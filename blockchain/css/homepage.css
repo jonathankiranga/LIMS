@@ -1,0 +1,515 @@
+   /* General Body Styles */
+    body {
+        font-family: 'Playfair Display', serif !important; /* Executive font */
+        src: url('/assets/PlayfairDisplay-Regular.ttf') format('truetype'),
+         url('/assets/PlayfairDisplay-Bold.ttf') format('truetype');
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrolling */
+    }
+
+   #loginForm {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #111;
+        padding: 20px;
+        border: 1px solid #00FF00;
+        color: #00FF00;
+        text-align: center;
+    }
+   /* Style for invalid form fields */
+   
+   .is-invalid {
+        border-color: red;
+    }
+   /* Style for the error message */
+   
+   .invalid-feedback {
+        color: red;
+        font-size: 12px;
+        position: absolute;
+        top: 100%; /* Position the error below the input field */
+        left: 0;
+        margin-top: 5px;
+        width: 100%; /* Ensure the error message takes full width */
+        white-space: nowrap; /* Prevent line break if message is long */
+    }
+ 
+    /* Form group container with relative positioning to allow absolute positioning of error message */
+    .form-group {
+        position: relative;
+        margin-bottom: 15px; /* Space between form rows */
+    }
+
+    .sidebar {
+        width: 20%;
+        position: relative;
+        background-color: #343a40; /* Dark background for the sidebar */
+        color: white;
+        padding: 10px;
+        height: calc(100vh - 50px); /* Full height minus footer space */
+        overflow-y: auto;
+    }
+
+    .sidebar h6 {
+        margin-top: 0;
+    }
+
+    .footer {
+        flex: 0 0 auto;
+        background-color: #343a40;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .footer span {
+        margin-right: 20px;
+    }
+
+    .sidebar .tree-menu a {
+        color: white;
+        text-decoration: none;
+    }
+    
+    .sidebar .tree-menu a:hover {
+        color: #ffffff;
+        background-color: #495057;
+    }
+  /*
+    Primary Color: Light Grey (#E0E0E0)
+    Secondary Color: Charcoal (#333333)
+    Accent Color: Bright Cyan (#00BFFF)
+    Background Color: White (#FFFFFF)
+*/
+    #page-content {
+        cursor: grab; /* Indicates draggable area */
+        padding: 10px;
+        width: 80vw;
+        background :#FFFFFF;
+        margin-top: 95px; /* Space for banner and breadcrumbs */
+        margin-left: 255px; /* Sidebar width */
+        padding: 20px;
+        height: calc(100vh - (100px + 30px)); /* Adjust for banner, breadcrumbs, and footer */
+        position: absolute; /* Required for dynamic positioning */
+        border: 2px solid #000;
+        overflow: auto; /* Enables scrolling */
+    }
+
+    #page-content-closable .close-btn {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      background: #f44336; /* Red close button */
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 2000;
+    }
+
+    #page-content .close-btn:hover {
+      background: #d32f2f; /* Darker red on hover */
+    }
+
+    .tree-menu .nav-item {
+        padding: 5px;
+    }
+    /* Collapsible submenu styling */
+    .submenu {
+        display: none;
+        padding-left: 15px;
+    }
+
+
+   .cursor {
+        display: inline-block;
+        width: 10px;
+        background-color: #00FF00;
+        animation: blink 0.5s steps(2, start) infinite;
+    }
+    
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    /* Default style for the status message */
+    /* Initially hide the status message and position it below everything */
+ #error-message {
+     display: none; /* Hidden by default */
+     position: fixed; /* Use fixed positioning for positioning relative to the viewport */
+     bottom: 90%; /* Position at the bottom 10% of the screen */
+     left: 50%; /* Center horizontally */
+     transform: translateX(-50%); /* Adjust for perfect centering */
+     font-family: 'Courier New', Courier, monospace;
+     color: #f00; /* Red color for error message */
+     padding: 10px;
+     border: 2px solid #f00; /* Optional: red border */
+     background-color: transparent; /* Transparent background */
+     width: 100%;
+     max-width: 500px;
+     word-wrap: break-word;
+     white-space: pre-wrap;
+     font-size: 16px; /* Adjust font size as needed */
+     z-index: 1; /* Set z-index to position it below other content initially */
+     transition: opacity 0.3s ease, bottom 0.3s ease; /* Smooth transition */
+ }
+
+ /* When typing, make it hover above everything */
+ .typing {
+     z-index: 9999; /* Higher z-index to hover above all other elements */
+     opacity: 1; /* Ensure full visibility while typing */
+     transition: opacity 0.3s ease;
+ }
+
+ .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+}
+.breadcrumb-item a {
+    color: #007bff; /* Bootstrap primary link color */
+    text-decoration: none;
+}
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+/* Tree menu base styles */
+.tree-menu .nav-item {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Base style for links */
+.tree-menu .nav-link {
+    display: block;
+    color: #333;
+    padding: 8px 15px;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover effect */
+.tree-menu .nav-link:hover {
+    background-color: #f0f0f0;
+    color: #007bff;
+}
+
+/* Indentation for submenus */
+.tree-menu .submenu {
+    padding-left: 20px; /* Indent submenus */
+}
+
+/* Default submenu item styles */
+.tree-menu .submenu .nav-link {
+    color: yellow; /* Different color for submenu items */
+}
+
+/* Highlight current menu item */
+.tree-menu .nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Highlight current submenu item */
+.tree-menu .submenu .nav-link.active {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+/* Custom styles for positioning the logout button */
+  /* Custom styles for the banner */
+.banner-container {
+    display: flex; /* Use flexbox for horizontal alignment */
+    justify-content: space-between; /* Space between elements */
+    align-items: center; /* Center items vertically */
+    padding: 10px; /* Add some padding */
+}
+.logout-link {
+    margin-left: auto; /* Push the logout link to the right */
+}
+    
+/* Main Wrapper */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Banner / Alert at the top */
+.banner-container {
+    background-color: grey;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    height: 50px; /* Fixed height for the banner */
+}
+
+#sidebarplaceholder{
+    background-color: grey;
+    width: 245px;
+    height: calc(80vh - 50px); /* Full height minus the banner */
+    z-index: 901;
+    padding-top: 10px;
+    overflow-y: auto; /* Scrollable if content overflows */
+}
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: repeating-linear-gradient(90deg, 
+    white 0px, white 2px,  
+    black 2px, black 3px
+    );
+    position: fixed;
+    top: 50px; /* Below the banner */
+    left: 0;
+    height: calc(100vh - 50px); /* Full height minus the banner */
+    color: white;
+    padding-top: 20px;
+    z-index: 900;
+    overflow: hidden; /* Scrollable if content overflows */
+}
+
+.sidebar h6 {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar .nav-item {
+    padding: 10px 20px;
+}
+
+.sidebar .nav-link {
+    color: #ddd;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.sidebar .submenu {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.sidebar .submenu .nav-link {
+    font-size: 14px;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    position: fixed;
+    top: 50px; /* Below the banner */
+    left: 250px; /* After the sidebar */
+    width: calc(100% - 250px); /* Remaining width of the screen */
+    background-color: transparent;
+    padding: 10px 20px;
+    z-index: 800;
+}
+
+.breadcrumb-item a {
+    color: #007bff;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+
+
+
+/* Login Form */
+#loginForm {
+    display: none;
+    padding: 40px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 100px auto;
+}
+
+#loginForm h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+/* Footer */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px; /* Fixed footer height */
+    background-color: #343a40;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+}
+
+
+   /**/
+   /* Tighter Form Fields */
+.login-input,
+.login-button {
+    padding: 6px; /* was 10px */
+    margin-bottom: 12px; /* was 20px */
+    font-size: 14px;
+}
+
+/* Tighter form groups */
+.form-group {
+    margin-bottom: 10px; /* was 15px */
+}
+
+/* Tighter Error Feedback */
+.invalid-feedback {
+    font-size: 11px;
+    margin-top: 3px; /* was 5px */
+}
+
+/* Sidebar Navigation - Compact */
+.sidebar .nav-item {
+    padding: 6px 16px; /* was 10px 20px */
+}
+
+.sidebar .nav-link {
+    font-size: 14px; /* was 16px */
+    padding: 4px 10px;
+}
+
+/* Sidebar submenu */
+.sidebar .submenu {
+    padding-left: 15px; /* was 20px */
+}
+
+.sidebar .submenu .nav-link {
+    font-size: 13px;
+}
+
+/* Tree menu tweaks */
+.tree-menu .nav-link {
+    padding: 6px 12px; /* tighter */
+    font-size: 14px;
+}
+
+.tree-menu .submenu {
+    padding-left: 15px; /* was 20px */
+}
+
+.tree-menu .submenu .nav-link {
+    font-size: 13px;
+}
+
+/* Banner */
+.banner-container {
+    height: 40px; /* was 50px */
+    padding: 5px 10px; /* was 10px */
+    font-size: 14px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    top: 40px; /* was 50px, match banner height */
+    padding: 6px 16px;
+    font-size: 13px;
+}
+
+.breadcrumb-item a {
+    font-size: 13px;
+}
+
+/* Content Area */
+#page-content {
+    padding: 10px; /* was 20px */
+    margin-top: 80px; /* was 95px: banner 40 + breadcrumb 40 */
+    height: calc(100vh - (80px + 30px)); /* adjust for new banner/breadcrumb */
+}
+
+/* Footer */
+.footer {
+    height: 28px; /* was 30px */
+    padding: 0 16px; /* slightly less */
+    font-size: 13px;
+}
+
+/* Login Form (optional tighter spacing) */
+#loginForm {
+    padding: 25px; /* was 40px */
+    max-width: 350px; /* optional */
+    margin: 80px auto;
+}
+
+/* Close Button */
+#page-content-closable .close-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 10px;
+}
+
+  #blobimage {
+            display: block;
+            max-width: 50%;
+            height: auto;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+   

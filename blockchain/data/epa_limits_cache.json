@@ -1,0 +1,637 @@
+{
+    "built_at": "2026-07-15 05:29:04",
+    "source_fetched_at": "2026-07-15 05:26:42",
+    "entry_count": 105,
+    "limits": {
+        "human and animal fecal waste": {
+            "mcl": "3",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "hpc measures a range of bacteria that are naturally present in the environment": {
+            "mcl": "3",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "found naturally in water; multiplies in heating systems": {
+            "mcl": "3",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "coliforms are naturally present in the environment; as well as feces; fecal coliforms and e. coli only come from human and animal fecal waste.": {
+            "mcl": "5",
+            "unit": "%",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "soil runoff": {
+            "mcl": "3",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "byproduct of drinking water disinfection": {
+            "mcl": "0.08",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "water additive used to control microbes": {
+            "mcl": "0.81",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from petroleum refineries; fire retardants; ceramics; electronics; solder": {
+            "mcl": "0.006",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "erosion of natural deposits; runoff from orchards, runoff from glass and electronics production wastes": {
+            "mcl": "0.01",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "decay of asbestos cement in water mains; erosion of natural deposits": {
+            "mcl": "7",
+            "unit": "MFL",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge of drilling wastes; discharge from metal refineries; erosion of natural deposits": {
+            "mcl": "2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from metal refineries and coal-burning factories; discharge from electrical, aerospace, and defense industries": {
+            "mcl": "0.004",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "corrosion of galvanized pipes; erosion of natural deposits; discharge from metal refineries; runoff from waste batteries and paints": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from steel and pulp mills; erosion of natural deposits": {
+            "mcl": "0.1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "corrosion of household plumbing systems; erosion of natural deposits": {
+            "mcl": "7",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from steel/metal factories; discharge from plastic and fertilizer factories": {
+            "mcl": "0.2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "water additive which promotes strong teeth; erosion of natural deposits; discharge from fertilizer and aluminum factories": {
+            "mcl": "4",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "erosion of natural deposits; discharge from refineries and factories; runoff from landfills and croplands": {
+            "mcl": "0.002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from fertilizer use; leaking from septic tanks, sewage; erosion of natural deposits": {
+            "mcl": "1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from petroleum refineries; erosion of natural deposits; discharge from mines": {
+            "mcl": "0.05",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "leaching from ore-processing sites; discharge from electronics, glass, and drug factories": {
+            "mcl": "0.002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "added to water during sewage/wastewater treatment": {
+            "mcl": "8",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from herbicide used on row crops": {
+            "mcl": "0.07",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from factories; leaching from gas storage tanks and landfills": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "leaching from linings of water storage tanks and distribution lines": {
+            "mcl": "0.0002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "leaching of soil fumigant used on rice and alfalfa": {
+            "mcl": "0.04",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from chemical plants and other industrial activities": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "residue of banned termiticide": {
+            "mcl": "0.0004",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from chemical and agricultural chemical factories": {
+            "mcl": "0.1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from herbicide used on rights of way": {
+            "mcl": "0.2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff/leaching from soil fumigant used on soybeans, cotton, pineapples, and orchards": {
+            "mcl": "0.0002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from industrial chemical factories": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from drug and chemical factories": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from chemical factories": {
+            "mcl": "0.05",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from rubber and chemical factories": {
+            "mcl": "0.006",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from herbicide used on soybeans and vegetables": {
+            "mcl": "0.007",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "emissions from waste incineration and other combustion; discharge from chemical factories": {
+            "mcl": "0.00000003",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from herbicide use": {
+            "mcl": "0.7",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "residue of banned insecticide": {
+            "mcl": "0.002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from industrial chemical factories; an impurity of some water treatment chemicals": {
+            "mcl": "8",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from petroleum refineries": {
+            "mcl": "0.00005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "breakdown of heptachlor": {
+            "mcl": "0.0002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from metal refineries and agricultural chemical factories": {
+            "mcl": "0.001",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff/leaching from insecticide used on cattle, lumber, gardens": {
+            "mcl": "0.0002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff/leaching from insecticide used on fruits, vegetables, alfalfa, livestock": {
+            "mcl": "0.04",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff/leaching from insecticide used on apples, potatoes, and tomatoes": {
+            "mcl": "0.2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff from landfills; discharge of waste chemicals": {
+            "mcl": "0.0005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from wood preserving factories": {
+            "mcl": "0.001",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "herbicide runoff": {
+            "mcl": "0.004",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from rubber and plastic factories; leaching from landfills": {
+            "mcl": "0.1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from factories and dry cleaners": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from petroleum factories": {
+            "mcl": "1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "runoff/leaching from insecticide used on cotton and cattle": {
+            "mcl": "0.003",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "residue of banned herbicide": {
+            "mcl": "0.05",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from textile finishing factories": {
+            "mcl": "0.07",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from metal degreasing sites and other factories": {
+            "mcl": "0.005",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "leaching from pvc pipes; discharge from plastic factories": {
+            "mcl": "0.002",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from petroleum factories; discharge from chemical factories": {
+            "mcl": "10",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.": {
+            "mcl": "0.000004",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "erosion of natural deposits of certain minerals that are radioactive and may emit a form of radiation known as alpha radiation": {
+            "mcl": "15",
+            "unit": "pCi/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "decay of natural and man-made deposits of certain minerals that are radioactive and may emit forms of radiation known as photons and beta radiation": {
+            "mcl": "4",
+            "unit": "millirems/year",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "erosion of natural deposits": {
+            "mcl": "0.03",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        "aluminum": {
+            "mcl": "0.05-0.2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "chloride": {
+            "mcl": "250",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "color": {
+            "mcl": "15",
+            "unit": "color units",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "copper": {
+            "mcl": "1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "fluoride": {
+            "mcl": "2",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "foaming agents": {
+            "mcl": "0.5",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "iron": {
+            "mcl": "0.3",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "manganese": {
+            "mcl": "0.05",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "odor": {
+            "mcl": "3",
+            "unit": "TON",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "ph": {
+            "mcl": "6.5-8.5",
+            "unit": "",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "silver": {
+            "mcl": "0.1",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "sulfate": {
+            "mcl": "250",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "total dissolved solids (tds)": {
+            "mcl": "500",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "zinc": {
+            "mcl": "5",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "tds": {
+            "mcl": "500",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "total dissolved solids": {
+            "mcl": "500",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        "total coliform": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "total coliforms": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "e.coli": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "escherichia coli": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "fecal coliform": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "thermotolerant coliform": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "legionella": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "giardia": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "crypto": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "cryptosporidium": {
+            "mcl": "0",
+            "unit": "/100mL",
+            "type": "qualitativeField",
+            "source": "manual-override"
+        },
+        "turbidity": {
+            "mcl": "1",
+            "unit": "NTU",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "turbidity (finished)": {
+            "mcl": "1",
+            "unit": "NTU",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "turbidity (filtered)": {
+            "mcl": "1",
+            "unit": "NTU",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "heterotrophic plate count": {
+            "mcl": "500",
+            "unit": "CFU/mL",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "chloroform": {
+            "mcl": "0.07",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "sodium": {
+            "mcl": "20",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "ammonia": {
+            "mcl": "0.5",
+            "unit": "mg/L",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "microcystin": {
+            "mcl": "0.003",
+            "unit": "ug/L",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "cyanotoxin": {
+            "mcl": "0.003",
+            "unit": "ug/L",
+            "type": "quantitativeField",
+            "source": "manual-override"
+        },
+        "total alkalinity": {
+            "mcl": "",
+            "unit": "mg/L as CaCO3",
+            "type": null,
+            "source": "manual-override"
+        },
+        "calcium": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "magnesium": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "potassium": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "bicarbonate": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "carbonate": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "hydroxide": {
+            "mcl": "",
+            "unit": "mg/L",
+            "type": null,
+            "source": "manual-override"
+        },
+        "radon": {
+            "mcl": "",
+            "unit": "pCi/L",
+            "type": null,
+            "source": "manual-override"
+        }
+    }
+}

@@ -1,0 +1,88 @@
+/* Condensed table */
+
+/* Pagination styling */
+#pagination .page-item {
+    margin: 0 2px;
+}
+
+#pagination .page-link {
+    color: #1a73e8; /* Match with table header color */
+    border: 1px solid #d1d5db;
+    padding: 5px 10px;
+}
+
+#pagination .page-item.active .page-link {
+    background-color: #1a73e8;
+    color: white;
+    border-color: #1a73e8;
+}
+
+#pagination .page-item.disabled .page-link {
+    color: #ccc;
+    pointer-events: none;
+    border-color: #d1d5db;
+}
+
+
+/* Modal Header Styling */
+.modal-header {
+    border-bottom: 2px solid #ddd;
+    font-size: 1.2rem;
+}
+
+/* Input Group Styling */
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+/* Form Field Styling */
+.form-control {
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid #ced4da;
+}
+
+/* Button Styling */
+#addNewStandard {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+
+#addNewStandard i {
+    margin-right: 0.5rem;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Modal Window */
+.modal-dialog {
+    max-width: 600px;
+}
+
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Placeholder Colors */
+::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Focus Styling */
+.form-control:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}

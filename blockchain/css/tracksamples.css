@@ -1,0 +1,62 @@
+.btn-icon {
+          background: none;
+          border: none;
+          font-size: 36px; /* Increase the font size of icons */
+          color: #007bff; /* Button color */
+          cursor: pointer;
+          padding: 15px; /* Add padding for larger clickable area */
+          border-radius: 50%; /* Optional: Make buttons circular */
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow for prominence */
+          transition: transform 0.2s, color 0.2s, box-shadow 0.2s;
+      }
+
+    .btn-icon:hover {
+          color: #0056b3; /* Change color on hover */
+          transform: scale(1.2); /* Slightly enlarge on hover */
+          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Emphasize shadow on hover */
+      }
+
+    .btn-icon:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Highlight on focus */
+      }
+
+    .action-menu {
+          display: flex;
+          gap: 20px; /* Increase spacing between buttons */
+          justify-content: center; /* Center align buttons */
+          margin-top: 30px; /* Add space above the menu */
+      }
+        /* Highlight selected row */
+    #data-table tbody tr.selected {
+        background-color: yellow;
+    }
+     /* Style for active row */
+     tr.active-row {
+        background: yellow !important;
+      }
+      
+      /* Optional: Add custom styling for table and buttons */
+#data-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.action-button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}
+
+p {
+    margin: 0;
+    font-size: 12px;
+    color: #555;
+}

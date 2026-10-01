@@ -1,0 +1,187 @@
+'Supplier Ageing Analysis As at 05/10/2016'
+'Supplier ID','Supplier Name','Current','30 days','60 days','90 days','over 90 days'
+cr354               ,MONGOOSE PROPERTIES CARES LTD ,0,0,0,0,0
+cr363               ,UKWALA SUPERMARKET            ,0,0,0,0,0
+cr372               ,Kenya Power                   ,0,0,0,0,0
+cr381               ,Esther Mwithiga               ,0,0,0,0,0
+cr391               ,Penta G                       ,0,0,0,0,0
+cr400               ,DAMACIVE CONSTRUCTION         ,0,0,0,0,0
+cr409               ,KK KEROSENE DISTRIBUTORS LTD  ,0,0,0,0,0
+cr418               ,INSTANT ALARMS SYSTEMS LTD    ,0,0,0,0,0
+cr462               ,BONIFACE MAINA (MUHORO)       ,0,0,0,0,0
+cr444               ,ACNA LOGISTICS LTD            ,0,0,0,0,0
+cr446               ,ROVERLAND AUTO CARE SERVICES  ,0,0,0,0,0
+cr468               ,WESTLINE OIL LIMITED (BITUMEN),0,0,0,0,0
+cr477               ,AFRICA GLOBAL EAGLE LIMITED   ,0,0,0,0,0
+cr487               ,ASSOCIATED ELECTRICAL & HARDWA,0,0,0,0,0
+cr496               ,Gracious General Supplies     ,0,0,0,0,0
+cr505               ,Joseph Iguta                  ,0,0,0,0,0
+cr514               ,NATIONAL SOCIAL SECURITY FUND ,0,0,0,0,0
+cr523               ,POLUCON SERVICES (kENYA) LIMIT,0,0,0,0,0
+cr532               ,Mabon Enterprises Ltd         ,0,0,0,0,0
+cr541               ,JIL INVESTMENTS               ,0,0,0,0,0
+cr463               ,DENALI LOGISTICS LIMITED      ,0,0,0,0,0
+cr429               ,RESOLUTE SUPPLIERS            ,0,0,0,0,0
+cr430               ,KARIUKI IAN GEOFFRY           ,0,0,0,0,0
+cr464               ,PETER ZAKAYO KARIUKI          ,0,0,0,0,0
+cr432               ,WANANCHI HARDWARE             ,0,0,0,0,0
+cr433               ,Friendship container          ,0,0,0,0,0
+cr434               ,FRIENDSHIP CONTAINERS         ,0,0,0,0,0
+cr435               ,KOBIAN KENYA LIMITED          ,0,0,0,0,0
+cr437               ,UCHUMI CHEMICALS              ,0,0,0,0,0
+cr438               ,ADDE INVESTMENT               ,0,0,0,0,0
+cr439               ,HOPE KEROSINE DISTRIBUTORS    ,0,0,0,0,0
+cr440               ,univet products               ,0,0,0,0,0
+cr441               ,ANTHONY KAGORI                ,0,0,0,0,0
+cr442               ,SOUTH SHORE INTERNATINAL LTD. ,0,0,0,0,0
+cr443               ,INTERCONTINENTAL HOTEL        ,0,0,0,0,0
+cr445               ,KENOL KOBIL LTD               ,0,0,0,0,0
+cr447               ,EPPL PETROLEUM                ,0,0,0,0,0
+cr452               ,TONNES LTD                    ,0,0,0,0,0
+cr454               ,COLAS EAST AFRICA             ,0,0,0,0,0
+cr455               ,kenya bureau of standards (KEB,0,0,0,0,0
+cr456               ,JOSEPH KARURI                 ,0,0,0,0,0
+cr457               ,Singh Retread Limited         ,0,0,0,0,0
+cr466               ,HASHI ENERGY                  ,0,0,0,0,0
+cr467               ,WESTLINE [expenses]           ,0,0,0,0,0
+cr469               ,JANEFFER MWANIA               ,0,0,0,0,0
+cr470               ,jimline investments           ,0,0,0,0,0
+cr471               ,Bever east africa enterprises ,0,0,0,0,0
+cr472               ,BEVER EAST AFRICA ENTERPRISES ,0,0,0,0,0
+cr473               ,PEMIJO-FUEL                   ,0,0,0,0,0
+cr474               ,GEORGE GITHUKA KAGERA         ,0,0,0,0,0
+cr475               ,ROBERT KAMANDE MURIGI         ,0,0,0,0,0
+cr476               ,ESTHER WANJIRU                ,0,0,0,0,0
+cr478               ,Roben Aberdares               ,0,0,0,0,0
+cr481               ,REDACHEM EAST AFRICA LTD      ,0,0,0,0,0
+cr480               ,REDACHEM EAST AFRICA          ,0,0,0,0,0
+cr482               ,RIMIS TRADING COMPANY         ,0,0,0,0,0
+cr483               ,Lydiah Nyambura Karanja       ,0,0,0,0,0
+cr484               ,FREDSON MECHANICAL ENGINEERS L,0,0,0,0,0
+cr485               ,Kenbro industries ltd         ,0,0,0,0,0
+cr486               ,KINGORI                       ,0,0,0,0,0
+cr488               ,PETER KINGORI WANJIMA         ,0,0,0,0,0
+cr489               ,BITUTRADE PETROLEUM LTD       ,0,0,0,0,0
+cr490               ,JANACO INTERNATIONAL (DUBAI)  ,0,0,0,0,0
+cr491               ,Equity Insurance Agency Limite,0,0,0,0,0
+cr492               ,ACCESS KENYA GROUP LIMITED    ,0,0,0,0,0
+cr493               ,ENVIRONMENTAL AUDIT           ,0,0,0,0,0
+cr494               ,DEL VENTURES AND LOGISTICS LTD,0,0,0,0,0
+cr495               ,TEXT BOOK CENTRE LTD          ,0,0,0,0,0
+cr497               ,ONE PETROLEUM LIMITED         ,0,0,0,0,0
+cr498               ,JANE WANJIRU                  ,0,0,0,0,0
+cr499               ,ESTHER KAMAU                  ,0,0,0,0,0
+cr500               ,PETER TRANSPORT               ,0,0,0,0,0
+cr501               ,CHROMLAB SCIENTIFIC SERVICES &,0,0,0,0,0
+cr502               ,HIRODS ENTERPRISES            ,0,0,0,0,0
+cr503               ,UNITED ENGINEERING SUPPLIES LT,0,0,0,0,0
+cr504               ,KENYA AIRWAYS                 ,0,0,0,0,0
+cr506               ,Eastleigh Trucks-Marsabit Tran,0,0,0,0,0
+cr507               ,MPAMBE FASTENERS & ELECTRICALS,0,0,0,0,0
+cr508               ,ISAWA HARDWARE AND TOOLS      ,0,0,0,0,0
+cr509               ,MAKEMA ELECTRICAL REWINDERS & ,0,0,0,0,0
+cr510               ,BERNARD MULWA                 ,0,0,0,0,0
+cr511               ,Transport  Expense            ,0,0,0,0,0
+cr512               ,KENYA SAFETY SYSTEMS          ,0,0,0,0,0
+cr513               ,PAY AS YOU EARN               ,0,0,0,0,0
+cr515               ,NATIONAL HOSPITAL INSURANCE FU,0,0,0,0,0
+cr516               ,MATERIAL TESTING AND RESEARCH ,0,0,0,0,0
+cr517               ,EQIUTY BANK LPO FINANCING     ,0,0,0,0,0
+cr518               ,AFRITECH GENERAL SUPPLIES LTD ,0,0,0,0,0
+cr519               ,Provision for bad debts       ,0,0,0,0,0
+cr520               ,SHAHRABI LIMITED              ,0,0,0,0,0
+cr521               ,PEARLS ENERGY EA LTD          ,0,0,0,0,0
+cr522               ,Mr. Maina Transport           ,0,0,0,0,0
+cr524               ,METAL TIN MAKERS LTD          ,0,0,0,0,0
+cr525               ,SUNCOAT CHEMICALS             ,0,0,0,0,0
+cr526               ,MERCY WANJIRU MWANGI          ,0,0,0,0,0
+cr527               ,NEOMATECH LIMITED             ,0,0,0,0,0
+cr528               ,CORRUGATED SHEETS LIMITED     ,0,0,0,0,0
+cr529               ,INTERPLUS LIMITED             ,0,0,0,0,0
+cr530               ,ELMAX  PETROLEUM  LTD         ,0,0,0,0,0
+cr531               ,KCB Insurance Agency Ltd      ,0,0,0,0,0
+cr533               ,WACHIKU TIMBER & HARDWARE     ,0,0,0,0,0
+cr534               ,ATRACO INTERNATIONAL (K) LTD  ,0,0,0,0,0
+cr535               ,BOREDO SUPPLIES               ,0,0,0,0,0
+cr536               ,HELLEN WANGUI KARIUKI         ,0,0,0,0,0
+cr537               ,Chemicals & Solvents (E.A) Lim,0,0,0,0,0
+cr538               ,SAHAM ASSURANCE (K) CO. LTD   ,0,0,0,0,0
+cr539               ,XPLICO INSURANCE CO. LTD      ,0,0,0,0,0
+cr540               ,STERLING AND PARAGON SOLUTIONS,0,0,0,0,0
+cr542               ,FUELUBES ENERGY LTD           ,0,0,0,0,0
+cr543               ,STRATON ENERGY LIMITED        ,0,0,0,0,0
+cr544               ,ACUMEN VALUERS LTD            ,0,0,0,0,0
+cr545               ,Petroleum Products Ltd        ,0,0,0,0,0
+cr546               ,OSTRAVA TRADIND CO            ,0,0,0,0,0
+cr461               ,Transcargo Forwarders ltd     ,0,0,0,0,0
+cr356               ,kenya safety systems          ,0,0,0,0,0
+cr357               ,GEE PEE ENTERPRISES           ,0,0,0,0,0
+cr358               ,NEW RAUARAKA HARDWARES        ,0,0,0,0,0
+cr359               ,NAIVAS SUPERMARKET            ,0,0,0,0,0
+cr360               ,STEEL SECTIONS                ,0,0,0,0,0
+cr361               ,G4S COURIER SERVICES          ,0,0,0,0,0
+cr362               ,TUSKEYS                       ,0,0,0,0,0
+cr346               ,Goods Recived notes           ,0,0,0,0,0
+cr347               ,Engenta ltd                   ,0,0,0,0,0
+cr348               ,Spans Ventures limited        ,0,0,0,0,0
+cr349               ,Smarternow                    ,0,0,0,0,0
+cr350               ,Lanchlan Kenya Limited        ,0,0,0,0,0
+cr351               ,GREAT DANNE LTD               ,0,0,0,0,0
+cr352               ,GALANA OIL KENYA LTD          ,0,0,0,0,0
+cr353               ,Kiarie Austine                ,0,0,0,0,0
+cr364               ,THE NAIROBI WOMENS HOSPITAL   ,0,0,0,0,0
+cr365               ,COAST MAIL CO LTD             ,0,0,0,0,0
+cr366               ,WANANCHI SAITARY AND HARDWARE ,0,0,0,0,0
+cr367               ,SAFARICOM                     ,0,0,0,0,0
+cr368               ,Commissioner of domestic taxex,0,0,0,0,0
+cr369               ,Eliud Mwaura                  ,0,0,0,0,0
+cr370               ,Auditor Simon                 ,0,0,0,0,0
+cr371               ,Nairobi water and sewerage co ,0,0,0,0,0
+cr373               ,William(alcoblow)             ,0,0,0,0,0
+cr374               ,Habo Agencies-Avanad          ,0,0,0,0,0
+cr375               ,Gulimex international ltd     ,0,0,0,0,0
+cr376               ,Rift motor Bazar              ,0,0,0,0,0
+cr377               ,NIC Medical Insurance         ,0,0,0,0,0
+cr378               ,Sarah Njiru                   ,0,0,0,0,0
+cr379               ,JOPET ENTERPRISES             ,0,0,0,0,0
+cr380               ,RENTOKILL INITIAL             ,0,0,0,0,0
+cr383               ,Engen Kenya Limited           ,0,0,0,0,0
+cr384               ,Joseph Kariuki Wanjama        ,0,0,0,0,0
+cr385               ,Auto Village                  ,0,0,0,0,0
+cr386               ,Seven seas Ltd                ,0,0,0,0,0
+cr387               ,NANCY KINYUA                  ,0,0,0,0,0
+cr388               ,COMPRESSOR SOLUTIONS          ,0,0,0,0,0
+cr458               ,WESTBUID GENERAL CONTRACTORS  ,0,0,0,0,0
+cr390               ,VAT Account                   ,0,0,0,0,0
+cr392               ,West LINE [Bitumen]           ,0,0,0,0,0
+cr393               ,SBI INTERNATIONAL             ,0,0,0,0,0
+cr453               ,Tonnes supplies International ,0,0,0,0,0
+cr395               ,HAYERBISHAN                   ,0,0,0,0,0
+cr396               ,Kundan Singh                  ,0,0,0,0,0
+cr460               ,ITERCHIMICA SRL ITALY         ,0,0,0,0,0
+cr398               ,Pamela                        ,0,0,0,0,0
+cr399               ,EAST AFRICAN FOUNDRY WORKS (K),0,0,0,0,0
+cr450               ,CECA DISTRIBUTORS             ,0,0,0,0,0
+cr402               ,Twiga Chemical Industries Limi,0,0,0,0,0
+cr403               ,JANACO INTERNATIONAL K LTD    ,0,0,0,0,0
+cr404               ,DEL PETROLEUM LTD             ,0,0,0,0,0
+cr405               ,Bitumen purchases             ,0,0,0,0,0
+cr406               ,Osho chemicals                ,0,0,0,0,0
+cr407               ,MARTHA WANJIRU                ,0,0,0,0,0
+cr408               ,KARURI                        ,0,0,0,0,0
+cr410               ,SPRING OIL LIMITED            ,0,0,0,0,0
+cr411               ,OILIBYA  COMPANY              ,0,0,0,0,0
+cr412               ,Bata company                  ,0,0,0,0,0
+cr413               ,M K MUNENE SCRAP METAL  HARDWA,0,0,0,0,0
+cr414               ,LAB EQUIPMENTS                ,0,0,0,0,0
+cr415               ,Digizone Entrerprises         ,0,0,0,0,0
+cr451               ,Josphat  Kuhinya ( Dubai)     ,0,0,0,0,0
+cr417               ,ACCESS KENYA GROUP LTD        ,0,0,0,0,0
+cr419               ,sumark General Enterprises    ,0,0,0,0,0
+cr420               ,Sacco  deposit                ,0,0,0,0,0
+cr421               ,Isaac Munyasia                ,0,0,0,0,0
+cr422               ,Mitei                         ,0,0,0,0,0
+cr423               ,WANJIRU HOLDINGS              ,0,0,0,0,0
+cr424               ,Director Maina                ,0,0,0,0,0
+cr425               ,LOWRY ENTERPRISES             ,0,0,0,0,0
+cr426               ,ISFAHAN BITUMEN-KES           ,0,0,0,0,0

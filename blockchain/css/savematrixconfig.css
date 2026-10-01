@@ -1,0 +1,197 @@
+/* ========== COMPACTED DROP ZONE AREA ========== */
+.drag-drop-container {
+  display: flex;
+  gap: 8px; /* was 20px */
+  overflow-x: auto;
+}
+.drop-source, .drop-target {
+  border: 1px dashed #bbb;
+  min-height: 120px; /* was 200px */
+  flex: 1 0 0;
+  padding: 6px; /* was 10px */
+  overflow-y: auto;
+  max-height: 200px; /* was 300px */
+  background-color: #fefefe;
+  min-width: 150px; /* was 200px */
+}
+.drop-source div, .drop-target div {
+  padding: 3px 6px; /* was 5px */
+  margin: 3px 0;     /* was 5px 0 */
+  background: #f9f9f9;
+  cursor: move;
+  border: 1px solid #ddd;
+}
+.drop-target.over {
+  border-color: #00aaff;
+  background-color: #f0faff;
+}
+
+/* ========== PAGINATION ========== */
+.pagination {
+  margin-top: 6px; /* was 10px */
+  display: flex;
+  gap: 6px; /* was 10px */
+  align-items: center;
+}
+.pagination button {
+  padding: 2px 8px; /* was 4px 10px */
+}
+
+/* ========== TYPOGRAPHY & HEADINGS ========== */
+h2 {
+  color: #003366;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* ========== FORM SPACING ========== */
+.form-group {
+  margin-bottom: 0.75em; /* was 1em */
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+select, textarea, button {
+  width: 100%;
+  padding: 6px; /* was 0.5em */
+  font-size: 14px; /* was 1em */
+  margin-top: 0.25em;
+}
+
+select[multiple] {
+  height: 120px; /* was 150px */
+}
+
+/* ========== TABLE STYLES ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px; /* was 20px */
+}
+th, td {
+  padding: 6px; /* was 10px or 8px */
+  border: 1px solid #ccc;
+  text-align: left;
+  font-size: 13px;
+}
+th {
+  background-color: #e0e7f0;
+}
+
+/* ========== SUMMARY BOX ========== */
+.summary {
+  margin-top: 1em; /* was 2em */
+  padding: 0.75em; /* was 1em */
+  background-color: #dff0d8;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  font-size: 14px;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary,
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px; /* tighter */
+  border-radius: 4px;
+  font-size: 14px;
+}
+.btn-primary:hover,
+button:hover {
+  background-color: #0056b3;
+}
+
+/* ========== DROPDOWN DESIGN ========== */
+.dropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #adb5bd;
+  max-height: 180px; /* was 200px */
+  overflow-y: auto;
+  z-index: 1000;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.dropdown div {
+  padding: 6px 10px; /* was 8px */
+  cursor: pointer;
+  font-size: 14px;
+}
+.dropdown div:hover {
+  background-color: #e9ecef;
+}
+
+/* ========== CONTAINER + FORM GRID ========== */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 12px 20px; /* was 20px 30px */
+  border-radius: 6px;
+  box-shadow: 0 0 4px #ccc;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px; /* was 20px */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px; /* was 8px */
+  grid-column: 1 / -1;
+}
+
+.button-group {
+  grid-column: 1 / -1;
+}
+
+/* ========== INPUTS GENERAL ========== */
+select, textarea {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ========== FINAL SUMMARY BOX ========== */
+.summary {
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.parameter-grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5px;
+}
+
+.parameter-grid th, 
+.parameter-grid td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  font-size: 14px;
+}
+
+.parameter-grid th {
+  background: #f3f3f3;
+  text-align: left;
+}

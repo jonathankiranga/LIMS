@@ -1,0 +1,687 @@
+/* ====================================
+   SMART ERP - MODERN DASHBOARD CSS
+   Bootstrap 5 + Custom Design
+   ==================================== */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+    --info-gradient: linear-gradient(135deg, #30b0fe 0%, #4fc3f7 100%);
+    
+    --color-primary: #667eea;
+    --color-secondary: #764ba2;
+    --color-success: #4facfe;
+    --color-danger: #ff6b6b;
+    --color-warning: #fa709a;
+    --color-info: #30b0fe;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.18);
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ====================================
+   GLOBAL STYLES
+   ==================================== */
+
+* {
+    transition: var(--transition);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a1a;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ====================================
+   DASHBOARD WRAPPER & HERO SECTION
+   ==================================== */
+
+.dashboard-wrapper {
+    position: relative;
+    min-height: 100vh;
+}
+
+.hero-section {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.hero-section .display-5 {
+    font-size: 2.5rem;
+}
+
+.hero-section .text-white-50 {
+    opacity: 0.8;
+    font-weight: 300;
+}
+
+/* ====================================
+   KPI CARDS - THE STARS OF THE SHOW
+   ==================================== */
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: inherit;
+}
+
+/* Gradient Variants */
+.kpi-card.gradient-blue {
+    border-top: 4px solid #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%);
+}
+
+.kpi-card.gradient-purple {
+    border-top: 4px solid #a855f7;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(126, 34, 206, 0.04) 100%);
+}
+
+.kpi-card.gradient-green {
+    border-top: 4px solid #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+}
+
+.kpi-card.gradient-orange {
+    border-top: 4px solid #f97316;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(234, 88, 12, 0.04) 100%);
+}
+
+.kpi-card.gradient-teal {
+    border-top: 4px solid #14b8a6;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(13, 148, 136, 0.04) 100%);
+}
+
+.kpi-card.gradient-pink {
+    border-top: 4px solid #ec4899;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(219, 39, 119, 0.04) 100%);
+}
+
+.kpi-card.gradient-red {
+    border-top: 4px solid #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.04) 100%);
+}
+
+.kpi-card.gradient-indigo {
+    border-top: 4px solid #6366f1;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(79, 70, 229, 0.04) 100%);
+}
+
+.kpi-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.kpi-card.gradient-blue .kpi-icon { color: #667eea; }
+.kpi-card.gradient-purple .kpi-icon { color: #a855f7; }
+.kpi-card.gradient-green .kpi-icon { color: #10b981; }
+.kpi-card.gradient-orange .kpi-icon { color: #f97316; }
+.kpi-card.gradient-teal .kpi-icon { color: #14b8a6; }
+.kpi-card.gradient-pink .kpi-icon { color: #ec4899; }
+.kpi-card.gradient-red .kpi-icon { color: #ef4444; }
+.kpi-card.gradient-indigo .kpi-icon { color: #6366f1; }
+
+.kpi-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0.5rem 0;
+    line-height: 1;
+}
+
+.kpi-text {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.kpi-card .btn {
+    align-self: flex-start;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+/* ====================================
+   ANALYTICS CARDS
+   ==================================== */
+
+.analytics-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-card .card-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 500px;
+    padding: 1.5rem;
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-custom h5 {
+    color: #1f2937;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-header-custom .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+/* ====================================
+   TODO LIST ITEMS
+   ==================================== */
+
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.todo-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: #f9fafb;
+    border-left: 3px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.todo-item:hover {
+    background: #f3f4f6;
+    border-left-color: #667eea;
+    padding-left: 1.25rem;
+}
+
+.todo-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.todo-content h6 {
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.todo-content a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.todo-content a:hover {
+    text-decoration: underline;
+    color: #764ba2;
+}
+
+/* ====================================
+   TASK & ACTIVITY ITEMS
+   ==================================== */
+
+.task-list, .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.task-item, .activity-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.task-item:hover, .activity-item:hover {
+    background: #f3f4f6;
+    box-shadow: var(--shadow-sm);
+}
+
+.task-check, .activity-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-info, .activity-info {
+    flex: 1;
+}
+
+.task-title, .activity-title {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.task-description, .activity-description {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.activity-date {
+    font-size: 0.75rem;
+    color: #9ca3af !important;
+    margin-top: 0.25rem;
+}
+
+/* ====================================
+   BANK ACCOUNTS LIST
+   ==================================== */
+
+.bank-accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bank-item {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.bank-item:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+    border-color: #d1d5db;
+}
+
+.bank-item h6 {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.badge-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+}
+
+.bank-item .small {
+    color: #6b7280;
+}
+
+.bank-item .fs-7 {
+    font-size: 0.85rem;
+}
+
+.bank-item hr {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    border-color: #e5e7eb;
+    opacity: 0.5;
+}
+
+/* ====================================
+   RESPONSIVE ADJUSTMENTS
+   ==================================== */
+
+@media (max-width: 768px) {
+    .hero-section .display-5 {
+        font-size: 1.75rem;
+    }
+    
+    .hero-section .row {
+        gap: 1rem;
+    }
+    
+    .hero-section .text-end {
+        text-align: left !important;
+    }
+    
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+    
+    .analytics-card .card-body {
+        max-height: 400px;
+    }
+}
+
+/* ====================================
+   UTILITIES & HELPERS
+   ==================================== */
+
+.text-muted {
+    color: #6b7280 !important;
+}
+
+.text-muted-50 {
+    color: #9ca3af !important;
+}
+
+.fs-7 {
+    font-size: 0.85rem;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ====================================
+   ANIMATIONS
+   ==================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.kpi-card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.analytics-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ====================================
+   LEGACY IFRAME STYLES (Compatibility)
+   ==================================== */
+
+iframe {
+    border: none;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+#mainBody {
+    position: absolute;
+    overflow: hidden;
+    height: 77%;
+    width: 78%;
+    margin-left: 20%;
+    margin-top: 1cm;
+    top: 1cm;
+}
+
+div.well.well-treeview {
+    width: 20% !important;
+    padding: 8px 0 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    transition: box-shadow 0.3s ease !important;
+    margin-bottom: 0 !important;
+}
+
+div.well.well-treeview:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+label.nav-header {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 12px !important;
+    letter-spacing: 0.3px !important;
+    font-weight: 600 !important;
+    margin: 3px 0 2px !important;
+    padding-left: 6px !important;
+}
+
+label.nav-items {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    padding: 3px 6px !important;
+}
+
+/* Modern font for tree/navigation lists */
+.nav.nav-list,
+.nav.nav-list.tree,
+ul.nav li,
+li.divider {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Compact dashboard padding overrides */
+.nav-list > li > a {
+    padding: 3px 8px !important;
+    font-size: 12px;
+}
+
+.nav-list .nav-header {
+    margin: 3px 0 2px !important;
+}
+
+li.divider {
+    margin: 2px 0 !important;
+}
+
+.frame-treeview {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 70%;
+}
+
+/* ====================================
+   BUTTON ENHANCEMENTS
+   ==================================== */
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-light {
+    background: white;
+    color: #667eea;
+}
+
+.btn-light:hover {
+    background: #f9fafb;
+    color: #764ba2;
+}
+
+.btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* ====================================
+   LEGACY TABLE STYLES
+   ==================================== */
+
+.table {
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table th {
+    background: #f3f4f6;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 600;
+    color: #1f2937;
+    padding: 0.75rem;
+}
+
+.table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table tr:hover {
+    background: #f9fafb;
+}
+
+/* ====================================
+   FORM ELEMENTS
+   ==================================== */
+
+input, select, textarea {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+input:required, select:required, textarea:required {
+    background-color: #fffbeb;
+}
+
+/* ====================================
+   OVERLAY LOADING
+   ==================================== */
+
+.overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.8) url("loader.gif") center no-repeat;
+}
+
+body.loading {
+    overflow: hidden;
+}
+
+body.loading .overlay {
+    display: block;
+}

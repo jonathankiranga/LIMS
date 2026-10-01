@@ -1,0 +1,67 @@
+/* Reset fullscreen override */
+.modal-fullscreen {
+    margin: auto !important;
+    max-width: 600px !important; /* Smaller, centered */
+    width: 90% !important;       /* Responsive: fits smaller screens */
+    height: auto !important;     /* Avoid fullscreen height */
+}
+
+/* Modal Dialog */
+.modal-dialog {
+    margin: 2rem auto;
+    max-width: 600px;  /* Comfortable width */
+}
+
+/* Modal Content */
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* Header */
+.modal-header {
+    background: #4a148c;  /* Sleek deep purple */
+    color: #fff;
+    padding: 0.75rem 1rem;
+}
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.btn-close {
+    filter: brightness(0) invert(1);
+}
+
+/* Body */
+.modal-body {
+    background-color: #fafafa;
+    padding: 20px;
+    font-size: 0.95rem;
+}
+
+/* Form Fields */
+.form-label {
+    font-weight: 500;
+    color: #333;
+}
+.form-control {
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.form-control:focus {
+    border-color: #4a148c;
+    box-shadow: 0 0 4px rgba(74,20,140,0.4);
+}
+
+/* Buttons */
+.btn-success {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.9rem;
+}
+.btn-success:hover {
+    background-color: #1b5e20;
+    border-color: #1b5e20;
+}

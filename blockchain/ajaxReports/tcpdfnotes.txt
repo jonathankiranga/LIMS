@@ -1,0 +1,43 @@
+<?php
+require_once(dirname(__FILE__) . '/../vendor/autoload.php'); // Adjust the path as necessary
+
+use TCPDF;
+
+// Include the PDFStarter class
+class PDFStarter {
+    private $pdf;
+
+    public function __construct($paperSize = 'A4') {
+        $this->pdf = new TCPDF('P', PDF_UNIT, $paperSize, true, 'UTF-8', false);
+        $this->pdf->SetCreator(PDF_CREATOR);
+        $this->pdf->SetAuthor('smartERP http://www.facebook.com/smarterp');
+        $this->pdf->SetTitle('Sample PDF');
+        $this->pdf->SetMargins(15, 27, 15);
+        $this->pdf->SetAutoPageBreak(TRUE, 25);
+        $this->pdf->AddPage();
+    }
+
+    public function outputPDF() {
+        // Set content
+        $this->pdf->SetFont('helvetica', 'B', 20);
+        $this->pdf->Cell(0, 10, 'Hello, TCPDF!', 0, 1, 'C');
+        $this->pdf->SetFont('helvetica', '', 12);
+        $this->pdf->MultiCell(0, 10, 'This is a sample PDF document.');
+        
+        // Output the PDF
+        return $this->pdf->Output('document.pdf', 'S'); // S = return as string
+    }
+}
+
+// Generate the PDF
+$pdfStarter = new PDFStarter();
+$pdfContent = $pdfStarter->outputPDF();
+
+// Return the PDF content to AJAX
+header('Content-Type: application/pdf');
+header('Content-Disposition: inline; filename="document.pdf"');
+echo $pdfContent;
+?>
+
+// Add page number
+$pdf->Cell(0, 10, 'Page '.$pdf->getAliasNumPage().' of '.$pdf->getAliasNbPages(), 0, 1, 'C');

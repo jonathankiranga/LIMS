@@ -1,0 +1,12 @@
+.table-responsive {
+    height: 180px;
+}
+
+.table-responsive-small {
+    height: 50px;
+}
+
+
+.table{
+    padding: 0px;
+}

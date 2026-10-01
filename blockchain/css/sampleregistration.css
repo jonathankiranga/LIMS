@@ -1,0 +1,341 @@
+/* ========= BASE EXECUTIVE THEME ========= */
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    background-color: #f7f9fc;
+    color: #212529;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* ========== SCROLL CONTAINERS ========== */
+.containernew {
+    display: flex;
+    justify-content: flex-end;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.containernew::-webkit-scrollbar {
+    display: none;
+}
+
+/* ========== CHECKBOX STYLING ========== */
+.checkbox-container {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.checkbox-container .checkbox {
+    margin-right: 0.5rem;
+    transform: scale(0.8);
+    transform-origin: left center;
+}
+
+/* ========== COLUMNS / FILE UPLOAD ========== */
+.col {
+    overflow: hidden;
+}
+.file-upload {
+    margin: 10px 0;
+}
+
+/* ========== MODAL DESIGN ========== */
+.modal-header {
+    background-color: #002855;
+    color: #ffffff;
+    font-weight: bold;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+.modal-footer {
+    border-top: none;
+    background-color: #f8f9fa;
+}
+.btn-close {
+    border: none;
+    color: black;
+    float: right;
+}
+
+/* ========== DROPDOWN DESIGN ========== */
+.dropdown {
+    position: absolute;
+    background: white;
+    border: 1px solid #adb5bd;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.dropdown div {
+    padding: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.dropdown div:hover {
+    background-color: #e9ecef;
+}
+
+/* ========== EXECUTIVE SAMPLE TABLE ========== */
+#sampleTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+    font-size: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#sampleTable th,
+#sampleTable td {
+    padding: 12px 16px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    min-width: 120px;
+}
+
+#sampleTable th {
+    background-color: #002855;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+#sampleTable input,
+#sampleTable select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 15px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+#sampleTable input:focus,
+#sampleTable select:focus {
+    border-color: #0076d6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 118, 214, 0.15);
+}
+
+/* Row hover effect */
+#sampleRows tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* DataTables look without DataTables */
+#sampleTable {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 14px;
+}
+
+#sampleTable th,
+#sampleTable td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+#sampleTable thead {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+#sampleTable tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#sampleTable tbody tr:hover {
+    background-color: #e6f7ff;
+    transition: background-color 0.2s ease;
+}
+
+#sampleTable input[type="text"],
+#sampleTable input[type="number"],
+#sampleTable input[type="file"] {
+    width: 100%;
+    padding: 4px 6px;
+    box-sizing: border-box;
+    font-size: 13px;
+}
+
+#sampleTable .btn {
+    padding: 4px 8px;
+    font-size: 13px;
+}
+
+ /* Excel-like table styling */
+        #sampleTable {
+            border-collapse: collapse;
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 14px;
+        }
+        #sampleTable th,
+        #sampleTable td {
+            border: 1px solid #d0d7de;
+            padding: 4px 8px;
+            text-align: left;
+            background-clip: padding-box;
+        }
+        #sampleTable th {
+            background-color: #3a4585;
+            font-weight: bold;
+            position: sticky; /* Freeze header */
+            top: 0;
+            z-index: 2;
+        }
+        #sampleTable tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #sampleTable tr:hover {
+            background-color: #dbe9f4;
+        }
+        /* Active cell effect */
+        #sampleTable td.active {
+            outline: 2px solid #0078d4;
+            outline-offset: -2px;
+            background-color: #eaf2fb;
+        }
+/* ========== EXECUTIVE BUTTONS ========== */
+.btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+.btn-danger {
+    background-color: #c92a2a;
+    color: #ffffff;
+    border: none;
+}
+.btn-danger:hover {
+    background-color: #a51111;
+}
+#addRow {
+    margin: 15px 0;
+    background-color: #004085;
+    color: #ffffff;
+    border: none;
+}
+#addRow:hover {
+    background-color: #002855;
+}
+
+/* ========== FLOATING TOOLTIP ========== */
+
+
+.tooltip-inner .text-muted {
+  color: #f8f9fa !important;
+  opacity: 0.85;
+}
+
+
+/* ========== TOMSELECT INTEGRATION ========== */
+.ts-control {
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+}
+.ts-dropdown {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0 0 4px 4px !important;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media screen and (max-width: 768px) {
+    #sampleTable {
+        font-size: 13px;
+    }
+
+    #sampleTable th,
+    #sampleTable td {
+        padding: 6px 10px;
+    }
+
+    #paramPreview {
+        font-size: 13px;
+        padding: 10px 12px;
+        max-width: 90vw;
+    }
+
+    .btn {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+}
+
+
+
+.thumb-preview {
+    max-width: 60px;
+    max-height: 60px;
+    cursor: zoom-in;
+    border: 1px solid #ccc;
+    padding: 2px;
+    background: white;
+}
+
+#imageTooltip {
+    position: absolute;
+    display: none;
+    border: 2px solid #333;
+    background: white;
+    padding: 5px;
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+#imageTooltip img {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+#documentno {
+    min-width: 150px;
+}
+
+/* Ensure samplehtml area fills available space and does not show scrollbars */
+#samplehtml {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important; /* remove scrolling */
+}
+
+/* Make direct children expand to full width and prevent internal scrolling */
+#samplehtml > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Ensure common media and embedded elements scale to container */
+#samplehtml img,
+#samplehtml table,
+#samplehtml iframe,
+#samplehtml object,
+#samplehtml embed,
+#samplehtml video {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+/* As a last resort hide overflow on all descendants (applies only within #samplehtml) */
+#samplehtml * {
+    overflow: hidden !important;
+}

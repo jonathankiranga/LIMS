@@ -1,0 +1,296 @@
+'Customer Ageing Analysis As at','08/07/2017'
+'Customer ID','Customer Name','Current','60 days','90 days','120 days','over 120 days'
+Dr365               ,GICHOCHO CONTRACTORS          ,.00,.00,.00,.00,.00
+Dr366               ,WESTBUILD G. CONTRACTORS      ,.00,.00,.00,.00,4546407.00
+Dr367               ,SBI INTERNATIONAL HOLDINGS (K),.00,.00,.00,.00,.00
+Dr368               ,LACON COMPANY                 ,.00,.00,.00,.00,.00
+Dr369               ,JILK CONTSTRUCTION CO.        ,.00,.00,.00,.00,169447.30
+Dr370               ,TERRITORIAL WORKS K LTD       ,.00,.00,.42,.00,.00
+Dr371               ,EASTERN GENERAL               ,.00,.00,.00,.00,78339.20
+Dr372               ,WORLD PEAK INTERNATIONAL LTD. ,.00,.00,.00,.00,.00
+Dr373               ,SINOE CONTRUCTIONS            ,.00,.00,.00,.00,1388754.12
+Dr485               ,MJOBA ENTERPRISES             ,.00,.00,.00,.00,.00
+Dr375               ,PASAK AGENCIES                ,.00,.00,.00,.00,4104331.74
+Dr376               ,LIRONA CONSTRUCTION LTD       ,.00,.00,725000.00,.00,.00
+Dr377               ,KUNDAN SINGH CONTRUCTION LTD  ,.00,.00,.00,.00,1124537.60
+Dr435               ,HURRICANE VENTURES            ,.00,.00,.00,.00,15203.58
+Dr379               ,NAIROBI CITY COUNCIL          ,.00,.00,.00,.00,.00
+Dr380               ,SAMAR CONTRUCTIONS            ,.00,.00,.00,.00,6452.72
+Dr381               ,EAGES COSTRUCTIONS            ,.00,.00,.00,.00,.00
+Dr382               ,MAGIC G CONTRACTORS           ,.00,.00,.00,.00,.00
+Dr383               ,SHEMILAND CONSTRUCTION.       ,.00,.00,.00,.00,.00
+Dr384               ,POLICAL INTERNATIONAL         ,.00,.00,.00,.00,.00
+Dr436               ,MATTAN CONTRACTORS LTD        ,.00,.00,.00,.00,378079.56
+Dr386               ,ASSIS CONSTRUCTION            ,.00,.00,.00,.00,553268.20
+Dr387               ,DANIEL G. NGENA               ,.00,.00,.00,.00,.00
+Dr388               ,EJIDIAH NDIGI                 ,.00,.00,.00,.00,.00
+Dr389               ,WINNIE MAINA                  ,.00,.00,.00,.00,.00
+Dr390               ,MR MAINA                      ,.00,.00,.00,.00,.00
+Dr391               ,MARTHA WANJIRU                ,.00,.00,.00,.00,.00
+Dr392               ,BENSON KIOH                   ,.00,.00,.00,.00,.00
+Dr393               ,PATRICK WAINAINA              ,.00,.00,.00,.00,.00
+Dr394               ,NANCY KINYUA                  ,.00,.00,.00,.00,.00
+Dr395               ,KIU CONSTRUCTION              ,.00,.00,.00,.00,3137764.00
+Dr396               ,ACME DISTRIBUTORS             ,.00,.00,.00,.00,.00
+Dr427               ,KANGE CONSTRUCTIONS           ,.00,.00,.00,.00,45.60
+Dr398               ,CASHIER- PETTY CASH           ,.00,.00,.00,.00,.00
+Dr399               ,MALCH CONTRUCTIONS            ,.00,.00,.00,.00,.00
+Dr400               ,KIMILILI HAULIERS             ,.00,.00,.00,.00,.00
+Dr401               ,WALLUKAT INVESTMENTS          ,.00,.00,.00,.00,.00
+Dr402               ,PETER  K. MUGAMBI             ,.00,.00,.00,.00,.00
+Dr403               ,CRESCENT CONTRUCRIONS COMPANY ,.00,.00,.00,.00,1814689.36
+Dr404               ,GLANACK INVESTMENTS           ,.00,.00,.00,.00,.00
+Dr405               ,TIMAX BUILDING AND GENERAL CON,.00,.00,.00,.00,624.00
+Dr406               ,STAR GENERAL EAST AFRICA CONTR,.00,.00,.00,.00,.00
+Dr407               ,DICKWAYS CONTRUCTIONS CO.LTD  ,.00,.00,.00,.00,.00
+Dr429               ,TANJAP CONTRUCTION COMPANY LTD,.00,.00,.00,.00,.00
+Dr409               ,PAK JEL HOLDING               ,.00,.00,.00,.00,626738.88
+Dr410               ,GREEN HORIZON VENTURES LTD    ,.00,.00,.00,.00,.00
+Dr411               ,LINYI CONTRUCTIONS            ,.00,.00,.00,.00,.87
+Dr412               ,WESTLINE OIL STREAM S.LTD(DEBT,.00,.00,.00,.00,.00
+Dr413               ,YELLOW HOUSE                  ,.00,.00,.00,.00,40560.00
+Dr414               ,HAYER BISHAN  AND SONS LTD    ,.00,.00,.00,.00,.00
+Dr415               ,KAMINGIRI ENG AND CONTRSUCTION,.00,.00,.00,.00,.00
+Dr430               ,BITS  AND LUBES LTD           ,.00,.00,.00,.00,.00
+Dr417               ,AGRIBORD K LTD                ,.00,.00,.00,.00,.00
+Dr419               ,DON WOODS COMPANY  LTD        ,.00,.00,.00,.00,.00
+Dr420               ,FAHARI COMPANY  LTD           ,.00,.00,.00,.00,.00
+Dr421               ,CHINA ROAD BRIDGE             ,.00,.00,.00,.00,.00
+Dr422               ,SIVAD CONTRUCTIONS            ,.00,.00,.00,.00,.00
+Dr642               ,Ascoda General contractors    ,.00,.00,.00,.00,.94
+Dr643               ,ASPHALT GEN. MERCHANT         ,.00,.00,.00,.00,.00
+Dr647               ,Elijah Matibo                 ,.00,.00,.00,.00,.00
+Dr423               ,TRAM TECHNICAL SERVICES LTD   ,.00,.00,.00,.00,.00
+Dr424               ,GULF ASPHALT                  ,.00,.00,.00,.00,11528.78
+Dr644               ,CHINA CHANGJAING MATERIALS CO.,.00,.00,.00,.00,.00
+Dr645               ,ELKANAH MUTAI                 ,.00,.00,.00,.00,.00
+Dr646               ,CHINA WU YI CO. LTD-MSA       ,.00,.00,.00,.00,8792.90
+Dr648               ,PRABHU SUPPLIERS LTD          ,.00,.00,.00,.00,.31
+Dr425               ,PETWA CONTRUCTIONS CO.LTD     ,.00,.00,.00,.00,146560.00
+Dr426               ,TRAPOZ CONTRACTORS LTD        ,.00,.00,.00,.00,.00
+Dr428               ,EDEN GEORGE  DIESEL LTD       ,.00,.00,.00,.00,.00
+Dr431               ,KARICHUTA CONTRUCTION COMPANY ,.00,.00,.00,.00,.17
+Dr432               ,KAIGI GENERAL CONTRCTORS LTD  ,.00,.00,.00,.00,1700.00
+Dr433               ,HERITAGE PETROLEUM LTD        ,.00,.00,.00,.00,1484348.00
+Dr434               ,S.S MEHTA AND SONS LTS        ,.00,.00,.00,.00,15217.00
+Dr437               ,WARIMWE GENERAL CONTRACTORS   ,.00,.00,.00,.00,.00
+Dr486               ,TREADSETTER TYRES LTD         ,.00,.00,.00,.00,.00
+Dr439               ,JUNJO COMMERCIAL AGENCIES     ,.00,.00,.00,.00,.00
+Dr440               ,ASSOCIATED CONSTUCTIONS       ,.00,.00,.00,.00,.00
+Dr441               ,HARMATTAN CO. LTD             ,.00,.00,.00,.00,.00
+Dr442               ,SAKAM ENTERPRISES LTD         ,.00,.00,.00,.00,1538903.70
+Dr443               ,SUBWAY CONTRUCTION COMPANY LTD,.00,.00,.00,.00,.00
+Dr444               ,GOGNI RAJOPE CONTRUCTIONS COMP,.00,.00,.00,.00,.00
+Dr445               ,MAJU COMPANY LTD              ,.00,.00,.00,.00,.00
+Dr446               ,NIPPO CORPORATION             ,.00,.00,.00,.00,.21
+Dr447               ,MULTI CONTRUCTIONS            ,.00,.00,.00,.00,568.00
+Dr448               ,CREDIT NOTES                  ,.00,.00,.00,.00,.00
+Dr449               ,BUD-KEN BULDING CONTRUCTIONS  ,.00,.00,.00,.00,.00
+Dr450               ,BETA  PETROLEUM CO. LTD       ,.00,.00,.00,.00,.00
+Dr487               ,KENYA EARTH AND ALLIED        ,.00,.00,.00,.00,.00
+Dr452               ,JIPSY CIVIL & BUILDING CONTRAC,.00,.00,.00,.00,2015987.20
+Dr453               ,DAMCIVE CO.LTD                ,.00,.00,.00,.00,.00
+Dr454               ,NAKURU MACHINERY SERVICES LTD ,.00,.00,.00,.00,7062.00
+Dr455               ,ASSOCIATED BITUMEN LIMITED    ,.00,.00,.00,.00,.00
+Dr456               ,NGWERU                        ,.00,.00,.00,.00,.00
+Dr457               ,TAI ENTERPRISES LTD           ,.00,.00,.00,.00,4261.00
+Dr458               ,NYORO CONTRUCTION             ,.00,.00,.00,.00,.88
+Dr459               ,MUKAN CONTRUCTION AND ENG SERV,.00,.00,.00,.00,.34
+Dr460               ,FEROZE CONTRUCTION COMPANY.   ,.00,.00,.00,.00,.00
+Dr461               ,JIANGXI ZHONGMEI ENGINEERING C,.00,.00,.00,.00,.00
+Dr462               ,TALEWA ROAD CONTRACTORS LTD   ,.00,.00,.00,.00,830096.00
+Dr463               ,OLEPOLOS CONTRUCTIONS CO LTD  ,.00,.00,.00,.00,.00
+Dr464               ,ASSOCIATED ELECTRICAL HARDWARE,.00,.00,.00,.00,2267340.00
+Dr465               ,TALENT GRAPHICS LTD           ,.00,.00,.00,.00,.00
+Dr466               ,BENMA TECHNICAL SERVICES LTD  ,.00,.00,.00,.00,480.20
+Dr467               ,EDNY TRADING                  ,.00,.00,.00,.00,.00
+Dr468               ,NORIS INTERNATIONAL LTD       ,.00,.00,.00,.00,.00
+Dr469               ,EQUISTAR LIMITED              ,.00,.00,.00,.00,3103722.29
+Dr474               ,NARIANA ENTERPRISES           ,.00,.00,.00,172500.00,167999.79
+Dr471               ,JAMES FINLAY KENYA LIMITED -L1,.00,.00,.00,.00,9975.84
+Dr472               ,CARRY ONE CONTRUCTIONS        ,.00,.00,.00,.00,260.00
+Dr473               ,WISA GENERAL MERCHANTS        ,.00,.00,.00,.00,.00
+Dr475               ,DHANJAL BROTHER               ,.00,.00,.00,.00,386840.00
+Dr476               ,RAGOT LTD                     ,.00,.00,369770.40,.00,.00
+Dr477               ,MUGACY                        ,.00,.00,.00,.00,.00
+Dr478               ,MR. KIMANI                    ,.00,.00,.00,.00,.00
+Dr488               ,YAMU ENGINEERING SERVICES LTD ,.00,.00,.00,.00,.00
+Dr480               ,JOMAT CONSTRUCTION COMPANY    ,.00,.00,.00,.00,.00
+Dr481               ,CEABUD ENGINEERING SERVCES LTD,.00,.00,.00,.00,87444.00
+Dr482               ,TECHSPA GENERAL SUPPLIER      ,.00,.00,.00,.00,.00
+Dr483               ,CHINA NATIONAL AERO -TECHNOLOG,.00,.00,.00,850000.00,3743614.00
+Dr484               ,ROGAT LTD                     ,.00,.00,.00,.00,.00
+Dr489               ,MR WAMBUA                     ,.00,.00,.00,.00,.00
+Dr490               ,NJUCA CONSOLIDATED  CO. TD (MS,.00,.00,.00,200000.00,115393.91
+Dr491               ,CONNECTED CONTRUCTIONS LRD    ,.00,.00,.00,.00,.00
+Dr492               ,TRANSNILE ENTERPRISES LTD     ,.00,.00,.00,.00,55152.00
+Dr493               ,ERIMA GENERAL CONTRACTORS     ,.00,.00,.00,.00,.00
+Dr494               ,NORTHERN ROADWAYS             ,.00,.00,.00,.00,982.00
+Dr495               ,DRYDOCK SUPPLIES LIMITED      ,.00,.00,.00,.00,.00
+Dr496               ,WESTLINE (PETER)              ,.00,.00,.00,.00,.00
+Dr497               ,PETER MUKOYAH                 ,.00,.00,.00,.00,.00
+Dr498               ,CHINA WUYI CO.LTD (104)       ,.00,.00,.00,.00,880062.68
+Dr499               ,FRANVI CONSTRUCTION CO.TLD    ,.00,.00,.00,.00,.00
+Dr500               ,ROUTE CONTRACTORS             ,.00,.00,.00,.00,.00
+Dr501               ,JANACO INTERNATIONAL LTD      ,.00,.00,.00,.00,.00
+Dr502               ,CEMENTERS LIMITED             ,.00,.00,.00,.00,.00
+Dr503               ,FALCON ROAD CONTRACTORS       ,.00,.00,.00,.00,30881.99
+Dr504               ,FALCON ROADS CONTRACTORS      ,.00,.00,.00,.00,.00
+Dr505               ,DAVID OUMA OTIENO             ,.00,.00,.00,.00,.00
+Dr506               ,DALAB CONTRUCTION CO.LTD      ,.00,.00,.00,.00,.00
+Dr507               ,VESCOM ENTERPRISES            ,.00,.00,.00,.00,.00
+Dr508               ,MALTAURO                      ,.00,.00,.00,.00,.00
+Dr509               ,PWANI UNITED BUILDER LTD      ,.00,.00,.00,.00,.00
+Dr510               ,DAVID MWANGI                  ,.00,.00,.00,.00,.00
+Dr511               ,MUSA TRADING LTD              ,.00,.00,.00,.00,.00
+Dr515               ,AMOGRACIA CONSTRUCTION LTD    ,.00,.00,.00,.00,.00
+Dr513               ,NAKURU HIGH SCHOOL            ,.00,.00,.00,.00,.00
+Dr516               ,WATERS ENTERPRISES LTD        ,.00,.00,.00,.00,.00
+Dr517               ,TAVEZ CONNECTIONS             ,.00,.00,.00,.00,.00
+Dr518               ,S.S MEHTA AND SONS LTD[MOMBASA,.00,.00,.00,.00,2966700.00
+Dr519               ,TRANSNILE SYSTEM              ,.00,.00,.00,.00,.20
+Dr520               ,DON VALLEY ENTERPRISES        ,.00,.00,.00,.00,.00
+Dr521               ,ABSAL AND SONS                ,.00,.00,1614909.00,.00,73312.00
+Dr522               ,MANTURA GEN CONTRATOR         ,.00,.00,.00,.00,.00
+Dr523               ,FRANCIS KIOKO                 ,.00,.00,.00,.00,.00
+Dr524               ,CHINA WUYI CO TLD (A2) PROJECT,.00,.00,.00,.00,.00
+Dr525               ,PARAGON CONSTRUCTIONS LTD     ,.00,.00,.00,.00,.00
+Dr526               ,samuel mwaura kiriu           ,.00,.00,.00,.00,.00
+Dr527               ,CHINA OVERSEAS ENGINEERING GRO,.00,.00,.00,.00,1.04
+Dr528               ,TWANG TECHNOLOGIES LTD        ,.00,.00,.00,.00,14762.76
+Dr529               ,SINOE                         ,.00,.00,.00,.00,.00
+Dr530               ,SAVVY ENTERPRISES LTD         ,.00,.00,.00,.00,.00
+Dr531               ,PAVEWAY CONSTRUCTION          ,.00,.00,.00,.00,.00
+Dr532               ,OCEANIC 2000                  ,.00,.00,.00,.00,69600.00
+Dr533               ,NJUCA CONSOLIDATED CO.LTD (NAI,.00,.00,1809310.00,1456305.49,.00
+Dr534               ,NJUJO BUILDING AND G.CON      ,.00,.00,.00,.00,236.80
+Dr535               ,ROBEN ABERDARE KENYA LIMITED  ,.00,.00,752840.00,.00,3939200.00
+Dr536               ,ARIA TRADING & CONSTRUCTION LT,.00,.00,.00,.00,.00
+Dr537               ,MONARCH OVERSEAS LIMITED      ,.00,.00,.00,.00,.20
+Dr538               ,SADOLIN PAINT (E,A) LTD       ,.00,.00,.00,.00,.00
+Dr539               ,CHAGLANO ENTERPRISES LTD      ,.00,.00,.00,.00,.00
+Dr540               ,EPHRASEH LTD MOMBASA          ,.00,.00,.00,.00,.00
+Dr541               ,TINFRA ENGINEERING LTD        ,.00,.00,.00,.00,.00
+Dr542               ,CHINA OVERSEAS ENGINEERING GRO,.00,.00,.00,.00,.00
+Dr543               ,YARROW CONSTRUCTION CO. LTD   ,.00,.00,.00,.00,24.00
+Dr544               ,ROACON JIMBIRI LTD            ,.00,.00,.00,.00,30981.39
+Dr545               ,GRAGAB AGENCIES LTD           ,.00,.00,.00,.00,444916.00
+Dr546               ,NDAISI GENERAL MERCHANT       ,.00,.00,.00,.00,.00
+Dr547               ,WAK CONSTRUCTION CO. LTD      ,.00,.00,105000.00,.00,404843.66
+Dr548               ,ROSAKI DESIGNS LTD            ,.00,.00,.00,.00,24360.00
+Dr549               ,MISSIONS OF HOPE              ,.00,.00,.00,.00,3.55
+Dr550               ,JOAM CONTRACTOR COMPANY LTD   ,.00,.00,.00,.00,.00
+Dr551               ,SPORTSVIEW HOTEL KASARANI     ,.00,.00,.00,.00,24.97
+Dr552               ,PINNIE AGENCY LTD             ,.00,.00,.00,.00,.00
+Dr553               ,KENEDY ALOO                   ,.00,.00,.00,.00,.00
+Dr554               ,HEMAK PROPERTIES              ,.00,.00,.00,.00,.00
+Dr555               ,SILVOL ENTERPRISES            ,.00,.00,.00,.00,.00
+Dr556               ,LUBIMBAYI LTD                 ,.00,.00,.00,.00,.00
+Dr557               ,HENPOINT KENYA LIMITED        ,.00,.00,.00,.00,1198.52
+Dr558               ,URIIC COMPANY LIMITED         ,.00,.00,.00,.00,4222628.29
+Dr559               ,SUNCOAT CHEMICALS             ,.00,.00,.00,.00,.00
+Dr560               ,BITUTRADE PETROLEUM LTD       ,.00,.00,.00,.00,.40
+Dr561               ,DEEKS CONTRACTORS (K) LTD     ,.00,.00,.00,.00,.00
+Dr562               ,JUSTUS MAINA                  ,.00,.00,.00,.00,.00
+Dr563               ,BODHAI INVESTMENTS LTD        ,.00,.00,.00,.00,.00
+Dr564               ,ENGENTA LIMITED               ,.00,.00,.00,.00,11500.00
+Dr565               ,BRIDGESTONE CONSTRUCTION      ,.00,.00,.00,.00,1899.53
+Dr566               ,SOLOGRACIOUS                  ,.00,.00,.00,.00,.00
+Dr567               ,MUHORO                        ,.00,.00,.00,.00,.00
+Dr568               ,KEWA EAST AFRICA LTD          ,.00,.00,.00,31000.00,.00
+Dr569               ,BEAMMS CITY MERCHANTS LIMITED ,.00,.00,.00,.00,.00
+Dr570               ,GRAKIM ENTERPRISES LTD        ,.00,.00,.00,.00,.00
+Dr571               ,LEE CONSTRUCTION LTD          ,.00,.00,.00,.00,.00
+Dr572               ,DICKWAYS CONSTRUCTION COMPANY ,.00,.00,.00,.00,.00
+Dr573               ,DANNEX INVESTMENTS & ENG WORKS,.00,.00,.00,.00,6600.00
+Dr574               ,JUFEX AUTO HARDWARE CO LTD    ,.00,.00,.00,.00,3843.34
+Dr575               ,FREIGHT EXCHANGE              ,.00,.00,.00,.00,.00
+Dr576               ,RAVINA AGENCIES LTD           ,.00,.00,.00,.00,712.89
+Dr577               ,ADDE INVESTMENT               ,.00,.00,.00,.00,3000.00
+Dr578               ,CHINA HENAN INTERNATIONAL (CHI,.00,.00,.00,.00,.00
+Dr579               ,CHINA WUYI CO. LTD C93 MWINGI ,.00,.00,.00,.00,.00
+Dr580               ,MANYA INVESTMENT              ,.00,.00,.00,.00,.00
+Dr581               ,KAMRO ENTERPRISES LTD         ,.00,.00,.00,.00,6.00
+Dr582               ,MIANGENI CONSTRUCTION         ,.00,.00,.00,.00,.00
+Dr583               ,TOYO CONSTRUCTION CO., LTD    ,.00,.00,.00,.00,.00
+Dr584               ,SAXON INVESTMENT LTD          ,.00,.00,.00,.00,744.00
+Dr585               ,LOPEX ENTERPRISES LTD         ,.00,.00,.00,.00,2.20
+Dr586               ,SOLAI PAINTS LTD              ,.00,.00,.00,.00,.00
+Dr587               ,KIRIMARA GENERAL AGENCIES LTD ,.00,.00,.00,.00,14.00
+Dr588               ,REXOPEN ENTERPRISES LTD       ,.00,.00,.00,.00,.00
+Dr589               ,REYNOLDS CONSTRUCTION COMPANY ,.00,.00,.00,.00,.00
+Dr590               ,MACHAKOS COUNTY  GOVERNMENT   ,.00,.00,.00,.00,2101795.89
+Dr591               ,DECIMAL CREATIONS LIMITED     ,.00,.00,.00,.00,15080.00
+Dr592               ,KALOLWANGA ENG SERVICE LTD. NA,.00,.00,.00,.00,.00
+Dr593               ,P. J PETROLEUM EQUIPMENT LTD  ,.00,.00,.00,.00,.00
+Dr594               ,TINFRA ENGINEERING LIMITED    ,.00,.00,.00,.00,334681.26
+Dr595               ,EABEST LIMITED                ,.00,.00,.00,.00,342937.75
+Dr596               ,KIMONDO                       ,.00,.00,.00,.00,.00
+Dr597               ,UNIPLASTIC                    ,.00,.00,.00,.00,.00
+Dr598               ,GANTT CONSTRUCTION LTD        ,.00,.00,.00,.00,24088.48
+Dr600               ,JOMIO HOLDINGS LTD            ,.00,.00,.00,.00,.00
+Dr601               ,STANELY MBUVI                 ,.00,.00,.00,.00,.00
+Dr602               ,PETER KINGORI WANJIMA         ,.00,.00,.00,.00,620790.00
+Dr604               ,ISSACK KATELO                 ,.00,.00,.00,.00,.00
+Dr605               ,NANILINE COMPANY LTD          ,.00,.00,.00,.00,175205.06
+Dr606               ,WESTMINSTER CONSTRUCTION CO. L,.00,.00,.00,.00,.00
+Dr607               ,MONACO ENGINEERING            ,.00,.00,.00,.00,.00
+Dr608               ,DECHE CONSTRUCTION            ,.00,.00,.00,.00,.00
+Dr609               ,PEJOM LIMITED                 ,.00,.00,.00,.00,.00
+Dr610               ,ZINKHOUSE GENERAL CONTRACTORS ,.00,.00,.00,.00,.00
+Dr611               ,DRYTREE GENERAL CONTRACTORS   ,.00,.00,.00,.00,.00
+Dr612               ,KELVETCH ENTERPRISES CO. LTD  ,.00,.00,.00,.00,.00
+Dr613               ,INSHALLAH CONSTRUCTION CO. LTD,.00,.00,.00,.00,.00
+Dr614               ,SIMRAK CONSTRUCTION LTD       ,.00,.00,.00,.00,.00
+Dr615               ,CHINA CIVIL ENGINEERING CONTRU,.00,.00,.00,.00,.00
+Dr616               ,ROADS AND BRIDGES (K) LTD     ,.00,.00,.00,.00,496944.00
+Dr617               ,FUELUBES                      ,.00,.00,.00,.00,476020.06
+Dr618               ,CHINA DALIAN INTERNATIONAL    ,.00,.00,.00,.00,919988.42
+Dr619               ,INTEX CONSTRUCTION LTD        ,.00,.00,.00,.00,1899800.00
+Dr620               ,MUSDEN ENTERPRISES LIMITED    ,.00,.00,.00,.00,.00
+Dr621               ,G. ISSAIAS AND COMPANY (KENYA),.00,.00,.00,.00,.00
+Dr622               ,KABAMBA ENTERPRISES LTD       ,.00,.00,.00,.00,150000.00
+Dr623               ,KSC INTERNATIONAL LTD( RECEIVE,.00,.00,.00,.00,.00
+Dr624               ,STEPHEN MACHARIA              ,.00,.00,.00,.00,27.00
+Dr625               ,JAPCO GENERAL CONTRACTORS LIMI,.00,.00,.00,.00,.00
+Dr626               ,PREMIER SURETY SERVICES       ,.00,.00,.00,.00,372299.71
+Dr627               ,FRANCIS MWANGI                ,.00,.00,.00,.00,2.07
+Dr628               ,CHINA HENAN INTERNATIONAL COOP,.00,.00,.00,.00,.00
+Dr629               ,AVENTURE LTD                  ,.00,.00,.00,.00,999.97
+Dr630               ,AGIM ENTERPRISES LTD          ,.00,.00,.00,.00,.00
+Dr30653             ,EDNY TRADING ENTERPRISE       ,.00,.00,.00,.00,.00
+Dr632               ,EMAD CONSTRUCTION LIMITED     ,.00,.00,.00,.00,.00
+Dr633               ,DANJE ENTERPRISES             ,.00,.00,.00,.00,89.99
+Dr634               ,GALAXY                        ,.00,.00,.00,.00,.00
+Dr635               ,RECONCILE TRADING & LOGISTICS ,.00,.00,.00,.00,.00
+Dr636               ,PEANCO LTD                    ,.00,.00,.00,.00,18787.07
+Dr637               ,LENJOKS AGENCIES              ,.00,.00,.00,.00,.08
+Dr638               ,MARASAN GENERAL SUPPLIERS     ,.00,.00,.00,.00,.00
+Dr639               ,ROSAKI DESIGNS LIMITED        ,.00,.00,.00,.00,.00
+Dr640               ,MOSES WAWERU WACHIRA          ,.00,.00,.00,.00,.24
+Dr641               ,EAST AFRICA DEVELOPMENT ENG. &,.00,.00,301600.00,301600.00,.00
+Dr650               ,CHINA WUYI CO.LTD(C99)MACHAKOS,.00,.00,.00,473448.00,167999.89
+Dr651               ,Gulsan Construction           ,.00,.00,.00,.00,204816.01
+Dr652               ,EIT LIMITED                   ,.00,.00,.00,.00,107055.00
+Dr655               ,PAUL OLANGO                   ,.00,.00,.00,.00,.28
+Dr649               ,TUFFSTEEL                     ,.00,.00,.00,.00,1868200.00
+Dr10653             ,PEFF AGENCY                   ,.00,.00,.00,.00,.00
+Dr20653             ,LUFFAM LTD                    ,.00,.00,.00,.00,30000.00
+Dr30654             ,TARINA COMPANY                ,.00,.00,.00,.00,32000.00
+Dr40653             ,MAINA MUNGA                   ,.00,.00,.00,.00,3200.02
+Dr40654             ,MANTONIC LIMITED              ,.00,.00,.00,.00,48000.00
+Dr50654             ,EDN & GEORGE              ,.00,.00,.00,.00,.00
+Dr654               ,ROBERT K. KIMAILE             ,.00,.00,.00,.00,.00
+Dr50655             ,NETSOL (K) LIMITED            ,.00,.00,.00,.00,.00
+Dr50656             ,DAMAVAND TRADING EAST AFRICA L,.00,.00,.00,.00,1152900.00
+Dr50657             ,ESTHER MWITHIGA               ,.00,.00,.00,.00,603000.00
+Dr50658             ,LAWRENCE THIONGO              ,.00,.00,.00,.00,.00
+Dr50659             ,FRED MUMANYI                  ,.00,.00,.00,.00,.00
+Dr50660             ,FRONTIER ENGINEERING LTD      ,.00,.00,.00,.00,.00
+Dr50661             ,JOVY ENTERPRISES              ,.00,.00,.00,.00,.00
+Dr50662             ,WESTGATE ANGENCIES            ,.00,.00,.00,.00,.00
+Dr50663             ,EXCEL CONSTRUCTION LTD        ,.00,.00,.00,.00,.00
+Dr50664             ,ANDREW NGANGA                 ,.00,.00,.00,66000.00,.00
+Dr50665             ,FIRST FORWARDERS              ,.00,.00,.00,27395.00,.00
+Dr50667             ,CHINA RAILWAY NO.3 ENG. GROUP ,.00,.00,.00,.00,.00
+Dr50668             ,COUNTY ENGINEERING CONTRACTORS,.00,.00,31000.00,.00,.00

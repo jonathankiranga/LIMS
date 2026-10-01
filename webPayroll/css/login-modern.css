@@ -1,0 +1,92 @@
+body {
+    background-color: #050c16;
+    color: #6af7ff;
+    font-family: "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 24px;
+    overflow: hidden;
+}
+
+#bootSequence, #loginForm {
+    text-align: left;
+    width: min(420px, 90vw);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    background-color: #6af7ff;
+    animation: blink 0.6s steps(2, start) infinite;
+}
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+#loginForm { display: none; }
+
+.login-input, .login-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(106,247,255,0.3);
+    background: #0c1626;
+    color: #e5f8ff;
+    outline: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+.login-input:focus, .login-select:focus {
+    border-color: #6af7ff;
+    box-shadow: 0 0 0 3px rgba(106,247,255,0.18);
+}
+.login-button {
+    padding: 10px 14px;
+    background: #6af7ff;
+    color: #021120;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: inherit;
+}
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+.helper-links {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #9ac7d6;
+}
+.helper-links a { color: #9ac7d6; cursor: pointer; text-decoration: underline; }
+.error-message {
+    color: #ff6b6b;
+    min-height: 18px;
+    font-size: 13px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+.brand .pill {
+    background: rgba(106,247,255,0.15);
+    color: #bff8ff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+}

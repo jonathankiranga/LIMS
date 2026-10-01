@@ -1,0 +1,552 @@
+{
+    "fetched_at": "2026-07-15 05:26:42",
+    "row_count": 109,
+    "rows": [
+        {
+            "name": "Human and animal fecal waste",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Human and animal fecal waste",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "HPC measures a range of bacteria that are naturally present in the environment",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Found naturally in water; multiplies in heating systems",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Coliforms are naturally present in the environment; as well as feces; fecal coliforms and E. coli only come from human and animal fecal waste.",
+            "mcl_raw": "5.0%4",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Soil runoff",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Human and animal fecal waste",
+            "mcl_raw": "TT3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Byproduct of drinking water disinfection",
+            "mcl_raw": "0.010",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Byproduct of drinking water disinfection",
+            "mcl_raw": "1.0",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Byproduct of drinking water disinfection",
+            "mcl_raw": "0.060",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Byproduct of drinking water disinfection",
+            "mcl_raw": "0.080",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Water additive used to control microbes",
+            "mcl_raw": "MRDL=4.01",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Water additive used to control microbes",
+            "mcl_raw": "MRDL=4.01",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Water additive used to control microbes",
+            "mcl_raw": "MRDL=0.81",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum refineries; fire retardants; ceramics; electronics; solder",
+            "mcl_raw": "0.006",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Erosion of natural deposits; runoff from orchards, runoff from glass and electronics production wastes",
+            "mcl_raw": "0.010 as of 01/23/06",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Decay of asbestos cement in water mains; erosion of natural deposits",
+            "mcl_raw": "7 MFL",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge of drilling wastes; discharge from metal refineries; erosion of natural deposits",
+            "mcl_raw": "2",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from metal refineries and coal-burning factories; discharge from electrical, aerospace, and defense industries",
+            "mcl_raw": "0.004",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Corrosion of galvanized pipes; erosion of natural deposits; discharge from metal refineries; runoff from waste batteries and paints",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from steel and pulp mills; erosion of natural deposits",
+            "mcl_raw": "0.1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Corrosion of household plumbing systems; erosion of natural deposits",
+            "mcl_raw": "TT7; Action Level=1.3",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from steel/metal factories; discharge from plastic and fertilizer factories",
+            "mcl_raw": "0.2",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Water additive which promotes strong teeth; erosion of natural deposits; discharge from fertilizer and aluminum factories",
+            "mcl_raw": "4.0",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Corrosion of household plumbing systems; erosion of natural deposits",
+            "mcl_raw": "TT7; Action Level=0.010",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Erosion of natural deposits; discharge from refineries and factories; runoff from landfills and croplands",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from fertilizer use; leaking from septic tanks, sewage; erosion of natural deposits",
+            "mcl_raw": "10",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from fertilizer use; leaking from septic tanks, sewage; erosion of natural deposits",
+            "mcl_raw": "1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum refineries; erosion of natural deposits; discharge from mines",
+            "mcl_raw": "0.05",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Leaching from ore-processing sites; discharge from electronics, glass, and drug factories",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Added to water during sewage/wastewater treatment",
+            "mcl_raw": "TT8",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide used on row crops",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide used on row crops",
+            "mcl_raw": "0.003",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from factories; leaching from gas storage tanks and landfills",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Leaching from linings of water storage tanks and distribution lines",
+            "mcl_raw": "0.0002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Leaching of soil fumigant used on rice and alfalfa",
+            "mcl_raw": "0.04",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from chemical plants and other industrial activities",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Residue of banned termiticide",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from chemical and agricultural chemical factories",
+            "mcl_raw": "0.1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide used on row crops",
+            "mcl_raw": "0.07",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide used on rights of way",
+            "mcl_raw": "0.2",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff/leaching from soil fumigant used on soybeans, cotton, pineapples, and orchards",
+            "mcl_raw": "0.0002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.6",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.075",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.007",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.07",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from drug and chemical factories",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from chemical factories",
+            "mcl_raw": "0.4",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from rubber and chemical factories",
+            "mcl_raw": "0.006",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide used on soybeans and vegetables",
+            "mcl_raw": "0.007",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Emissions from waste incineration and other combustion; discharge from chemical factories",
+            "mcl_raw": "0.00000003",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide use",
+            "mcl_raw": "0.02",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide use",
+            "mcl_raw": "0.1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Residue of banned insecticide",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories; an impurity of some water treatment chemicals",
+            "mcl_raw": "TT8",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum refineries",
+            "mcl_raw": "0.7",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum refineries",
+            "mcl_raw": "0.00005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from herbicide use",
+            "mcl_raw": "0.7",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Residue of banned termiticide",
+            "mcl_raw": "0.0004",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Breakdown of heptachlor",
+            "mcl_raw": "0.0002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from metal refineries and agricultural chemical factories",
+            "mcl_raw": "0.001",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from chemical factories",
+            "mcl_raw": "0.05",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff/leaching from insecticide used on cattle, lumber, gardens",
+            "mcl_raw": "0.0002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff/leaching from insecticide used on fruits, vegetables, alfalfa, livestock",
+            "mcl_raw": "0.04",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff/leaching from insecticide used on apples, potatoes, and tomatoes",
+            "mcl_raw": "0.2",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff from landfills; discharge of waste chemicals",
+            "mcl_raw": "0.0005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from wood preserving factories",
+            "mcl_raw": "0.001",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Herbicide runoff",
+            "mcl_raw": "0.5",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Herbicide runoff",
+            "mcl_raw": "0.004",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from rubber and plastic factories; leaching from landfills",
+            "mcl_raw": "0.1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from factories and dry cleaners",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum factories",
+            "mcl_raw": "1",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Runoff/leaching from insecticide used on cotton and cattle",
+            "mcl_raw": "0.003",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Residue of banned herbicide",
+            "mcl_raw": "0.05",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from textile finishing factories",
+            "mcl_raw": "0.07",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from metal degreasing sites and other factories",
+            "mcl_raw": "0.2",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from industrial chemical factories",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from metal degreasing sites and other factories",
+            "mcl_raw": "0.005",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Leaching from PVC pipes; discharge from plastic factories",
+            "mcl_raw": "0.002",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from petroleum factories; discharge from chemical factories",
+            "mcl_raw": "10",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "1(unitless)",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "0.00001",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "See Hazard Index PFAS information",
+            "mcl_raw": "No individual MCL",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "0.00001",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "0.00001",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "0.0000040",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Discharge from manufacturing and industrial chemical facilities, use of certain consumer products, occupational exposures, and certain firefighting activities.",
+            "mcl_raw": "0.0000040",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Erosion of natural deposits of certain minerals that are radioactive and may emit a form of radiation known as alpha radiation",
+            "mcl_raw": "15 picocuries per Liter (pCi/L)",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Decay of natural and man-made deposits of certain minerals that are radioactive and may emit forms of radiation known as photons and beta radiation",
+            "mcl_raw": "4 millirems per year",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Erosion of natural deposits",
+            "mcl_raw": "5 pCi/L",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Erosion of natural deposits",
+            "mcl_raw": "30 ug/L as of 12/08/03",
+            "source": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations"
+        },
+        {
+            "name": "Aluminum",
+            "mcl_raw": "0.05 to 0.2 mg/L*",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Chloride",
+            "mcl_raw": "250 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Color",
+            "mcl_raw": "15 color units",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Copper",
+            "mcl_raw": "1.0 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Corrosivity",
+            "mcl_raw": "Non-corrosive",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Fluoride",
+            "mcl_raw": "2.0 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Foaming agents",
+            "mcl_raw": "0.5 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Iron",
+            "mcl_raw": "0.3 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Manganese",
+            "mcl_raw": "0.05 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Odor",
+            "mcl_raw": "3 TON (threshold odor number)",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "pH",
+            "mcl_raw": "6.5 - 8.5",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Silver",
+            "mcl_raw": "0.1 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Sulfate",
+            "mcl_raw": "250 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Total Dissolved Solids (TDS)",
+            "mcl_raw": "500 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        },
+        {
+            "name": "Zinc",
+            "mcl_raw": "5 mg/L",
+            "source": "https://www.epa.gov/sdwa/secondary-drinking-water-standards-guidance-nuisance-chemicals"
+        }
+    ],
+    "fetch_errors": []
+}

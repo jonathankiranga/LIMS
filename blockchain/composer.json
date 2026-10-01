@@ -1,0 +1,12 @@
+{
+    "require": {
+        "smalot/pdfparser": "^2.11",
+        "phpmailer/phpmailer": "^6.9",
+        "phpoffice/phpspreadsheet": "1.28",
+        "setasign/fpdi": "^2.6",
+        "tecnickcom/tcpdf": "^6.8",
+        "fpdf/fpdf": "^1.86",
+        "setasign/fpdf": "^1.8",
+        "tecnickcom/tc-lib-barcode": "^1.18"
+    }
+}

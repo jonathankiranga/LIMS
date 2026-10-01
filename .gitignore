@@ -1,0 +1,31 @@
+# PHP dependencies
+/vendor/
+composer.phar
+
+# Environment files
+.env
+.env.*
+config/local.php
+
+# Logs and temporary files
+*.log
+tmp/
+cache/
+session/
+uploads/
+storage/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Backup files
+*.bak
+*.orig
+
+# If you use Composer
+composer.lock

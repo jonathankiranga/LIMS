@@ -1,0 +1,19 @@
+{
+    "name": "lims/smarterplims",
+    "description": "LIMS SmartERP System",
+    "type": "project",
+    "require": {
+        "tecnickcom/tc-lib-barcode": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Com\\Tecnick\\Barcode\\": "vendor/tecnickcom/tc-lib-barcode/src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./vendor/tecnickcom/tc-lib-barcode"
+        }
+    ]
+}

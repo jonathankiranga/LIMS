@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cost Allocation Module — Help</title>
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1f2933; }
+    header { background: #1f3a56; color: #fff; padding: 16px 22px; }
+    main { max-width: 960px; margin: 20px auto; background: #fff; padding: 24px; border: 1px solid #d9e2ec; }
+    h1, h2, h3 { color: #102a43; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    th, td { border: 1px solid #cbd2d9; padding: 8px; vertical-align: top; }
+    th { background: #f0f4f8; text-align: left; }
+    .back a { color: #243b53; text-decoration: none; }
+    .info { background: #e6f6ff; border: 1px solid #90cdf4; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    ul { margin: 8px 0; padding-left: 24px; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<header><h1>Cost Allocation Module</h1></header>
+<main>
+
+<div class="back"><a href="../SystemManual.html">Back to Table of Contents</a></div>
+
+<h2>What This Module Does</h2>
+<p>The Cost Allocation module answers one question: <strong>"What does it cost us to run each test?"</strong></p>
+<p>It reads expenses already recorded in the General Ledger — salaries, rent, utilities, depreciation, equipment maintenance — and distributes them across lab tests based on configurable rules.</p>
+
+<div class="info"><strong>Important:</strong> This module does not create new GL entries. It only reads and allocates existing expenses for reporting purposes.</div>
+
+<h2>Before You Start</h2>
+<p>Make sure the following are already set up:</p>
+<ul>
+  <li>Tests are registered as active stock items</li>
+  <li>Labor amounts per test are set up in Test Labor Mapping</li>
+  <li>Fixed assets with depreciation rates are entered</li>
+  <li>Expenses are posted to the General Ledger (bills, journals, depreciation) and tagged to assets where applicable</li>
+  <li>Test results are recorded in the LIMS with status "completed", "approved", or "verified"</li>
+</ul>
+
+<h2>Menu Path</h2>
+<table>
+  <thead><tr><th>Section</th><th>Menu Item</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>General Ledger</td><td>Cost Allocation Rules</td><td>Set up which GL accounts to allocate and how</td></tr>
+    <tr><td>General Ledger</td><td>Run Cost Allocation</td><td>Run the monthly allocation process</td></tr>
+    <tr><td>General Ledger</td><td>Cost Accounting Report</td><td>View allocated costs in a spreadsheet</td></tr>
+    <tr><td>General Ledger</td><td>Test Labor Mapping</td><td>Set flat labor cost amount per test</td></tr>
+    <tr><td>General Ledger</td><td>Test Equipment Mapping</td><td>Map tests to equipment assets</td></tr>
+  </tbody>
+</table>
+
+<h2>Setup (One-Time)</h2>
+
+<h3>1. Map Tests to Labor Amounts</h3>
+<p>Open <strong>Test Labor Mapping</strong>. For each test, enter a flat <strong>Amount</strong> representing the labor cost per test. This replaces the previous role-rate × hours calculation — the amount is used directly as the labor basis for allocation.</p>
+
+<h3>2. Map Tests to Equipment</h3>
+<p>Open <strong>Test Equipment Mapping</strong>. For each test, select the equipment asset(s) it uses. Equipment cost is <strong>not</strong> calculated theoretically — instead, actual expenses posted to the General Ledger and tagged to each asset (via <strong>asset_id</strong>) are used as the allocation basis.</p>
+<div class="info"><strong>Note:</strong> Expenses must be posted to the GL with the correct asset tag. Use the asset selector in Enter Bills and enter depreciation via Fixed Asset Depreciation to ensure costs are attributed to the right asset.</div>
+
+<h3>3. Set Up Allocation Rules</h3>
+<p>Open <strong>Cost Allocation Rules</strong>. Each rule tells the system which GL account to read and how to spread the cost:</p>
+<table>
+  <thead><tr><th>Driver</th><th>How It Works</th><th>Best For</th></tr></thead>
+  <tbody>
+    <tr><td>Labor Hours</td><td>Spread based on labor hours per test</td><td>Salaries, utilities, rent, insurance</td></tr>
+    <tr><td>Equipment Hours</td><td>Spread based on actual GL costs tagged to each asset</td><td>Depreciation, calibration, repairs</td></tr>
+    <tr><td>Fixed Per Test</td><td>Divide equally across all tests</td><td>Software subscriptions, flat fees</td></tr>
+  </tbody>
+</table>
+
+<h2>Monthly Workflow</h2>
+<table>
+  <thead><tr><th>Step</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Open <strong>Run Cost Allocation</strong></td></tr>
+    <tr><td>2</td><td>Select the Period Start and End dates (typically 1st to last day of the month)</td></tr>
+    <tr><td>3</td><td>Click <strong>Run Allocation</strong></td></tr>
+    <tr><td>4</td><td>View results in <strong>Cost Accounting Report</strong></td></tr>
+  </tbody>
+</table>
+
+<h2>Reading the Report</h2>
+<p>The Cost Accounting Report shows a spreadsheet with these columns:</p>
+<table>
+  <thead><tr><th>Column</th><th>What It Shows</th></tr></thead>
+  <tbody>
+    <tr><td>Test</td><td>Test name</td></tr>
+    <tr><td>Tests</td><td>Number of test instances completed in the period</td></tr>
+    <tr><td>Material</td><td>Reagent costs traced directly to the test</td></tr>
+    <tr><td>Labor</td><td>Allocated salary and overtime costs</td></tr>
+    <tr><td>Equipment</td><td>Allocated depreciation and maintenance costs</td></tr>
+    <tr><td>Overhead</td><td>Allocated utilities, rent, insurance, and other overhead</td></tr>
+    <tr><td>Total</td><td>Sum of all cost components</td></tr>
+    <tr><td>Cost/Test</td><td>Total divided by number of tests = cost per individual test</td></tr>
+  </tbody>
+</table>
+<p><strong>Filtering:</strong> Use the From/To date fields to filter by date range, or select a previously run period from the dropdown. Click <strong>Export CSV</strong> to download.</p>
+
+<h2>Allocation Rules</h2>
+<p>Rules map GL expense accounts to allocation drivers. You can add, edit, or deactivate rules via the Rules page. A rule only produces results if the GL account has actual expenses in the period.</p>
+
+<h2>Troubleshooting</h2>
+<table>
+  <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>Allocation returns $0 for a component</td><td>Post expenses to the GL first (Enter Bills, Journals, Depreciation)</td></tr>
+    <tr><td>"No completed tests found"</td><td>Check that tests have status "completed", "approved", or "verified" in the LIMS for the selected date range</td></tr>
+    <tr><td>Report is empty</td><td>Run the allocation first before viewing the report</td></tr>
+    <tr><td>Test not in mapping dropdown</td><td>Ensure the test is active and registered as a stock item</td></tr>
+    <tr><td>Labor cost is $0</td><td>Add a labor mapping with a non-zero amount in Test Labor Mapping</td></tr>
+    <tr><td>Equipment cost is $0</td><td>Ensure the test has equipment mappings AND actual expenses are posted to the GL tagged to that asset (via Enter Bills asset selector or Fixed Asset Depreciation)</td></tr>
+  </tbody>
+</table>
+
+</main>
+</body>
+</html>

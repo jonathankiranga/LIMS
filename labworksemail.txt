@@ -1,0 +1,27 @@
+Mail server username
+
+recovery@erplabworks.co.ke
+Outgoing mail server (requires authentication)
+
+erplabworks.co.ke
+Incoming mail server
+
+erplabworks.co.ke
+Supported outgoing mail protocols
+
+SMTP
+Supported incoming mail protocols
+
+POP3, IMAP
+
+995
+993
+465
+
+define("HOST","erplabworks.co.ke");
+define("PORT","465");
+define("heloaddress","");
+define("username",'recovery@erplabworks.co.ke');
+define("password",'d0?f8m28N');
+define("auth","1");
+define("timeout","30");

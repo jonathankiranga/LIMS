@@ -1,0 +1,20 @@
+.cursor {
+    display: inline-block; /* Ensures the cursor appears inline with the text */
+    width: 1px; /* Width of the cursor */
+    height: 1em; /* Height matches the text line */
+    background-color: blanchedalmond; /* Invisible background */
+    border-right: 2px solid black; /* The visible cursor (adjust thickness and color) */
+    animation: blink 0.5s step-end infinite; /* Blinking effect */
+    position: absolute; /* Allows it to appear above other elements */
+    z-index: 9999; /* Ensure it is on top of other objects */
+}
+
+/* Blinking animation */
+@keyframes blink {
+    from {
+        border-right-color: black;
+    }
+    to {
+        border-right-color: transparent;
+    }
+}

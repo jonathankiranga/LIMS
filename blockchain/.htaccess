@@ -1,0 +1,9 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Rule to redirect clean URLs to homepage.php
+RewriteRule ^([a-zA-Z0-9_-]+)$ homepage.php?link=$1 [L,QSA]
+
+# Optionally, redirect the root URL to a default link (e.g., dashboard)
+RewriteRule ^$ homepage.php?link=dashboard [L,QSA]
+

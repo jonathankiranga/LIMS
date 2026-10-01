@@ -1,0 +1,116 @@
+   
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+            /* font-size: 18px;  Sets font size to 18 pixels */
+        }
+        #bootSequence, #loginForm {
+            text-align: left;
+            width: 400px;
+            position: relative;
+            /* Center the elements within the flexbox container */
+            display: flex;
+            flex-direction: column; /* Stack elements inside */
+            justify-content: center;
+            align-items: center;
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            background-color: #00FF00;
+            animation: blink 0.5s steps(2, start) infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        #loginForm {
+            display: none;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: none;
+            outline: none;
+            background: #222;
+            color: #00FF00;
+            font-family: monospace;
+        }
+        .login-button {
+            padding: 8px 16px;
+            background-color: #00FF00;
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        .forgot-password {
+            display: block;
+            margin-top: 15px;
+            color: #00FF00;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+               
+        /* Simple modal styles for forgot password prompt */
+        #forgotPasswordModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #111;
+            padding: 20px;
+            border: 1px solid #00FF00;
+            color: #00FF00;
+            text-align: center;
+        }
+        
+        #registernewuser {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #111;
+            padding: 20px;
+            border: 1px solid #00FF00;
+            color: #00FF00;
+            text-align: center;
+        }
+        
+        
+        .modal-input {
+            width: 80%;
+            padding: 8px;
+            margin: 10px 0;
+            background: #222;
+            color: #00FF00;
+            border: none;
+            outline: none;
+            font-family: monospace;
+        }
+        .close-modal {
+            background-color: #00FF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        .error-message {
+            color: #FF0000; /* Red color for error message */
+            margin-top: 10px;
+        }

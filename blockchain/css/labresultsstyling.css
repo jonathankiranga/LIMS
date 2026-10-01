@@ -1,0 +1,142 @@
+/* ===== GRID CONTAINER ===== */
+.grid-container {
+    margin: 15px auto;
+    max-width: 98%;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.filter-bar label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.filter-bar input,
+.filter-bar select {
+    padding: 4px 6px;
+    font-size: 13px;
+}
+
+/* ===== TABLE STYLING ===== */
+#dataGrid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Keeps column widths stable */
+}
+
+#dataGrid th, 
+#dataGrid td {
+    border: 1px solid #ccc;
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+}
+
+/* Fixed Column Widths */
+#dataGrid th:nth-child(1),
+#dataGrid td:nth-child(1) { width: 100px; } /* Sample ID */
+
+#dataGrid th:nth-child(2),
+#dataGrid td:nth-child(2) { width: 200px; } /* Parameter Name */
+
+#dataGrid th:nth-child(3),
+#dataGrid td:nth-child(3) { width: 150px; } /* Result Type Dropdown */
+
+#dataGrid th:nth-child(4),
+#dataGrid td:nth-child(4) { width: 120px; } /* Result Value */
+
+#dataGrid th:nth-child(5),
+#dataGrid td:nth-child(5) { width: 120px; } /* Status */
+
+/* Header Styling */
+#dataGrid th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+    border-bottom: 2px solid #999;
+}
+
+/* Compact row styling */
+#dataGrid tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+#dataGrid tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+/* Editable cells */
+#dataGrid td[contenteditable="true"] {
+    background-color: #fffbe6;
+    cursor: text;
+}
+
+/* Inputs & selects inside grid */
+#dataGrid select,
+#dataGrid input {
+    width: 100%;
+    font-size: 12px;
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+#dataGrid input[type="number"] {
+    text-align: right;
+}
+
+/* Pagination */
+.pagination {
+    margin-top: 6px;
+    text-align: right;
+    font-size: 13px;
+}
+
+.pagination button {
+    margin-left: 3px;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+}
+
+.pagination button:hover {
+    background: #e6e6e6;
+}
+
+
+/* Optional: small spinner overlay inside input */
+.input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.input-wrapper input {
+  padding-right: 24px; /* space for spinner */
+}
+
+.input-wrapper .saving-spinner {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #007bff;
+  display: none; /* hidden by default */
+}
+

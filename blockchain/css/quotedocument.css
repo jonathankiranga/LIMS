@@ -1,0 +1,442 @@
+.quote-page {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+.quote-page .card-header,
+.quote-page .card-body {
+    background: transparent;
+    border: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.quote-page__intro {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.quote-page__title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.quote-page__subtitle {
+    margin: 0.35rem 0 0;
+    color: #6c757d;
+    font-size: 0.92rem;
+}
+
+.quote-page__status {
+    min-width: 220px;
+    text-align: right;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quote-page__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.quote-page__table-actions {
+    margin-bottom: 0.35rem;
+}
+
+.quote-page__panel {
+    background: #fff;
+    border: 1px solid #dfe5ec;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.quote-page__panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.85rem;
+}
+
+.quote-page__panel-title {
+    margin: 0 0 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #51606f;
+}
+
+.quote-page__panel-head .quote-page__panel-title {
+    margin-bottom: 0;
+}
+
+.quote-page__panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quote-page__action-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #cdd5df;
+    border-radius: 999px;
+    background: #fff;
+    color: #51606f;
+    cursor: pointer;
+}
+
+.quote-page__action-check input[type="checkbox"] {
+    margin: 0;
+}
+
+.quote-page__action-check span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.quote-page__panel-note {
+    color: #6c757d;
+    font-size: 0.78rem;
+}
+
+.quote-page__grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.quote-page__grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quote-page__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+}
+
+.quote-page__field--full {
+    grid-column: 1 / -1;
+}
+
+.quote-page__stack {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.quote-page label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #51606f;
+}
+
+.quote-page input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]),
+.quote-page select,
+.quote-page textarea {
+    width: 100%;
+    border: 1px solid #cdd5df;
+    border-radius: 0.55rem;
+    padding: 0.5rem 0.7rem;
+    background: #fff;
+}
+
+.quote-page textarea {
+    min-height: 7rem;
+    resize: vertical;
+}
+
+.quote-page__identity {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    border-bottom: 2px solid #d7e0ea;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.quote-page__company-name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #22364a;
+}
+
+.quote-page__company-copy,
+.quote-page__quote-copy {
+    color: #51606f;
+    line-height: 1.55;
+}
+
+.quote-page__quote-copy {
+    min-width: 240px;
+    text-align: right;
+}
+
+.quote-page__table-wrap {
+    overflow-x: auto;
+}
+
+.quote-page__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.quote-page__table th,
+.quote-page__table td {
+    padding: 0.65rem;
+    border-bottom: 1px solid #e5eaf0;
+    vertical-align: top;
+}
+
+.quote-page__table th {
+    background: #f7f9fc;
+    color: #22364a;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.quote-page__table .form-control-sm,
+.quote-page__table select,
+.quote-page__table input {
+    min-width: 100%;
+}
+
+.quote-page__row-total {
+    font-weight: 700;
+    text-align: right;
+}
+
+.quote-page__row-meta {
+    margin-top: 0.35rem;
+    font-size: 0.76rem;
+    color: #6c757d;
+    text-align: right;
+}
+
+.quote-page__params-row td {
+    background: #fbfcfe;
+}
+
+.quote-page__params-meta {
+    margin-bottom: 0.55rem;
+    color: #6c757d;
+    font-size: 0.82rem;
+}
+
+.quote-page__params-list {
+    padding: 0.75rem;
+    border: 1px solid #e1e8ef;
+    border-radius: 0.7rem;
+    background: #fbfcfe;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem 1rem;
+    align-items: start;
+}
+
+.quote-page__quote-list,
+.quote-page__picker-results {
+    max-height: 21rem;
+    overflow-y: auto;
+    border: 1px solid #e1e8ef;
+    border-radius: 0.7rem;
+    background: #fbfcfe;
+}
+
+.quote-page__quote-list {
+    padding: 0.35rem;
+}
+
+.quote-page__quote-entry {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    background: #fff;
+    padding: 0.75rem 0.85rem;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.quote-page__quote-entry + .quote-page__quote-entry {
+    margin-top: 0.5rem;
+}
+
+.quote-page__quote-entry:hover,
+.quote-page__quote-entry:focus {
+    border-color: #93b7dd;
+    box-shadow: 0 0 0 2px rgba(52, 123, 200, 0.08);
+    background: #f8fbff;
+}
+
+.quote-page__quote-entry.is-active {
+    border-color: #347bc8;
+    background: #eef5fd;
+}
+
+.quote-page__quote-heading,
+.quote-page__quote-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.quote-page__quote-heading strong {
+    color: #22364a;
+}
+
+.quote-page__quote-meta {
+    margin-top: 0.35rem;
+    color: #6c757d;
+    font-size: 0.82rem;
+}
+
+.quote-page__picker-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quote-page__picker-status {
+    color: #6c757d;
+    font-size: 0.82rem;
+}
+
+.quote-page__picker-results {
+    padding: 0.75rem;
+    max-height: 14rem;
+    overflow-y: auto;
+    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem 1rem;
+    align-items: start;
+}
+
+.quote-page__picker-empty {
+    color: #6c757d;
+    font-size: 0.88rem;
+}
+
+.quote-page__picker-option {
+    display: flex;
+    gap: 0.45rem;
+    align-items: flex-start;
+    padding: 0.15rem 0;
+    border-bottom: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.quote-page__picker-option:last-child {
+    border-bottom: 0;
+}
+
+.quote-page__picker-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.quote-page__picker-copy {
+    display: block;
+    min-width: 0;
+}
+
+.quote-page__picker-copy strong {
+    color: #22364a;
+    display: block;
+    word-break: break-word;
+}
+
+.quote-page__picker-copy span {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.quote-page__totals {
+    margin-left: auto;
+    max-width: 320px;
+}
+
+.quote-page__total-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+}
+
+.quote-page__total-row--grand {
+    border-top: 2px solid #22364a;
+    margin-top: 0.3rem;
+    padding-top: 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.quote-page__footer {
+    color: #6c757d;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.quote-page__print-link[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 991px) {
+    .quote-page__grid--two,
+    .quote-page__fields {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-page__picker-results {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quote-page__params-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quote-page__identity,
+    .quote-page__intro,
+    .quote-page__panel-head {
+        flex-direction: column;
+    }
+
+    .quote-page__quote-copy,
+    .quote-page__status {
+        min-width: 0;
+        text-align: left;
+    }
+
+    .quote-page__totals {
+        max-width: none;
+        width: 100%;
+    }
+}
+
+@media (max-width: 575px) {
+    .quote-page__picker-results {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-page__params-list {
+        grid-template-columns: 1fr;
+    }
+}

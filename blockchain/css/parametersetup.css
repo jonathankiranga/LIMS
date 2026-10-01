@@ -1,0 +1,66 @@
+
+        
+.scrollable-content {
+    overflow: hidden; /* Initially hide overflow */
+    white-space: nowrap; /* Prevent text wrapping */
+    text-overflow: ellipsis; /* Show ellipsis for truncated text */
+    display: block; /* Ensure block display for the content */
+    max-width: 100%; /* Full width of the table cell */
+    padding: 5px; /* Add padding inside the div */
+    border: 1px solid #ccc; /* Subtle border for the content */
+    background-color: #f9f9f9; /* Background color */
+    color: #333; /* Text color */
+    box-sizing: border-box; /* Include padding and border in width/height */
+    font-family: Arial, sans-serif; /* Font style */
+    font-size: 14px; /* Font size */
+    max-height: 30px; /* Collapsed height */
+    transition: max-height 0.3s ease; /* Smooth transition for expanding */
+    cursor: pointer; /* Pointer cursor to indicate focusable element */
+}
+
+.scrollable-content:focus {
+    overflow: visible; /* Show all content */
+    white-space: normal; /* Allow text to wrap */
+    max-height: none; /* Remove height restriction */
+    outline: none; /* Remove default outline for better appearance */
+    background-color: #fff; /* Optional: Change background color on focus */
+    border-color: #007BFF; /* Optional: Highlight border on focus */
+}
+
+.custom-modal {
+  max-width: 90%; /* Set maximum width */
+  width: 800px; /* Set fixed width */
+}
+
+.table th, .table td {
+  word-wrap: break-word;
+}
+
+.table .col-id{
+  width: 20px;
+}
+
+.table .col-date {
+  width: 150px;
+}
+
+.table .col-description {
+  width: 300px;
+}
+
+.table .col-others {
+  width: 120px;
+}
+
+.table th, .table td {
+    text-align: center;
+}
+
+.table th {
+    width: 120px; /* Set fixed width for column headers */
+}
+
+.table td {
+max-width: 150px; /* Set maximum width for cells */
+padding: 0; /* Remove padding to make space for content */
+}

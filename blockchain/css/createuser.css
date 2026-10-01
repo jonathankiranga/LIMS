@@ -1,0 +1,42 @@
+
+   
+        body {
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card {
+            border-radius: 15px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 30px;
+        }
+
+        .btn-custom {
+            background-color: #4e54c8;
+            color: white;
+            border-radius: 30px;
+            transition: 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #8f94fb;
+            color: #fff;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .custom-icon {
+            font-size: 3rem;
+            color: #8f94fb;
+            margin-bottom: 10px;
+        }
+    

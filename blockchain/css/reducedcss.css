@@ -1,0 +1,68 @@
+/* Ensure modal never exceeds viewport */
+.modal-dialog {
+    max-width: 600px;       /* Comfortable width */
+    margin: 1rem auto;      /* Centered with margin */
+}
+
+.modal-content {
+    max-height: 90vh;       /* Never taller than screen */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Keep header + footer fixed, body scrolls */
+.modal-header,
+.modal-footer {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;   /* Slimmer */
+}
+.modal-body {
+    flex-grow: 1;
+    overflow-y: auto;       /* Scroll only content */
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* Form Controls */
+.form-control {
+    height: 32px;               /* Fixed slim height */
+    padding: 0.2rem 0.5rem;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    border-radius: 3px;
+}
+.form-control::placeholder {
+    font-size: 0.75rem;
+}
+
+/* Labels */
+.form-label {
+    margin-bottom: 0.15rem;
+    font-size: 0.8rem;
+}
+
+/* Input widths */
+.form-control,
+.input-group {
+    max-width: 260px;           /* Narrower forms */
+}
+
+/* Buttons */
+.btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.82rem;
+    border-radius: 4px;
+}
+.btn-success {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+}
+.btn-success:hover {
+    background-color: #1b5e20;
+}
+
+/* Reduce spacing between form groups */
+.mb-3, .mt-3, .my-3 {
+    margin-bottom: 0.35rem !important;
+    margin-top: 0.35rem !important;
+}

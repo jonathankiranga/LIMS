@@ -1,0 +1,581 @@
+/* Enhanced Dashboard CSS - Modern UX with fixes for glitches */
+
+:root {
+  --primary-color: #1f4e79;
+  --secondary-color: #2a7f62;
+  --success-color: #2a7f62;
+  --danger-color: #b42318;
+  --warning-color: #d97706;
+  --info-color: #2563eb;
+  --light-bg: #f7f9fc;
+  --border-color: #d0d7e2;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Body Improvements */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container Fixes */
+.container, .container-fluid {
+  max-width: 100%;
+  padding: 8px;
+}
+
+#mainBody {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sidebar/Tree View Improvements */
+.well.well-treeview {
+  background: white;
+  border-right: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  padding: 8px 0;
+  border-radius: 0;
+  transition: box-shadow 0.3s ease;
+}
+
+.well.well-treeview:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.frame-treeview {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 120px) !important;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table Responsive Fix */
+.table-responsive {
+  max-height: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+}
+
+.table {
+  margin-bottom: 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table thead {
+  background: var(--light-bg);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.table thead th {
+  background-color: var(--light-bg);
+  border: none;
+  padding: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  vertical-align: middle;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.table thead th.number {
+  text-align: right;
+}
+
+.table tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--light-bg);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table.EvenTableRows tbody tr:nth-child(even) {
+  background-color: var(--light-bg);
+}
+
+.table.OddTableRows tbody tr:nth-child(odd) {
+  background-color: var(--light-bg);
+}
+
+.table td.number {
+  text-align: right;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+/* Form Improvements */
+input, select, textarea {
+  font-size: 14px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: all 0.3s ease;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: white;
+  color: var(--text-primary);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.05);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+input:required,
+select:required,
+textarea:required {
+  background-color: #fffbf0;
+}
+
+/* Error States */
+input.error,
+input.inputerror,
+select.error,
+select.selecterror,
+label.error {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+input.error:focus,
+select.error:focus {
+  box-shadow: 0 0 0 0.2rem rgba(219, 40, 40, 0.15);
+}
+
+/* Label Improvements */
+label {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  display: block;
+}
+
+label.nav-header {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 3px 0 2px;
+  padding-left: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+label.nav-items {
+  color: var(--primary-color);
+  font-weight: 500;
+  min-width: 350px;
+  padding-left: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Modern font for tree/navigation lists */
+.nav.nav-list,
+.nav.nav-list.tree,
+ul.nav li,
+li.divider {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Compact dashboard padding overrides */
+.nav-list > li > a {
+  padding: 3px 8px !important;
+  font-size: 12px;
+}
+
+.nav-list .nav-header {
+  margin: 3px 0 2px !important;
+}
+
+li.divider {
+  margin: 2px 0 !important;
+}
+
+label.nav-items:hover {
+  color: var(--secondary-color);
+}
+
+label.grouper {
+  color: var(--warning-color);
+  font-weight: 600;
+}
+
+/* Link Improvements */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+a:active {
+  color: var(--secondary-color);
+}
+
+/* Page Title */
+p.page_title_text {
+  background: linear-gradient(135deg, var(--light-bg) 0%, white 100%);
+  border-left: 4px solid var(--primary-color);
+  margin: 10px 0;
+  padding: 8px;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Status Messages */
+p.good {
+  font-weight: 600;
+  color: var(--success-color);
+  padding: 10px;
+  background-color: #f0f9f6;
+  border-radius: 4px;
+}
+
+p.bad {
+  font-weight: 600;
+  color: var(--danger-color);
+  padding: 10px;
+  background-color: #fdf4f4;
+  border-radius: 4px;
+}
+
+/* Responsive Grid */
+.centre {
+  margin: 5px auto 10px;
+  text-align: center;
+  padding-right: 10px;
+}
+
+.rightside {
+  text-align: right;
+  position: absolute;
+  float: right;
+  right: 100px;
+  top: 100px;
+}
+
+DIV.keepleft {
+  float: left;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+DIV.form {
+  position: relative;
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+DIV.belowform {
+  position: relative;
+  display: block;
+  margin-top: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+}
+
+/* Modal Improvements */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: var(--shadow-lg);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+/* Buttons */
+button, .btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+button.btn-primary, .btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+button.btn-primary:hover, .btn-primary:hover {
+  background-color: var(--secondary-color);
+  box-shadow: var(--shadow-lg);
+}
+
+button.btn-secondary, .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+button.btn-danger, .btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+button.btn-success, .btn-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+/* Images */
+img {
+  border: none;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table thead th {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .table tbody td {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .modal-content {
+    width: 90%;
+    margin: 20% auto;
+    padding: 20px;
+  }
+
+  label.nav-items {
+    min-width: 100%;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .table-responsive {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+/* Table readability + responsive refinements */
+.table,
+table.table,
+table.table-bordered {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table thead th,
+table.table th,
+table.table-bordered th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eaf1f8;
+  border-bottom: 1px solid #d0d7e2;
+}
+
+.table tbody td,
+table.table td,
+table.table-bordered td {
+  border-bottom: 1px solid #e5e9ef;
+  line-height: 1.45;
+}
+
+.table tbody tr:nth-child(even),
+table.table tbody tr:nth-child(even),
+table.table-bordered tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.table tbody tr:hover,
+table.table tbody tr:hover,
+table.table-bordered tbody tr:hover {
+  background: #e8f0f8;
+}
+
+.table td.number,
+table.table td.number,
+table.table-bordered td.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+@media (max-width: 992px) {
+  .table-responsive table.table,
+  .table-responsive table.table-bordered {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    border-radius: 6px;
+  }
+
+  .table-responsive table.table,
+  .table-responsive table.table-bordered {
+    min-width: 680px;
+  }
+}

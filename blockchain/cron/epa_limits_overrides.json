@@ -1,0 +1,60 @@
+{
+  "_comment": "Two sections. 'aliases' maps a lab's parameter-name spelling to the exact contaminant name as it appears on the EPA page, so the scraped row can be matched. 'supplemental' is for parameters that are NOT literally a row in either EPA table (no federal MCL exists, or the number only appears in a footnote/rule summary rather than the table cell) - these must be reviewed by hand if EPA policy changes, since they can't be auto-scraped.",
+
+  "aliases": {
+    "total trihalomethanes": "Total Trihalomethanes (TTHMs)",
+    "trihalomethanes": "Total Trihalomethanes (TTHMs)",
+    "tce": "Trichloroethylene",
+    "perchloroethylene": "Tetrachloroethylene",
+    "petc": "Tetrachloroethylene",
+    "para-dichlorobenzene": "p-Dichlorobenzene",
+    "ortho-dichlorobenzene": "o-Dichlorobenzene",
+    "monochlorobenzene": "Chlorobenzene",
+    "tds": "Total Dissolved Solids (TDS)",
+    "total dissolved solids": "Total Dissolved Solids (TDS)",
+    "chlorine dioxide": "Chlorine dioxide (as ClO2)",
+    "chlorine": "Chlorine (as Cl2)",
+    "chloramines": "Chloramines (as Cl2)",
+    "radium 226": "Radium 226 and Radium 228 (combined)",
+    "radium 228": "Radium 226 and Radium 228 (combined)",
+    "combined radium": "Radium 226 and Radium 228 (combined)",
+    "gross alpha": "Alpha particles",
+    "chromium": "Chromium (total)"
+  },
+
+  "supplemental": {
+    "_comment": "type: quantitativeField | qualitativeField | null (null = no numeric limit, just used to fill unit if blank). These values were hand-verified against EPA guidance; re-check them periodically, they cannot be scraped from the two table pages.",
+
+    "total coliform":            { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "Table gives 5.0% positive-samples-per-month rule (footnote 4); labs report presence/absence per sample." },
+    "total coliforms":           { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see total coliform" },
+    "e.coli":                    { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "Not a separate table row; grouped under Total Coliforms rule." },
+    "escherichia coli":          { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see e.coli" },
+    "fecal coliform":            { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see e.coli" },
+    "thermotolerant coliform":   { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see e.coli" },
+    "legionella":                { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "Table row is Treatment Technique only, no numeric MCL cell." },
+    "giardia":                   { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see legionella" },
+    "crypto":                    { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see legionella" },
+    "cryptosporidium":           { "mcl": "0", "unit": "/100mL", "type": "qualitativeField", "note": "see legionella" },
+
+    "turbidity":                 { "mcl": "1", "unit": "NTU", "type": "quantitativeField", "note": "1 NTU max comes from Surface Water Treatment Rule footnote, not the MCL table cell (which is TT)." },
+    "turbidity (finished)":      { "mcl": "1", "unit": "NTU", "type": "quantitativeField", "note": "see turbidity" },
+    "turbidity (filtered)":      { "mcl": "1", "unit": "NTU", "type": "quantitativeField", "note": "see turbidity" },
+    "heterotrophic plate count": { "mcl": "500", "unit": "CFU/mL", "type": "quantitativeField", "note": "500 CFU/mL comes from Surface Water Treatment Rule footnote, table cell is TT only." },
+
+    "chloroform":                { "mcl": "0.07", "unit": "mg/L", "type": "quantitativeField", "note": "This is the individual MCLG for chloroform listed in the TTHM footnote, not a standalone MCL row." },
+
+    "sodium":                    { "mcl": "20", "unit": "mg/L", "type": "quantitativeField", "note": "No federal MCL/SMCL for sodium; 20 mg/L is a commonly used health-advisory level for sodium-restricted diets, not an EPA table value." },
+    "ammonia":                   { "mcl": "0.5", "unit": "mg/L", "type": "quantitativeField", "note": "No federal MCL for ammonia; not scrapable from either table." },
+    "microcystin":               { "mcl": "0.003", "unit": "ug/L", "type": "quantitativeField", "note": "EPA health advisory, not an enforceable NPDWR/SMCL table entry." },
+    "cyanotoxin":                { "mcl": "0.003", "unit": "ug/L", "type": "quantitativeField", "note": "see microcystin" },
+
+    "total alkalinity":          { "mcl": "", "unit": "mg/L as CaCO3", "type": null, "note": "No federal limit; unregulated water-chemistry parameter, kept only to fill unit." },
+    "calcium":                   { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "magnesium":                 { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "potassium":                 { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "bicarbonate":               { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "carbonate":                 { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "hydroxide":                 { "mcl": "", "unit": "mg/L", "type": null, "note": "No federal limit." },
+    "radon":                     { "mcl": "", "unit": "pCi/L", "type": null, "note": "Proposed but never finalized as an enforceable NPDWR; no current federal MCL." }
+  }
+}

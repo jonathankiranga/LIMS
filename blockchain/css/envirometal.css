@@ -1,0 +1,30 @@
+ #environmental-conditions-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Labels will take 1 fraction of space, form controls 2 fractions */
+    gap: 15px; /* Space between columns */
+    max-width: 600px; /* Adjust form width */
+    margin: 0 auto; /* Center the form */
+}
+
+.form-group {
+    display: contents; /* So that the label/input pairs are aligned */
+}
+
+label {
+    font-weight: bold;
+    text-align: right; /* Align labels to the right */
+    padding-right: 10px;
+    display: flex; /* Flex makes it easier to control alignment */
+    align-items: center;
+}
+
+input.form-control, select.form-control {
+    width: 100%;
+}
+
+button[type="submit"] {
+    grid-column: 1 / span 2; /* Button spans both columns */
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+}

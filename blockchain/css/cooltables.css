@@ -1,0 +1,39 @@
+
+/* Styling for any table with class 'table table-sm table-hover' */
+table.table.table-sm.table-hover {
+    font-family: 'Playfair Display', serif !important; /* Executive font */
+    src: url('/assets/PlayfairDisplay-Regular.ttf') format('truetype'),
+         url('/assets/PlayfairDisplay-Bold.ttf') format('truetype');
+    font-size: 14px; /* Adjust font size */
+    color: #333; /* Elegant dark gray text */
+    border: 1px solid #ddd; /* Light border for the table */
+}
+
+/* Header row styling */
+table.table.table-sm.table-hover thead th {
+    background-color: #f8f9fa; /* Subtle light gray background */
+    color: #212529; /* Darker text for header */
+    font-weight: 700; /* Bold headers */
+    text-transform: uppercase; /* Executive look */
+    padding: 10px; /* Comfortable spacing */
+    border-bottom: 2px solid #ddd; /* Stronger separation */
+}
+
+/* Table body styling */
+table.table.table-sm.table-hover tbody tr {
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+table.table.table-sm.table-hover tbody tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+table.table.table-sm.table-hover tbody td {
+    padding: 8px; /* Comfortable cell spacing */
+    vertical-align: middle; /* Align content vertically */
+}
+
+/* Adjust actions column for better alignment */
+table.table.table-sm.table-hover tbody td:last-child {
+    text-align: center;
+}

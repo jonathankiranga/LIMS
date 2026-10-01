@@ -1,0 +1,76 @@
+<!-- Currency Symbols Group -->
+<optgroup label="Currency Symbols">
+    <option value="€">€ (Euro)</option>
+    <option value="$">$ (Dollar)</option>
+    <option value="£">£ (Pound)</option>
+    <option value="¥">¥ (Yen)</option>
+</optgroup>
+<select id="symbolSelect">
+    <option value="">Select a Symbol</option>
+   <optgroup label="Greek Letters">
+        <option value="Γ">Γ (Uppercase Gamma)</option>
+        <option value="γ">γ (Lowercase Gamma)</option>
+        <option value="α">α (Alpha)</option>
+        <option value="β">β (Beta)</option>
+        <option value="δ">δ (Delta)</option>
+        <option value="Δ">Δ (Uppercase Delta)</option>
+        <option value="ε">ε (Epsilon)</option>
+        <option value="ζ">ζ (Zeta)</option>
+        <option value="η">η (Eta)</option>
+        <option value="θ">θ (Theta)</option>
+        <option value="Θ">Θ (Uppercase Theta)</option>
+        <option value="ι">ι (Iota)</option>
+        <option value="κ">κ (Kappa)</option>
+        <option value="λ">λ (Lambda)</option>
+        <option value="Λ">Λ (Uppercase Lambda)</option>
+        <option value="μ">μ (Mu)</option>
+        <option value="ν">ν (Nu)</option>
+        <option value="ξ">ξ (Xi)</option>
+        <option value="Ξ">Ξ (Uppercase Xi)</option>
+        <option value="ο">ο (Omicron)</option>
+        <option value="π">π (Pi)</option>
+        <option value="Π">Π (Uppercase Pi)</option>
+        <option value="ρ">ρ (Rho)</option>
+        <option value="σ">σ (Sigma)</option>
+        <option value="Σ">Σ (Uppercase Sigma)</option>
+        <option value="τ">τ (Tau)</option>
+        <option value="υ">υ (Upsilon)</option>
+        <option value="Φ">Φ (Uppercase Phi)</option>
+        <option value="φ">φ (Lowercase Phi)</option>
+        <option value="χ">χ (Chi)</option>
+        <option value="ψ">ψ (Psi)</option>
+        <option value="Ω">Ω (Uppercase Omega)</option>
+        <option value="ω">ω (Lowercase Omega)</option>
+    </optgroup>
+   <optgroup label="Mathematical Operators">
+        <option value="±">± (Plus-Minus)</option>
+        <option value="∞">∞ (Infinity)</option>
+        <option value="≠">≠ (Not Equal)</option>
+        <option value="≡">≡ (Identical To)</option>
+        <option value="≈">≈ (Almost Equal)</option>
+        <option value="∑">∑ (Summation)</option>
+        <option value="∏">∏ (Product)</option>
+        <option value="√">√ (Square Root)</option>
+        <option value="∂">∂ (Partial Derivative)</option>
+        <option value="∫">∫ (Integral)</option>
+        <option value="∇">∇ (Nabla)</option>
+    </optgroup>
+   <optgroup label="Miscellaneous Symbols">
+        <option value="°">° (Degree)</option>
+        <option value="•">• (Bullet)</option>
+        <option value="©">© (Copyright)</option>
+        <option value="®">® (Registered Trademark)</option>
+        <option value="™">™ (Trademark)</option>
+        <option value="→">→ (Right Arrow)</option>
+        <option value="←">← (Left Arrow)</option>
+        <option value="↑">↑ (Up Arrow)</option>
+        <option value="↓">↓ (Down Arrow)</option>
+        <option value="←→">←→ (Left-Right Arrow)</option>
+        <option value="∞">∞ (Infinity)</option>
+        <option value="♠">♠ (Spade)</option>
+        <option value="♣">♣ (Club)</option>
+        <option value="♥">♥ (Heart)</option>
+        <option value="♦">♦ (Diamond)</option>
+        <option value="★">★ (Star)</option>
+    </optgroup>
+</select>

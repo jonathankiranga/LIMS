@@ -1,0 +1,1221 @@
+body{
+    font-family:Arial, Verdana, Helvetica, sans-serif;
+    padding-left: 10px;
+    font-size:12px;
+    line-height:20px;
+    color: #111827;
+    background-color:#f7f9fc;
+}
+
+iframe{
+    position:absolute;
+    border: navy;
+    overflow: hidden;/* visible scroll;*/
+    height:100%;/* 70%; */
+    width:100%;
+}
+
+#mainBody {
+    position:absolute;
+    overflow:hidden;
+    height:77%;
+    width:78%;
+    margin-left:20%;  /*well-treeview position*/
+    margin-top: 1cm;
+    top: 1cm;
+ }
+
+div.well.well-treeview {
+    width: 20% !important;
+    padding: 8px 0 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    transition: box-shadow 0.3s ease !important;
+    margin-bottom: 0 !important;
+}
+
+div.well.well-treeview:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.frame-treeview {
+    overflow-y: scroll; 
+    overflow-x: hidden; 
+    height:70%;
+}
+
+label.nav-header{
+    color:  #000;
+    font-weight:  bolder;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    margin: 3px 0 2px;
+    padding-left: 6px;
+}
+
+label.nav-items{
+   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+   color: #1f4e79; /* accounting primary */
+   font-weight: 500;
+   min-width: 350px;
+   font-size: 12px;
+   padding: 3px 6px;
+}
+
+/* Modern font for tree/navigation lists */
+.nav.nav-list,
+.nav.nav-list.tree,
+ul.nav li,
+li.divider {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Compact dashboard padding overrides */
+.nav-list > li > a {
+    padding: 3px 8px !important;
+    font-size: 12px;
+}
+
+.nav-list .nav-header {
+    margin: 3px 0 2px !important;
+}
+
+li.divider {
+    margin: 2px 0 !important;
+}
+
+.table-responsive {
+    max-height:80%;
+    max-width:80%;
+}
+
+.mini{
+    max-height:400px;
+    width: 400px;
+}
+
+.auditreport{
+    max-height:200px;
+    max-width:500px;
+}
+
+.increment{
+    max-width:100px;
+}
+
+a{
+    color:#1f4e79;
+    text-decoration:none;
+    text-align: left;
+}
+ 
+a:hover{
+    color:#2a7f62;
+    text-decoration:underline;
+}
+
+label.grouper{
+    color:  #d97706;
+}
+
+table.table{
+    padding: 0;
+}
+
+table.alignleft{
+     float: left  
+}
+
+form {
+    target-name :mainContentIFrame;
+}
+
+
+img{
+	border:none;
+	vertical-align:middle;
+}
+
+p.good{
+	font-weight:bold;
+	color:green;
+}
+
+p.bad{
+	font-weight:bold;
+	color:red;
+}
+
+p.page_title_text{ /* page title, used in many *.php */
+	background: gainsboro;
+	margin:10px auto;
+	padding:5px;
+	text-align:center;
+}
+
+td{
+    vertical-align:top;
+    align-content: center;
+}
+
+th{
+	font-weight:normal;
+	background-color:#eaf1f8;
+	font-size:100%;
+	color:#111827;
+	text-align:center;
+	vertical-align:middle;
+}
+
+th.number{
+	font-weight:normal;
+	background-color:#eaf1f8;
+	font-size:100%;
+	color:#111827;
+	text-align:right;
+	vertical-align:middle;
+        width: 100px;
+}
+
+th.ascending {
+  cursor: s-resize;
+}
+
+th.descending {
+  cursor: n-resize;
+}
+
+th:after {
+	content: "";
+	float: right;
+	margin-top: 7px;
+	visibility: hidden;
+}
+th.ascending:after {
+	border-width: 0 4px 4px;
+	border-style: solid;
+	border-color: #000 transparent;
+	visibility: visible;
+}
+
+th.descending:after {
+	border-bottom: none;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid #000;
+	visibility: visible;
+}
+
+td{
+	font-size:100%;
+	text-align:left;
+}
+
+td.select{
+	background-color:#eee;
+}
+
+td.number{
+	text-align:right;
+}
+
+.centre{
+	margin:5 auto 10px;
+	text-align:center;
+        padding-right: 10px;
+}
+
+.rightside{
+    text-align: right;
+    position: absolute;
+    float: right;
+    right:100px;
+    top:100px;
+}
+
+
+
+
+
+DIV.keepleft{
+    float: left;
+    margin-left: 0;
+    padding-left: 0;
+ }
+ 
+DIV.form{
+    position: absolute;
+    display: block;
+    top: 10px;
+    left: 200px;
+    margin-left: 0;
+    padding-left: 0;
+ }
+ 
+ DIV.belowform{
+    position: absolute;
+    display: block;
+    top: 300px;
+    left: 200px;
+    margin-left: 0;
+    padding-left: 0;
+ }
+
+input{
+	font-size:100%;
+	background-color:#e3e1e1;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+
+
+input:hover{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:100%;
+	background-color:#e3e5f5;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+
+input.number{
+    text-align:right;
+    width: 100px;
+}
+
+textarea {
+  border: 1px solid #888; 
+}
+
+input.image{
+	border-width:0px;
+	background-color:transparent;
+}
+
+input.inputerror, input.error, select.error, select.selecterror, label.error {
+    color:red;
+    border: 2px solid red;
+}
+
+input:required, select:required, textarea:required {
+    background-color:lightyellow;
+}
+
+select, option {
+    font-family:Arial, Verdana, Helvetica, sans-serif;
+    width: 150px;
+}
+
+option {
+    overflow: visible;
+    white-space:  nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.EvenTableRows{
+    background-color:#ccc;
+}
+
+.OddTableRows{
+    background-color:#eee;
+}
+
+
+div.error{
+	background-color:#fddbdb;
+	color:red;
+	border:1px solid red;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.warn{
+	background-color:#f5dbfd;
+	color:maroon;
+	border:1px solid maroon;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.success{
+	background-color:#b9ecb4;
+	color:#006400;/* darkgreen is not a w3c css valid color */
+	border:1px solid #006400;/* darkgreen is not a w3c css valid color */
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.info{
+	background-color:#c7ccf6;
+	color:navy;
+	border:1px solid navy;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+
+div.infome{
+	background-color:#c7ccf6;
+	color:navy;
+	border:1px solid navy;
+	width:50%;
+	text-align:center;
+	margin:0 auto;
+}
+
+
+
+div.page_help_text{ /* many */
+	background-color:#ccc;/* lightgray is not a w3c css valid color #ccc */
+	border:#a52a2a 1px solid;
+	border-radius: 5px;
+	padding-top:3px;/* 2px in merge */
+	padding-bottom:3px; /* 2px in merge */
+	padding-left:3px;   /* 10px in merge */
+	z-index:1;
+	width:50%; /* 80% in merge */
+	float:none;
+	visibility:visible;
+	margin:0 auto;
+	position:static;
+	font-family:Verdana, Arial, Helvetica;
+	font-weight:normal;
+	font-size:100%;
+	color:black;
+	text-align:center;
+}
+/* date picker */
+
+.dpTbl { /* date picker background */
+	border:thin solid black;
+	background:white;
+	box-shadow: 3px 3px 4px #000; /* shadow on modern browsers */
+}
+.dpTD {
+	border: 0;
+	width:20px;
+	background-color: #EEEEEE;
+	text-align:right;
+	cursor:pointer;
+}
+.dpDayHighlight {
+	border: 0;
+	width:20px;
+	background-color: yellow;
+	text-align:right;
+	cursor:pointer;
+}
+.dpTDHover {
+	border: 0;
+	width:20px;
+	background-color: #CCCCCC;
+	text-align:right;
+	cursor:pointer;
+}
+
+.table1 {
+	width:90%;
+	background: #eee;
+	border: 0px 0px 2px 2px #222 solid;
+	background: #eee;
+	margin: 0 auto;
+}
+
+.tableheader{
+	font-weight:normal;
+	background-color:#cccce5;
+	color:#300;
+}
+
+.notavailable{ /* WorkOrderIssue.php, WorkOrderStatus.php  */
+	font-weight:lighter;/* light is not a w3c css valid font weight */
+	font-style:italic;
+	color:#555;
+}
+
+
+.label{ /*WorkOrderCosting.php, WorkOrderEntry.php, WorkOrderIssue.php, WorkOrderStatus.php */
+	font-weight:bold;
+	font-style:normal;
+	font-size:120%;
+	color:black;
+	background-color:#ccc;
+}
+.table_index {
+	background-color: #F1FFDD;
+}
+
+.header{ /* used in \includes\InputSerialItemsFile.php */
+	background-image:url("");
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+	border:none;
+	margin:0px;
+	padding:0px;
+}
+input.inputerror{ /* many * .php */
+	background-color:#fddbdb;
+}
+
+textarea{
+	font-size:100%;
+	background-color:whitesmoke;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+select.selecterror{ /*AccountGroups.php, BankAccounts.php, BOMs.php, Stocks.php */
+	background-color:#fddbdb;
+}
+
+.OsRow{ /* PO_OrderDetails.php */
+	background-color:#234567;
+	color:white;
+}
+
+/*** CANVAS ***/
+
+#CanvasDiv{
+   padding: 5px;
+}
+
+/*** HEADER ***/
+#HeaderDiv{
+	overflow:hidden; /* REQUIRED:height according to items contained */
+	background: repeat-x #cfcfcf;/*url(silverwolf/images/menu_bg_dblue.png)*/
+	color:white;
+	padding:3px;
+	border:thin solid lightgray;
+}
+/*** HEADER - APP INFO ***/
+
+#AppInfoDiv{
+	float:left; /* REQUIRED:to the left */
+        color:white;
+}
+#AppInfoDiv img{
+	vertical-align:middle; /* center image and text vertically */
+        color:white;
+}
+#AppInfoCompanyDiv{
+	display:table-cell; /* REQUIRED:as a cell */
+     color:white;
+}
+#AppInfoUserDiv{
+	display:table-cell; /* REQUIRED:as a cell */
+}
+#AppInfoUserDiv a{
+	color:white;
+}
+#AppInfoUserDiv a:hover{
+	color:white;
+	text-decoration:underline;
+}
+#AppInfoModuleDiv{
+    color:white;
+}
+
+/*** HEADER - QUICK MENU ***/
+
+#QuickMenuDiv{
+	float:right; /* to the right side  */
+	margin-top:2px;
+}
+#QuickMenuDiv ul{
+	list-style:none; /* hide the bullets */
+}
+#QuickMenuDiv li{
+	display: inline; /* items are inline */
+}
+
+/*** links as buttons!!! clicking anywhere in the button will activate 
+ the link!!! ***HJ***/
+ 
+ 
+#QuickMenuDiv li a{
+	padding:9px; /* links as button */
+	border:thin outset lightgray; /* un-pressed state */
+        color:white;
+}
+#QuickMenuDiv li a:hover{
+	padding:9px; /* links as button */
+	border:thin inset lightgray; /* pressed state */
+	text-decoration:none; /* no underline */
+	color:white;
+}
+
+/*** BODY ***/
+
+#BodyDiv{
+	clear:both; /* REQUIRED */
+	overflow:hidden; /* REQUIRED */
+	color:black;
+	background:whitesmoke;
+	padding-bottom:5px;
+	text-align:left;
+        min-height: 100%;
+}
+
+
+/*** BODY - MAIN MENU ***/
+
+#MainMenuDiv{
+	float:left; /* REQUIRED:to the left side */
+	white-space:nowrap; /* don't break text */
+	text-align:center; 
+	width:12%;
+	margin-top:3px;
+        height: 100%;
+}
+#MainMenuDiv ul{
+	padding:0; /* REQUIRED:remove extra gaps (ex-bullets) */
+	margin:0 3px 0 0;
+	border:thin outset silver;
+}
+#MainMenuDiv li{
+	list-style:none; /* REQUIRED */
+	padding:0; /* REQUIRED */
+}
+#MainMenuDiv li a,
+#MainMenuDiv li a:hover,
+#MainMenuDiv li a:active,
+#MainMenuDiv .main_menu_selected a,
+#MainMenuDiv .main_menu_selected a:hover{ /* common styles */
+	display:block; /* REQUIRED */
+	padding:3px;
+	border:thin outset silver;
+	color:black;
+	text-decoration:none;
+	background:silver;
+}
+#MainMenuDiv li a:hover{ /* link as button!!! pressed state */
+	border:thin inset silver;
+}
+#MainMenuDiv .main_menu_selected a,#MainMenuDiv .main_menu_selected a:hover{ /* the selected button */
+	border:thin inset silver;
+	background:dimgray;
+	color:white;
+}
+
+/*** BODY - SUB MENU ***/
+
+#SubMenuDiv{
+	display:table;
+	float:  right;
+	overflow:hidden;
+	width:88%;
+	margin-top:3px;
+	text-align:left;
+}
+#SubMenuDiv ul{
+	list-style-type:none; /* REQUIRED:hide bullets */
+	padding:0; /* REQUIRED:remove extra gaps (ex-bullets) */
+	margin:0;
+	background:gainsboro;
+	border:thin outset gainsboro;
+	margin-left:3px;
+}
+#SubMenuDiv li{
+	list-style:none; /* REQUIRED:hide the bullets */
+	padding:2px;
+}
+.menu_group_headers{
+	background:silver;
+	outline:thin outset silver;
+	text-align:center;
+	color:black;
+}
+
+#TransactionsDiv,#InquiriesDiv,#MaintenanceDiv{
+	display:table-cell;
+}
+#InquiriesDiv div{ /* default div, used for custom report header */
+	background:silver;
+	color:black;
+	padding:2px;
+}
+
+.menu_group_item p{
+	color:#00f; /* This is the color for bullets, I like it to be the same as the anchor color, but it's up to you */
+	text-indent:-10px; /* this makes the bullet to appear as the li tag previously used */
+	margin:0 0 0 12px; /* One thing that I didnÃÂÃÂ´t like of the li was that it had no left margin applied */
+}
+
+
+#FooterDiv{
+    clear:both; 
+    overflow:hidden;	
+    margin: auto;
+    background: repeat-x #cfcfcf;/*url(silverwolf/images/menu_bg_dblue.png);*/
+}
+#FooterDiv a{
+    text-decoration:underline;
+}
+
+#FooterWrapDiv{
+	overflow:hidden;
+	padding:3px;
+}
+
+#FooterLogoDiv{ 
+    float:right; /* right side */
+    padding:5px;
+}
+
+#FooterLogoDiv img {
+    vertical-align: top;
+}
+
+#FooterVersionDiv{
+	float:left; /* left side */
+	margin-top:5px;
+}
+
+#FooterTimeDiv{
+   clear:left; /* below  */
+}
+
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+  border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+}
+
+
+
+
+
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+}
+@media (min-width: 768px) {
+  .main {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+.main .page-header {
+  margin-top: 0;
+}
+
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+.placeholders h4 {
+  margin-bottom: 0;
+}
+.placeholder {
+  margin-bottom: 20px;
+}
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.myInput {
+    background-image: url('magnifier.png'); /* Add a search icon to input */
+    background-position: 10px 10px; /* Position the search icon */
+    background-repeat: no-repeat; /* Do not repeat the icon image */
+    width:70%; /* Full-width */
+    font-size: 8 px; /* Increase font-size */
+    padding: 2px 2px 2px 2px; /* Add some padding */
+    border: 2px solid #ddd; /* Add a grey border */
+ /*   margin-bottom: 12px; /* Add some space below the input */
+}
+
+.myTable {
+    border-collapse: collapse; /* Collapse borders */
+    width: 600px; /* Full-width */
+    border: 1px solid #ddd; /* Add a grey border */
+    font-size: 8 px; /* Increase font-size */
+   
+}
+
+.myTable th, .myTable td {
+    text-align: left; /* Left-align text */
+    padding:0px; /* Add padding */
+}
+
+.myTable tr {
+    /* Add a bottom border to all table rows */
+    border-bottom: 1px solid #ddd; 
+}
+
+.myTable tr.header, .myTable tr:hover {
+    /* Add a grey background color to the table header and on hover */
+    background-color: #f1f1f1;
+}
+
+table.stockfind{
+    height: available;
+}
+
+table.register{
+  width: 800px;
+}
+
+DIV.form{
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+}
+
+DIV.confirmso {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background: #F1FFDD;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    left: 50px;
+    width: available;
+    height: available
+}
+
+DIV.homePageOne {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background: #F1FFDD;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    left:12%;
+    width:35%;
+}
+
+DIV.homePageTwo {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background: #F1FFDD;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    right:12%;
+    width:35%;
+}
+
+
+DIV.homePagetree {
+    visibility:visible;
+    display:block; 
+    position:absolute; 
+    cursor:pointer;
+    background: #F1FFDD;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    left: 12%;
+    top: 270px;
+    width: 70%;
+    font-size: 10px;
+}
+
+DIV.CustPricelist {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background:#F1FFDD;
+    border:#C3C3C3 2px solid ; /* Add a grey border */
+    left:1px;
+    top:1px;
+    height:40%;
+    width:80%;
+}
+
+DIV.homePricelist {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background:#F1FFDD;
+    border:#C3C3C3 2px solid ; /* Add a grey border */
+    right:15%;
+    top:50%;
+    height:40%;
+    width:40%;
+}
+
+div.homepage{
+    background-color: #a47e3c ;
+    color:navy;
+    border:1px solid navy;
+    width: 60%;
+    text-align: right;
+}
+
+th.blanks{
+    width: 150px;
+    height: 30px;
+}
+
+
+
+input[type="text"].cell{
+   width: 100%;  
+   border-width:0;
+ }
+ 
+DIV.finderheader {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+    background:  #C3C3C3;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    font-size: 8 px; /* Increase font-size */
+    height: 250px;
+    overflow: hidden; 
+    width:600px;
+}
+
+DIV.finder{
+    visibility:visible;
+    cursor:pointer;
+    background: white;
+    border: #C3C3C3 2px solid ; /* Add a grey border */
+    font-size: 8 px; /* Increase font-size */
+    width: auto;
+    height: 200px;
+    padding-left:0;
+    overflow-y: scroll; 
+    width:600px;
+}
+
+table.finder{
+    overflow-y: scroll; 
+    overflow-x: hidden; 
+    width: 600px;
+}
+
+.table-bordered {
+    width:100%;
+}
+
+.overlay{
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: rgba(255,255,255,0.8) url("loader.gif") center no-repeat;
+}
+/* Turn off scrollbar when body element has the loading class */
+body.loading{
+    overflow: hidden;   
+}
+/* Make spinner image visible when body element has the loading class */
+body.loading .overlay{
+    display: block;
+}
+
+DIV.Prizes {
+    visibility:visible;
+    display:block; 
+    position:absolute;
+    cursor:pointer;
+  /*  background:  #ff0;*/
+    border:#C3C3C3 2px solid ;  
+    top:50%;
+    max-height:40%;
+    max-width:40%;
+}
+
+.customwidth {
+    min-width:  100px;
+}
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+
+/*Making a table resposive DIV without the table tag*/
+.table-footer-cell{
+display: table-cell;
+padding: 10px;
+text-align: justify;
+border-bottom: 1px solid black;
+}
+
+#resp-table-footer {
+display: table-footer-group;
+background-color: gray;
+font-weight: bold;
+font-size: 25px;
+color: rgba(255, 255, 255, 0.45);
+}
+
+.table-body-cell{
+display: table-cell;
+}
+
+.resp-table-row{
+display: table-row;
+}
+
+#resp-table-body{
+display: table-row-group;
+}
+
+.table-header-cell{
+display: table-cell;
+padding: 10px;
+text-align: justify;
+border-bottom: 1px solid black;
+}
+
+#resp-table-header{
+display: table-header-group;
+background-color: gray;
+font-weight: bold;
+font-size: 25px;
+}
+
+#resp-table-caption{
+display: table-caption;
+text-align: center;
+font-size: 30px;
+font-weight: bold;
+}
+
+#resp-table {
+width: 100%;
+display: table;
+}
+ 
+
+ 
+ DIV.Colum1 {
+    position: absolute;
+    display: block;
+    top: 30px;
+    left: 10px; 
+    max-width: 600px; 
+    max-height: 400px;
+    min-height: 400px;
+ }
+ 
+ DIV.Colum2 {
+     position: absolute; 
+     display: block;
+     top: 30px;
+     left: 650px;
+     max-width: 600px;
+     max-height: 400px;
+     min-height: 400px;
+ }
+ 
+ DIV.Colum3 {
+     position: absolute; 
+     display: block;
+     top: 500px;
+     left: 10px;
+     max-width: 600px;
+     max-height: 400px;
+     min-height: 400px;
+ }
+ 
+ DIV.Colum4 {
+     position: absolute;
+     display: block;
+     top: 500px;
+     left: 650px; 
+     max-width: 600px;
+     max-height: 400px;
+     min-height: 400px;
+ }
+ 
+Div.upcomming {
+    border: 2px solid #ddd; /* Add a grey border */
+    padding-left: 5px;
+    padding-top: 5px;
+    top: 5px;
+    min-width: 500px;
+}
+
+.select,
+.chosen-select,
+.chosen-select-no-single,
+.chosen-select-no-results,
+.chosen-select-deselect,
+.chosen-select-rtl,
+.chosen-select-width {
+  width: 250px;
+}
+
+/* Table readability + responsive refinements */
+table.table,
+table.table-bordered,
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+table.table th,
+table.table-bordered th,
+.table th {
+  background: #eaf1f8;
+  border-bottom: 1px solid #d0d7e2;
+  padding: 9px 10px;
+}
+
+table.table td,
+table.table-bordered td,
+.table td {
+  border-bottom: 1px solid #d0d7e2;
+  padding: 8px 10px;
+  line-height: 1.45;
+}
+
+table.table tr:nth-child(even) td,
+table.table-bordered tr:nth-child(even) td,
+.table tr:nth-child(even) td {
+  background: #fafbfd;
+}
+
+table.table tr:hover td,
+table.table-bordered tr:hover td,
+.table tr:hover td {
+  background: #e8f0f8;
+}
+
+td.number,
+.table td.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+@media (max-width: 992px) {
+  .table-responsive table.table,
+  .table-responsive table.table-bordered {
+    min-width: 700px;
+  }
+}

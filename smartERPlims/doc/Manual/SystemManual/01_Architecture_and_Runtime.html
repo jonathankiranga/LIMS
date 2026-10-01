@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture and Runtime Model</title>
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1f2933; }
+    header { background: #1f3a56; color: #fff; padding: 16px 22px; }
+    main { max-width: 980px; margin: 20px auto; background: #fff; padding: 24px; border: 1px solid #d9e2ec; }
+    h1,h2,h3 { color: #102a43; }
+    .back { margin-bottom: 14px; }
+    .back a { color: #243b53; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header><h1>Architecture and Runtime Model</h1></header>
+  <main>
+    <div class="back"><a href="../SystemManual.html">Back to Table of Contents</a></div>
+    <h2>Application Shape</h2>
+    <p>The system is a menu-driven ERP workspace with role-filtered options and a central working pane.</p>
+    <ul>
+      <li>Users log in and see only permitted module areas.</li>
+      <li>Each module is grouped into Transactions, Inquiries and Reports, and Set Up.</li>
+      <li>The homepage acts as a live operational work queue.</li>
+    </ul>
+
+    <h2>Core Runtime Behavior</h2>
+    <h3>Session and Authentication</h3>
+    <ul>
+      <li>User authentication controls access to all business functions.</li>
+      <li>Session lifetime and execution limits are centrally configured.</li>
+      <li>Every business form submission is validated with a form token.</li>
+    </ul>
+
+    <h3>Authorization</h3>
+    <ul>
+      <li>Access is permission-token based.</li>
+      <li>Business roles are mapped to permission tokens.</li>
+      <li>Each function is mapped to required permission level.</li>
+    </ul>
+
+    <h3>Data and Transactions</h3>
+    <ul>
+      <li>All business transactions run on MySQL with transaction commit/rollback support.</li>
+      <li>Operational numbering is centrally managed per document type.</li>
+      <li>Data change operations are audit-trail aware when auditing is enabled.</li>
+    </ul>
+  </main>
+</body>
+</html>
+
