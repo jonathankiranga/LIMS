@@ -217,7 +217,7 @@
     font-size: 12px;
     padding: 8px;
 }
-}
+
 
 .status-chip.failure {
     background: #f8d7da;

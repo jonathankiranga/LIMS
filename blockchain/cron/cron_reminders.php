@@ -1,11 +1,36 @@
 <?php
-// Cron Job: Process Reminders and Send Emails
-// Run this every 5 minutes via cron: */5 * * * * php /path/to/cron_reminders.php
+/**
+ * cron_reminders.php
+ *
+ * Run every five minutes via cron:
+ *   "0/5 * * * *" php /path/to/blockchain/cron/cron_reminders.php
+ *
+ * Two stages:
+ *   1. Match workspace tasks against active ws_email_rules triggers
+ *      (task_due_soon / task_overdue) and record a ws_reminders row for each.
+ *   2. Fire every due ws_reminders row: render its template, deliver with
+ *      sendEmail(), then mark it sent.
+ *
+ * Mail is sent directly by this script. ws_email_queue is intentionally not
+ * used: nothing in this project drains that table, so queueing a row there
+ * would never result in delivery.
+ *
+ * Task source mirrors workspace_board_schema_ready() in functions/api.php:
+ * when the kanban tables exist, cards are the live task store; otherwise the
+ * legacy workspace_tasks table is used.
+ */
+
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit("This script can only be run from the command line.\n");
+}
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-$logDir = __DIR__ . '/../../logs';
+$DRY_RUN = in_array('--dry-run', $argv ?? array(), true);
+
+$logDir = __DIR__ . '/../logs';
 if (!is_dir($logDir)) {
     @mkdir($logDir, 0775, true);
 }
@@ -14,7 +39,7 @@ $logFile = $logDir . '/cron_reminders.log';
 function log_cron($message) {
     global $logFile;
     $timestamp = date('Y-m-d H:i:s');
-    @file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
+    @file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
 
 log_cron('Starting reminder processing');
@@ -24,196 +49,382 @@ if (!file_exists($configFile)) {
     log_cron('ERROR: config.php not found');
     exit(1);
 }
-include($configFile);
+$config = include($configFile);
 
-$db_host = $config['DB_HOST'];
-$db_name = $config['DB_NAME'];
-$db_username = $config['DB_USERNAME'];
-$db_password = $config['DB_PASSWORD'];
-
-$db = new mysqli($db_host, $db_username, $db_password, $db_name);
+$db = new mysqli($config['DB_HOST'], $config['DB_USERNAME'], $config['DB_PASSWORD'], $config['DB_NAME']);
 if ($db->connect_error) {
     log_cron('ERROR: DB connection failed - ' . $db->connect_error);
     exit(1);
 }
 $db->set_charset('utf8mb4');
 
-// ============================================
-// Process Email Rules (task_due_soon, task_overdue)
-// ============================================
-function processEmailRules($db, $log_cron) {
-    $rulesResult = $db->query("SELECT r.*, t.subject, t.body 
-                               FROM ws_email_rules r 
-                               LEFT JOIN ws_email_templates t ON r.email_template_id = t.id 
-                               WHERE r.is_active=1 AND r.trigger_type IN ('task_due_soon', 'task_overdue') 
-                               ORDER BY r.priority DESC");
-    
-    $rulesProcessed = 0;
-    $today = date('Y-m-d');
-    
-    while ($rule = $rulesResult->fetch_assoc()) {
-        $triggerType = $rule['trigger_type'];
-        $recipients = json_decode($rule['recipients'] ?? '[]', true);
-        
-        if ($triggerType === 'task_due_soon') {
-            $startDate = $today;
-            $endDate = date('Y-m-d', strtotime('+1 day'));
-            $dateField = 'due_date';
-        } elseif ($triggerType === 'task_overdue') {
-            $startDate = '1970-01-01';
-            $endDate = $today;
-            $dateField = 'due_date';
+require_once __DIR__ . '/../functions/sendemails.php';
+
+/**
+ * Run a query, log and swallow failures instead of emitting a fatal.
+ */
+function db_try($db, $sql, $context) {
+    $result = $db->query($sql);
+    if (!$result) {
+        log_cron("ERROR [$context]: " . $db->error);
+    }
+    return $result;
+}
+
+/**
+ * Run a write query. In --dry-run mode the statement is logged and discarded
+ * so the whole pipeline can be exercised without touching data or sending mail.
+ */
+function db_write($db, $sql, $context) {
+    global $DRY_RUN;
+    if ($DRY_RUN) {
+        log_cron("DRY-RUN [$context] would execute: " . preg_replace('/\s+/', ' ', $sql));
+        return true;
+    }
+    return db_try($db, $sql, $context);
+}
+
+function db_table_exists($db, $table) {
+    $result = db_try($db, "SHOW TABLES LIKE '" . $db->real_escape_string($table) . "'", "table_exists:$table");
+    return $result && $result->num_rows > 0;
+}
+
+/**
+ * Whether the kanban (card) tables are in place. Matches
+ * workspace_board_schema_ready() in functions/api.php.
+ */
+function using_cards($db) {
+    foreach (['workspace_boards', 'workspace_lists', 'workspace_cards', 'workspace_card_members'] as $table) {
+        if (!db_table_exists($db, $table)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Load every open task that has a due date, normalised to one shape:
+ *   id, title, description, due_date, workspace_name, recipient_name, emails[]
+ */
+function load_due_tasks($db, $useCards) {
+    if ($useCards) {
+        // Cards have no assignee column; membership lives in
+        // workspace_card_members, so assignees arrive via GROUP_CONCAT.
+        $sql = "SELECT c.id, c.title, c.description, c.due_date,
+                       w.name AS workspace_name,
+                       GROUP_CONCAT(DISTINCT u.email ORDER BY u.email SEPARATOR ',') AS emails,
+                       GROUP_CONCAT(DISTINCT COALESCE(NULLIF(u.full_name, ''), cm.user_id)
+                                    ORDER BY cm.id SEPARATOR ', ') AS recipient_names
+                FROM workspace_cards c
+                JOIN workspace_boards wb ON c.board_id = wb.id
+                LEFT JOIN workspaces w ON wb.workspace_id = w.id
+                LEFT JOIN workspace_lists l ON c.list_id = l.id
+                LEFT JOIN workspace_card_members cm ON cm.card_id = c.id
+                LEFT JOIN users u ON cm.user_id = u.user_id
+                WHERE c.archived = 0
+                  AND c.due_date IS NOT NULL
+                  AND LOWER(COALESCE(l.name, '')) NOT IN ('done', 'complete', 'completed', 'closed')
+                GROUP BY c.id";
+    } else {
+        $sql = "SELECT t.id, t.title, t.description, t.due_date,
+                       w.name AS workspace_name,
+                       u.email AS email,
+                       COALESCE(NULLIF(u.full_name, ''), t.assigned_to) AS recipient_name
+                FROM workspace_tasks t
+                LEFT JOIN workspaces w ON t.workspace_id = w.id
+                LEFT JOIN users u ON t.assigned_to = u.user_id
+                WHERE t.status <> 'done'
+                  AND t.due_date IS NOT NULL";
+    }
+
+    $result = db_try($db, $sql, $useCards ? 'load_cards' : 'load_tasks');
+    if (!$result) {
+        return array();
+    }
+
+    $tasks = array();
+    while ($row = $result->fetch_assoc()) {
+        $emails = array();
+        if ($useCards) {
+            if (!empty($row['emails'])) {
+                $emails = array_filter(array_map('trim', explode(',', $row['emails'])));
+            }
+            $recipientName = !empty($row['recipient_names']) ? $row['recipient_names'] : 'User';
         } else {
+            if (!empty($row['email'])) {
+                $emails = array($row['email']);
+            }
+            $recipientName = !empty($row['recipient_name']) ? $row['recipient_name'] : 'User';
+        }
+
+        $tasks[] = array(
+            'id' => (int)$row['id'],
+            'title' => $row['title'],
+            'description' => (string)($row['description'] ?? ''),
+            'due_date' => $row['due_date'],
+            'workspace_name' => !empty($row['workspace_name']) ? $row['workspace_name'] : 'Workspace',
+            'recipient_name' => $recipientName,
+            'emails' => array_values($emails),
+        );
+    }
+    return $tasks;
+}
+
+/**
+ * Create one ws_reminders row per (rule, task) match. Deduplicated on
+ * (reminder_type, reference_id) for the current day, which is what
+ * idx_reference on ws_reminders exists for.
+ */
+function process_email_rules($db, $tasks, $today) {
+    $rulesResult = db_try($db,
+        "SELECT r.*, t.subject, t.body
+         FROM ws_email_rules r
+         LEFT JOIN ws_email_templates t ON r.email_template_id = t.id
+         WHERE r.is_active = 1
+           AND r.trigger_type IN ('task_due_soon', 'task_overdue')
+         ORDER BY r.priority DESC",
+        'load_rules');
+    if (!$rulesResult) {
+        return array('rules' => 0, 'created' => 0);
+    }
+
+    $rulesProcessed = 0;
+    $created = 0;
+    $now = date('Y-m-d H:i:s');
+
+    while ($rule = $rulesResult->fetch_assoc()) {
+        $rulesProcessed++;
+        $ruleId = (int)$rule['id'];
+
+        $subject = $rule['subject_override'] ?: $rule['subject'];
+        $body = $rule['body_override'] ?: $rule['body'];
+        if (empty($subject) || empty($body)) {
+            log_cron("SKIPPED rule #$ruleId ({$rule['rule_name']}): no active email template and no subject/body override");
             continue;
         }
-        
-        $taskSql = "SELECT t.*, w.name as workspace_name, u.email, u.realname, u.userid as assignee_id
-                    FROM workspace_tasks t
-                    LEFT JOIN workspace_boards wb ON t.board_id = wb.id
-                    LEFT JOIN workspaces w ON wb.workspace_id = w.id
-                    LEFT JOIN www_users u ON t.assigned_to = u.userid
-                    WHERE t.$dateField IS NOT NULL 
-                    AND t.$dateField BETWEEN '$startDate' AND '$endDate'";
-        
-        if ($triggerType === 'task_due_soon') {
-            $taskSql .= " AND t.status != 'done'";
-        } elseif ($triggerType === 'task_overdue') {
-            $taskSql .= " AND t.status != 'done'";
+
+        $configuredRecipients = json_decode($rule['recipients'] ?? '[]', true);
+        if (!is_array($configuredRecipients)) {
+            $configuredRecipients = array();
         }
-        
-        $taskResult = $db->query($taskSql);
-        
-        while ($task = $taskResult->fetch_assoc()) {
-            $checkSql = "SELECT id FROM ws_email_log 
-                        WHERE email_rule_id=" . $rule['id'] . " 
-                        AND reference_id=" . $task['id'] . "
-                        AND DATE(sent_at) = '$today'";
-            $checkResult = $db->query($checkSql);
-            if ($checkResult->num_rows > 0) {
+
+        foreach ($tasks as $task) {
+            $dueDay = substr((string)$task['due_date'], 0, 10);
+            if ($dueDay === '') {
                 continue;
             }
-            
+            if ($rule['trigger_type'] === 'task_due_soon') {
+                $tomorrow = date('Y-m-d', strtotime($today . ' +1 day'));
+                if ($dueDay < $today || $dueDay > $tomorrow) {
+                    continue;
+                }
+            } elseif ($dueDay >= $today) {
+                continue;
+            }
+
+            $recipients = array();
+            foreach ($configuredRecipients as $recipient) {
+                if (!empty($recipient['email'])) {
+                    $recipients[$recipient['email']] = $recipient['name'] ?? '';
+                }
+            }
+            if (empty($recipients)) {
+                foreach ($task['emails'] as $email) {
+                    $recipients[$email] = $task['recipient_name'];
+                }
+            }
+            if (empty($recipients)) {
+                log_cron("SKIPPED task #{$task['id']} ({$task['title']}): rule #$ruleId has no recipients and the task has no assignee email");
+                continue;
+            }
+
             $context = array(
                 'task_title' => $task['title'],
                 'due_date' => $task['due_date'],
-                'user_name' => $task['realname'] ?? $task['assigned_to'] ?? 'User',
-                'workspace_name' => $task['workspace_name'] ?? 'Workspace',
-                'task_description' => $task['description'] ?? ''
+                'user_name' => $task['recipient_name'],
+                'workspace_name' => $task['workspace_name'],
+                'task_description' => $task['description'],
             );
-            
-            $subject = $rule['subject_override'] ?: $rule['subject'];
-            $body = $rule['body_override'] ?: $rule['body'];
-            
+            $renderedSubject = $subject;
+            $renderedBody = $body;
             foreach ($context as $key => $value) {
-                $subject = str_replace('{{' . $key . '}}', $value, $subject);
-                $body = str_replace('{{' . $key . '}}', $value, $body);
+                $renderedSubject = str_replace('{{' . $key . '}}', $value, $renderedSubject);
+                $renderedBody = str_replace('{{' . $key . '}}', $value, $renderedBody);
             }
-            
-            foreach ($recipients as $recipient) {
-                $email = $recipient['email'] ?? '';
-                $name = $recipient['name'] ?? '';
-                
-                if ($email) {
-                    $sql = "INSERT INTO ws_email_queue (email_rule_id, recipient_email, recipient_name, subject, body, status, send_at)
-                            VALUES (" . $rule['id'] . ", '" . $db->real_escape_string($email) . "', 
-                                    '" . $db->real_escape_string($name) . "',
-                                    '" . $db->real_escape_string($subject) . "', '" . $db->real_escape_string($body) . "', 
-                                    'pending', NOW())";
-                    $db->query($sql);
-                    
-                    $db->query("INSERT INTO ws_email_log (email_rule_id, reference_id, recipient_email, recipient_name, subject, status)
-                                VALUES (" . $rule['id'] . ", " . $task['id'] . ", 
-                                        '" . $db->real_escape_string($email) . "', '" . $db->real_escape_string($name) . "',
-                                        '" . $db->real_escape_string($subject) . "', 'sent')");
-                    
-                    $log_cron("Queued {$triggerType} email for task #{$task['id']}: {$task['title']} -> $email");
-                }
+
+            $existing = db_try($db,
+                "SELECT id FROM ws_reminders
+                 WHERE reminder_type = 'task'
+                   AND reference_id = " . $task['id'] . "
+                   AND status IN ('pending', 'sent')
+                   AND DATE(created_at) = '" . $db->real_escape_string($today) . "'
+                 LIMIT 1",
+                "dedup_task_{$task['id']}");
+            if ($existing && $existing->num_rows > 0) {
+                continue;
+            }
+
+            $primaryEmail = array_key_first($recipients);
+            $primaryName = $recipients[$primaryEmail] !== '' ? $recipients[$primaryEmail] : $task['recipient_name'];
+
+            $insert = "INSERT INTO ws_reminders
+                       (reminder_type, reference_id, title, description, reminder_date,
+                        remind_before_minutes, recipient_user, recipient_email,
+                        send_notification, send_email, include_calendar, created_by)
+                       VALUES ('task', " . $task['id'] . ", '"
+                . $db->real_escape_string($renderedSubject) . "', '"
+                . $db->real_escape_string(strip_tags($renderedBody)) . "', '"
+                . $now . "', 0, '"
+                . $db->real_escape_string($task['recipient_name']) . "', '"
+                . $db->real_escape_string($primaryEmail) . "', 1, 1, 0, '"
+                . $db->real_escape_string("system:rule=" . $ruleId) . "')";
+
+            if (db_write($db, $insert, "insert_reminder_task_{$task['id']}")) {
+                $created++;
+                log_cron("Created {$rule['trigger_type']} reminder for task #{$task['id']} ({$task['title']}) -> $primaryEmail");
             }
         }
-        $rulesProcessed++;
     }
-    
-    return array('rules' => $rulesProcessed, 'emails' => $emailsQueued);
+
+    return array('rules' => $rulesProcessed, 'created' => $created);
 }
 
-$result = processEmailRules($db, 'log_cron');
-log_cron("Processed {$result['rules']} email rules, queued {$result['emails']} task emails");
-
-$now = date('Y-m-d H:i:s');
-$windowStart = date('Y-m-d H:i:s', strtotime('-5 minutes'));
-$windowEnd = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-
-$result = $db->query("SELECT * FROM ws_reminders 
-                      WHERE status='pending' 
-                      AND reminder_date BETWEEN '$windowStart' AND '$windowEnd'");
-
-$processed = 0;
-$emailsQueued = 0;
-
-while ($row = $result->fetch_assoc()) {
-    $context = array(
-        'title' => $row['title'],
-        'description' => $row['description'],
-        'reminder_date' => $row['reminder_date'],
-        'user_name' => $row['recipient_user'] ?? 'User'
-    );
-    
-    if ($row['send_email'] && $row['recipient_email']) {
-        $templateResult = $db->query("SELECT * FROM ws_email_templates WHERE category='reminder' AND is_active=1 LIMIT 1");
-        if ($template = $templateResult->fetch_assoc()) {
-            $subject = $template['subject'];
-            $body = $template['body'];
-            foreach ($context as $key => $value) {
-                $subject = str_replace('{{' . $key . '}}', $value, $subject);
-                $body = str_replace('{{' . $key . '}}', $value, $body);
+/**
+ * Resolve the subject/body a reminder should be delivered with. Reminders
+ * created by this script carry 'system:rule=<id>' in created_by so the
+ * originating rule's template (and any override) is used.
+ */
+function resolve_reminder_template($db, $reminder) {
+    if (preg_match('/^system:rule=(\d+)$/', (string)$reminder['created_by'], $matches)) {
+        $ruleId = (int)$matches[1];
+        $result = db_try($db,
+            "SELECT r.subject_override, r.body_override, t.subject, t.body
+             FROM ws_email_rules r
+             LEFT JOIN ws_email_templates t ON r.email_template_id = t.id
+             WHERE r.id = $ruleId LIMIT 1",
+            "resolve_rule_$ruleId");
+        if ($result && ($row = $result->fetch_assoc())) {
+            $subject = $row['subject_override'] ?: $row['subject'];
+            $body = $row['body_override'] ?: $row['body'];
+            if (!empty($subject) && !empty($body)) {
+                return array('subject' => $subject, 'body' => $body);
             }
-            
-            $sql = "INSERT INTO ws_email_queue (reminder_id, recipient_email, recipient_name, subject, body, status, send_at)
-                    VALUES (" . $row['id'] . ", '" . $db->real_escape_string($row['recipient_email']) . "', 
-                            '" . $db->real_escape_string($row['recipient_user'] ?? '') . "',
-                            '" . $db->real_escape_string($subject) . "', '" . $db->real_escape_string($body) . "', 
-                            'pending', NOW())";
-            $db->query($sql);
-            $emailsQueued++;
-            
-            log_cron("Queued email for reminder #{$row['id']}: {$row['title']}");
         }
     }
-    
-    $db->query("UPDATE ws_reminders SET status='sent', sent_at=NOW() WHERE id=" . $row['id']);
-    $processed++;
+
+    $result = db_try($db,
+        "SELECT subject, body FROM ws_email_templates
+         WHERE category = 'reminder' AND is_active = 1
+         ORDER BY id ASC LIMIT 1",
+        'resolve_default_template');
+    if ($result && ($row = $result->fetch_assoc())) {
+        return array('subject' => $row['subject'], 'body' => $row['body']);
+    }
+    return null;
 }
 
-log_cron("Processed $processed reminders, queued $emailsQueued emails");
+/**
+ * Deliver every reminder that is due and still pending.
+ */
+function fire_due_reminders($db) {
+    global $DRY_RUN;
+    $result = db_try($db,
+        "SELECT * FROM ws_reminders
+         WHERE status = 'pending' AND reminder_date <= NOW()
+         ORDER BY reminder_date ASC
+         LIMIT 200",
+        'load_due_reminders');
+    if (!$result) {
+        return array('processed' => 0, 'sent' => 0, 'failed' => 0);
+    }
 
-// Process due task reminders
+    $processed = 0;
+    $sent = 0;
+    $failed = 0;
+
+    while ($reminder = $result->fetch_assoc()) {
+        $id = (int)$reminder['id'];
+        $processed++;
+
+        if (empty($reminder['send_email']) || empty($reminder['recipient_email'])) {
+            db_write($db, "UPDATE ws_reminders SET status = 'sent', sent_at = NOW() WHERE id = $id", "mark_sent_$id");
+            continue;
+        }
+
+        $template = resolve_reminder_template($db, $reminder);
+        if (!$template) {
+            log_cron("ERROR reminder #$id: no usable email template found, leaving pending");
+            $failed++;
+            continue;
+        }
+
+        $context = array(
+            'title' => $reminder['title'],
+            'task_title' => $reminder['title'],
+            'description' => $reminder['description'],
+            'due_date' => $reminder['title'],
+            'user_name' => $reminder['recipient_user'] ?: 'User',
+        );
+        $subject = $template['subject'];
+        $body = $template['body'];
+        foreach ($context as $key => $value) {
+            $subject = str_replace('{{' . $key . '}}', $value, $subject);
+            $body = str_replace('{{' . $key . '}}', $value, $body);
+        }
+
+        if ($DRY_RUN) {
+            log_cron("DRY-RUN would send reminder #$id to {$reminder['recipient_email']}: $subject");
+            $sent++;
+            continue;
+        }
+
+        $result_sent = sendEmail($reminder['recipient_email'], $subject, $body);
+
+        if (!empty($result_sent['success'])) {
+            db_write($db,
+                "UPDATE ws_reminders SET status = 'sent', sent_at = NOW() WHERE id = $id", "mark_sent_$id");
+            db_write($db,
+                "INSERT INTO ws_email_log (reminder_id, recipient_email, recipient_name, subject, status, sent_at)
+                 VALUES ($id, '" . $db->real_escape_string($reminder['recipient_email']) . "',
+                         '" . $db->real_escape_string($reminder['recipient_user'] ?? '') . "',
+                         '" . $db->real_escape_string($subject) . "', 'sent', NOW())",
+                "log_sent_$id");
+            $sent++;
+            log_cron("Sent reminder #$id to {$reminder['recipient_email']}: $subject");
+        } else {
+            db_write($db,
+                "INSERT INTO ws_email_log (reminder_id, recipient_email, recipient_name, subject, status, error_message, sent_at)
+                 VALUES ($id, '" . $db->real_escape_string($reminder['recipient_email']) . "',
+                         '" . $db->real_escape_string($reminder['recipient_user'] ?? '') . "',
+                         '" . $db->real_escape_string($subject) . "', 'failed',
+                         '" . $db->real_escape_string(substr((string)($result_sent['error'] ?? 'unknown'), 0, 500)) . "', NOW())",
+                "log_failed_$id");
+            $failed++;
+            log_cron("FAILED reminder #$id to {$reminder['recipient_email']}: " . ($result_sent['error'] ?? 'unknown error'));
+        }
+    }
+
+    return array('processed' => $processed, 'sent' => $sent, 'failed' => $failed);
+}
+
+// ============================================
+// Main
+// ============================================
+
 $today = date('Y-m-d');
-$tomorrow = date('Y-m-d', strtotime('+1 day'));
+$useCards = using_cards($db);
+log_cron(($useCards ? 'Task source: workspace_cards' : 'Task source: workspace_tasks (legacy)')
+    . ', date=' . $today);
 
-$taskResult = $db->query("SELECT t.pkey, t.Taskname, t.datedue, t.TaskOwner, u.email, u.realname 
-                          FROM Tasks t 
-                          LEFT JOIN www_users u ON t.TaskOwner = u.userid
-                          WHERE t.datedue IS NOT NULL AND t.Status <> 4 
-                          AND t.datedue BETWEEN '$today' AND '$tomorrow'");
+$tasks = load_due_tasks($db, $useCards);
+log_cron('Loaded ' . count($tasks) . ' open task(s) with a due date');
 
-while ($task = $taskResult->fetch_assoc()) {
-    $existingResult = $db->query("SELECT id FROM ws_reminders WHERE reference_id=" . $task['pkey'] . " AND reminder_type='task' AND DATE(reminder_date)='" . $today . "'");
-    if ($existingResult->num_rows > 0) {
-        continue;
-    }
-    
-    if ($task['email']) {
-        $reminderDate = $today . ' 08:00:00';
-        $sql = "INSERT INTO ws_reminders (reminder_type, reference_id, title, description, reminder_date, remind_before_minutes,
-                recipient_user, recipient_email, send_notification, send_email, include_calendar, created_by)
-                VALUES ('task', " . $task['pkey'] . ", 'Task Due Tomorrow: " . $db->real_escape_string($task['Taskname']) . "',
-                        'Task due on " . $task['datedue'] . "', '$reminderDate', 0,
-                        '" . $db->real_escape_string($task['TaskOwner']) . "', '" . $db->real_escape_string($task['email']) . "',
-                        1, 1, 0, 'system')";
-        $db->query($sql);
-        log_cron("Created task reminder for #{$task['pkey']}: {$task['Taskname']}");
-    }
-}
+$ruleResult = process_email_rules($db, $tasks, $today);
+log_cron("Processed {$ruleResult['rules']} email rules, created {$ruleResult['created']} reminder(s)");
+
+$fireResult = fire_due_reminders($db);
+log_cron("Fired {$fireResult['processed']} reminder(s): {$fireResult['sent']} sent, {$fireResult['failed']} failed");
 
 log_cron('Completed reminder processing');
-echo "OK: Processed $processed reminders\n";
+echo ($DRY_RUN ? "[DRY-RUN] no changes written, no mail sent. " : '')
+    . "OK: processed {$ruleResult['created']} new reminder(s), sent {$fireResult['sent']}, failed {$fireResult['failed']}\n";

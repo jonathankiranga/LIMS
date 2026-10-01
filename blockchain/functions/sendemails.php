@@ -32,10 +32,15 @@ function sendEmail(string $to, string $subject, string $content, string $cc = ''
         // Port-based encryption (THE FIX - consistent logic)
         // Port 465 = SSL (SMTPS), Port 587 = TLS (STARTTLS)
         $mail->Port       = $config['smtp_port'];
-        $mail->SMTPSecure = ($config['smtp_port'] == 465)
+        $mail->SMTPSecure = ((int)$config['smtp_port'] === 465)
             ? PHPMailer::ENCRYPTION_SMTPS      // SSL on port 465
             : PHPMailer::ENCRYPTION_STARTTLS;  // TLS on port 587
-        
+
+        // Without an explicit timeout PHPMailer waits 300s. When the SMTP host
+        // silently drops packets (firewalled port 587) that stalls a cron run
+        // for five minutes per message instead of failing fast.
+        $mail->Timeout = 20;
+
         // REMOVED: SMTPOptions that disable SSL verification (was causing silent failures)
         
         // Recipients

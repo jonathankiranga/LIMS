@@ -1,6 +1,7 @@
 <?php
 
-$config = include('../include/config.php'); // Load the config file
+$config = include __DIR__ . '/include/config.php'; // Load the config file
+
 // Database connection
 $secretKey = $config['SECRET_KEY'];  // Access the SECRET_KEY from config
 $db_host   = $config['DB_HOST'];
