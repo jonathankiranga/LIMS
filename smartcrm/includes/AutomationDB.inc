@@ -126,6 +126,20 @@ function DB_num_rows($result) {
 }
 
 /**
+ * Get the last database error message
+ * Mirrors DB_error_msg() from ConnectDB_mysqli.inc
+ * 
+ * @param mysqli $db Database connection
+ * @return string Error message or empty string
+ */
+function DB_error_msg($db) {
+    if ($db instanceof mysqli) {
+        return $db->error;
+    }
+    return '';
+}
+
+/**
  * Get last insert ID
  * 
  * @param mysqli $db Database connection

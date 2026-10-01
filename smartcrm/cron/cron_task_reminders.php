@@ -1,18 +1,26 @@
 <?php
 // Send email reminders for tasks due soon and include an iCalendar invite.
 
-$PathPrefix = '../';
-$PageSecurity = 0;
-$AllowAnyone = true;
+// For CLI mode: set safe $_SERVER defaults (config.php reads PHP_SELF)
+if (PHP_SAPI === 'cli') {
+    $_SERVER['PHP_SELF'] = $_SERVER['PHP_SELF'] ?? 'cron/cron_task_reminders.php';
+    $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $_SERVER['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+    $_SERVER['SCRIPT_NAME'] = $_SERVER['SCRIPT_NAME'] ?? 'cron/cron_task_reminders.php';
+}
 
 date_default_timezone_set('Africa/Nairobi');
 
+$PathPrefix = dirname(__DIR__) . DIRECTORY_SEPARATOR;
 include($PathPrefix . 'config.php');
-// Ensure DB connect uses the default database
-$_SESSION['DatabaseName'] = $DefaultDatabase ?? null;
-include($PathPrefix . 'includes/ConnectDB.inc');
-include($PathPrefix . 'includes/SQL_CommonFunctions.inc');
+include($PathPrefix . 'includes/AutomationDB.inc');
 require_once($PathPrefix . 'Mailer/PHPMailerAutoload.php');
+
+$db = getAutomationDB();
+if (!$db) {
+    echo "[ERROR] Failed to connect to database\n";
+    exit(1);
+}
 
 $statusLabels = array(
     "0" => 'Not yet begun',
@@ -42,36 +50,37 @@ if ($Result === false) {
     exit(1);
 }
 
-$smtpConfigPath = __DIR__ . '/smtp_config.php';
-if (file_exists($smtpConfigPath)) {
-    require $smtpConfigPath;
+$smtpConfigPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'smtp_config.php';
+if (!file_exists($smtpConfigPath)) {
+    echo "[ERROR] SMTP config not found at $smtpConfigPath\n";
+    exit(1);
+}
+require $smtpConfigPath;
+
+if (!isset($smtp_config) || !is_array($smtp_config)) {
+    echo "[ERROR] smtp_config.php did not define \$smtp_config\n";
+    exit(1);
 }
 
-function buildMailer($SMTP_CONFIG, $CompanyEmail) {
+function buildMailer($smtpConfig, $fallbackFromEmail) {
     $mail = new PHPMailer(true);
     $mail->CharSet = 'utf-8';
     $mail->isSMTP();
     $mail->SMTPDebug = 0;
 
-    if (isset($SMTP_CONFIG) && is_array($SMTP_CONFIG)) {
-        $mail->Host       = $SMTP_CONFIG['Host'] ?? '';
-        $mail->SMTPAuth   = $SMTP_CONFIG['SMTPAuth'] ?? false;
-        $mail->Username   = $SMTP_CONFIG['Username'] ?? '';
-        $mail->Password   = $SMTP_CONFIG['Password'] ?? '';
-        $mail->SMTPSecure = $SMTP_CONFIG['SMTPSecure'] ?? '';
-        $mail->Port       = $SMTP_CONFIG['Port'] ?? 25;
-        $fromEmail        = $SMTP_CONFIG['FromEmail'] ?? ($CompanyEmail ?? 'no-reply@localhost');
-        $fromName         = $SMTP_CONFIG['FromName'] ?? 'Smarternow CRM';
-    } else {
-        $mail->Host = 'smtp.example.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'user';
-        $mail->Password = 'secret';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
-        $fromEmail = $CompanyEmail ?? 'no-reply@localhost';
-        $fromName  = 'Smarternow CRM';
+    $mail->Host       = $smtpConfig['host'] ?? '';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = $smtpConfig['username'] ?? '';
+    $mail->Password   = $smtpConfig['password'] ?? '';
+    $mail->Port       = $smtpConfig['port'] ?? 25;
+
+    $secure = strtolower($smtpConfig['secure'] ?? '');
+    if ($secure === 'ssl' || $secure === 'tls') {
+        $mail->SMTPSecure = $secure;
     }
+
+    $fromEmail = $smtpConfig['from_email'] ?? ($fallbackFromEmail ?: 'no-reply@localhost');
+    $fromName  = $smtpConfig['from_name'] ?? 'Smarternow CRM';
 
     $mail->setFrom($fromEmail, $fromName);
     $mail->SMTPOptions = array('ssl' => array('verify_peer' => false,'verify_peer_name' => false,'allow_self_signed' => true));
@@ -121,10 +130,7 @@ while ($row = DB_fetch_array($Result)) {
          . "END:VEVENT\r\n"
          . "END:VCALENDAR\r\n";
 
-    $tmpFile = tempnam(sys_get_temp_dir(), 'taskics_');
-    file_put_contents($tmpFile, $ics);
-
-    $mailer = buildMailer($SMTP_CONFIG ?? null, $CompanyEmail ?? null);
+    $mailer = buildMailer($smtp_config, $SysAdminEmail ?? '');
     $mailer->addAddress($email, $email);
     $mailer->Subject = $subject;
     $mailer->msgHTML($body, dirname(__FILE__), true);
@@ -138,7 +144,6 @@ while ($row = DB_fetch_array($Result)) {
     }
     $mailer->clearAddresses();
     $mailer->clearAttachments();
-    @unlink($tmpFile);
 }
 
 echo "Reminders sent: {$sent}\n";

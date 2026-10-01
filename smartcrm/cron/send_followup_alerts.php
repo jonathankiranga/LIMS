@@ -9,10 +9,36 @@ if (php_sapi_name() !== 'cli') {
     exit(1);
 }
 
-$PathPrefix = dirname(__DIR__) . '/';
-require $PathPrefix . 'includes/session.inc';
-require $PathPrefix . 'includes/SQL_CommonFunctions.inc';
+$PathPrefix = dirname(__DIR__) . DIRECTORY_SEPARATOR;
+
+// For CLI mode: set safe $_SERVER defaults (config.php reads PHP_SELF)
+if (PHP_SAPI === 'cli') {
+    $_SERVER['PHP_SELF'] = $_SERVER['PHP_SELF'] ?? 'cron/send_followup_alerts.php';
+    $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $_SERVER['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+    $_SERVER['SCRIPT_NAME'] = $_SERVER['SCRIPT_NAME'] ?? 'cron/send_followup_alerts.php';
+}
+
+require $PathPrefix . 'config.php';
+require $PathPrefix . 'includes/AutomationDB.inc';
 require $PathPrefix . 'Mailer/PHPMailerAutoload.php';
+
+$db = getAutomationDB();
+if (!$db) {
+    fwrite(STDERR, "Failed to connect to database\n");
+    exit(1);
+}
+
+$smtpConfigPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'smtp_config.php';
+if (!file_exists($smtpConfigPath)) {
+    fwrite(STDERR, "SMTP config not found at $smtpConfigPath\n");
+    exit(1);
+}
+require $smtpConfigPath;
+if (!isset($smtp_config) || !is_array($smtp_config)) {
+    fwrite(STDERR, "smtp_config.php did not define \$smtp_config\n");
+    exit(1);
+}
 
 $lookAheadDays = 1; // include today and tomorrow
 $nowUtc = gmdate('Y-m-d\TH:i:s\Z');
@@ -86,31 +112,21 @@ while ($row = DB_fetch_array($result)) {
 
     $mail = new PHPMailer();
     $mail->isSMTP();
-    // Load SMTP config if available
-    $smtpConfigPath = __DIR__ . '/smtp_config.php';
-    if (file_exists($smtpConfigPath)) {
-        require $smtpConfigPath;
+    $mail->CharSet = 'utf-8';
+
+    $mail->Host       = $smtp_config['host'] ?? '';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = $smtp_config['username'] ?? '';
+    $mail->Password   = $smtp_config['password'] ?? '';
+    $mail->Port       = $smtp_config['port'] ?? 25;
+
+    $secure = strtolower($smtp_config['secure'] ?? '');
+    if ($secure === 'ssl' || $secure === 'tls') {
+        $mail->SMTPSecure = $secure;
     }
-    if (isset($SMTP_CONFIG) && is_array($SMTP_CONFIG)) {
-        $mail->Host       = $SMTP_CONFIG['Host'] ?? '';
-        $mail->SMTPAuth   = $SMTP_CONFIG['SMTPAuth'] ?? false;
-        $mail->Username   = $SMTP_CONFIG['Username'] ?? '';
-        $mail->Password   = $SMTP_CONFIG['Password'] ?? '';
-        $mail->SMTPSecure = $SMTP_CONFIG['SMTPSecure'] ?? '';
-        $mail->Port       = $SMTP_CONFIG['Port'] ?? 25;
-        $fromEmail        = $SMTP_CONFIG['FromEmail'] ?? ($CompanyEmail ?? 'no-reply@localhost');
-        $fromName         = $SMTP_CONFIG['FromName'] ?? 'Smarternow CRM';
-    } else {
-        // fallback placeholders
-        $mail->Host = 'smtp.example.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'user';
-        $mail->Password = 'secret';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
-        $fromEmail = $CompanyEmail ?? 'no-reply@localhost';
-        $fromName  = 'Smarternow CRM';
-    }
+
+    $fromEmail = $smtp_config['from_email'] ?? ($SysAdminEmail ?: 'no-reply@localhost');
+    $fromName  = $smtp_config['from_name'] ?? 'Smarternow CRM';
 
     $mail->setFrom($fromEmail, $fromName);
     $mail->addAddress($email, $owner);
