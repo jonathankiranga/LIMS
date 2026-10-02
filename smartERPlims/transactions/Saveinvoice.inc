@@ -81,7 +81,9 @@ if($_SESSION['DocumentPosted']==true){
       ,'".$VATinclusive ."'
       ,'".$journal ."'
       ,'0'
-      ,picture
+      ,picture,
+      locationcode = '" . $db->real_escape_string($_POST['Bank_Code'] ?? '') . "',
+      externaldocumentno = '" . $db->real_escape_string((($_POST['Bank_Code2'] ?? '') !== '' && ($_POST['Bank_Code2'] ?? '') === ($_POST['Bank_Code'] ?? '')) ? '' : ($_POST['Bank_Code2'] ?? '')) . "'
       from SalesHeader 
       where documentno='".$_SESSION['DocumentNo']."') ";
    
