@@ -18,21 +18,13 @@ if(isset($_GET['ref'])){
     $_POST['documentno'] = $_GET['ref'];
     $_SESSION['DocumentPosted']=false;
     $_SESSION['DocumentPicking']=false;
-    $_SESSION['Qunatity_delivered']=0;
     $_POST['manualdocumentno']= GetTempNextNo(10);
 }
 
-if(isset($_POST['confirmed']) && $_POST['confirmed'] === '1'){
-    prnMsg("Saving",'info');
-    require_once('vendor/autoload.php');
-    include_once('includes/EtimsService.inc');
-    require_once('reports/BarCodeClass.inc');
-    include('transactions/Saveinvoice.inc');  
-}
-
-
 if(isset($_POST['delete']) and $_POST['delete']=='Delete Document for ever'){
-    if($_SESSION['Qunatity_delivered']==0){
+    /* An order with any delivered quantity must not be deleted. */
+    $delivCheck = DB_fetch_row(DB_query("SELECT COUNT(*) FROM SalesLine WHERE documentno='".$db->real_escape_string($_POST['documentno'])."' AND documenttype=1 AND IFNULL(Qunatity_delivered,0)>0", $db));
+    if((int)$delivCheck[0] == 0){
      $sql= sprintf("delete from SalesLine where `documentno`='%s' "
              . " and `SalesLine`.`documenttype`='1' ",$_POST['documentno']);
      DB_query($sql, $db);
@@ -41,7 +33,7 @@ if(isset($_POST['delete']) and $_POST['delete']=='Delete Document for ever'){
              . " and `SalesHeader`.`documenttype`='1' ",$_POST['documentno']);
      DB_query($sql, $db);
    }else{
-       prnMsg("Items exist",'warn');
+       prnMsg(_('Items on this order have been delivered, so it cannot be deleted.'),'warn');
    }
 }    
 
@@ -99,7 +91,42 @@ $rowresults = DB_fetch_row($ResultIndex);
     }
     
     $_POST['documentno'] = $rowresults[1];
-    
+
+/* Customer and tax settings drive both the line pricing and the verification
+   of the frozen payload, so resolve them before anything is saved. */
+$customerposting = '';
+$VATinclusive = 0;
+$IsTaxed = 1;
+
+$sqldebtors=DB_query("SELECT `itemcode` ,`creditlimit`,`customer`
+      ,`phone` ,`email` ,`city` ,`country`,`curr_cod`,`customerposting`,`salesman`,`VATinclusive`,`IsTaxed`
+       FROM `debtors` join postinggroups on code=`customerposting` where itemcode='".$db->real_escape_string($_POST['CustomerID'])."'", $db);
+$debtorsrow = DB_fetch_row($sqldebtors);
+if ($debtorsrow) {
+    $customerposting = $debtorsrow[8];
+    $VATinclusive = (int)(bool)$debtorsrow[10];
+    $IsTaxed = (int)$debtorsrow[11];
+}
+
+$invoiceLines = null;
+
+if(isset($_POST['confirmed']) && $_POST['confirmed'] === '1'){
+    /* Re-derive the lines from the payload that was rendered, never from the
+       current database state, so a delivery or repricing booked after the
+       page was loaded cannot change what gets invoiced. */
+    $invoiceLines = invoiceRebuildFrozenLines($db, $VATinclusive);
+
+    if ($invoiceLines === false) {
+        prnMsg(_('This invoice could not be verified. The form contents were altered or the page was tampered with. Reload the order and try again.'),'error');
+    } else {
+        prnMsg("Saving",'info');
+        require_once('vendor/autoload.php');
+        include_once('includes/EtimsService.inc');
+        require_once('reports/BarCodeClass.inc');
+        include('transactions/Saveinvoice.inc');
+    }
+}
+
 echo '<form autocomplete="off" action="'. htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') .'" method="post" id="salesform">';
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="'. $_SESSION['FormID'] .'" />';
@@ -142,31 +169,17 @@ $runningnettotal = 0;
 $runningvattotal = 0;
 $runninggrosstotal = 0;
 $runningshipping=0;
-    
-$sqldebtors=DB_query("SELECT `itemcode` ,`creditlimit`,`customer`
-      ,`phone` ,`email` ,`city` ,`country`,`curr_cod`,`customerposting`,`salesman`,`VATinclusive`,`IsTaxed`
-       FROM `debtors` join postinggroups on code=`customerposting` where itemcode='".$_POST['CustomerID']."'", $db);
-$debtorsrow = DB_fetch_row($sqldebtors);
-$customerposting = $debtorsrow[8];
-$VATinclusive = $debtorsrow[10];
-$IsTaxed = $debtorsrow[11];
 
-      
-$Slaqry ="SELECT `entryno`,`documenttype`,`docdate`,`documentno`,`locationcode`
-    ,`stocktype`,`code`,`description`,`unitofmeasure`,`Quantity`
-    ,`Quantity_toinvoice`,`Qunatity_delivered`,`UnitPrice`,`vatamount`,`invoiceamount`
-    ,`completed`,`printed` ,`containerprice`,`containersunits` 
-    ,`totalchargedcontainers`,`containercode`,`vatrate` ,`inclusive`,`partperunit` 
-    ,`PriceInPricelist`, `LineDiscountPercent`, `SampleID`, `TAT`
-  FROM `SalesLine` 
-  where `documentno`='".$_POST['documentno']."'
-    and `code` is not null and `code` != '' ";
+/* Only lines with a delivered quantity can be invoiced. Pricing comes from the
+   sales quotation (UnitPrice) and nothing else. */
+$computed = computeInvoiceLines($db, $_POST['documentno'], $VATinclusive, $IsTaxed, $_POST);
+$invoiceRows = $computed['lines'];
 
-
- 
- 
- 
-  $ResultIndex = DB_query($Slaqry,$db);
+/* Advisory notices float over the grid rather than sitting in the document
+   flow, so the table is not pushed out of position. */
+if (!empty($computed['errors'])) {
+    invoiceFloatNotice($computed['errors'], 'warn');
+}
 
 echo '<label>Filter: <input type="text" id="paramFilter" onkeyup="filterTable()" placeholder="Search code, description or sample ID..." size="40"></label>';
 echo '<table class="table-condensed table-responsive-small table-bordered" id="invoiceTable"><tr>'
@@ -186,169 +199,63 @@ $runningvattotal  = 0;
 $runninggrosstotal  = 0;
 $runningshipping = 0;
 
-
-// Pre-fetch item categories for all rows
+/* Categories drive the TS group headings below. */
 $itemCatMap = array();
-$itemDiscountMap = array();
-$ResultIndex2 = DB_query($Slaqry, $db);
-while ($sl = DB_fetch_array($ResultIndex2)) {
-    $sc = trim($sl['code']);
-    $itemCatMap[$sc] = '';
-    $itemDiscountMap[$sc] = (float)($sl['LineDiscountPercent'] ?? 0);
-}
-if (!empty($itemCatMap)) {
-    $escCats = array_map(function($c) use ($db) { return "'" . mysqli_real_escape_string($db, $c) . "'"; }, array_keys($itemCatMap));
+if (!empty($invoiceRows)) {
+    $escCats = array_map(function($c) use ($db) { return "'" . mysqli_real_escape_string($db, $c) . "'"; }, array_unique(array_column($invoiceRows, 'code')));
     $catRes = DB_query("SELECT itemcode, category FROM stockmaster WHERE itemcode IN (" . implode(',', $escCats) . ")", $db);
     while ($cr = DB_fetch_array($catRes)) {
         $itemCatMap[trim($cr['itemcode'])] = $cr['category'] ?? '';
     }
-    // Pre-fetch discounttable discounts
-    $discRes = DB_query("SELECT itemcode, discount_percent FROM discounttable WHERE itemcode IN (" . implode(',', $escCats) . ") AND is_active = 1", $db);
-    while ($dr = DB_fetch_array($discRes)) {
-        $itemDiscountMap[trim($dr['itemcode'])] = (float)$dr['discount_percent'];
-    }
 }
 
-while($stocklist=DB_fetch_array($ResultIndex)){
-    
-    $emptycost=0; $totalemptycost=0; $cvatamount =0; $cnetamount=0; $cgrossamount=0; $emptyunits=0;$Shipping=0;
-    $PriceInPricelist=0;
-    
-    $itemcode = trim($stocklist['entryno']);
-    $stkcode = trim($stocklist['code']);
+$rowsHtml = array();
+$rowCat = array();
+
+foreach ($invoiceRows as $entryno => $row) {
+    $stkcode = $row['code'];
     $rowCategory = $itemCatMap[$stkcode] ?? '';
-    $rowDiscFromTable = $itemDiscountMap[$stkcode] ?? 0;
-    $containercode = trim($stocklist['container']);
-    $InfRowContainers = ContainerInfo($stkcode);
-    $rate = ($IsTaxed==0)?0: $stocklist['vatrate'];
-   
-    $location = $_POST['location'][$itemcode];
-    $qty = $stocklist['Qunatity_delivered'];
-    $PriceInPricelist = $stocklist['PriceInPricelist'];
-    $unitofmeasure = $stocklist['unitofmeasure'];
-    $salesprice = $stocklist['PriceInPricelist'];
-    if(!$salesprice || $salesprice == 0){
-         $salesprice  = SelectTestPriceListToUse($stkcode,$qty,$_POST['CustomerID']) ;
-         $PriceInPricelist = SelectTestPriceListToUse($stkcode,$qty) ;
-         $salesprice = ($salesprice==0)?$PriceInPricelist:$salesprice;
-    }
-    $_SESSION['Qunatity_delivered'] += $qty;
-       
-    if($stocklist['partperunit']>1){
-            $baseamount = ($salesprice * $qty);
- 
-            if(isset($_POST['emptycost'][$itemcode])){
-                
-                 $emptycost = $_POST['emptycost'][$itemcode];
-                 $totalemptycost = ($emptycost * $qty);             
-                 $crate = $InfRowContainers[3];
-                 $cnetamount = $totalemptycost;
-                 
-                 if($VATinclusive==true){
-                    $cvatamount = $cnetamount * ($crate/100+$crate);
-                    $cgrossamount= $cnetamount ;
-                }else{
-                    $cvatamount = $cnetamount * ($crate/100);
-                    $cgrossamount= $cnetamount + $cvatamount;
-                }
-                
-            }
-     } else {
-          $baseamount = ($salesprice * $qty);
-    }
-    // determine line discount percent: prefer stored order value, then POST override(s), then header
-    $lineDiscountPercent = 0.0;
-    if (isset($stocklist['LineDiscountPercent'])) {
-        $lineDiscountPercent = (float)$stocklist['LineDiscountPercent'];
-    }
-    // allow overrides from the form (old capitalization or new lowercase name)
-    if (isset($_POST['linediscountpercent']) && is_array($_POST['linediscountpercent']) && isset($_POST['linediscountpercent'][$itemcode])) {
-        $lineDiscountPercent = (float)$_POST['linediscountpercent'][$itemcode];
-    } elseif (isset($_POST['LineDiscountPercent']) && is_array($_POST['LineDiscountPercent']) && isset($_POST['LineDiscountPercent'][$itemcode])) {
-        $lineDiscountPercent = (float)$_POST['LineDiscountPercent'][$itemcode];
-    } elseif (isset($_POST['DiscountPercent']) && $_POST['DiscountPercent'] !== '') {
-        $lineDiscountPercent = (float)$_POST['DiscountPercent'];
-    }
-    $discountResult = calculateLineDiscount($baseamount, $lineDiscountPercent);
-    $discountAmount = $discountResult['discount_amount'];
-    $baseamount = $discountResult['amount_after'];
-    // determine sample id and tat to show in UI (prefer stored values)
-    $sampleValue = '';
-    if (isset($stocklist['SampleID'])) {
-        $sampleValue = $stocklist['SampleID'];
-    } elseif (isset($stocklist['sampleID'])) {
-        $sampleValue = $stocklist['sampleID'];
-    }
-    $tatValue = isset($stocklist['TAT']) ? $stocklist['TAT'] : (isset($stocklist['tat']) ? $stocklist['tat'] : '');
-        
-    
-   $Shipping =(float)(isset($_POST['Shipping'][$itemcode])?$_POST['Shipping'][$itemcode] :$PostShipping); 
-   
-    if($VATinclusive==true){
-        $netamount = ($baseamount  * (1- ($rate/(100+$rate)))) ;
-        $vatamount = ($baseamount  * ($rate/(100+$rate))) ;
-        $grossamount = $baseamount + $Shipping+$Postpackaging   ;
-    }else{
-        $vatamount  = ($baseamount  * ($rate/100));
-        $grossamount = $baseamount  + $vatamount + $Shipping+$Postpackaging ;
-        $netamount = $baseamount;
-    }
-  
-    
-    $runningnettotal += ($netamount);
-    $runningvattotal += ($vatamount);
-    $runninggrosstotal += ($grossamount) ;
-    $runningshipping += round($Shipping,1);
-    
-    // Invoice lines keep the order's own line discount (no category override on invoices).
-    $appliedDiscount = $lineDiscountPercent;
+    $rowDiscFromTable = 0;
 
-    $rowsHtml[$itemcode] = '<tr data-itemcode="'.htmlspecialchars($stkcode,ENT_QUOTES).'" data-category="'.htmlspecialchars($rowCategory,ENT_QUOTES).'" data-discount="'.htmlspecialchars($rowDiscFromTable,ENT_QUOTES).'">'
+    $runningnettotal += $row['netamount'];
+    $runningvattotal += $row['vatamount'];
+    $runninggrosstotal += $row['grossamount'];
+    $runningshipping += round($row['Shipping'], 1);
+
+/* Invoice lines keep the order's own line discount, no category override. */
+    $appliedDiscount = $row['linediscountpercent'];
+
+    /* A line with no quotation price gets an editable price box so it can be
+       priced inline. Lines that already carry the quotation price stay
+       read-only, so the agreed price cannot be altered by accident. */
+    if ($row['priceMissing']) {
+        $priceCell = '<input type="text" class="number priceinput" name="salesprice['.$entryno.']" size="8" value="" placeholder="0.00" />';
+        $rowClass  = ' class="needprice"';
+    } else {
+        $priceCell = '<input type="text" class="number priceinput" name="salesprice['.$entryno.']" size="8" value="'.htmlspecialchars(number_format($row['salesprice'],2),ENT_QUOTES).'" readonly="readonly" />';
+        $rowClass  = '';
+    }
+
+    $rowsHtml[$entryno] = '<tr'.$rowClass.' data-itemcode="'.htmlspecialchars($stkcode,ENT_QUOTES).'" data-category="'.htmlspecialchars($rowCategory,ENT_QUOTES).'" data-discount="'.htmlspecialchars($rowDiscFromTable,ENT_QUOTES).'">'
          .'<td>'.$stkcode.'</td>'
-         .'<td>'.trim($stocklist['description']).'</td>'
-         .'<td><input type="text" name="sampleid['.$itemcode.']" value="'.htmlspecialchars($sampleValue,ENT_QUOTES).'" size="10" /></td>'
-         .'<td class="number">'.$qty.'</td>'
-         .'<td class="number">'.number_format($salesprice,2).'</td>'
-         .'<td class="number"><input type="text" class="number linediscountinput" name="linediscountpercent['.$itemcode.']" size="6" value="'.htmlspecialchars(number_format($appliedDiscount,2),ENT_QUOTES).'" /></td>'
-         .'<td class="number">'.number_format($netamount,2).'</td>'
-         .'<td class="number">'.number_format($vatamount,2).'</td>'
-         .'<td class="number">'.number_format($grossamount,2).'</td>'
-         .'<td class="number"><input type="text" name="TAT['.$itemcode.']" size="4" value="'.htmlspecialchars($tatValue,ENT_QUOTES).'" /></td>'
+         .'<td>'.htmlspecialchars($row['description'],ENT_QUOTES).'</td>'
+         .'<td><input type="text" name="sampleid['.$entryno.']" value="'.htmlspecialchars($row['sampleid'],ENT_QUOTES).'" size="10" /></td>'
+         .'<td class="number">'.$row['qty'].'</td>'
+         .'<td class="number">'.$priceCell.'</td>'
+         .'<td class="number"><input type="text" class="number linediscountinput" name="linediscountpercent['.$entryno.']" size="6" value="'.htmlspecialchars(number_format($appliedDiscount,2),ENT_QUOTES).'" /></td>'
+         .'<td class="number">'.number_format($row['netamount'],2).'</td>'
+         .'<td class="number">'.number_format($row['vatamount'],2).'</td>'
+         .'<td class="number">'.number_format($row['grossamount'],2).'</td>'
+         .'<td class="number"><input type="text" name="TAT['.$entryno.']" size="4" value="'.htmlspecialchars($row['TAT'],ENT_QUOTES).'" /></td>'
          .'</tr>';
-    $rowCat[$itemcode] = $rowCategory;
+    $rowCat[$entryno] = $rowCategory;
+}
 
-    $_SESSION['invoiceRows'][$itemcode] = [
-        'entryno' => $itemcode,
-        'code' => $stkcode,
-        'description' => trim($stocklist['description']),
-        'unitofmeasure' => $stocklist['unitofmeasure'],
-        'qty' => $qty,
-        'salesprice' => $salesprice,
-        'PriceInPricelist' => $PriceInPricelist,
-        'UnitPrice' => $stocklist['UnitPrice'],
-        'vatrate' => $stocklist['vatrate'],
-        'inclusive' => $stocklist['inclusive'],
-        'locationcode' => $stocklist['locationcode'],
-        'partperunit' => $stocklist['partperunit'],
-        'containercode' => $containercode,
-        'linepackage' => isset($Postpackaging) ? $Postpackaging : 0,
-        'Shipping' => $Shipping,
-        'netamount' => $netamount,
-        'vatamount' => $vatamount,
-        'grossamount' => $grossamount,
-        'emptycost' => $emptycost,
-        'totalemptycost' => $cgrossamount,
-        'discountamount' => $discountAmount,
-        'linediscountpercent' => $lineDiscountPercent,
-        'sampleid' => $sampleValue,
-        'TAT' => $tatValue,
-    ];
-}
-   
-if (!isset($rowsHtml)) {
-    $rowsHtml = array();
-    $rowCat = array();
-}
+/* Freeze the computed lines into a signed payload. The signature is verified on
+   save, so these values are what gets invoiced regardless of later changes. */
+echo '<input type="hidden" name="invoice_freeze" value="'.htmlspecialchars(base64_encode(json_encode($invoiceRows)),ENT_QUOTES).'" />';
+echo '<input type="hidden" name="invoice_freeze_sig" value="'.invoiceFreezeSign($invoiceRows).'" />';
+
 
 if (!defined('STDGROUP_CSS')) {
     define('STDGROUP_CSS', 1);
@@ -439,6 +346,72 @@ function filterTable(){
 include('includes/footer.inc');
 
 
+/* ------------------------------------------------------------------------
+ * Floating notice
+ *
+ * Sits above the page instead of in the document flow, so it cannot shift
+ * the grid or the totals out of alignment. Dismissable, and collapses to a
+ * single line when there is only one message.
+ * ---------------------------------------------------------------------- */
+function invoiceFloatNotice($messages, $type = 'warn')
+{
+    $messages = array_values(array_unique((array)$messages));
+    if (empty($messages)) {
+        return;
+    }
+
+    $esc = function ($s) {
+        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    };
+
+    if (count($messages) === 1) {
+        $body = '<p class="fnv-msg">' . $esc($messages[0]) . '</p>';
+    } else {
+        $items = '';
+        foreach ($messages as $m) {
+            $items .= '<li>' . $esc($m) . '</li>';
+        }
+        $body = '<p class="fnv-count">' . count($messages) . ' items need attention:</p>'
+              . '<ul class="fnv-list">' . $items . '</ul>';
+    }
+
+    echo '<div id="invoiceFloatNotice" class="fnv fnv-' . $esc($type) . '" role="alert">'
+       . '<button type="button" class="fnv-close" title="Dismiss" '
+       . 'onclick="document.getElementById(\'invoiceFloatNotice\').style.display=\'none\'">&times;</button>'
+       . $body
+       . '</div>';
+
+    echo '<style>
+    #invoiceFloatNotice.fnv{
+        position:fixed; top:12px; right:12px; z-index:99999;
+        max-width:420px; padding:12px 34px 12px 14px;
+        background:#fffbe6; color:#5a3e00;
+        border:1px solid #d9b64a; border-left:4px solid #d9b64a;
+        border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,.18);
+        font-size:13px; line-height:1.45; text-align:left;
+    }
+    #invoiceFloatNotice.fnv-error{
+        background:#fdeaea; color:#7a1414; border-color:#c94a4a; border-left-color:#c94a4a;
+    }
+    #invoiceFloatNotice.fnv-info{
+        background:#eaf3fd; color:#12456f; border-color:#4a90c9; border-left-color:#4a90c9;
+    }
+    #invoiceFloatNotice.fnv .fnv-msg{ margin:0; }
+    #invoiceFloatNotice.fnv .fnv-count{ margin:0 0 6px; font-weight:bold; }
+    #invoiceFloatNotice.fnv .fnv-list{ margin:0; padding-left:18px; }
+    #invoiceFloatNotice.fnv .fnv-list li{ margin:2px 0; }
+    #invoiceFloatNotice.fnv .fnv-close{
+        position:absolute; top:6px; right:8px;
+        background:none; border:0; font-size:20px; line-height:1;
+        color:inherit; opacity:.6; cursor:pointer; padding:0 4px;
+    }
+    #invoiceFloatNotice.fnv .fnv-close:hover{ opacity:1; }
+    tr.needprice td{ background:#fff6d5; }
+    tr.needprice td.priceinput{ font-weight:bold; }
+    </style>';
+}
+
+
 function calculateLineDiscount($amount, $discountPercent){
     $discountPercent = floatval($discountPercent);
     if($discountPercent <= 0){
@@ -449,6 +422,298 @@ function calculateLineDiscount($amount, $discountPercent){
     return array('amount_after' => $amount_after, 'discount_amount' => $discount_amount);
 }
 
+
+/* ------------------------------------------------------------------------
+ * Invoice line freezing
+ *
+ * Line values are computed on page load and frozen into a signed hidden
+ * payload. On save the payload is verified, so a price list edit, a repricing
+ * or a delivery booked after the page was rendered cannot change what gets
+ * invoiced. The signature also prevents a browser-side edit of the hidden
+ * fields.
+ * ---------------------------------------------------------------------- */
+
+/** Server-side signing key. Never emitted into the page markup. */
+function invoiceFreezeKey(){
+    global $InvoiceFreezeSecret;
+
+    if (!empty($InvoiceFreezeSecret)) {
+        return (string)$InvoiceFreezeSecret;
+    }
+    if (empty($_SESSION['InvoiceFreezeKey'])) {
+        if (function_exists('random_bytes')) {
+            $_SESSION['InvoiceFreezeKey'] = bin2hex(random_bytes(32));
+        } else {
+            $_SESSION['InvoiceFreezeKey'] = sha1(uniqid((string)mt_rand(), true));
+        }
+    }
+    return $_SESSION['InvoiceFreezeKey'];
+}
+
+/** Fields carried in the frozen payload, in a fixed order. */
+function invoiceFrozenFields(){
+    return array(
+        'entryno', 'code', 'description', 'unitofmeasure', 'qty',
+        'salesprice', 'PriceInPricelist', 'vatrate', 'inclusive',
+        'locationcode', 'partperunit', 'containercode',
+        'Shipping', 'linepackage', 'totalemptycost', 'totalchargedcontainers',
+        /* Governs whether a posted price may override the frozen one, so it
+           must itself be signed or the flag can be forged. */
+        'priceMissing',
+    );
+}
+
+/** Canonical string form of the frozen set, used as the HMAC message. */
+function invoiceFreezeCanonical($rows){
+    $fields = invoiceFrozenFields();
+    $lines = array();
+
+    foreach ($rows as $entryno => $row) {
+        $parts = array((string)$entryno);
+        foreach ($fields as $field) {
+            $parts[] = isset($row[$field]) ? (string)$row[$field] : '';
+        }
+        $lines[] = implode('|', $parts);
+    }
+    return implode("\n", $lines);
+}
+
+function invoiceFreezeSign($rows){
+    return hash_hmac('sha256', invoiceFreezeCanonical($rows), invoiceFreezeKey());
+}
+
+/**
+ * Net / VAT / gross for one line.
+ *
+ * The base (salesprice * qty) is frozen; the line discount is applied to it
+ * here, so a discount typed into the form is honoured even when the user
+ * confirms without pressing Re-Calculate.
+ */
+function invoiceLineAmounts($salesprice, $qty, $discountpercent, $rate, $VATinclusive, $Shipping, $linepackage){
+    $baseamount = ((float)$salesprice) * ((float)$qty);
+    $disc = calculateLineDiscount($baseamount, $discountpercent);
+    $after = $disc['amount_after'];
+    $Shipping = (float)$Shipping;
+    $linepackage = (float)$linepackage;
+    $rate = (float)$rate;
+
+    if ($VATinclusive) {
+        $netamount = $after * (1 - ($rate / (100 + $rate)));
+        $vatamount = $after * ($rate / (100 + $rate));
+        $grossamount = $netamount + $vatamount + $Shipping + $linepackage;
+    } else {
+        $vatamount = $after * ($rate / 100);
+        $grossamount = $after + $vatamount + $Shipping + $linepackage;
+        $netamount = $after;
+    }
+
+    return array(
+        'baseamount'    => $baseamount,
+        'discountamount' => $disc['discount_amount'],
+        'netamount'     => $netamount,
+        'vatamount'     => $vatamount,
+        'grossamount'   => $grossamount,
+    );
+}
+
+/**
+ * Load the order lines that may be invoiced and compute their amounts.
+ *
+ * Lines with no delivered quantity are excluded in SQL so the grid, the
+ * totals and the save all work from one set. Price is the agreed quotation
+ * price (UnitPrice) and nothing else.
+ *
+ * Returns array('lines' => rows keyed by entryno, 'errors' => array of strings).
+ */
+function computeInvoiceLines($db, $documentno, $VATinclusive, $IsTaxed, $post = array()){
+    $query = "SELECT `entryno`,`documenttype`,`docdate`,`documentno`,`locationcode`
+        ,`stocktype`,`code`,`description`,`unitofmeasure`
+        ,`Qunatity_delivered`,`UnitPrice`
+        ,`vatrate`,`inclusive`,`partperunit`,`containercode`
+        ,`totalchargedcontainers`,`PriceInPricelist`,`LineDiscountPercent`,`SampleID`,`TAT`
+      FROM `SalesLine`
+      WHERE `documentno`='" . $db->real_escape_string($documentno) . "'
+        AND `code` IS NOT NULL AND `code` != ''
+        AND IFNULL(`Qunatity_delivered`,0) > 0
+      ORDER BY `entryno`";
+
+    $ResultIndex = DB_query($query, $db);
+
+    $lines = array();
+    $errors = array();
+
+    while ($stocklist = DB_fetch_array($ResultIndex)) {
+        $entryno = (string)$stocklist['entryno'];
+        $stkcode = trim($stocklist['code']);
+
+        /* Quotation price, unconditionally. No price list lookup. */
+        $salesprice = (float)$stocklist['UnitPrice'];
+
+        /* A line with no quotation price is still invoiced: it is shown with
+           an empty editable price so the user can supply one. It is flagged so
+           the notice can point at it, not hidden away. */
+        $priceMissing = ($salesprice <= 0);
+
+        if ($priceMissing && isset($post['salesprice'][$entryno]) && $post['salesprice'][$entryno] !== '') {
+            $salesprice = (float)$post['salesprice'][$entryno];
+            $priceMissing = ($salesprice <= 0);
+        }
+
+        if ($priceMissing) {
+            $errors[] = sprintf(
+                _('Item %1$s (%2$s) has no price on the sales quotation. Enter a price to include it on the invoice.'),
+                $stkcode,
+                trim($stocklist['description'])
+            );
+        }
+
+        $qty = (float)$stocklist['Qunatity_delivered'];
+        $rate = ((int)$IsTaxed == 0) ? 0 : (float)$stocklist['vatrate'];
+        $containercode = trim($stocklist['containercode']);
+
+        $Shipping = 0;
+        if (isset($post['Shipping'][$entryno])) {
+            $Shipping = (float)$post['Shipping'][$entryno];
+        }
+        $linepackage = 0;
+
+        /* Discount: order line value, then a form override. */
+        $lineDiscountPercent = (float)($stocklist['LineDiscountPercent'] ?? 0);
+        if (isset($post['linediscountpercent'][$entryno])) {
+            $lineDiscountPercent = (float)$post['linediscountpercent'][$entryno];
+        } elseif (isset($post['LineDiscountPercent'][$entryno])) {
+            $lineDiscountPercent = (float)$post['LineDiscountPercent'][$entryno];
+        } elseif (isset($post['DiscountPercent']) && $post['DiscountPercent'] !== '') {
+            $lineDiscountPercent = (float)$post['DiscountPercent'];
+        }
+
+        $amounts = invoiceLineAmounts(
+            $salesprice, $qty, $lineDiscountPercent, $rate, $VATinclusive, $Shipping, $linepackage
+        );
+
+        $lines[$entryno] = array(
+            'entryno'        => $entryno,
+            'code'           => $stkcode,
+            'description'    => trim($stocklist['description']),
+            'unitofmeasure'  => $stocklist['unitofmeasure'],
+            'qty'            => $qty,
+            'salesprice'     => $salesprice,
+            'PriceInPricelist' => (float)($stocklist['PriceInPricelist'] ?? 0),
+            'vatrate'        => $rate,
+            'inclusive'      => (int)((bool)$VATinclusive),
+            'locationcode'   => $stocklist['locationcode'],
+            'partperunit'    => (float)($stocklist['partperunit'] ?? 0),
+            'containercode'  => $containercode,
+            'Shipping'       => $Shipping,
+            'linepackage'    => $linepackage,
+            'totalemptycost' => 0,
+            'totalchargedcontainers' => (float)($stocklist['totalchargedcontainers'] ?? 0),
+            'linediscountpercent' => $lineDiscountPercent,
+            'priceMissing'   => $priceMissing,
+            'sampleid'       => isset($stocklist['SampleID']) ? $stocklist['SampleID'] : '',
+            'TAT'            => isset($stocklist['TAT']) ? $stocklist['TAT'] : '',
+            'netamount'      => $amounts['netamount'],
+            'vatamount'      => $amounts['vatamount'],
+            'grossamount'    => $amounts['grossamount'],
+            'baseamount'     => $amounts['baseamount'],
+            'discountamount' => $amounts['discountamount'],
+        );
+    }
+
+    return array('lines' => $lines, 'errors' => $errors);
+}
+
+/**
+ * Decode and verify the frozen payload posted with the confirmation.
+ *
+ * Returns the verified rows with totals recomputed from the frozen base and
+ * the posted discount, or false when the payload is missing or has been
+ * tampered with.
+ */
+function invoiceRebuildFrozenLines($db, $VATinclusive){
+    if (!isset($_POST['invoice_freeze']) || !isset($_POST['invoice_freeze_sig'])) {
+        return false;
+    }
+
+    $raw = base64_decode($_POST['invoice_freeze'], true);
+    if ($raw === false) {
+        return false;
+    }
+    $rows = json_decode($raw, true);
+    if (!is_array($rows) || empty($rows)) {
+        return false;
+    }
+
+    /* Verify against the values as received, before any recalculation. */
+    if (!hash_equals(invoiceFreezeSign($rows), (string)$_POST['invoice_freeze_sig'])) {
+        return false;
+    }
+
+    $verified = array();
+    foreach ($rows as $entryno => $row) {
+        if (!is_array($row)) {
+            return false;
+        }
+        foreach (invoiceFrozenFields() as $field) {
+            if (!isset($row[$field])) {
+                return false;
+            }
+        }
+
+        /* Discount, sample ID and TAT are user-editable on the form. */
+        $discount = $row['linediscountpercent'];
+        if (isset($_POST['linediscountpercent'][$entryno])) {
+            $discount = (float)$_POST['linediscountpercent'][$entryno];
+        }
+
+        /* Price is editable only where the quotation had none. Where the
+           quotation set a price, the signed frozen value stands and a posted
+           value cannot override it. */
+        if (!empty($row['priceMissing']) && isset($_POST['salesprice'][$entryno])
+            && $_POST['salesprice'][$entryno] !== '') {
+            $row['salesprice'] = (float)$_POST['salesprice'][$entryno];
+            $row['priceMissing'] = ($row['salesprice'] <= 0);
+        }
+        $sampleid = $row['sampleid'];
+        if (isset($_POST['sampleid'][$entryno]) && $_POST['sampleid'][$entryno] !== '') {
+            $sampleid = $_POST['sampleid'][$entryno];
+        }
+        $tat = $row['TAT'];
+        if (isset($_POST['TAT'][$entryno]) && $_POST['TAT'][$entryno] !== '') {
+            $tat = $_POST['TAT'][$entryno];
+        }
+
+        /* Tax basis comes from the signed payload, not from the debtor as it
+           stands now. If the debtor's flag changed since the invoice was
+           rendered, refuse rather than silently reprice the confirmed lines. */
+        $frozenInclusive = (int)((bool)$row['inclusive']);
+        if ((int)((bool)$VATinclusive) !== $frozenInclusive) {
+            return false;
+        }
+
+        $amounts = invoiceLineAmounts(
+            (float)$row['salesprice'], (float)$row['qty'], $discount,
+            (float)$row['vatrate'], $frozenInclusive, $row['Shipping'], $row['linepackage']
+        );
+
+        $row['linediscountpercent'] = (float)$discount;
+        $row['sampleid'] = $sampleid;
+        $row['TAT'] = $tat;
+        $row['qty'] = (float)$row['qty'];
+        $row['salesprice'] = (float)$row['salesprice'];
+        $row['vatrate'] = (float)$row['vatrate'];
+        $row['inclusive'] = $frozenInclusive;
+        $row['netamount'] = $amounts['netamount'];
+        $row['vatamount'] = $amounts['vatamount'];
+        $row['grossamount'] = $amounts['grossamount'];
+        $row['baseamount'] = $amounts['baseamount'];
+        $row['discountamount'] = $amounts['discountamount'];
+
+        $verified[$entryno] = $row;
+    }
+
+    return $verified;
+}
 
 function ContainerInfo($itemcode){
     global $db;

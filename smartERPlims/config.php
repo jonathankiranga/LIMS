@@ -20,6 +20,10 @@ putenv('TZ=Africa/Nairobi');
 $AllowCompanySelectionBox = 'ShowSelectionBox';
 //The system administrator name use the user input mail;
 $SysAdminEmail = '';
+// Signing key used to freeze invoice line values between render and save.
+// Leave blank and a per-session key is generated automatically; set a long
+// random value here to keep signatures valid across server restarts.
+$InvoiceFreezeSecret = '';
 $DefaultDatabase = 'mozillaerpv2';
 $SessionLifeTime = 144000;
 $MaximumExecutionTime = 1000;

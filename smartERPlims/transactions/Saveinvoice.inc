@@ -85,62 +85,82 @@ if($_SESSION['DocumentPosted']==true){
       from SalesHeader 
       where documentno='".$_SESSION['DocumentNo']."') ";
    
-    $skippedZero = 0;
-    foreach ($_SESSION['invoiceRows'] as $key => $row) {
+/* Lines come from the verified frozen payload, never from session state or a
+       fresh read of the order. Every value written below comes from that
+       payload so nothing can shift between rendering and posting. */
+    $invoiceUnpriced = array();
+    foreach ($invoiceLines as $key => $row) {
 
-        // Skip zero-amount lines: nothing to bill (price and gross both
-        // come from the freshly re-rendered session rows).
+        /* Nothing to bill: no price was entered, so the line is left off. */
         if (!isset($row['salesprice']) || (float)$row['salesprice'] <= 0
             || !isset($row['grossamount']) || (float)$row['grossamount'] <= 0) {
-            $skippedZero++;
+            $invoiceUnpriced[] = trim($row['code']) . ' (' . trim($row['description']) . ')';
             continue;
         }
         {
-            $linepackage = $row['linepackage'];
-            $Shipping = $row['Shipping'];
-            $netamount = $row['netamount'];
-            $vatamount = $row['vatamount'];
-            $grossamount = $row['grossamount'];
-            $totalemptycost = $row['totalemptycost'];
-            $salesprice = $row['salesprice'];
+            $linepackage = (float)$row['linepackage'];
+            $Shipping = (float)$row['Shipping'];
+            $netamount = (float)$row['netamount'];
+            $vatamount = (float)$row['vatamount'];
+            $grossamount = (float)$row['grossamount'];
+            $totalemptycost = (float)$row['totalemptycost'];
+            $salesprice = (float)$row['salesprice'];
+            $qty = (float)$row['qty'];
+            $unitofmeasure = $db->real_escape_string($row['unitofmeasure']);
+            $code = $db->real_escape_string($row['code']);
+            $description = $db->real_escape_string($row['description']);
+            $locationcode = $db->real_escape_string($row['locationcode']);
+            $containercode = $db->real_escape_string($row['containercode']);
+            $partperunit = (float)$row['partperunit'];
+            $vatrate = (float)$row['vatrate'];
+            $PriceInPricelist = (float)$row['PriceInPricelist'];
+            $totalchargedcontainers = (float)$row['totalchargedcontainers'];
 
-            // Determine discount to persist: prefer POST override, otherwise session row value
-            if (isset($_POST['linediscountpercent']) && isset($_POST['linediscountpercent'][$key])) {
-                $ld_sql = (float) $_POST['linediscountpercent'][$key];
-            } else {
-                $ld_sql = $row['linediscountpercent'];
-            }
+            /* Discount to persist: the payload value was already updated with
+               the POST override when the frozen rows were rebuilt. */
+            $ld_sql = sprintf('%F', (float)$row['linediscountpercent']);
 
-            // Determine sampleID to persist: prefer POST override, otherwise session row value
-            if (isset($_POST['sampleid']) && isset($_POST['sampleid'][$key]) && $_POST['sampleid'][$key] !== '') {
-                $sample_sql = "'" . $db->real_escape_string($_POST['sampleid'][$key]) . "'";
-            } else {
-                $sample_sql = "'" . $db->real_escape_string($row['sampleid']) . "'";
-            }
+            $sample_sql = "'" . $db->real_escape_string($row['sampleid']) . "'";
+            $tat_sql = (string)(int)$row['TAT'];
 
-            // Determine TAT to persist: prefer POST override, otherwise session row value
-            if (isset($_POST['TAT']) && isset($_POST['TAT'][$key]) && $_POST['TAT'][$key] !== '') {
-                $tat_sql = (int) $_POST['TAT'][$key];
-            } else {
-                $tat_sql = (int) $row['TAT'];
-            }
+            /* Persist the tax basis the amounts were calculated with, taken
+               from the signed payload, not the debtor row read a moment ago. */
+            $rowInclusive = isset($row['inclusive']) ? (int)((bool)$row['inclusive']) : (int)((bool)$VATinclusive);
 
-           $sql[] =  sprintf("INSERT INTO SalesLine
-           (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,
-           vatamount,invoiceamount,vatrate,inclusive,locationcode,partperunit,LineDiscountPercent,shipping,packagescharge,
-           PriceInPricelist,totalchargedcontainers,containercode,sampleID,TAT) 
-           (select '%s','%s','%s',code,description,unitofmeasure,Qunatity_delivered,
-           %f ,%f ,%f ,vatrate,inclusive,locationcode,partperunit,%s,%f,%f,PriceInPricelist ,%f ,containercode,%s,%s from SalesLine where entryno='".$key."')" ,
-            10 ,FormatDateForSQL($_POST['date']) ,$INVOICENO ,
-            $salesprice,$vatamount ,$grossamount ,$ld_sql, $Shipping,
-            $linepackage,$totalemptycost, $sample_sql, $tat_sql );
+            $sql[] = sprintf(
+                "INSERT INTO SalesLine
+                   (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,
+                    vatamount,invoiceamount,vatrate,inclusive,locationcode,partperunit,LineDiscountPercent,
+                    shipping,packagescharge,PriceInPricelist,totalchargedcontainers,containercode,sampleID,TAT)
+                 VALUES
+                   (10,'%s','%s','%s','%s','%s',%F,
+                    %F,%F,%F,%F,%d,'%s',%F,%s,
+                    %F,%F,%F,%F,'%s',%s,%s)",
+                FormatDateForSQL($_POST['date']),
+                $INVOICENO,
+                $code,
+                $description,
+                $unitofmeasure,
+                $qty,
+                $salesprice,
+                $vatamount,
+                $grossamount,
+                $vatrate,
+                (int)((bool)$rowInclusive),
+                $locationcode,
+                $partperunit,
+                $ld_sql,
+                $Shipping,
+                $linepackage,
+                $PriceInPricelist,
+                $totalchargedcontainers,
+                $containercode,
+                $sample_sql,
+                $tat_sql
+            );
         }
     }
 
-    if ($skippedZero > 0) {
-        prnMsg($skippedZero . ' zero-amount line(s) skipped (not saved to the invoice).', 'info');
-    }
-        
     $sql[]=PostGL($PeriodNo,$journal,$INVOICENO);
     $sql[]=PostDebtors($PeriodNo,$journal,$INVOICENO);
     $sql[]=VATPostGL($PeriodNo,$journal,$INVOICENO);
@@ -151,7 +171,7 @@ if($_SESSION['DocumentPosted']==true){
         JOIN stockmaster sm ON sl.code = sm.itemcode
         JOIN inventorypostinggroup ipg ON ipg.code = sm.postinggroup
         WHERE sl.documentno = '".$_SESSION['DocumentNo']."'
-        AND (ipg.CostOfSales IS NULL OR ipg.balancesheet IS NULL)");
+        AND (ipg.CostOfSales IS NULL OR ipg.balancesheet IS NULL)", $db);
     $badCount = DB_fetch_row($checkResult);
     if ($badCount[0] > 0) {
         prnMsg('Cannot post the invoice. ' . $badCount[0] . ' item(s) have inventory posting groups with missing Cost of Sales or Balance Sheet accounts. Update them in Inventory Posting Groups before posting.', 'error');
@@ -211,9 +231,24 @@ if($_SESSION['DocumentPosted']==true){
         echo sprintf('<script type="text/javascript">ForcePDFPrint(\'%s\');</script>',$INVOICENO);
         
          
-        $_SESSION['DocumentPosted']=true;
-        unset($_SESSION['DocumentNo']);
-        unset($_POST);
+$_SESSION['DocumentPosted']=true;
+         unset($_SESSION['DocumentNo']);
+         unset($_POST);
+
+        /* Tell the user, without shifting the page, which lines were left off
+           for want of a price. */
+        if (!empty($invoiceUnpriced)) {
+            if (function_exists('invoiceFloatNotice')) {
+                $msgs = array();
+                foreach ($invoiceUnpriced as $u) {
+                    $msgs[] = sprintf(
+                        _('Item %s was not invoiced: no price was entered. Reopen the order to add it.'),
+                        $u
+                    );
+                }
+                invoiceFloatNotice($msgs, 'warn');
+            }
+        }
     }
     
 }
