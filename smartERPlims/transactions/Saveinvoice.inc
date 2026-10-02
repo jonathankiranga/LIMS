@@ -81,11 +81,16 @@ if($_SESSION['DocumentPosted']==true){
       ,'".$VATinclusive ."'
       ,'".$journal ."'
       ,'0'
-      ,picture,
-      locationcode = '" . $db->real_escape_string($_POST['Bank_Code'] ?? '') . "',
-      externaldocumentno = '" . $db->real_escape_string((($_POST['Bank_Code2'] ?? '') !== '' && ($_POST['Bank_Code2'] ?? '') === ($_POST['Bank_Code'] ?? '')) ? '' : ($_POST['Bank_Code2'] ?? '')) . "'
+      ,picture
       from SalesHeader 
       where documentno='".$_SESSION['DocumentNo']."') ";
+
+$bank1 = trim($_POST['Bank_Code'] ?? '');
+$bank2 = trim($_POST['Bank_Code2'] ?? '');
+if ($bank2 !== '' && $bank2 === $bank1) {
+    $bank2 = '';
+}
+$sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
    
 /* Lines come from the verified frozen payload, never from session state or a
        fresh read of the order. Every value written below comes from that
