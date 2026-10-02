@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 $manualPath = __DIR__ . '/USER_MANUAL.md';
 if (!is_readable($manualPath)) {
@@ -10,32 +9,41 @@ if (!is_readable($manualPath)) {
 
 $markdown = (string)file_get_contents($manualPath);
 
-function slugify(string $text): string
+function slugify($text)
 {
     $text = strtolower(trim($text));
-    $text = preg_replace('/[^a-z0-9]+/', '-', $text) ?? '';
+    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+    $text = ($text === null) ? '' : $text;
     $text = trim($text, '-');
     return $text !== '' ? $text : 'section';
 }
 
-function renderInline(string $text): string
+function renderInline($text)
 {
     $text = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    $text = preg_replace('/`([^`]+)`/', '<code>$1</code>', $text) ?? $text;
-    $text = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $text) ?? $text;
+
+    $replaced = preg_replace('/`([^`]+)`/', '<code>$1</code>', $text);
+    $text = ($replaced === null) ? $text : $replaced;
+
+    $replaced = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $text);
+    $text = ($replaced === null) ? $text : $replaced;
+
     return $text;
 }
 
-function renderMarkdown(string $markdown): string
+function renderMarkdown($markdown)
 {
-    $lines = preg_split("/\r\n|\n|\r/", $markdown) ?: [];
+    $lines = preg_split("/\r\n|\n|\r/", $markdown);
+    $lines = ($lines === false) ? array() : $lines;
+
     $html = '';
     $inUl = false;
     $inOl = false;
     $inCode = false;
-    $toc = [];
+    $toc = array();
 
-    $closeLists = static function () use (&$html, &$inUl, &$inOl): void {
+    /* No `: void` return type, so this stays valid on PHP 5.4 and 7.0. */
+    $closeLists = static function () use (&$html, &$inUl, &$inOl) {
         if ($inUl) {
             $html .= "</ul>\n";
             $inUl = false;
@@ -76,7 +84,7 @@ function renderMarkdown(string $markdown): string
             $headingText = trim($matches[2]);
             $id = slugify($headingText);
             if ($level >= 2) {
-                $toc[] = ['id' => $id, 'title' => $headingText, 'level' => $level];
+                $toc[] = array('id' => $id, 'title' => $headingText, 'level' => $level);
             }
             $html .= "<h{$level} id=\"{$id}\">" . renderInline($headingText) . "</h{$level}>\n";
             continue;
