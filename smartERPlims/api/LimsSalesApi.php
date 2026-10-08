@@ -309,7 +309,7 @@ class LimsSalesApi{
 
         // Validate the source quotation BEFORE writing the order: a failed
         // lookup used to leave an empty sales header behind.
-        $stmt = $this->db->prepare("SELECT code, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
+        $stmt = $this->db->prepare("SELECT code, category, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
             FROM salesline WHERE documenttype = 54 AND documentno = ? ORDER BY entryno ASC");
         $stmt->bind_param("s", $quoteNo);
         $stmt->execute();
@@ -340,6 +340,7 @@ class LimsSalesApi{
                     'documentno' => $headerResult['documentno'],
                     'docdate' => $headerResult['docdate'],
                     'code' => trim((string)$ql['code']),
+                    'category' => trim((string)($ql['category'] ?? '')),
                     'description' => trim((string)$ql['description']),
                     'Quantity' => (float)($ql['Quantity'] ?? 0),
                     'UnitPrice' => (float)($ql['UnitPrice'] ?? 0),
@@ -893,7 +894,8 @@ class LimsSalesApi{
             'totalchargedcontainers' => 'd',
             'PartPerUnit' => 'd',
             'LineDiscountPercent' => 'd',
-            'PriceInPricelist' => 'd'
+            'PriceInPricelist' => 'd',
+            'category' => 's'
         ];
 
         foreach ($optionalFields as $field => $type) {
@@ -1241,7 +1243,7 @@ class LimsSalesApi{
             return;
         }
 
-        $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
+        $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.category, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
             FROM salesline sl
             LEFT JOIN stockmaster sm ON sm.itemcode = sl.code
             WHERE sl.documenttype = 54 AND sl.documentno = ?
@@ -1251,9 +1253,20 @@ class LimsSalesApi{
         $result = $stmt->get_result();
         $lines = [];
         while ($row = $result->fetch_assoc()) {
+            $category = trim((string)($row['category'] ?? ''));
+            $standardId = 0;
+            if (preg_match('/^TS(\\d{1,6})$/', $category, $m)) {
+                $standardId = (int)$m[1];
+            } elseif (preg_match('/^TS(\\d{1,6})$/', trim((string)$row['code']), $m)) {
+                // The bundle line itself identifies its StandardID.
+                $standardId = (int)$m[1];
+            }
+
             $lines[] = [
                 'code' => trim((string)$row['code']),
                 'labid' => (int)($row['labid'] ?? 0),
+                'standard_id' => $standardId,
+                'category' => $category,
                 'description' => trim((string)$row['description']),
                 'Quantity' => (float)($row['Quantity'] ?? 0),
                 'UnitPrice' => (float)($row['UnitPrice'] ?? 0),
