@@ -771,7 +771,7 @@ function quoteField(id) {
 
 function quoteGatherRows() {
   var arr = {};
-  ['itemcode', 'stockname', 'units', 'partsperunit', 'quantity', 'pricevalue', 'LineDiscountPercent', 'tat', 'rowseq']
+  ['itemcode', 'stockname', 'units', 'partsperunit', 'quantity', 'pricevalue', 'LineDiscountPercent', 'tat', 'rowseq', 'stdgroup']
     .forEach(function (nm) { arr[nm] = []; });
   quoteTableData().forEach(function (d) {
     arr.itemcode.push(d.code || '');
@@ -783,6 +783,7 @@ function quoteGatherRows() {
     arr.LineDiscountPercent.push(d.disc);
     arr.tat.push(d.tat);
     arr.rowseq.push(d.rowseq || '');
+    arr.stdgroup.push(d.stdGroup || '');
   });
   return arr;
 }

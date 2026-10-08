@@ -19,7 +19,8 @@ if ($standardID != NULL) {
         tp.Category, 
         tp.BaseID,
         tp.UnitOfMeasure,
-        tp.ResultType
+        tp.ResultType,
+        tp.AccreditationStatus
  FROM testparameters tp
  INNER JOIN TestStandards ts ON tp.StandardID = ts.StandardID
  WHERE tp.StandardID = ? 

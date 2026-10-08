@@ -906,6 +906,7 @@ switch ($action) {
         $prices = (array)($req['pricevalue[]'] ?? []);
         $discs = (array)($req['LineDiscountPercent[]'] ?? []);
         $tats = (array)($req['tat[]'] ?? []);
+        $stdgroups = (array)($req['stdgroup[]'] ?? []);
 
         foreach ($codes as $i => $code) {
             $code = trim((string)$code);
@@ -929,6 +930,14 @@ switch ($action) {
                 $descri = $code;
             }
 
+            // stdGroup is the exact TS#### standard category that the
+            // quotation grid used for this line.
+            $stdGroup = trim((string)($stdgroups[$i] ?? ''));
+            if ($stdGroup === '' && preg_match('/^TS\\d{4}$/', $code)) {
+                $stdGroup = $code;
+            }
+            $stdGroupEsc = mysqli_real_escape_string($db, $stdGroup);
+
             $vatrate = $IsTaxed ? (int)quoteStockDetails($code)['vat'] : 0;
 
             // Shared amount math (single source of truth with reprice).
@@ -937,13 +946,14 @@ switch ($action) {
             $SQL = "INSERT INTO SalesLine
                     (documenttype, docdate, documentno, code, description, unitofmeasure, Quantity,
                      UnitPrice, vatamount, invoiceamount, vatrate, inclusive, containerprice,
-                     containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent)
+                     containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent, category)
                     VALUES
                     ('54', '" . mysqli_real_escape_string($db, $DATE) . "', '$docnoEsc',
                      '" . mysqli_real_escape_string($db, $code) . "', '" . mysqli_real_escape_string($db, $descri) . "',
                      '" . mysqli_real_escape_string($db, quoteUnitDescrip($unit)) . "',
                      $qty, $price, $vat, $gross, $vatrate, '" . (int)$VATinclusive . "',
-                     0, 0, 0, '0', $ppu, " . ($tatVal !== null ? (string)$tatVal : 'NULL') . ", $lineDisc)";
+                     0, 0, 0, '0', $ppu, " . ($tatVal !== null ? (string)$tatVal : 'NULL') . ", $lineDisc,
+                     '" . $stdGroupEsc . "')";
             $lineRes = ajaxDB_query($SQL);
             if ($lineRes === false) {
                 $lineErrno = $db->errno;

@@ -90,7 +90,13 @@ $bank2 = trim($_POST['Bank_Code2'] ?? '');
 if ($bank2 !== '' && $bank2 === $bank1) {
     $bank2 = '';
 }
+<<<<<<< HEAD
 $sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
+=======
+$sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank1) . "', "
+        . "externaldocumentno='" . $db->real_escape_string($bank2) . "' "
+        . "WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
+>>>>>>> 9dd73ced43e182e896c61acca6bcfbbaa1de362b
    
 /* Lines come from the verified frozen payload, never from session state or a
        fresh read of the order. Every value written below comes from that

@@ -1413,26 +1413,50 @@ async function searchQuotes(query) {
   }
 }
 
-function loadQuoteParams(rowNum, stdId) {
+function loadQuoteParams(rowNum, stdId, quotedBaseIds) {
   const paramsContainer = document.getElementById(`params_container_${rowNum}`);
-  if (!paramsContainer) return;
-  fetch(`ajax/getParametersUnderMatrix.php?stdId=${stdId}&matrixid=0`)
+  if (!paramsContainer) return Promise.resolve();
+
+  const quotedIds = new Set(
+    (Array.isArray(quotedBaseIds) ? quotedBaseIds : [])
+      .map(id => String(id).trim())
+      .filter(id => id !== '')
+  );
+
+  return fetch(`ajax/getParametersUnderMatrix.php?stdId=${encodeURIComponent(stdId)}&matrixid=0`)
     .then(res => res.json())
     .then(data => {
       paramsContainer.innerHTML = '';
+
       if (!Array.isArray(data) || data.length === 0) {
+        window.sampleParamsCache[rowNum] = [];
+        window.masterSelectedParams[rowNum] = [];
+        paramsContainer.dataset.params = '[]';
+        paramsContainer.dataset.masterSelected = '[]';
         paramsContainer.innerHTML = '<p>No parameters available.</p>';
       } else {
         window.sampleParamsCache[rowNum] = data;
+
         const masterList = data.map(p => ({
           ParameterID: p.ParameterID || p.parameterId || null,
           ParameterName: p.ParameterName || '',
           StandardID: stdId || null,
           BaseID: p.BaseID || p.BasePID || null
         }));
-        window.masterSelectedParams[rowNum] = masterList;
+
+        // A quotation identifies parameters by stockmaster.labid,
+        // which is the same ID as baseparameters.ParameterID and therefore
+        // matches testparameters.BaseID. Only those quoted BaseIDs are selected.
+        const selectedList = masterList.filter(p =>
+          p.BaseID !== null &&
+          p.BaseID !== '' &&
+          quotedIds.has(String(p.BaseID).trim())
+        );
+
+        window.masterSelectedParams[rowNum] = selectedList;
+
         try { paramsContainer.dataset.params = JSON.stringify(data); } catch (e) { /* ignore */ }
-        try { paramsContainer.dataset.masterSelected = JSON.stringify(masterList); } catch (e) { /* ignore */ }
+        try { paramsContainer.dataset.masterSelected = JSON.stringify(selectedList); } catch (e) { /* ignore */ }
 
         let hiddenContainer = document.getElementById(`selected_params_inputs_${rowNum}`);
         if (!hiddenContainer) {
@@ -1441,8 +1465,21 @@ function loadQuoteParams(rowNum, stdId) {
           hiddenContainer.style.display = 'none';
           paramsContainer.appendChild(hiddenContainer);
         }
+
         refreshHiddenSelectedParamsInputs(rowNum);
         renderAllParamGroups();
+
+        if (quotedIds.size === 0) {
+          console.warn(
+            'Quotation contains no parameter lines for StandardID ' + stdId +
+            '. All parameters remain unchecked.'
+          );
+        } else if (selectedList.length === 0) {
+          console.warn(
+            'No quoted parameters matched testparameters.BaseID for StandardID ' + stdId +
+            '. All parameters remain unchecked.'
+          );
+        }
       }
 
       const matrixInput = document.getElementById(`MatrixName_${rowNum}`);
@@ -1453,10 +1490,13 @@ function loadQuoteParams(rowNum, stdId) {
         if (paramsRow) paramsRow.style.display = 'none';
       }
     })
-    .catch(err => console.error('Error fetching parameters for quote row:', err));
+    .catch(err => {
+      console.error('Error fetching parameters for quote row:', err);
+      throw err;
+    });
 }
 
-async function addQuoteSampleRow(stdId, stdName, qty, units) {
+async function addQuoteSampleRow(stdId, stdName, qty, units, quotedBaseIds) {
   addSampleRow();
   const rows = document.querySelectorAll('#sampleRows tr.main-row');
   const row = rows[rows.length - 1];
@@ -1464,12 +1504,14 @@ async function addQuoteSampleRow(stdId, stdName, qty, units) {
 
   document.getElementById(`StandardID_${rowNum}`).value = stdId;
   document.getElementById(`StandardName_${rowNum}`).value = stdName;
+
   const samplesEl = document.getElementById(`samples_${rowNum}`);
   if (samplesEl) samplesEl.value = qty > 0 ? qty : 1;
+
   const unitsEl = document.getElementById(`standard_kit_units_${rowNum}`);
   if (unitsEl) unitsEl.value = units;
 
-  loadQuoteParams(rowNum, stdId);
+  await loadQuoteParams(rowNum, stdId, quotedBaseIds);
 }
 
 async function applySelectedQuote(documentNo) {
@@ -1493,7 +1535,11 @@ async function applySelectedQuote(documentNo) {
         return (stdName && stdName.value) || (stdId && stdId.value);
       }
     );
-    if (hasFilledRows && !confirm('Loading quotation ' + documentNo + ' will replace the current sample rows. Continue?')) {
+
+    if (hasFilledRows && !confirm(
+      'Loading quotation ' + documentNo +
+      ' will replace the current sample rows. Continue?'
+    )) {
       return;
     }
 
@@ -1501,41 +1547,119 @@ async function applySelectedQuote(documentNo) {
     document.getElementById('CustomerName').value = quote.customername || '';
     document.getElementById('quoteno').value = documentNo;
 
+    /*
+     * Build the quotation parameter map first.
+     *
+     * ERP mapping:
+     *   SalesLine.category = TS0076
+     *       -> standard_id = 76
+     *
+     *   SalesLine.labid = 112
+     *       -> baseparameters.ParameterID = 112
+     *       -> testparameters.BaseID = 112
+     *
+     * Therefore we must NOT compare labid with testparameters.ParameterID.
+     */
+    const quotedByStandard = {};
     const bundleLines = [];
-    const seen = {};
+    const seenStandards = {};
+
     lines.forEach(l => {
-      const m = /^TS(\d{3,6})$/.exec(String(l.code || '').trim());
-      if (m) {
-        const stdId = parseInt(m[1], 10);
-        if (!seen[stdId]) {
-          seen[stdId] = true;
+      const code = String(l.code || '').trim();
+      const category = String(l.category || '').trim();
+
+      let stdId = parseInt(l.standard_id, 10) || 0;
+
+      if (!stdId) {
+        const categoryMatch = /^TS(\\d{1,6})$/i.exec(category);
+        if (categoryMatch) {
+          stdId = parseInt(categoryMatch[1], 10);
+        }
+      }
+
+      // Standard bundle line, e.g. TS0076.
+      const bundleMatch = /^TS(\\d{1,6})$/i.exec(code);
+      if (bundleMatch) {
+        const bundleStdId = parseInt(bundleMatch[1], 10);
+
+        if (!seenStandards[bundleStdId]) {
+          seenStandards[bundleStdId] = true;
           bundleLines.push({
-            stdId,
+            stdId: bundleStdId,
             stdName: l.description || '',
             qty: parseInt(l.Quantity || 1, 10),
-            units: l.unitofmeasure || ''
+            units: l.unitofmeasure || '',
+            quotedBaseIds: []
           });
         }
+
+        return;
+      }
+
+      // Parameter line: labid is the BaseParameterID.
+      const baseId = parseInt(l.labid, 10) || 0;
+      if (!stdId || !baseId) {
+        return;
+      }
+
+      if (!quotedByStandard[stdId]) {
+        quotedByStandard[stdId] = [];
+      }
+
+      if (!quotedByStandard[stdId].some(id => String(id) === String(baseId))) {
+        quotedByStandard[stdId].push(baseId);
       }
     });
 
-    document.getElementById('sampleRows').querySelectorAll('tr.main-row, tr.params-row').forEach(tr => tr.remove());
+    // Attach the exact quoted BaseIDs to each standard row.
+    bundleLines.forEach(bl => {
+      bl.quotedBaseIds = quotedByStandard[bl.stdId] || [];
+    });
+
+    document.getElementById('sampleRows')
+      .querySelectorAll('tr.main-row, tr.params-row')
+      .forEach(tr => tr.remove());
+
     window.sampleParamsCache = {};
     window.masterSelectedParams = {};
     document.getElementById('tablecount').value = '';
 
     if (bundleLines.length === 0) {
-      toastr.info('No sample-standard bundle lines in this quotation. Customer and quotation were linked only.');
+      toastr.info(
+        'No sample-standard bundle lines in this quotation. ' +
+        'Customer and quotation were linked only.'
+      );
       reindexSampleRows();
       updateRegistrationSummary();
       return;
     }
 
-    bundleLines.forEach(bl => addQuoteSampleRow(bl.stdId, bl.stdName, bl.qty, bl.units));
+    // Wait for every standard's parameters to load before rendering the final state.
+    await Promise.all(
+      bundleLines.map(bl =>
+        addQuoteSampleRow(
+          bl.stdId,
+          bl.stdName,
+          bl.qty,
+          bl.units,
+          bl.quotedBaseIds
+        )
+      )
+    );
 
     reindexSampleRows();
     updateRegistrationSummary();
-    toastr.success('Quotation ' + documentNo + ' linked and sample rows pre-filled.');
+
+    const totalQuotedParameters = bundleLines.reduce(
+      (total, bl) => total + bl.quotedBaseIds.length,
+      0
+    );
+
+    toastr.success(
+      'Quotation ' + documentNo +
+      ' linked. ' + totalQuotedParameters +
+      ' quoted parameter(s) selected.'
+    );
   } catch (err) {
     console.error('Error applying quotation:', err);
     toastr.error('Error loading quotation.');

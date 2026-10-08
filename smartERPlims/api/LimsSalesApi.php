@@ -309,7 +309,7 @@ class LimsSalesApi{
 
         // Validate the source quotation BEFORE writing the order: a failed
         // lookup used to leave an empty sales header behind.
-        $stmt = $this->db->prepare("SELECT code, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
+        $stmt = $this->db->prepare("SELECT code, category, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
             FROM salesline WHERE documenttype = 54 AND documentno = ? ORDER BY entryno ASC");
         $stmt->bind_param("s", $quoteNo);
         $stmt->execute();
@@ -340,6 +340,7 @@ class LimsSalesApi{
                     'documentno' => $headerResult['documentno'],
                     'docdate' => $headerResult['docdate'],
                     'code' => trim((string)$ql['code']),
+                    'category' => trim((string)($ql['category'] ?? '')),
                     'description' => trim((string)$ql['description']),
                     'Quantity' => (float)($ql['Quantity'] ?? 0),
                     'UnitPrice' => (float)($ql['UnitPrice'] ?? 0),
@@ -893,7 +894,8 @@ class LimsSalesApi{
             'totalchargedcontainers' => 'd',
             'PartPerUnit' => 'd',
             'LineDiscountPercent' => 'd',
-            'PriceInPricelist' => 'd'
+            'PriceInPricelist' => 'd',
+            'category' => 's'
         ];
 
         foreach ($optionalFields as $field => $type) {
@@ -1241,7 +1243,7 @@ class LimsSalesApi{
             return;
         }
 
-        $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
+        $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.category, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
             FROM salesline sl
             LEFT JOIN stockmaster sm ON sm.itemcode = sl.code
             WHERE sl.documenttype = 54 AND sl.documentno = ?
@@ -1251,9 +1253,20 @@ class LimsSalesApi{
         $result = $stmt->get_result();
         $lines = [];
         while ($row = $result->fetch_assoc()) {
+            $category = trim((string)($row['category'] ?? ''));
+            $standardId = 0;
+            if (preg_match('/^TS(\\d{1,6})$/', $category, $m)) {
+                $standardId = (int)$m[1];
+            } elseif (preg_match('/^TS(\\d{1,6})$/', trim((string)$row['code']), $m)) {
+                // The bundle line itself identifies its StandardID.
+                $standardId = (int)$m[1];
+            }
+
             $lines[] = [
                 'code' => trim((string)$row['code']),
                 'labid' => (int)($row['labid'] ?? 0),
+                'standard_id' => $standardId,
+                'category' => $category,
                 'description' => trim((string)$row['description']),
                 'Quantity' => (float)($row['Quantity'] ?? 0),
                 'UnitPrice' => (float)($row['UnitPrice'] ?? 0),
@@ -1555,18 +1568,11 @@ class LimsSalesApi{
                 $q = $this->db->query("UPDATE stockcategory SET categorydescription = '$stdName' WHERE categoryid = '$catId'");
                 if (!$q) $errors[] = 'standard update stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
             } else {
-                // No 'TS####' for this StandardID yet: fall back to a full-name
-                // match (legacy categories), otherwise create the TS#### row.
-                $byName = $this->db->query("SELECT categoryid FROM stockcategory WHERE categorydescription = '$stdName' LIMIT 1");
-                if ($byName && $byName->num_rows > 0) {
-                    $nr = $byName->fetch_assoc();
-                    $catId = trim((string)$nr['categoryid']);
-                    $q = $this->db->query("UPDATE stockcategory SET categorydescription = '$stdName' WHERE categoryid = '$catId'");
-                    if (!$q) $errors[] = 'standard update stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
-                } else {
-                    $q = $this->db->query("INSERT INTO stockcategory (categoryid, categorydescription) VALUES ('$catId', '$stdName')");
-                    if (!$q) $errors[] = 'standard insert stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
-                }
+                // StandardID is the authoritative identity. Never substitute a
+                // legacy category found by name because two standards can share
+                // the same name.
+                $q = $this->db->query("INSERT INTO stockcategory (categoryid, categorydescription) VALUES ('$catId', '$stdName')");
+                if (!$q) $errors[] = 'standard insert stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
             }
 
             // Upsert bundle stock item so the standard itself is priceable/quotable in Sales Quotation
@@ -1667,15 +1673,11 @@ class LimsSalesApi{
                 if ($ctResult && $ctResult->num_rows > 0) $catId = $cand;
             }
             if ($catId === '') {
-                $catResult = $this->db->query("SELECT categoryid FROM stockcategory WHERE categorydescription = '$stdNameEsc' LIMIT 1");
-                if ($catResult && $catResult->num_rows > 0) {
-                    $catRow = $catResult->fetch_assoc();
-                    $catId = trim((string)$catRow['categoryid']);
-                }
-                if ($catId === '') {
-                    $skipped['no_category']++;
-                    continue;
-                }
+                // StandardID is required for an exact parameter-to-standard link.
+                // Do not fall back to a category name and risk assigning the
+                // parameter to the wrong standard.
+                $skipped['no_category']++;
+                continue;
             }
             $catId = $this->db->real_escape_string($catId);
 

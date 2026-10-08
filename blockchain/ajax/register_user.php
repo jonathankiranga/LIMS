@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
          // Get the newly created user ID
         $user_id = $conn->insert_id;
-        $dir = "userkeys/$user_id";
+        $dir = dirname(__DIR__) . "/userkeys/$user_id";
 
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
@@ -260,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&  $_POST['action'] === 'validate_tok
         $publicKey = openssl_pkey_get_details($keyPair)['key'];
       
         
-        $dir = "userkeys/$user_id";
+        $dir = dirname(__DIR__) . "/userkeys/$user_id";
 
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);

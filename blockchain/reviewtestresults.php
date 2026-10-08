@@ -134,25 +134,12 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
     <input type="text" id="searchInput" class="form-control" placeholder="Search results..." onkeyup="searchTable()">
 </div> 
 <table id="testResultsTable" class="wr-table">
-    <thead>
-        <tr>
-            <th>Action</th>
-            <th>#</th>
-            <th>Sample Batch No</th>
-            <th>Sample ID</th>
-            <th>Date</th>
-            <th>Parameter</th>
-            <th>Results</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Rows will be dynamically generated -->
-    </tbody>
+    <thead><tr>
+        <th>Action</th><th>#</th><th>Sample Batch No</th><th>Sample ID</th><th>Date</th><th>No. of Tests</th><th>Tests / Results</th>
+    </tr></thead><tbody></tbody>
 </table>
-        
 <div class="pagination" id="pagination"></div>
-
-    </div>
+</div>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="neutralityModal" tabindex="-1" role="dialog" aria-labelledby="neutralityModalLabel" aria-hidden="true">
@@ -192,310 +179,37 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 
 <!-- Modal for Approving Test Results -->
 <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approveModalLabel">Review and Approve Test Result</h5>
-                <button type="button" class="btn btn-secondary btn-sm"  id="CMDneutralityModal">
-                    Open Neutrality Calculator
-                  </button>
-                <button type="button" class="btn btn-secondary btn-sm"  id="CMDtdscalculatorModal">
-                    Open TDS Calculator
-                  </button>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="approveForm">
-                    <input type="hidden" id="resultsID" name="resultsID">
-                    <input type="hidden" id="flag" name="flag">
-                    <input type="hidden" id="resultType" name="resultType">
-                    <div class="mb-3">
-                        <label for="sampleID" class="form-label">Sample ID</label>
-                        <input type="text" id="sampleID" class="form-control" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="parameter" class="form-label">Parameter</label>
-                        <input type="text" id="parameter" class="form-control" readonly>
-                    </div>
-                    <div class="container mt-4">
-                        <h5 class="text-center">Test Result Details</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="mrlResult" class="form-label">Quantitative</label>
-                                    <input type="text" id="mrlResult"  name="mrlResult" class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="resultStatus" class="form-label">Qualitative</label>
-                                    <select id="resultStatus" name="resultStatus" class="form-control">
-                                        <option value="">N/A</option>
-                                        <option value="ND">Not Detected</option>
-                                        <option value="Absent">Absent</option>
-                                        <option value="Detected">Detected</option>
-                                        <option value="Below Limit">Below Limit</option>
-                                        <option value="Detected Range">Detected Range</option>
-                                        <option value="Trace">Trace</option>
-                                        <option value="Above Limit">Above Limit</option>
-                                        <option value="Inconclusive">Inconclusive</option>
-                                        <option value="Error">Error</option>
-                                        <option value="Invalid">Invalid</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="rangeResult" class="form-label">Range</label>
-                                    <input type="text" id="rangeResult" name="rangeResult" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="mw-100">
-                                <label for="standtocompare" class="form-label">Standard Limits</label>
-                                <input type="text" id="standtocompare" class="form-control" readonly>
-                            </div>                       
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="approvalStatus" class="form-label">Approval Status</label>
-                        <select id="approvalStatus" name="approvalStatus" class="form-select" required>
-                            <option value="">Select</option>
-                            <option value="1">Approved</option>
-                            <option value="2">Reanalysis Required</option>
-                            <option value="3">Error Corrected</option>
-                            <option value="4">Rejected</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-success" onclick="submitApproval()">Submit Approval</button>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="modal-dialog modal-xl"><div class="modal-content">
+<div class="modal-header"><h5 class="modal-title" id="approveModalLabel">Review and Approve Sample Block</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+<div class="modal-body">
+<div class="row mb-3">
+<div class="col-md-4"><label class="form-label fw-bold">Sample ID</label><input type="text" id="blockSampleID" class="form-control" readonly></div>
+<div class="col-md-4"><label class="form-label fw-bold">Sample Batch No</label><input type="text" id="blockDocumentNo" class="form-control" readonly></div>
+<div class="col-md-4"><label class="form-label fw-bold">Number of Tests</label><input type="text" id="blockTestCount" class="form-control" readonly></div>
 </div>
+<div class="table-responsive"><table class="sample-tests-table" style="width:100%;border-collapse:collapse;">
+<thead><tr><th style="background:#17324d;color:#fff;padding:8px;">#</th><th style="background:#17324d;color:#fff;padding:8px;">Parameter</th><th style="background:#17324d;color:#fff;padding:8px;">Result</th><th style="background:#17324d;color:#fff;padding:8px;">Standard Limits</th></tr></thead>
+<tbody id="sampleTestsBody"></tbody></table></div><hr>
+<div class="row align-items-end"><div class="col-md-5"><label for="approvalStatus" class="form-label fw-bold">Block Decision</label>
+<select id="approvalStatus" name="approvalStatus" class="form-select" required><option value="">Select decision</option><option value="1">Approve Entire Sample</option><option value="4">Reject Entire Sample</option></select>
+</div><div class="col-md-7 text-end"><button type="button" class="btn btn-success" onclick="submitApproval()"><i class="fas fa-check"></i> Apply Decision to All Tests</button></div></div>
+<input type="hidden" id="blockHeaderID"><input type="hidden" id="flag" value="3">
+</div></div></div></div>
 
 <script>
-    
-    
-// Lightweight client-side pagination for the results table (no DataTables dependency)
-var wrPage = 1;
-var wrPerPage = 10;
-var wrRows = [];
-var wrQuery = '';
-
-function wrMatches(row, q) {
-    if (!q) return true;
-    const cells = row.getElementsByTagName('td');
-    for (let j = 0; j < cells.length; j++) {
-        if (cells[j] && cells[j].textContent.toLowerCase().includes(q)) return true;
-    }
-    return false;
-}
-
-function wrRenderPage() {
-    const tbody = document.querySelector('#testResultsTable tbody');
-    if (!tbody) return;
-    const visible = wrRows.filter(function (r) { return wrMatches(r, wrQuery); });
-    const totalPages = Math.max(1, Math.ceil(visible.length / wrPerPage));
-    if (wrPage > totalPages) wrPage = totalPages;
-    if (wrPage < 1) wrPage = 1;
-    const start = (wrPage - 1) * wrPerPage;
-    const slice = visible.slice(start, start + wrPerPage);
-    tbody.innerHTML = '';
-    slice.forEach(function (tr) { tbody.appendChild(tr); });
-    wrRenderPager(totalPages, visible.length);
-}
-
-function wrRenderPager(totalPages, count) {
-    const box = document.getElementById('pagination');
-    if (!box) return;
-    let html = '<span style="margin-right:8px;color:#17324d;font-size:13px;">' + count + ' record(s) - Page ' + wrPage + ' of ' + totalPages + '</span>';
-    html += '<button type="button"' + (wrPage === 1 ? ' disabled' : '') + ' onclick="wrGo(' + (wrPage - 1) + ')">&#8592; Prev</button>';
-    let s = Math.max(1, wrPage - 4);
-    let e = Math.min(totalPages, s + 9);
-    if (e < totalPages && e - s < 9) s = Math.max(1, e - 9);
-    for (let i = s; i <= e; i++) {
-        html += '<button type="button" class="' + (i === wrPage ? 'active' : '') + '" onclick="wrGo(' + i + ')">' + i + '</button>';
-    }
-    if (e < totalPages) html += '<span style="color:#17324d;margin-left:4px;">&hellip;</span>';
-    html += '<button type="button"' + (wrPage === totalPages ? ' disabled' : '') + ' onclick="wrGo(' + (wrPage + 1) + ')">Next &#8594;</button>';
-    box.innerHTML = html;
-}
-
-function wrGo(p) { wrPage = p; wrRenderPage(); }
-
-function searchTable() {
-    const input = document.getElementById('searchInput');
-    wrQuery = input ? input.value.trim().toLowerCase() : '';
-    wrPage = 1;
-    wrRenderPage();
-}
-
-function disableOtherFields(selectedId) {
-    const fields = ['mrlResult','resultStatus','rangeResult'];
-    document.getElementById('resultType').value = selectedId;
-    
-    fields.forEach(field => {
-        document.getElementById(field).disabled = (field !== selectedId);
-    });
-}
-
-function reloadResults(){
-    const fields = ['mrlResult', 'resultStatus', 'rangeResult'];
-    
-    fields.forEach(field => {
-        document.getElementById(field).disabled = false;
-    });
-}
-
-// Attach event listeners to fields
-document.getElementById('mrlResult').addEventListener('input', () => disableOtherFields('mrlResult'));
-document.getElementById('resultStatus').addEventListener('input', () => disableOtherFields('resultStatus'));
-document.getElementById('rangeResult').addEventListener('input', () => disableOtherFields('rangeResult'));
-
-
-function fetchTestResults(flag) {
-     const tbody = document.querySelector('#testResultsTable tbody');
-     //approve_test_result_2.php
-     fetch(`ajax/get_test_results.php?statusID=${flag}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                tbody.innerHTML = '';
-                wrRows = [];
-                data.results.forEach((result, index) => {
-                    const row = document.createElement('tr');
-                    const displayResult = result.ResultType === 'quantitativeField' ? (result.MRL_Result || 'N/A') : (result.ResultType === 'qualitativeField' ? (result.ResultStatus || 'N/A') : (result.ResultType === 'rangeField' ? (result.RangeResult || 'N/A') : (result.MRL_Result || result.ResultStatus || result.RangeResult || 'N/A')));
-                    row.innerHTML = `<td>
-                            <button class="btn btn-primary btn-sm" onclick="openApprovalModal(${result.resultsID}, ${flag})">
-                                 ${getButtonLabel(flag)}
-                            </button>
-                        </td>
-                        <td>${index + 1}</td>
-                        <td>${result.DocumentNo}</td>
-                        <td>${result.SampleID}</td>
-                        <td>${new Date(result.Date.split(' ')[0]).toISOString().split('T')[0]}</td>
-                        <td><div class="scrollable-content" tabindex="0">${result.StandardName+':'+result.ParameterName}</div></td>
-                        <td>${displayResult}</td>`;
-                    wrRows.push(row);
-                });
-                wrPage = 1;
-                wrRenderPage();
-            } else {
-                 tbody.innerHTML = '';
-                toastr.error('No results to display.');
-            }
-        })
-        .catch(error => console.error('Error fetching test results:', error));
-}
-
-
-function getButtonLabel(flag) {
-    let label = 'Approve'; // Default label
-    switch (flag) {
-        case 2:
-            label = 'Review'; // If flag is 2, change the label to 'Review'
-            break;
-        default:
-            label = 'Approve'; // Default to 'Approve'
-            break;
-    }
-    return label;
-}
-
-function openApprovalModal(resultsID,flag) {
-    reloadResults();
-    fetch(`ajax/get_test_resultByID.php?resultsID=${resultsID}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const result = data.result;
-                document.getElementById('flag').value = flag;
-                document.getElementById('resultsID').value = result.resultsID;
-                document.getElementById('sampleID').value = result.SampleID;
-                currentSampleID = result.SampleID;
-                document.getElementById('parameter').value = result.StandardName+':'+result.ParameterName;
-                document.getElementById('standtocompare').value = 'Limits:' +(result.Limits || 'N/A') + '  units of measure:' + (result.UnitOfMeasure || 'N/A') ;
-                
-                // Determine active result field robustly (maps various stored values)
-                const rtRaw = (result.ResultType || '').toString();
-                const rt = rtRaw.toLowerCase();
-                let activeField = '';
-                if (rt.includes('quant') || rt.includes('mrl')) {
-                    activeField = 'mrlResult';
-                } else if (rt.includes('qual') || rt.includes('resultstatus')) {
-                    activeField = 'resultStatus';
-                } else if (rt.includes('range')) {
-                    activeField = 'rangeResult';
-                } else {
-                    // fallback: prefer the non-empty field from the record
-                    if (result.MRL_Result && result.MRL_Result.toString().trim() !== '') activeField = 'mrlResult';
-                    else if (result.ResultStatus && result.ResultStatus.toString().trim() !== '') activeField = 'resultStatus';
-                    else if (result.RangeResult && result.RangeResult.toString().trim() !== '') activeField = 'rangeResult';
-                    else activeField = 'mrlResult';
-                }
-
-                // Populate fields (always fill values) then enable only the active one
-                document.getElementById('mrlResult').value = result.MRL_Result || '';
-                setOption(result.ResultStatus || '');
-                document.getElementById('rangeResult').value = result.RangeResult || '';
-                disableOtherFields(activeField);
-
-                const approveModal = new bootstrap.Modal($('#approveModal'), { backdrop: 'static', keyboard: false });
-                approveModal.show();
-            } else {
-                toastr.error('Failed to load test result details.');
-            }
-        })
-        .catch(error => console.error('Error loading test result details:', error));
-}
-
-function submitApproval() {
-    const flag = document.getElementById('flag') ; 
-    const formData = new FormData(document.getElementById('approveForm'));
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i); // Get the key
-        const value = localStorage.getItem(key); // Get the corresponding value
-        formData.append(key, value); // Append the key-value pair to formData
-    }
-
-    const approve_test_result=`approve_test_result_${flag.value}.php`;
- 
-    fetch(`ajax/${approve_test_result}`, {
-        method:'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-             toastr.success(data.message);
-            
-            const approveModal = new bootstrap.Modal($('#approveModal'), { backdrop: 'static' , keyboard: false});
-                 approveModal.hide();
-                 
-            fetchTestResults(flag.value); // Reload the table
-        } else {
-            toastr.error(data.message);
-        }
-    })
-    .catch(error => console.error('Error submitting approval:', error));
-}
-  
-
-
-function setOption(resultValue) {
-    const selectElement = document.getElementById('resultStatus');
-    // Check if resultValue exists in the select options
-    const optionExists = Array.from(selectElement.options).some(option => option.value === resultValue);
-    // Set the option if it exists, otherwise set it to 'N/A'
-    selectElement.value = optionExists ? resultValue : '';
-}
-
+var wrPage=1,wrPerPage=10,wrRows=[],wrQuery='',wrResults=[];
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function resultValue(r){if(r.ResultType==='qualitativeField')return r.ResultStatus||'N/A';if(r.ResultType==='rangeField')return r.RangeResult||'N/A';return r.MRL_Result||'N/A';}
+function wrMatches(row,q){return !q||row.textContent.toLowerCase().indexOf(q)!==-1;}
+function wrRenderPage(){const tb=document.querySelector('#testResultsTable tbody');if(!tb)return;const v=wrRows.filter(r=>wrMatches(r,wrQuery)),tp=Math.max(1,Math.ceil(v.length/wrPerPage));if(wrPage>tp)wrPage=tp;const st=(wrPage-1)*wrPerPage;tb.innerHTML='';v.slice(st,st+wrPerPage).forEach(tr=>tb.appendChild(tr));wrRenderPager(tp,v.length);}
+function wrRenderPager(tp,count){const box=document.getElementById('pagination');if(!box)return;let h='<span style="margin-right:8px;color:#17324d;font-size:13px;">'+count+' sample(s) - Page '+wrPage+' of '+tp+'</span>';h+='<button type="button"'+(wrPage===1?' disabled':'')+' onclick="wrGo('+(wrPage-1)+')">&#8592; Prev</button>';let a=Math.max(1,wrPage-4),z=Math.min(tp,a+9);if(z<tp&&z-a<9)a=Math.max(1,z-9);for(let i=a;i<=z;i++)h+='<button type="button" class="'+(i===wrPage?'active':'')+'" onclick="wrGo('+i+')">'+i+'</button>';if(z<tp)h+='<span style="color:#17324d;margin-left:4px;">&hellip;</span>';h+='<button type="button"'+(wrPage===tp?' disabled':'')+' onclick="wrGo('+(wrPage+1)+')">Next &#8594;</button>';box.innerHTML=h;}
+function wrGo(p){wrPage=p;wrRenderPage();}
+function searchTable(){const i=document.getElementById('searchInput');wrQuery=i?i.value.trim().toLowerCase():'';wrPage=1;wrRenderPage();}
+function fetchTestResults(flag){const tb=document.querySelector('#testResultsTable tbody');tb.innerHTML='<tr><td colspan="7" class="text-center">Loading...</td></tr>';fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1').then(r=>r.json()).then(data=>{if(!data.success){wrRows=[];wrResults=[];tb.innerHTML='<tr><td colspan="7" class="text-center">No pending sample blocks.</td></tr>';wrRenderPager(1,0);return;}wrResults=data.results||[];wrRows=[];wrResults.forEach((sample,index)=>{const tests=sample.tests||[];const names=tests.map(t=>'<li>'+esc(t.ParameterName)+'</li>').join('');const summary=tests.map(t=>'<span class="result-badge"><b>'+esc(t.ParameterName)+':</b> '+esc(resultValue(t))+'</span>').join('');const row=document.createElement('tr');row.innerHTML='<td><button class="btn btn-primary btn-sm" onclick="openApprovalModal('+index+')"><i class="fas fa-tasks"></i> Review / Approve</button></td><td>'+(index+1)+'</td><td>'+esc(sample.DocumentNo||'')+'</td><td><strong>'+esc(sample.SampleID||'')+'</strong></td><td>'+esc((sample.Date||'').split(' ')[0])+'</td><td>'+tests.length+'</td><td><ul class="test-list">'+names+'</ul><div>'+summary+'</div></td>';wrRows.push(row);});wrPage=1;wrRenderPage();}).catch(err=>{console.error(err);tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">Error loading results.</td></tr>';});}
+function openApprovalModal(index){const sample=wrResults[index];if(!sample)return;document.getElementById('blockHeaderID').value=sample.HeaderID||'';document.getElementById('blockSampleID').value=sample.SampleID||'';document.getElementById('blockDocumentNo').value=sample.DocumentNo||'';document.getElementById('blockTestCount').value=(sample.tests||[]).length;document.getElementById('approvalStatus').value='';const body=document.getElementById('sampleTestsBody');body.innerHTML='';(sample.tests||[]).forEach((t,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #e5edf5;">'+(i+1)+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;"><strong>'+esc(t.ParameterName||'')+'</strong>'+(t.ParamCategory?'<br><small>'+esc(t.ParamCategory)+'</small>':'')+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc(resultValue(t))+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc('Limits: '+(t.Limits||'N/A')+' | Unit: '+(t.UnitOfMeasure||'N/A'))+'</td>';body.appendChild(tr);});bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).show();}
+function submitApproval(){const h=document.getElementById('blockHeaderID').value,s=document.getElementById('blockSampleID').value,a=document.getElementById('approvalStatus').value,f=document.getElementById('flag').value;if(!h||!s){toastr.error('Sample information is missing.');return;}if(!a){toastr.error('Please select a block decision.');return;}const fd=new FormData();fd.append('blockApproval','1');fd.append('reviewBlockApproval','1');fd.append('HeaderID',h);fd.append('SampleID',s);fd.append('flag',f);fd.append('approvalStatus',a);for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);fd.append(k,localStorage.getItem(k));}if(!fd.get('user_id')){toastr.error('User identity was not found. Please log in again.');return;}const btn=document.querySelector('#approveModal .btn-success');if(btn)btn.disabled=true;fetch('ajax/approve_test_result_3.php',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{if(data.success){toastr.success(data.message);bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();fetchTestResults(3);}else toastr.error(data.message||'Sample block approval failed.');}).catch(err=>{console.error(err);toastr.error('An error occurred while approving the sample block.');}).finally(()=>{if(btn)btn.disabled=false;});}
 fetchTestResults(3);
-
-
 var currentSampleID = '';
 
 function buildCalculatorURL(baseURL, ions) {
@@ -544,6 +258,7 @@ function openTDSCalculator() {
 
 $('#CMDneutralityModal').click(openNeutralityCalculator);
 $('#CMDtdscalculatorModal').click(openTDSCalculator);
+
 
 
 

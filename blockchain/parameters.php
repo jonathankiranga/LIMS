@@ -34,6 +34,7 @@
                             <th>MRL </th>
                             <th>MRLUnit</th>
                             <th>Category</th>
+                            <th>Accreditation</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -104,6 +105,14 @@
                         <div class="mb-2">
                             <label for="Category" class="form-label">Category</label>
                             <input type="text" class="form-control" id="Category" name="Category" readonly>
+                        </div>                        <!-- Accreditation Status -->
+                        <div class="mb-2">
+                            <label for="AccreditationStatus" class="form-label">Accreditation Status</label>
+                            <select class="form-control" id="AccreditationStatus" name="AccreditationStatus">
+                                <option value="accredited">Accredited</option>
+                                <option value="not_accredited" selected>Not Accredited</option>
+                                <option value="contracted">Contracted</option>
+                            </select>
                         </div>
                         <!-- MRL -->
                         <div class="mb-2">
@@ -235,7 +244,9 @@ $(document).ready(function () {
     // Add Parameter
     $('#addParameterBtn').on('click', function () {
         const standardID = $(this).data('id');
-        $('#StandardID').val(standardID);
+        $('#StandardIDForm').val(standardID);
+        $('#ParameterIDForm').val('');
+        $('#GlobalParameterForm').val('');
        
         const standardName = $(this).data('name');
         $('#addstandardName').text(standardName);
@@ -280,11 +291,14 @@ $(document).ready(function () {
         $('#method').val($(this).data('method'));
         $('#mrl').val($(this).data('mrl'));
         
+        const accreditationStatus = $(this).data('accreditationstatus') || 'not_accredited';
+        $('#AccreditationStatus').val(accreditationStatus);
+        
         const mrlunit = $(this).data('mrlunit') || 'ppm'; 
         $('#mrlunit').val(mrlunit);  //select option
         
         const category = $(this).data('category') || 'chemical'; 
-        $('#category').val(category);
+        $('#Category').val(category);
         
         const unitofmeasure = $(this).data('unitofmeasure') || 'ppm'; 
         $('#unitofmeasure').val(unitofmeasure);  //select option
@@ -548,6 +562,15 @@ function fetchParameters(standardID, page = 1) {
                         <td>${parameter.MRLUnit}</td>    
                         <td>${parameter.Category}</td>
                         <td>
+                            ${
+                                parameter.AccreditationStatus === 'accredited'
+                                    ? '<span class="badge bg-success">Accredited</span>'
+                                    : parameter.AccreditationStatus === 'contracted'
+                                        ? '<span class="badge bg-warning text-dark">Contracted</span>'
+                                        : '<span class="badge bg-secondary">Not Accredited</span>'
+                            }
+                        </td>
+                        <td>
                             <button class="btn btn-warning btn-sm editParameter"
                                 data-ParameterID="${parameter.ParameterID}"  
                                 data-matrixid="${parameter.BaseID}" 
@@ -561,7 +584,8 @@ function fetchParameters(standardID, page = 1) {
                                 data-Method="${parameter.Method}"  
                                 data-MRL="${parameter.MRL}"  
                                 data-MRLUnit="${parameter.MRLUnit}" 
-                                data-Category="${parameter.Category}">
+                                data-Category="${parameter.Category}"
+                                 data-AccreditationStatus="${parameter.AccreditationStatus || 'not_accredited'}">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-sm deleteParameter" 
