@@ -102,6 +102,90 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
         if (!$stmt->execute()) throw new Exception('Failed to update completion dates: '.$stmt->error);
         $stmt->close();
 
+        /*
+         * 4. Write ONE blockchain block for the complete sample decision.
+         * The database approval and ledger entry are committed together.
+         */
+        $privateKeyPath = __DIR__ . "/userkeys/" . $userID . "/private_key.pem";
+        if (!file_exists($privateKeyPath)) {
+            throw new Exception('Blockchain private key not found for user ' . $userID . '. Approval was not committed.');
+        }
+
+        $privateKey = file_get_contents($privateKeyPath);
+        if ($privateKey === false || trim($privateKey) === '') {
+            throw new Exception('Blockchain private key could not be read. Approval was not committed.');
+        }
+
+        $ledgerPayload = [
+            'event' => 'SAMPLE_TEST_BLOCK_DECISION',
+            'sampleID' => $sampleID,
+            'HeaderID' => $headerID,
+            'department' => $department,
+            'decision' => $approvalStatus,
+            'decisionText' => [1=>'APPROVED',2=>'REANALYSIS_REQUIRED',4=>'REJECTED'][$approvalStatus],
+            'testCount' => $updated,
+            'user_id' => $userID,
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        $lastBlockQuery = $conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");
+        if (!$lastBlockQuery) {
+            throw new Exception('Unable to read the previous blockchain block: ' . $conn->error);
+        }
+        $lastBlock = $lastBlockQuery->fetch_assoc();
+        $previousHash = $lastBlock ? $lastBlock['current_hash'] : str_repeat('0', 64);
+
+        $payloadJson = json_encode($ledgerPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($payloadJson === false) {
+            throw new Exception('Unable to create blockchain payload.');
+        }
+
+        $dataString = $payloadJson . '|' . $previousHash;
+        $currentHash = hash('sha256', $dataString);
+        $digitalSignature = signData($currentHash, $privateKey);
+        $encryptedData = encryptPrivateKey($dataString, $privateKey);
+
+        $stmtLedger = $conn->prepare(
+            "INSERT INTO blockchain_ledger
+             (timestamp, previous_hash, current_hash, digital_signature, encrypted_data, status, userid)
+             VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)"
+        );
+        if (!$stmtLedger) {
+            throw new Exception('Failed to prepare blockchain ledger entry: ' . $conn->error);
+        }
+
+        $stmtLedger->bind_param(
+            'sssss',
+            $previousHash,
+            $currentHash,
+            $digitalSignature,
+            $encryptedData,
+            $userID
+        );
+
+        if (!$stmtLedger->execute()) {
+            throw new Exception('Failed to write blockchain ledger entry: ' . $stmtLedger->error);
+        }
+
+        $blockId = $conn->insert_id;
+        $stmtLedger->close();
+
+        /*
+         * Link every test result in this approval block to the same ledger block.
+         */
+        foreach ($testIDs as $recordID) {
+            log_transaction_metadata($conn, $blockId, $recordID, 'test_results');
+        }
+
+        logAction(
+            $conn,
+            'SAMPLE_BLOCK_' . $ledgerPayload['decisionText'],
+            $sampleID,
+            $currentHash,
+            $userID,
+            'SUCCESS'
+        );
+
         $conn->commit();
         $words = [1=>'approved',2=>'sent for reanalysis',4=>'rejected'];
 
