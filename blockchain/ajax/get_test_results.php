@@ -43,7 +43,7 @@ if (!$wholeSample) {
     $types .= 's';
 }
 
-$sql .= " ORDER BY sp.SampleID, tr.HeaderID, tr.resultsID";
+$sql .= " ORDER BY tr.HeaderID, tr.resultsID";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
