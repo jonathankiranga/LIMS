@@ -4,6 +4,34 @@ require_once '../functions/functions.php';
 
 header('Content-Type: application/json');
 
+/* Whole-sample review block approval mode */
+if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] === 1) {
+    $headerID=(int)($_POST['HeaderID']??0); $sampleID=trim($_POST['SampleID']??''); $flag=(int)($_POST['flag']??3); $approvalStatus=(int)($_POST['approvalStatus']??0); $userID=trim($_POST['user_id']??'');
+    if($headerID<=0||$sampleID===''||$userID===''){echo json_encode(['success'=>false,'message'=>'Sample, header or user information is missing.']);exit;}
+    if($flag!==3){echo json_encode(['success'=>false,'message'=>'Invalid review approval level.']);exit;}
+    $statusMap=[1=>4,4=>0]; if(!isset($statusMap[$approvalStatus])){echo json_encode(['success'=>false,'message'=>'Invalid sample review decision.']);exit;}
+    $statusID=$statusMap[$approvalStatus]; $conn->begin_transaction();
+    try {
+        $stmt=$conn->prepare("SELECT tr.TestID FROM test_results tr JOIN Sample_Header sp ON sp.HeaderID=tr.HeaderID WHERE tr.HeaderID=? AND sp.SampleID=? AND tr.StatusID=3");
+        if(!$stmt)throw new Exception('Failed to prepare sample review lookup: '.$conn->error);
+        $stmt->bind_param('is',$headerID,$sampleID); if(!$stmt->execute())throw new Exception('Failed to load sample review tests: '.$stmt->error);
+        $rs=$stmt->get_result();$testIDs=[];while($r=$rs->fetch_assoc())$testIDs[]=(int)$r['TestID'];$stmt->close();
+        if(!$testIDs)throw new Exception('No pending review tests were found for this sample block.');
+        $stmt=$conn->prepare("UPDATE test_results SET approvedby=?, StatusID=? WHERE HeaderID=? AND StatusID=3");
+        if(!$stmt)throw new Exception('Failed to prepare sample review update: '.$conn->error);
+        $stmt->bind_param('sii',$userID,$statusID,$headerID);if(!$stmt->execute())throw new Exception('Failed to update sample review block: '.$stmt->error);$updated=$stmt->affected_rows;$stmt->close();
+        if($updated!==count($testIDs))throw new Exception('Sample review changed during approval. No partial review block was committed.');
+        $ph=implode(',',array_fill(0,count($testIDs),'?'));$stmt=$conn->prepare("UPDATE sample_tests SET datetestended=NOW() WHERE TestID IN ($ph)");
+        if(!$stmt)throw new Exception('Failed to prepare review completion update: '.$conn->error);$types=str_repeat('i',count($testIDs));$bind=[$types];foreach($testIDs as $id)$bind[]=$id;$refs=[];foreach($bind as $k=>$v)$refs[$k]=&$bind[$k];call_user_func_array([$stmt,'bind_param'],$refs);if(!$stmt->execute())throw new Exception('Failed to update review completion dates: '.$stmt->error);$stmt->close();
+        $privateKeyPath=__DIR__."/userkeys/".$userID."/private_key.pem";if(!file_exists($privateKeyPath))throw new Exception('Blockchain private key not found for user '.$userID.'. Approval was not committed.');$privateKey=file_get_contents($privateKeyPath);if($privateKey===false||trim($privateKey)==='')throw new Exception('Blockchain private key could not be read. Approval was not committed.');
+        $decisionText=[1=>'APPROVED',4=>'REJECTED'][$approvalStatus];$ledgerPayload=['event'=>'SAMPLE_REVIEW_BLOCK_DECISION','sampleID'=>$sampleID,'HeaderID'=>$headerID,'decision'=>$approvalStatus,'decisionText'=>$decisionText,'testCount'=>$updated,'user_id'=>$userID,'timestamp'=>date('Y-m-d H:i:s')];
+        $q=$conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");if(!$q)throw new Exception('Unable to read the previous blockchain block: '.$conn->error);$last=$q->fetch_assoc();$previousHash=$last?$last['current_hash']:str_repeat('0',64);
+        $payloadJson=json_encode($ledgerPayload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($payloadJson===false)throw new Exception('Unable to create blockchain payload.');$dataString=$payloadJson.'|'.$previousHash;$currentHash=hash('sha256',$dataString);$digitalSignature=signData($currentHash,$privateKey);$encryptedData=encryptPrivateKey($dataString,$privateKey);
+        $stmtLedger=$conn->prepare("INSERT INTO blockchain_ledger (timestamp,previous_hash,current_hash,digital_signature,encrypted_data,status,userid) VALUES (CURRENT_TIMESTAMP,?,?,?,?,'active',?)");if(!$stmtLedger)throw new Exception('Failed to prepare blockchain ledger entry: '.$conn->error);$stmtLedger->bind_param('sssss',$previousHash,$currentHash,$digitalSignature,$encryptedData,$userID);if(!$stmtLedger->execute())throw new Exception('Failed to write blockchain ledger entry: '.$stmtLedger->error);$blockId=$conn->insert_id;$stmtLedger->close();
+        foreach($testIDs as $recordID)log_transaction_metadata($conn,$blockId,$recordID,'test_results');logAction($conn,'SAMPLE_REVIEW_BLOCK_'.$decisionText,$sampleID,$currentHash,$userID,'SUCCESS');$conn->commit();$word=[1=>'approved',4=>'rejected'][$approvalStatus];echo json_encode(['success'=>true,'message'=>'Sample '.$sampleID.' has been '.$word.' as a review block. '.$updated.' test result(s) updated.']);$conn->close();exit;
+    }catch(Exception $e){$conn->rollback();$conn->close();echo json_encode(['success'=>false,'message'=>$e->getMessage()]);exit;}
+}
+
 /* Sample block approval mode */
 if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     $headerID = (int)($_POST['HeaderID'] ?? 0);
