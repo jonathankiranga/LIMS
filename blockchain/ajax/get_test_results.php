@@ -23,7 +23,6 @@ $sql = "
         COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
         tp.Category AS ParamCategory
     FROM test_results tr
-    JOIN Sample_Tests st ON tr.TestID = st.TestID
     JOIN Sample_Header sp ON tr.HeaderID = sp.HeaderID
     JOIN testparameters tp
       ON tp.ParameterID = tr.ParameterID
