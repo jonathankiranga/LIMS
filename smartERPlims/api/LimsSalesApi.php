@@ -1568,18 +1568,11 @@ class LimsSalesApi{
                 $q = $this->db->query("UPDATE stockcategory SET categorydescription = '$stdName' WHERE categoryid = '$catId'");
                 if (!$q) $errors[] = 'standard update stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
             } else {
-                // No 'TS####' for this StandardID yet: fall back to a full-name
-                // match (legacy categories), otherwise create the TS#### row.
-                $byName = $this->db->query("SELECT categoryid FROM stockcategory WHERE categorydescription = '$stdName' LIMIT 1");
-                if ($byName && $byName->num_rows > 0) {
-                    $nr = $byName->fetch_assoc();
-                    $catId = trim((string)$nr['categoryid']);
-                    $q = $this->db->query("UPDATE stockcategory SET categorydescription = '$stdName' WHERE categoryid = '$catId'");
-                    if (!$q) $errors[] = 'standard update stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
-                } else {
-                    $q = $this->db->query("INSERT INTO stockcategory (categoryid, categorydescription) VALUES ('$catId', '$stdName')");
-                    if (!$q) $errors[] = 'standard insert stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
-                }
+                // StandardID is the authoritative identity. Never substitute a
+                // legacy category found by name because two standards can share
+                // the same name.
+                $q = $this->db->query("INSERT INTO stockcategory (categoryid, categorydescription) VALUES ('$catId', '$stdName')");
+                if (!$q) $errors[] = 'standard insert stdid=' . $stdId . ' (' . $catId . '): ' . $this->db->error;
             }
 
             // Upsert bundle stock item so the standard itself is priceable/quotable in Sales Quotation
@@ -1680,15 +1673,11 @@ class LimsSalesApi{
                 if ($ctResult && $ctResult->num_rows > 0) $catId = $cand;
             }
             if ($catId === '') {
-                $catResult = $this->db->query("SELECT categoryid FROM stockcategory WHERE categorydescription = '$stdNameEsc' LIMIT 1");
-                if ($catResult && $catResult->num_rows > 0) {
-                    $catRow = $catResult->fetch_assoc();
-                    $catId = trim((string)$catRow['categoryid']);
-                }
-                if ($catId === '') {
-                    $skipped['no_category']++;
-                    continue;
-                }
+                // StandardID is required for an exact parameter-to-standard link.
+                // Do not fall back to a category name and risk assigning the
+                // parameter to the wrong standard.
+                $skipped['no_category']++;
+                continue;
             }
             $catId = $this->db->real_escape_string($catId);
 
