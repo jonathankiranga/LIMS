@@ -34,6 +34,7 @@
                             <th>MRL </th>
                             <th>MRLUnit</th>
                             <th>Category</th>
+                            <th>Accreditation</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -560,6 +561,15 @@ function fetchParameters(standardID, page = 1) {
                         <td>${parameter.MRL}</td>
                         <td>${parameter.MRLUnit}</td>    
                         <td>${parameter.Category}</td>
+                        <td>
+                            ${
+                                parameter.AccreditationStatus === 'accredited'
+                                    ? '<span class="badge bg-success">Accredited</span>'
+                                    : parameter.AccreditationStatus === 'contracted'
+                                        ? '<span class="badge bg-warning text-dark">Contracted</span>'
+                                        : '<span class="badge bg-secondary">Not Accredited</span>'
+                            }
+                        </td>
                         <td>
                             <button class="btn btn-warning btn-sm editParameter"
                                 data-ParameterID="${parameter.ParameterID}"  
