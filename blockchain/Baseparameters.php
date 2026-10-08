@@ -96,6 +96,31 @@
     </div>
 </div>
 
+<!-- Add Unit of Measure Modal -->
+<div id="UnitOfMeasureModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Unit of Measure</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="UnitOfMeasureForm">
+                <div class="modal-body">
+                    <label for="newUnitOfMeasure" class="form-label">Unit of Measure</label>
+                    <input type="text" id="newUnitOfMeasure" name="unitOfMeasure" class="form-control" maxlength="50" autocomplete="off" required>
+                    <div id="unitOfMeasureMessage" class="small mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Parameter Modal -->
 <div id="ParameterModalRecord" class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -154,7 +179,14 @@
                         <div class="row">
                             <div class="col-6 d-flex flex-column mb-2">
                                 <label for="unitOfMeasure" class="form-label">Unit of Measure</label>
-                                <input type="text" id="unitOfMeasure" name="unitOfMeasure" class="form-control" placeholder="e.g. mg/l">
+                                <div class="input-group">
+                                    <select id="unitOfMeasure" name="unitOfMeasure" class="form-control">
+                                        <option value="">-- Select --</option>
+                                    </select>
+                                    <button type="button" id="addUnitOfMeasureBtn" class="btn btn-outline-primary" title="Add Unit of Measure">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-6 d-flex flex-column mb-2">
                                 <label for="category" class="form-label">Category</label>
@@ -327,6 +359,64 @@ function autoMatchSpecies() {
 
 var currentPage = 1;
 
+var unitOfMeasureList = [];
+
+function loadUnitOfMeasures(selectedValue, callback) {
+    $.ajax({
+        url: 'ajax/fetch_units_of_measure.php',
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            if (!response.success || !Array.isArray(response.data)) {
+                toastr.error(response.message || 'Failed to load units of measure.');
+                return;
+            }
+
+            unitOfMeasureList = response.data;
+
+            var select = $('#unitOfMeasure');
+            if (!select.length) {
+                if (typeof callback === 'function') callback();
+                return;
+            }
+
+            var selected = selectedValue !== undefined && selectedValue !== null
+                ? String(selectedValue)
+                : String(select.val() || '');
+
+            select.empty().append('<option value="">-- Select --</option>');
+
+            unitOfMeasureList.forEach(function(unit) {
+                var value = String(unit.UnitOfMeasure || '');
+                if (!value) return;
+
+                var option = $('<option></option>')
+                    .attr('value', value)
+                    .text(value);
+
+                if (value === selected) {
+                    option.prop('selected', true);
+                }
+
+                select.append(option);
+            });
+
+            if (typeof callback === 'function') callback();
+        },
+        error: function(xhr) {
+            toastr.error('Failed to load units of measure.');
+            if (typeof callback === 'function') callback();
+        }
+    });
+}
+
+function refreshUnitOfMeasureSelect(selectedValue) {
+    loadUnitOfMeasures(selectedValue);
+}
+
+
+
 function loadBaseParameters(page) {
     currentPage = page;
     $.ajax({
@@ -397,6 +487,8 @@ $(document).ready(function () {
     if (typeof Quill !== 'undefined') {
         initializeQuillEditors();
     }
+
+    loadUnitOfMeasures('');
 
     loadBaseParameters(1);
 
@@ -488,6 +580,53 @@ $(document).ready(function () {
         editModal.show();
     });
 
+    // Quick Add Unit of Measure
+    $('#addUnitOfMeasureBtn').on('click', function () {
+        $('#UnitOfMeasureForm')[0].reset();
+        $('#unitOfMeasureMessage').removeClass('text-danger text-success').text('');
+        bootstrap.Modal.getOrCreateInstance($('#UnitOfMeasureModal')[0]).show();
+        setTimeout(function () {
+            $('#newUnitOfMeasure').trigger('focus');
+        }, 300);
+    });
+
+    $('#UnitOfMeasureForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var button = form.find('button[type="submit"]');
+        var unit = $.trim($('#newUnitOfMeasure').val());
+
+        if (!unit) {
+            $('#unitOfMeasureMessage').removeClass('text-success').addClass('text-danger').text('Unit of measure is required.');
+            return;
+        }
+
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Adding...');
+
+        $.ajax({
+            url: 'ajax/save_unit_of_measure.php',
+            type: 'POST',
+            data: { unitOfMeasure: unit },
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    bootstrap.Modal.getOrCreateInstance($('#UnitOfMeasureModal')[0]).hide();
+                    loadUnitOfMeasures(response.UnitOfMeasure || unit);
+                    toastr.success(response.message || 'Unit of measure added successfully.');
+                } else {
+                    $('#unitOfMeasureMessage').removeClass('text-success').addClass('text-danger').text(response.message || 'Unable to add unit of measure.');
+                }
+            },
+            error: function (xhr) {
+                $('#unitOfMeasureMessage').removeClass('text-success').addClass('text-danger').text('Unable to add unit of measure.');
+            },
+            complete: function () {
+                button.prop('disabled', false).html('<i class="fas fa-plus"></i> Add');
+            }
+        });
+    });
+
     // Sync to ERP
     $('#syncToERP').on('click', function () {
         if (!confirm('Sync all base parameters to ERP system?')) return;
@@ -526,7 +665,7 @@ $(document).ready(function () {
         $('#limits').val($(this).data('limits') || '');
         $('#minLimit').val($(this).data('minlimit') || '');
         $('#maxLimit').val($(this).data('maxlimit') || '');
-        $('#unitOfMeasure').val($(this).data('unitofmeasure') || '');
+        loadUnitOfMeasures($(this).data('unitofmeasure') || '');
         $('#category').val($(this).data('category') || 'chemical');
         $('#method').val($(this).data('method') || '');
         var editModal = new bootstrap.Modal($('#ParameterModalRecord'), { backdrop: 'static' });
