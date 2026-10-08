@@ -1,98 +1,187 @@
 <?php
 require '../db_connection.php';
-require_once '../functions/functions.php'; 
- 
-$columnMap = [
-    // DB enum values
-    'quantitativeField' => 'MRL_Result',
-    'qualitativeField'  => 'ResultStatus',
-    'rangeField'        => 'RangeResult',
-    // Form field IDs
-    'mrlResult'         => 'MRL_Result',
-    'resultStatus'      => 'ResultStatus',
-    'rangeResult'       => 'RangeResult'
-];
-
-$selected     = trim($_POST['resultType']);
-$resultColumn = $columnMap[$selected] ?? '';
-$resultValue  = $_POST[$selected];
-$FLAG         = (int)$_POST['flag'];
-$approvalStatus=(int)$_POST['approvalStatus'] ?? NULL;
-
-$statusMapping = [
-    1 => 4,  // Approved -> StatusID 3
-    2 => 1,  // Reanalysis Required -> StatusID 1
-    3 => 4,  // Reanalysis Required -> StatusID 1
-    4 => 0   // Rejected -> StatusID 0
-];
-
-$approvalMapping = [
-    2 => 'reviewedby',  // Approved -> StatusID 3
-    3 => 'approvedby'
-];
+require_once '../functions/functions.php';
 
 header('Content-Type: application/json');
-if (isset($approvalStatus) && isset($statusMapping[$approvalStatus])) {
-    $conn->autocommit(0);
-    try {
-        $stmt = $conn->prepare("UPDATE sample_tests
-                                JOIN test_results ON sample_tests.TestID = test_results.TestID
-                                SET sample_tests.datetestended = NOW()
-                                WHERE test_results.resultsID = ?");
-              if (!$stmt) {
-                   echo json_encode(['success' => false, 'message' => 'Failed to prepare date update for  approval.']);
-                   exit;
-               }
 
-           $stmt->bind_param("i",$_POST['resultsID']);
-           if (!$stmt->execute()) {
-                   echo json_encode(['success' => false, 'message' => 'Failed to execute date update for  approval.']);
-                   exit;
-               }else{
-                   $stmt->close();
-               }
-               
-           $statusID = $statusMapping[$approvalStatus];
-           $level =(($approvalStatus==3)?'alteredby': $approvalMapping[$FLAG]);
-           // Prepare and execute the update statement
-           $stmt = $conn->prepare("UPDATE test_results SET $level=? , StatusID = ? WHERE resultsID = ?");
-            if(!$stmt) {
-                echo json_encode(['success' => false, 'message' => 'Failed to prepare statement approval.']);
-                exit;
-            }
+/* Sample block approval mode */
+if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
+    $headerID = (int)($_POST['HeaderID'] ?? 0);
+    $sampleID = trim($_POST['SampleID'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $flag = (int)($_POST['flag'] ?? 3);
+    $approvalStatus = (int)($_POST['approvalStatus'] ?? 0);
+    $userID = trim($_POST['user_id'] ?? '');
 
-            $stmt->bind_param("sii",$_POST['user_id'],$statusID, $_POST['resultsID']);
-            if (!$stmt->execute()) {
-              echo json_encode(['success' => false, 'message' => 'Failed to execute approval.']);
-              exit;
-             }
+    $statusMap = [1 => 4, 2 => 1, 4 => 0];
 
-           if($_POST['approvalStatus']==3){
-               $stmt = $conn->prepare("UPDATE test_results SET MRL_Result = null,  ResultStatus = null, 
-                   RangeResult = null, $resultColumn = ?,StatusID = 4 WHERE resultsID = ?");
-               if (!$stmt) {
-                   echo json_encode(['success' => false, 'message' => 'Failed to prepare correction statement.']);
-                   exit;
-               }
-
-               $stmt->bind_param('si', $resultValue,$_POST['resultsID']);
-               if (!$stmt->execute()) {
-                   echo json_encode(['success' => false, 'message' => 'Failed to execute correction.']);
-                   exit;
-               }else{
-                   $stmt->close();
-               }
-           }
-
-   } catch (Exception $e) {
-           $conn->rollback();
-    } finally {
-           $conn->commit();
+    if ($headerID <= 0 || $sampleID === '' || $userID === '') {
+        echo json_encode(['success'=>false,'message'=>'Sample, header or user information is missing.']);
+        exit;
     }
-   $conn->autocommit(1);
-   $conn->close();
-   
-   echo json_encode(['success' => true, 'message' => 'Results updated successfully.']);
- }else{
-      echo json_encode(['success' => FALSE, 'message' => 'Something is wrong']);
- }
+    if (!isset($statusMap[$approvalStatus])) {
+        echo json_encode(['success'=>false,'message'=>'Invalid block decision.']);
+        exit;
+    }
+
+    $statusID = $statusMap[$approvalStatus];
+    $level = ($flag === 2) ? 'reviewedby' : 'approvedby';
+
+    $conn->begin_transaction();
+
+    try {
+        $sql = "SELECT tr.TestID
+                FROM test_results tr
+                JOIN Sample_Header sp ON sp.HeaderID = tr.HeaderID
+                JOIN testparameters tp
+                  ON tp.ParameterID = tr.ParameterID
+                 AND tp.StandardID = tr.StandardID
+                WHERE tr.HeaderID = ?
+                  AND sp.SampleID = ?
+                  AND tr.StatusID = 2";
+        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
+            $sql .= " AND tp.Category = ?";
+        }
+
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
+
+        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
+            $stmt->bind_param('iss', $headerID, $sampleID, $department);
+        } else {
+            $stmt->bind_param('is', $headerID, $sampleID);
+        }
+
+        if (!$stmt->execute()) throw new Exception('Failed to load sample tests: '.$stmt->error);
+
+        $rs = $stmt->get_result();
+        $testIDs = [];
+        while ($r = $rs->fetch_assoc()) $testIDs[] = (int)$r['TestID'];
+        $stmt->close();
+
+        if (!$testIDs) throw new Exception('No pending tests were found for this sample block.');
+
+        $sql = "UPDATE test_results tr
+                JOIN testparameters tp
+                  ON tp.ParameterID = tr.ParameterID
+                 AND tp.StandardID = tr.StandardID
+                SET tr.`$level` = ?, tr.StatusID = ?
+                WHERE tr.HeaderID = ?
+                  AND tr.StatusID = 2";
+        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
+            $sql .= " AND tp.Category = ?";
+        }
+
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
+
+        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
+            $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
+        } else {
+            $stmt->bind_param('sii', $userID, $statusID, $headerID);
+        }
+
+        if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
+        $updated = $stmt->affected_rows;
+        $stmt->close();
+
+        if ($updated <= 0) throw new Exception('No test results were updated.');
+
+        $placeholders = implode(',', array_fill(0, count($testIDs), '?'));
+        $sql = "UPDATE sample_tests SET datetestended = NOW() WHERE TestID IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare completion update: '.$conn->error);
+
+        $types = str_repeat('i', count($testIDs));
+        $bind = [$types];
+        foreach ($testIDs as $id) $bind[] = $id;
+        $refs = [];
+        foreach ($bind as $k => $v) $refs[$k] = &$bind[$k];
+        call_user_func_array([$stmt, 'bind_param'], $refs);
+
+        if (!$stmt->execute()) throw new Exception('Failed to update completion dates: '.$stmt->error);
+        $stmt->close();
+
+        $conn->commit();
+        $words = [1=>'approved',2=>'sent for reanalysis',4=>'rejected'];
+
+        echo json_encode([
+            'success'=>true,
+            'message'=>'Sample '.$sampleID.' has been '.$words[$approvalStatus].' as a block. '.$updated.' test result(s) updated.'
+        ]);
+        $conn->close();
+        exit;
+    } catch (Exception $e) {
+        $conn->rollback();
+        $conn->close();
+        echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
+        exit;
+    }
+}
+
+/* Existing single-result mode retained for compatibility. */
+$columnMap = [
+    'quantitativeField'=>'MRL_Result',
+    'qualitativeField'=>'ResultStatus',
+    'rangeField'=>'RangeResult',
+    'mrlResult'=>'MRL_Result',
+    'resultStatus'=>'ResultStatus',
+    'rangeResult'=>'RangeResult'
+];
+
+$selected = trim($_POST['resultType'] ?? '');
+$resultColumn = $columnMap[$selected] ?? '';
+$resultValue = $_POST[$selected] ?? '';
+$flag = (int)($_POST['flag'] ?? 3);
+$approvalStatus = (int)($_POST['approvalStatus'] ?? 0);
+
+$statusMapping = [1=>4,2=>1,3=>4,4=>0];
+$approvalMapping = [2=>'reviewedby',3=>'approvedby'];
+
+if (!isset($statusMapping[$approvalStatus])) {
+    echo json_encode(['success'=>false,'message'=>'Something is wrong']);
+    exit;
+}
+
+$resultsID = (int)($_POST['resultsID'] ?? 0);
+$userID = $_POST['user_id'] ?? '';
+$conn->begin_transaction();
+
+try {
+    $stmt = $conn->prepare("UPDATE sample_tests
+                            JOIN test_results ON sample_tests.TestID = test_results.TestID
+                            SET sample_tests.datetestended = NOW()
+                            WHERE test_results.resultsID = ?");
+    if (!$stmt) throw new Exception('Failed to prepare date update.');
+    $stmt->bind_param('i',$resultsID);
+    if (!$stmt->execute()) throw new Exception('Failed to update test completion date.');
+    $stmt->close();
+
+    $statusID = $statusMapping[$approvalStatus];
+    $level = ($approvalStatus === 3) ? 'alteredby' : ($approvalMapping[$flag] ?? 'approvedby');
+
+    $stmt = $conn->prepare("UPDATE test_results SET `$level`=?, StatusID=? WHERE resultsID=?");
+    if (!$stmt) throw new Exception('Failed to prepare approval update.');
+    $stmt->bind_param('sii',$userID,$statusID,$resultsID);
+    if (!$stmt->execute()) throw new Exception('Failed to execute approval.');
+    $stmt->close();
+
+    if ($approvalStatus === 3 && $resultColumn !== '') {
+        $stmt = $conn->prepare("UPDATE test_results
+                                SET MRL_Result=NULL, ResultStatus=NULL, RangeResult=NULL,
+                                    `$resultColumn`=?, StatusID=4
+                                WHERE resultsID=?");
+        if (!$stmt) throw new Exception('Failed to prepare correction update.');
+        $stmt->bind_param('si',$resultValue,$resultsID);
+        if (!$stmt->execute()) throw new Exception('Failed to execute correction.');
+        $stmt->close();
+    }
+
+    $conn->commit();
+    $conn->close();
+    echo json_encode(['success'=>true,'message'=>'Results updated successfully.']);
+} catch (Exception $e) {
+    $conn->rollback();
+    $conn->close();
+    echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
+}
