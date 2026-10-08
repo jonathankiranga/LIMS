@@ -215,13 +215,21 @@ $sqldebtors = DB_query("SELECT itemcode, creditlimit, customer, phone, email, ci
             $tat = $rows['tat'];
             $lineDiscountPercent = (float) ($rows['discountpercent'] ?? 0);
             $docnoEsc = mysqli_real_escape_string($db, $_POST['documentno']);
+            $stdGroup = trim((string) ($rows['stdgroup'] ?? ''));
+
+            // Preserve the exact standard category on every quote line.
+            // TS#### is the ERP's canonical StandardID mapping.
+            if ($stdGroup === '' && preg_match('/^TS\\d{4}$/', trim($rows['itemcode']))) {
+                $stdGroup = trim($rows['itemcode']);
+            }
+            $stdGroupEsc = mysqli_real_escape_string($db, $stdGroup);
 
             $sql[] = sprintf("INSERT INTO SalesLine
                    (documenttype, docdate, documentno, code, description, unitofmeasure, Quantity,
                     UnitPrice, vatamount, invoiceamount, vatrate, inclusive, containerprice,
-                    containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent)
+                    containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent, category)
                  VALUES
-                   ('%s','%s','%s','%s','%s','%s','%s',%f,%f,%f,'%f','%s',%f,%f,%f,'%s','%s',%s,%f)"
+                   ('%s','%s','%s','%s','%s','%s','%s',%f,%f,%f,'%f','%s',%f,%f,%f,'%s','%s',%s,%f,'%s')"
                 , "54"
                 , $DATE
                 , $docnoEsc
@@ -237,7 +245,8 @@ $sqldebtors = DB_query("SELECT itemcode, creditlimit, customer, phone, email, ci
                 , 0, 0, 0, 0
                 , $Partperunit
                 , $tat ? (int) $tat : 'NULL'
-                , $lineDiscountPercent);
+                , $lineDiscountPercent
+                , $stdGroupEsc);
         }
     }
 
@@ -293,6 +302,7 @@ if (isset($_POST['submit']) && $_POST['submit'] === 'Save Quote') {
                 'quantity' => (float) ($_POST['quantity'][$i] ?? 1),
                 'tat' => ($_POST['tat'][$i] ?? 0),
                 'discountpercent' => (float) ($_POST['LineDiscountPercent'][$i] ?? 0),
+                'stdgroup' => trim((string) ($_POST['stdgroup'][$i] ?? '')),
                 'sampleid' => ''
             );
         }
