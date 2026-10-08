@@ -360,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
  
       $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . $sample['ParameterName'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . accreditationParameterName($sample) . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $resutlts . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $standard . '</td>
@@ -368,7 +368,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
    }
 
     $html .= '</tbody></table>'; // Close the table
-    $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>'; // Add footer
+    $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
+    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Accredited &nbsp;&nbsp; † Not Accredited &nbsp;&nbsp; ‡ Contracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
     
     $lines = explode("\n", $SampletypeNotes);
@@ -381,7 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
  
     foreach ($samples as $sample) {
         $validatedresults = validateresults($sample);
-        $html .=' Test Results for '. $sample['ParameterName'].' are <u>'.
+        $html .=' Test Results for '. accreditationParameterName($sample) .' are <u>'.
        ($validatedresults['grade'] == '' ? $validatedresults['results'] : '')  . 
        ($validatedresults['grade'] == 'blue' ? 'Below the minimum specified level' : '')  . 
        ($validatedresults['grade'] == 'green' ? 'Optimum' : '')  . 
@@ -682,6 +683,21 @@ function formatResultNumber($row, $value){
         return formatCertNumber($value);
     }
     return $value;
+}
+
+function accreditationSymbol($status){
+    switch (strtolower(trim((string)$status))) {
+        case 'accredited': return '*';
+        case 'contracted': return '‡';
+        case 'not_accredited':
+        default: return '†';
+    }
+}
+
+function accreditationParameterName($sample){
+    $name = htmlspecialchars((string)($sample['ParameterName'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $symbol = accreditationSymbol($sample['AccreditationStatus'] ?? 'not_accredited');
+    return $name . '<sup style="font-size:7px;">' . $symbol . '</sup>';
 }
 
 function validateresults($row){
