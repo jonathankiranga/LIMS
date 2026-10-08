@@ -4,9 +4,10 @@ require '../db_connection.php';
 $statusID = isset($_GET['statusID']) ? (int)$_GET['statusID'] : 0;
 $department = strtolower(trim($_GET['department'] ?? ''));
 $groupBySample = isset($_GET['groupBySample']) && (int)$_GET['groupBySample'] === 1;
+$wholeSample = isset($_GET['wholeSample']) && (int)$_GET['wholeSample'] === 1;
 
 $allowedDepartments = ['microbiological', 'chemical'];
-if (!in_array($department, $allowedDepartments, true)) {
+if (!$wholeSample && !in_array($department, $allowedDepartments, true)) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Invalid department supplied by the calling program.']);
     exit;
@@ -35,9 +36,11 @@ $sql = "
 $params = [$statusID];
 $types = 'i';
 
-$sql .= " AND tp.Category = ?";
-$params[] = $department;
-$types .= 's';
+if (!$wholeSample) {
+    $sql .= " AND tp.Category = ?";
+    $params[] = $department;
+    $types .= 's';
+}
 
 $sql .= " ORDER BY sp.SampleID, tr.HeaderID, tr.resultsID";
 
