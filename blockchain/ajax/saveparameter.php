@@ -78,6 +78,7 @@ $Limits        = trim($_POST['Limits'] ?? '');
 $Method        = trim($_POST['Method'] ?? '');
 $matrixID      = isset($_POST['GlobalParameterID']) && $_POST['GlobalParameterID'] !== '' ? intval($_POST['GlobalParameterID']) : null;
 $Category      = trim($_POST['Category'] ?? '');
+$AccreditationStatus = trim($_POST['AccreditationStatus'] ?? 'not_accredited');
 $MRL           = isset($_POST['MRL']) && $_POST['MRL'] !== '' ? (float)$_POST['MRL'] : null;
 $MRLUnit       = trim($_POST['MRLUnit'] ?? '');
 $updatedAt     = date('Y-m-d H:i:s');
@@ -96,6 +97,11 @@ dbLog('PARSED VALUES', [
     'MRL' => $MRL,
     'MRLUnit' => $MRLUnit
 ]);
+
+$allowedAccreditationStatuses = ['accredited', 'not_accredited', 'contracted'];
+if (!in_array($AccreditationStatus, $allowedAccreditationStatuses, true)) {
+    $AccreditationStatus = 'not_accredited';
+}
 
 if (empty($name)) {
     outputResponse([
@@ -200,7 +206,7 @@ try {
 
         dbLog('DB #2 PREPARE OK');
 
-        $bindTypes = "ssddsisdsssii";
+        $bindTypes="ssddsisdssssii";
         dbLog('DB #2 BIND TYPES', $bindTypes);
 
         $stmt->bind_param(
@@ -212,6 +218,7 @@ try {
             $Method,
             $matrixID,
             $Category,
+            $AccreditationStatus,
             $MRL,
             $MRLUnit,
             $updatedAt,
@@ -250,8 +257,8 @@ try {
         dbLog('DB #2 PREPARE: INSERT TESTPARAMETERS');
 
         $query = "INSERT INTO TestParameters
-                  (ParameterName, StandardID, MinLimit, MaxLimit, Limits, UnitOfMeasure, Method, BaseID, Category, MRL, MRLUnit, CreatedAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  (ParameterName, StandardID, MinLimit, MaxLimit, Limits, UnitOfMeasure, Method, BaseID, Category, AccreditationStatus, MRL, MRLUnit, CreatedAt)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $createdAt = date('Y-m-d H:i:s');
 
@@ -268,7 +275,7 @@ try {
 
         dbLog('DB #2 PREPARE OK');
 
-        $bindTypes = "siddsssisdss";
+        $bindTypes = "siddsssissdss";
         dbLog('DB #2 BIND TYPES', $bindTypes);
 
         $stmt->bind_param(
