@@ -263,6 +263,7 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                                 <th>MRL</th>
                                 <th>MRL Unit</th>
                                 <th>Category</th>
+                                <th>Accreditation</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -325,6 +326,14 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                                 <select id="p_Category" name="Category" class="form-control">
                                     <option value="chemical">Chemical</option>
                                     <option value="microbiological">Microbiological</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label>Accreditation Status</label>
+                                <select id="p_AccreditationStatus" name="AccreditationStatus" class="form-control">
+                                    <option value="accredited">Accredited</option>
+                                    <option value="not_accredited" selected>Not Accredited</option>
+                                    <option value="contracted">Contracted</option>
                                 </select>
                             </div>
                             <div class="mb-2">
@@ -1106,7 +1115,7 @@ function paramRowDataVal(tr, field) {
 }
 
 function isParamRowDirty(tr) {
-    var fields = ['ParameterName', 'UnitOfMeasure', 'MinLimit', 'MaxLimit', 'Limits', 'Method', 'MRL', 'MRLUnit', 'Category'];
+    var fields = ['ParameterName', 'UnitOfMeasure', 'MinLimit', 'MaxLimit', 'Limits', 'Method', 'MRL', 'MRLUnit', 'Category', 'AccreditationStatus'];
     for (var i = 0; i < fields.length; i++) {
         var cur = paramFieldVal(tr, fields[i]);
         var orig = paramRowDataVal(tr, fields[i].toLowerCase());
@@ -1186,6 +1195,7 @@ $('#paramSaveChangesBtn').click(function() {
             Method: paramFieldVal(tr, 'Method'),
             GlobalParameterID: tr.data('baseid') || '',
             Category: paramFieldVal(tr, 'Category'),
+            AccreditationStatus: paramFieldVal(tr, 'AccreditationStatus'),
             MRL: paramFieldVal(tr, 'MRL'),
             MRLUnit: paramFieldVal(tr, 'MRLUnit')
         };
@@ -1226,7 +1236,8 @@ function loadParameters(sid) {
                     'data-method="' + esc(p.Method || '') + '" ' +
                     'data-mrl="' + esc(pgiNum(p.MRL)) + '" ' +
                     'data-mrlunit="' + esc(p.MRLUnit || '') + '" ' +
-                    'data-category="' + esc(p.Category || '') + '"';
+                    'data-category="' + esc(p.Category || '') + '" ' +
+                    'data-accreditationstatus="' + esc(p.AccreditationStatus || 'not_accredited') + '"';
                 tbody.append(
                     '<tr ' + rowData + '>' +
                     '<td><input class="pgi" data-field="ParameterName" value="' + esc(p.ParameterName || '') + '"></td>' +
@@ -1238,6 +1249,13 @@ function loadParameters(sid) {
                     '<td><input type="number" step="0.01" class="pgi" data-field="MRL" value="' + esc(pgiNum(p.MRL)) + '"></td>' +
                     '<td><select class="pgi" data-field="MRLUnit">' + unitOptionsHtml(p.MRLUnit || '') + '</select></td>' +
                     '<td>' + pgiCategorySelect(p.Category || '') + '</td>' +
+                    '<td>' +
+                    '<select class="pgi" data-field="AccreditationStatus">' +
+                    '<option value="accredited"' + (p.AccreditationStatus === 'accredited' ? ' selected' : '') + '>Accredited</option>' +
+                    '<option value="not_accredited"' + ((!p.AccreditationStatus || p.AccreditationStatus === 'not_accredited') ? ' selected' : '') + '>Not Accredited</option>' +
+                    '<option value="contracted"' + (p.AccreditationStatus === 'contracted' ? ' selected' : '') + '>Contracted</option>' +
+                    '</select>' +
+                    '</td>' +
                     '<td>' +
                     '<button class="btn btn-warning btn-sm edit-param" title="Edit">' +
                     '<i class="fas fa-edit"></i></button> ' +
@@ -1287,6 +1305,7 @@ $(document).on('click', '.edit-param', function() {
     $('#p_MRL').val(paramFieldVal(tr, 'MRL'));
     $('#p_MRLUnit').val(paramFieldVal(tr, 'MRLUnit'));
     $('#p_Category').val(paramFieldVal(tr, 'Category'));
+    $('#p_AccreditationStatus').val(paramRowDataVal(tr, 'accreditationstatus') || 'not_accredited');
     initBaseSearch();
     if (tsBaseSearch && baseId && paramName) {
         tsBaseSearch.addOption({ ParameterID: baseId, ParameterName: paramName });
@@ -1311,6 +1330,7 @@ $('#paramAddForm').on('submit', function(e) {
         Method: $('#p_Method').val(),
         GlobalParameterID: $('#p_GlobalParameterID').val(),
         Category: $('#p_Category').val(),
+        AccreditationStatus: $('#p_AccreditationStatus').val() || 'not_accredited',
         MRL: $('#p_MRL').val(),
         MRLUnit: $('#p_MRLUnit').val()
     };
