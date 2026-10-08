@@ -235,7 +235,9 @@ $(document).ready(function () {
     // Add Parameter
     $('#addParameterBtn').on('click', function () {
         const standardID = $(this).data('id');
-        $('#StandardID').val(standardID);
+        $('#StandardIDForm').val(standardID);
+        $('#ParameterIDForm').val('');
+        $('#GlobalParameterForm').val('');
        
         const standardName = $(this).data('name');
         $('#addstandardName').text(standardName);
@@ -284,7 +286,7 @@ $(document).ready(function () {
         $('#mrlunit').val(mrlunit);  //select option
         
         const category = $(this).data('category') || 'chemical'; 
-        $('#category').val(category);
+        $('#Category').val(category);
         
         const unitofmeasure = $(this).data('unitofmeasure') || 'ppm'; 
         $('#unitofmeasure').val(unitofmeasure);  //select option
