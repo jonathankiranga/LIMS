@@ -104,6 +104,14 @@
                         <div class="mb-2">
                             <label for="Category" class="form-label">Category</label>
                             <input type="text" class="form-control" id="Category" name="Category" readonly>
+                        </div>                        <!-- Accreditation Status -->
+                        <div class="mb-2">
+                            <label for="AccreditationStatus" class="form-label">Accreditation Status</label>
+                            <select class="form-control" id="AccreditationStatus" name="AccreditationStatus">
+                                <option value="accredited">Accredited</option>
+                                <option value="not_accredited" selected>Not Accredited</option>
+                                <option value="contracted">Contracted</option>
+                            </select>
                         </div>
                         <!-- MRL -->
                         <div class="mb-2">
@@ -281,6 +289,9 @@ $(document).ready(function () {
         $('#MaxLimit').val($(this).data('maxlimit'));
         $('#method').val($(this).data('method'));
         $('#mrl').val($(this).data('mrl'));
+        
+        const accreditationStatus = $(this).data('accreditationstatus') || 'not_accredited';
+        $('#AccreditationStatus').val(accreditationStatus);
         
         const mrlunit = $(this).data('mrlunit') || 'ppm'; 
         $('#mrlunit').val(mrlunit);  //select option
@@ -563,7 +574,8 @@ function fetchParameters(standardID, page = 1) {
                                 data-Method="${parameter.Method}"  
                                 data-MRL="${parameter.MRL}"  
                                 data-MRLUnit="${parameter.MRLUnit}" 
-                                data-Category="${parameter.Category}">
+                                data-Category="${parameter.Category}"
+                                 data-AccreditationStatus="${parameter.AccreditationStatus || 'not_accredited'}">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-sm deleteParameter" 
