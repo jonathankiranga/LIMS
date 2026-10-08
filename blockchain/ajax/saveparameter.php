@@ -187,6 +187,7 @@ try {
                   `Method` = ?,
                   `BaseID` = COALESCE(?, BaseID),
                   `Category` = ?,
+                  `AccreditationStatus` = ?,
                   `MRL` = ?,
                   `MRLUnit` = ?,
                   `UpdatedAt` = ?,
