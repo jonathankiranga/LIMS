@@ -161,7 +161,28 @@ while($row=DB_fetch_array($ResultIndex)){
     
 echo '</select></td><td>Your Reference</td>'
         . '<td><input tabindex="5" type="text" name="reference" value="'.$_POST['reference'].'"  size="5" /></td></tr>';
-// Quotation number (optional) - will be persisted to SalesHeader.externaldocumentno when invoice is saved
+
+// Add bank selection (mirrors SalesQuotation)
+$savedBank1Inv = $_POST['Bank_Code'] ?? '';
+$savedBank2Inv = $_POST['Bank_Code2'] ?? '';
+// Try to inherit from original order/quote if not posted
+if ($savedBank1Inv === '' || $savedBank2Inv === '') {
+    $origDoc = $_SESSION['DocumentNo'] ?? ($_POST['documentno'] ?? '');
+    if ($origDoc !== '') {
+        $bq = DB_query("SELECT locationcode, externaldocumentno FROM SalesHeader WHERE documentno='" . mysqli_real_escape_string($db, $origDoc) . "' LIMIT 1", $db);
+        if ($br = DB_fetch_row($bq)) {
+            if ($savedBank1Inv === '') $savedBank1Inv = $br[0] ?? '';
+            if ($savedBank2Inv === '') $savedBank2Inv = $br[1] ?? '';
+        }
+    }
+}
+
+echo '<tr><td colspan="6" style="padding:0;"><table class="table table-bordered" style="margin-bottom:0;">';
+echo '<tr><td>Select Bank to Deposit:</td><td><select name="Bank_Code" id="Bank_Code" class="form-control form-control-sm"><option></option></select></td>';
+echo '<td>Select option 2 Bank to Deposit:</td><td><select name="Bank_Code2" id="Bank_Code2" class="form-control form-control-sm"><option></option></select></td></tr>';
+echo '</table></td></tr>';
+echo '<input type="hidden" id="savedBank1" value="' . htmlspecialchars($savedBank1Inv, ENT_QUOTES) . '" />';
+echo '<input type="hidden" id="savedBank2" value="' . htmlspecialchars($savedBank2Inv, ENT_QUOTES) . '" />';
 
 echo '</table>';
 
@@ -341,6 +362,37 @@ function filterTable(){
         rows[i].style.display = match ? "" : "none";
     }
 }
+$(document).ready(function(){
+    if (typeof loadBanks === "function" && document.getElementById("currencycode") && document.getElementById("currencycode").value) {
+        var p;
+        try { p = loadBanks(); } catch(e) {}
+        if (p && p.then) {
+            p.then(function(){
+                var b1 = document.getElementById("Bank_Code");
+                var b2 = document.getElementById("Bank_Code2");
+                if (b1 && !b1.value && b1.options && b1.options.length > 1) {
+                    var v1 = document.getElementById("savedBank1") ? document.getElementById("savedBank1").value : "";
+                    if (v1) {
+                        for (var i=0; i<b1.options.length; i++) {
+                            if (b1.options[i].value === v1) { b1.value = v1; break; }
+                        }
+                    }
+                    if (!b1.value) { b1.value = b1.options[1].value; }
+                }
+                if (b2 && document.getElementById("savedBank2")) {
+                    var v2 = document.getElementById("savedBank2").value;
+                    if (v2) {
+                        for (var i=0; i<b2.options.length; i++) {
+                            if (b2.options[i].value === v2) { b2.value = v2; break; }
+                        }
+                    }
+                }
+                if (b1 && b2 && b1.value && b1.value === b2.value) { b2.value = ""; }
+                if (typeof syncBankOptions === "function") { syncBankOptions(); }
+            });
+        }
+    }
+});
 </script>';
 
 include('includes/footer.inc');
