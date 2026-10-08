@@ -13,10 +13,22 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     $approvalStatus = (int)($_POST['approvalStatus'] ?? 0);
     $userID = trim($_POST['user_id'] ?? '');
 
+    /*
+     * IMPORTANT: department is supplied by the calling approval program.
+     * It is NOT taken from the logged-in user's department because a
+     * super-user/admin may legitimately have no department assignment.
+     */
+    $allowedDepartments = ['microbiological', 'chemical'];
+    $department = strtolower($department);
+
     $statusMap = [1 => 4, 2 => 1, 4 => 0];
 
     if ($headerID <= 0 || $sampleID === '' || $userID === '') {
         echo json_encode(['success'=>false,'message'=>'Sample, header or user information is missing.']);
+        exit;
+    }
+    if (!in_array($department, $allowedDepartments, true)) {
+        echo json_encode(['success'=>false,'message'=>'Invalid department supplied by the calling program.']);
         exit;
     }
     if (!isset($statusMap[$approvalStatus])) {
@@ -39,18 +51,12 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                 WHERE tr.HeaderID = ?
                   AND sp.SampleID = ?
                   AND tr.StatusID = 2";
-        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
-            $sql .= " AND tp.Category = ?";
-        }
+        $sql .= " AND tp.Category = ?";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
 
-        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
-            $stmt->bind_param('iss', $headerID, $sampleID, $department);
-        } else {
-            $stmt->bind_param('is', $headerID, $sampleID);
-        }
+        $stmt->bind_param('iss', $headerID, $sampleID, $department);
 
         if (!$stmt->execute()) throw new Exception('Failed to load sample tests: '.$stmt->error);
 
@@ -68,18 +74,12 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                 SET tr.`$level` = ?, tr.StatusID = ?
                 WHERE tr.HeaderID = ?
                   AND tr.StatusID = 2";
-        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
-            $sql .= " AND tp.Category = ?";
-        }
+        $sql .= " AND tp.Category = ?";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
 
-        if ($department !== '' && $department !== 'admin' && $department !== 'guest') {
-            $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
-        } else {
-            $stmt->bind_param('sii', $userID, $statusID, $headerID);
-        }
+        $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
 
         if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
         $updated = $stmt->affected_rows;
