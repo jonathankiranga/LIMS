@@ -12,18 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     // Get data from POST request
-    $ParameterID   = isset($_POST['ParameterID']) ? intval($_POST['ParameterID']) : null;
-    $name          = $conn->real_escape_string($_POST['ParameterName']);
-    $StandardID    = $conn->real_escape_string($_POST['StandardID']);
-    $UnitOfMeasure = $conn->real_escape_string($_POST['UnitOfMeasure']);
-    $MinLimit      = $conn->real_escape_string($_POST['MinLimit']); // Corrected field name
-    $MaxLimit      = $conn->real_escape_string($_POST['MaxLimit']); // Corrected field name
-    $Limits        = $conn->real_escape_string($_POST['Limits']); // Corrected field name
-    $Method        = $conn->real_escape_string($_POST['Method']); // Corrected field name
-    $matrixID      = $conn->real_escape_string($_POST['GlobalParameterID']); // Corrected field name
-    $Category      = $conn->real_escape_string($_POST['Category']); // Corrected field name
-    $MRL           = $conn->real_escape_string($_POST['MRL']); // Corrected field name
-    $MRLUnit       = $conn->real_escape_string($_POST['MRLUnit']); // Corrected field name
+    $ParameterID   = isset($_POST['ParameterID']) && $_POST['ParameterID'] !== '' ? intval($_POST['ParameterID']) : null;
+    $name          = trim($_POST['ParameterName'] ?? '');
+    $StandardID    = isset($_POST['StandardID']) && $_POST['StandardID'] !== '' ? intval($_POST['StandardID']) : null;
+    $UnitOfMeasure = trim($_POST['UnitOfMeasure'] ?? '');
+    $MinLimit      = isset($_POST['MinLimit']) && $_POST['MinLimit'] !== '' ? (float)$_POST['MinLimit'] : null;
+    $MaxLimit      = isset($_POST['MaxLimit']) && $_POST['MaxLimit'] !== '' ? (float)$_POST['MaxLimit'] : null;
+    $Limits        = trim($_POST['Limits'] ?? '');
+    $Method        = trim($_POST['Method'] ?? '');
+    $matrixID      = isset($_POST['GlobalParameterID']) && $_POST['GlobalParameterID'] !== '' ? intval($_POST['GlobalParameterID']) : null;
+    $Category      = trim($_POST['Category'] ?? '');
+    $MRL           = isset($_POST['MRL']) && $_POST['MRL'] !== '' ? (float)$_POST['MRL'] : null;
+    $MRLUnit       = trim($_POST['MRLUnit'] ?? '');
     $updatedAt     = date('Y-m-d H:i:s');
 
     // Validate required fields
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Validate matrixID exists in baseparameters when one is supplied (foreign key integrity; never writes baseparameters)
-    if ($matrixID !== '' && $matrixID !== null) {
+    if ($matrixID !== null) {
         $checkBase = $conn->prepare("SELECT ParameterID FROM baseparameters WHERE ParameterID = ?");
         $checkBase->bind_param("i", $matrixID);
         $checkBase->execute();
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         `MinLimit` = ?,
                         `MaxLimit` = ?,
                         `Method` = ?,
-                        `BaseID` = COALESCE(NULLIF(?, ''), BaseID),
+                        `BaseID` = COALESCE(?, BaseID),
                         `Category` = ?,
                         `MRL` = ?,
                         `MRLUnit` = ?,
@@ -75,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         WHERE `ParameterID` = ? and  StandardID = ?";
             $stmt = $conn->prepare($query);
             if ($stmt) {
-                $stmt->bind_param("ssddsdsdsssii", $name , $Limits,$MinLimit, $MaxLimit,$Method,$matrixID,
-                        $Category,$MRL,$MRLUnit, $updatedAt, $UnitOfMeasure, $ParameterID,$StandardID);
+                $stmt->bind_param("ssddsisdsssii", $name, $Limits, $MinLimit, $MaxLimit, $Method, $matrixID,
+                        $Category, $MRL, $MRLUnit, $updatedAt, $UnitOfMeasure, $ParameterID, $StandardID);
                 if ($stmt->execute()) {
                     $response['success'] = true;
                     $response['message'] = 'Test Parameters updated successfully.';
@@ -107,8 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($query);
                        
             if ($stmt) {
-                $stmt->bind_param("siddsssdsdss", $name,$StandardID, $MinLimit, $MaxLimit, $Limits, $UnitOfMeasure
-                        ,$Method,$matrixID,$Category,$MRL,$MRLUnit, $createdAt);
+                $stmt->bind_param("siddsssisdss", $name, $StandardID, $MinLimit, $MaxLimit, $Limits, $UnitOfMeasure,
+                        $Method, $matrixID, $Category, $MRL, $MRLUnit, $createdAt);
                 if ($stmt->execute()) {
                     $response['success'] = true;
                     $response['message'] = 'Test Parameters created successfully.';
