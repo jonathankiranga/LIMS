@@ -207,7 +207,7 @@ try {
 
         dbLog('DB #2 PREPARE OK');
 
-        $bindTypes="ssddsisdssssii";
+        $bindTypes="ssddsissdsssii";
         dbLog('DB #2 BIND TYPES', $bindTypes);
 
         $stmt->bind_param(
