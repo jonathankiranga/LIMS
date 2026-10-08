@@ -1,31 +1,30 @@
 <?php
 require '../db_connection.php';
 
-// Get parameters
-$statusID = $_GET['statusID'] ?? 0;
-$department = $_GET['department'] ?? ''; // chemical, microbiological, admin, guest
-
-// Build query with department filtering
-// ResultType resolution priority:
-// 1. testparameters.ResultType (explicit override)
-// 2. baseparameters.ResultType (via tp.BaseID = bp.ParameterID)
-// 3. Default 'quantitativeField'
+$statusID = isset($_GET['statusID']) ? (int)$_GET['statusID'] : 0;
+$department = trim($_GET['department'] ?? '');
+$groupBySample = isset($_GET['groupBySample']) && (int)$_GET['groupBySample'] === 1;
 
 $sql = "
-    SELECT DISTINCT 
-        st.*, sp.*, tr.*, tp.*, ts.*,
+    SELECT
+        st.*,
+        sp.*,
+        tr.*,
+        tp.*,
+        ts.*,
         COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
         tp.Category AS ParamCategory
-    FROM test_results tr 
+    FROM test_results tr
     JOIN Sample_Tests st ON tr.TestID = st.TestID
     JOIN Sample_Header sp ON tr.HeaderID = sp.HeaderID
-    JOIN testparameters tp ON tp.ParameterID = tr.ParameterID AND tp.StandardID = tr.StandardID
+    JOIN testparameters tp
+      ON tp.ParameterID = tr.ParameterID
+     AND tp.StandardID = tr.StandardID
     JOIN teststandards ts ON ts.StandardID = tr.StandardID
     LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
     WHERE tr.StatusID = ?
 ";
 
-// Add department filter
 $params = [$statusID];
 $types = 'i';
 
@@ -34,8 +33,8 @@ if ($department && $department !== 'admin' && $department !== 'guest') {
     $params[] = $department;
     $types .= 's';
 }
-// For 'admin' - no filter (see all)
-// For 'guest' - could add filter to show none, or handle at frontend
+
+$sql .= " ORDER BY sp.SampleID, tr.HeaderID, tr.resultsID";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -45,17 +44,51 @@ if (!$stmt) {
 }
 
 $stmt->bind_param($types, ...$params);
-$stmt->execute();
-$result = $stmt->get_result();
 
-$response = ['success' => false, 'results' => []];
-if ($result->num_rows > 0) {
-    $response['success'] = true;
-    while ($row = $result->fetch_assoc()) {
-        // ResultType already resolved in SQL via COALESCE
-        $response['results'][] = $row;
+if (!$stmt->execute()) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Query execute failed: ' . $stmt->error]);
+    exit;
+}
+
+$result = $stmt->get_result();
+$groups = [];
+
+while ($row = $result->fetch_assoc()) {
+    if (!$groupBySample) {
+        $groups[] = $row;
+        continue;
     }
+
+    /*
+     * HeaderID is part of the grouping key. The UI still presents one
+     * block for each SampleID, while preventing two headers with a reused
+     * SampleID from being mixed.
+     */
+    $key = (string)$row['HeaderID'];
+
+    if (!isset($groups[$key])) {
+        $groups[$key] = [
+            'HeaderID' => $row['HeaderID'],
+            'SampleID' => $row['SampleID'],
+            'DocumentNo' => $row['DocumentNo'] ?? '',
+            'Date' => $row['Date'] ?? '',
+            'tests' => []
+        ];
+    }
+
+    $groups[$key]['tests'][] = $row;
+}
+
+if ($groupBySample) {
+    $groups = array_values($groups);
 }
 
 header('Content-Type: application/json');
-echo json_encode($response);
+echo json_encode([
+    'success' => count($groups) > 0,
+    'results' => $groups
+]);
+
+$stmt->close();
+$conn->close();
