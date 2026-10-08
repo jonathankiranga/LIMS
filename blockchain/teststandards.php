@@ -977,22 +977,53 @@ initializeQuillEditors();
 // ──────────────────────────────────────────────
 var currentParamStandardID = 0;
 
-// Populate UnitOfMeasure and MRLUnit selects
-var paramUnitList = ['mg/L','mg/kg','µg/L','µg/kg','g/L','g/kg','%','ppm','ppb','CFU/mL','CFU/g','MPN/100mL','NTU','pH','mS/cm','µS/cm','mg/m³','µg/m³','Bq/L','Bq/kg','°C','mm','cm','m','L','mL','µL','N','% v/v','% w/w'];
+// Populate UnitOfMeasure and MRLUnit selects from the central UOM catalogue
+var paramUnitList = [];
+
+function loadUnitOfMeasures(callback) {
+    $.ajax({
+        url: 'ajax/fetch_units_of_measure.php',
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            if (!response.success || !Array.isArray(response.data)) {
+                generalPurposeTypeLine(response.message || 'Failed to load units of measure.');
+                return;
+            }
+
+            paramUnitList = response.data.map(function(row) {
+                return row.UnitOfMeasure || '';
+            }).filter(function(unit) {
+                return unit !== '';
+            });
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        },
+        error: function() {
+            generalPurposeTypeLine('Failed to load units of measure.');
+        }
+    });
+}
 
 function unitOptionsHtml(selected) {
     var html = '<option value="">-- Select --</option>';
     paramUnitList.forEach(function(u) {
-        html += '<option value="' + u + '"' + (String(u) === String(selected) ? ' selected' : '') + '>' + u + '</option>';
+        html += '<option value="' + esc(u) + '"' + (String(u) === String(selected) ? ' selected' : '') + '>' + esc(u) + '</option>';
     });
     return html;
 }
 
-function populateUnitSelects() {
-    $('#p_unitofmeasure').html(unitOptionsHtml(''));
-    $('#p_MRLUnit').html(unitOptionsHtml(''));
+function populateUnitSelects(selectedUnit, selectedMRLUnit) {
+    $('#p_unitofmeasure').html(unitOptionsHtml(selectedUnit || ''));
+    $('#p_MRLUnit').html(unitOptionsHtml(selectedMRLUnit || ''));
 }
-populateUnitSelects();
+
+loadUnitOfMeasures(function() {
+    populateUnitSelects('', '');
+});
 
 // Auto-calculate Limits from Min/Max
 $('#p_MinLimit, #p_MaxLimit').on('input', function() {
