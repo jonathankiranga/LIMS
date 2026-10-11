@@ -1423,7 +1423,8 @@ function loadQuoteParams(rowNum, stdId, quotedBaseIds) {
       .filter(id => id !== '')
   );
 
-  return fetch(`ajax/getParametersUnderMatrix.php?stdId=${encodeURIComponent(stdId)}&matrixid=0`)
+  const baseIdsQuery = Array.from(quotedIds).join(',');
+  return fetch(`ajax/getParametersUnderMatrix.php?stdId=${encodeURIComponent(stdId)}&matrixid=0&baseIds=${encodeURIComponent(baseIdsQuery)}`)
     .then(res => res.json())
     .then(data => {
       paramsContainer.innerHTML = '';
