@@ -325,6 +325,8 @@ if(isset($_GET['No'])){
        ,SalesLine.TAT
        ,IFNULL(SalesLine.LineDiscountPercent, 0) as discountpercent
        ,IFNULL(SalesHeader.QtyDiscount, 0) as headerdiscount
+       ,IFNULL(SalesHeader.pricingmode, '{}') as pricingmode
+       ,IFNULL(SalesLine.category, '') as stdgroup
     FROM SalesHeader join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
@@ -336,6 +338,7 @@ if(isset($_GET['No'])){
     // Calculate totals and maxTAT with discount handling
     $R1=0; $R2=0; $R3=0; $maxTAT = 0; $headerDiscountPercent = 0;
     $lineItems = [];
+    $pricingModeConfig = [];
     $SalesAddCategory =new SalesAddCategory();
     
     while($rows = DB_fetch_array($ResultIndex)){
@@ -344,15 +347,18 @@ if(isset($_GET['No'])){
             $headerDiscountPercent = (float)($rows['headerdiscount'] ?? 0);
         }
         
-        // Get line discount - calculate from ORIGINAL unit price (not already-discounted netamt)
-        $lineDiscountPercent = (float)($rows['discountpercent'] ?? 0);
-        $originalLineTotal = $rows['Sp'] * $rows['Quantity'] * $rows['partperunit'];
-        if($lineDiscountPercent > 0){
-            $lineDiscountAmount = $originalLineTotal * ($lineDiscountPercent / 100);
-            $rows['line_discount_amount'] = $lineDiscountAmount;
-        } else {
-            $rows['line_discount_amount'] = 0;
+        // Read the per-standard pricing selection saved with the quotation.
+        if (empty($pricingModeConfig) && !empty($rows['pricingmode'])) {
+            $decodedPricingModes = json_decode((string)$rows['pricingmode'], true);
+            if (is_array($decodedPricingModes)) {
+                $pricingModeConfig = $decodedPricingModes;
+            }
         }
+
+        // Keep the original discount for pricing-mode classification. Some 100% discounts
+        // are structural (to zero the unbilled rows), not customer discounts to display.
+        $rows['line_discount_amount'] = 0;
+        $rows['display_discount_percent'] = (float)($rows['discountpercent'] ?? 0);
         
         // Use already-discounted values directly - no re-application of discount
         $R1 += $rows['vatamount'];
@@ -363,6 +369,70 @@ if(isset($_GET['No'])){
             $maxTAT = $tatValue;
         }
         $lineItems[] = $rows;
+    }
+
+    // Determine the actual pricing mode for each Test Standard group. Forced selections
+    // are stored in SalesHeader.pricingmode; Auto quotes are inferred from saved line discounts.
+    $groupIndexes = [];
+    foreach ($lineItems as $i => $item) {
+        $group = trim((string)($item['stdgroup'] ?? ''));
+        $code = trim((string)($item['itemcode'] ?? $item['barcode'] ?? ''));
+        if ($group === '' && preg_match('/^TS\\d{4}$/', $code)) {
+            $group = $code;
+            $lineItems[$i]['stdgroup'] = $group;
+        }
+        if ($group !== '') {
+            if (!isset($groupIndexes[$group])) $groupIndexes[$group] = [];
+            $groupIndexes[$group][] = $i;
+        }
+    }
+
+    $groupPricingModes = [];
+    foreach ($groupIndexes as $group => $indexes) {
+        $savedMode = $pricingModeConfig[$group] ?? 'auto';
+        if ($savedMode === 'standard' || $savedMode === 'pertest') {
+            $groupPricingModes[$group] = $savedMode;
+            continue;
+        }
+        $bundleDiscount = null;
+        $hasTestAt100 = false;
+        foreach ($indexes as $i) {
+            $code = trim((string)($lineItems[$i]['itemcode'] ?? $lineItems[$i]['barcode'] ?? ''));
+            $discount = (float)($lineItems[$i]['discountpercent'] ?? 0);
+            if (preg_match('/^TS\\d{4}$/', $code)) {
+                $bundleDiscount = $discount;
+            } elseif ($discount >= 99.999) {
+                $hasTestAt100 = true;
+            }
+        }
+        if ($bundleDiscount !== null && $bundleDiscount >= 99.999) {
+            $groupPricingModes[$group] = 'pertest';
+        } elseif ($bundleDiscount !== null && $hasTestAt100) {
+            $groupPricingModes[$group] = 'standard';
+        } else {
+            $groupPricingModes[$group] = 'pertest';
+        }
+    }
+
+    // Show only real discounts on billable rows. The 100% line discount used to zero
+    // unbilled rows is hidden: tests in Standard Pricing, or the bundle in Test Pricing.
+    $lineTotalDiscount = 0;
+    foreach ($lineItems as $i => $item) {
+        $group = trim((string)($item['stdgroup'] ?? ''));
+        $code = trim((string)($item['itemcode'] ?? $item['barcode'] ?? ''));
+        $isBundle = preg_match('/^TS\\d{4}$/', $code) === 1;
+        $mode = $groupPricingModes[$group] ?? null;
+        $lineDiscountPercent = (float)($item['discountpercent'] ?? 0);
+        $structuralDiscount = (($mode === 'standard' && !$isBundle) || ($mode === 'pertest' && $isBundle));
+        if ($structuralDiscount) {
+            $lineItems[$i]['display_discount_percent'] = 0;
+            $lineItems[$i]['line_discount_amount'] = 0;
+        } else {
+            $lineItems[$i]['display_discount_percent'] = $lineDiscountPercent;
+            $originalLineTotal = (float)$item['Sp'] * (float)$item['Quantity'] * (float)$item['partperunit'];
+            $lineItems[$i]['line_discount_amount'] = $originalLineTotal * ($lineDiscountPercent / 100);
+            $lineTotalDiscount += $lineItems[$i]['line_discount_amount'];
+        }
     }
     
     // Get bank details
@@ -434,7 +504,7 @@ if(isset($_GET['No'])){
         $bgColor = ($rowCount % 2 == 0) ? '#f8f9fa' : '#ffffff';
         $ppu = (int)$rows['partperunit'];
         $units = ($ppu > 1) ? $rows['unitofmeasure'] . '(1x' . $ppu . ')' : $rows['unitofmeasure'];
-        $lineDiscountPercent = (float)($rows['discountpercent'] ?? 0);
+        $lineDiscountPercent = (float)($rows['display_discount_percent'] ?? $rows['discountpercent'] ?? 0);
         
         $html .= '<tr style="background-color:' . $bgColor . ';">';
         $html .= '<td style="padding:5px;border-bottom:1px solid #eee;text-align:right;">' . (int)$rows['Quantity'] . '</td>';
@@ -448,12 +518,7 @@ if(isset($_GET['No'])){
         $html .= '</tr>';
     }
     // Totals rows aligned with Net Amt column (col 7)
-    // Calculate line discount total
-    $lineTotalDiscount = 0;
-    foreach ($lineItems as $rows) {
-        $lineTotalDiscount += ($rows['line_discount_amount'] ?? 0);
-    }
-    
+    // $lineTotalDiscount was calculated above using only actual discounts on billable rows.
     // Calculate header discount on subtotal BEFORE line discounts
     $headerDiscountAmount = 0;
     if($headerDiscountPercent > 0){
