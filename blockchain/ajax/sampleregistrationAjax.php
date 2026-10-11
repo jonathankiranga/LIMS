@@ -520,7 +520,7 @@ try {
                         'Quantity' =>  1,
                         'Qunatity_delivered' =>  1,
                         'UnitPrice' => 0,
-                        'locationcode' => $cfg['locationcode'] ?? null
+                        'locationcode' => $config['locationcode'] ?? null
                     ];
                     $payload['lines'][] = $lineItem;
                 }
@@ -544,7 +544,6 @@ try {
                 'response' => $erpResp,
                 'error' => $erpErr
             ];
-        }
     }
 
     $responsePayload = [
