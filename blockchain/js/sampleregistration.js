@@ -97,7 +97,7 @@ function addSampleRow() {
     const paramsRow = document.createElement('tr');
     paramsRow.classList.add('params-row');
     paramsRow.id = `params_row_${irow}`;
-    paramsRow.style.display = 'none';
+    paramsRow.style.display = '';
     paramsRow.innerHTML = `
       <td colspan="11">
         <div id="params_container_${irow}"></div>
@@ -1407,13 +1407,9 @@ function loadQuoteParams(rowNum, stdId, quotedBaseIds) {
         }
       }
 
-      const matrixInput = document.getElementById(`MatrixName_${rowNum}`);
+      // Keep the parameter section visible regardless of matrix selection.
       const paramsRow = document.getElementById(`params_row_${rowNum}`);
-      if (matrixInput && matrixInput.value.trim() === '') {
-        if (paramsRow) paramsRow.style.display = '';
-      } else {
-        if (paramsRow) paramsRow.style.display = 'none';
-      }
+      if (paramsRow) paramsRow.style.display = '';
     })
     .catch(err => {
       console.error('Error fetching parameters for quote row:', err);
