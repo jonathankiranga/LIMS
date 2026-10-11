@@ -296,6 +296,7 @@ class LimsSalesApi{
             'customername' => $limsData['customername'] ?? $limsData['CustomerName'] ?? '',
             'yourreference' => $limsData['yourreference'] ?? $limsData['Orderno'] ?? '',
             'externaldocumentno' => $limsData['externaldocumentno'] ?? $limsData['HeaderID'] ?? '',
+            'sourcequoteno' => trim((string)($limsData['quoteno'] ?? '')),
             'userid' => $limsData['userid'] ?? 'system',
             'printed' => '1','released' => '1','status' => '1',
             'documenttype' => $this->config['documenttype']
@@ -749,6 +750,7 @@ class LimsSalesApi{
             'customername' => 's',
             'yourreference' => 's',
             'externaldocumentno' => 's',
+            'sourcequoteno' => 's',
             'salespersoncode' => 's',
             'userid' => 's',
             'postinggroup' => 's',
@@ -1194,16 +1196,29 @@ class LimsSalesApi{
 
         if ($query !== '') {
             $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference
-                FROM salesheader
-                WHERE documenttype = 54 AND (documentno LIKE CONCAT('%', ?, '%') OR customername LIKE CONCAT('%', ?, '%'))
-                ORDER BY entryno DESC
+                FROM salesheader q
+                WHERE q.documenttype = 54
+                  AND (q.documentno LIKE CONCAT('%', ?, '%') OR q.customername LIKE CONCAT('%', ?, '%'))
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM salesheader so
+                      WHERE so.documenttype = 10
+                        AND so.sourcequoteno = q.documentno
+                  )
+                ORDER BY q.entryno DESC
                 LIMIT ?");
             $stmt->bind_param("ssi", $query, $query, $limit);
         } else {
             $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference
-                FROM salesheader
-                WHERE documenttype = 54
-                ORDER BY entryno DESC
+                FROM salesheader q
+                WHERE q.documenttype = 54
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM salesheader so
+                      WHERE so.documenttype = 10
+                        AND so.sourcequoteno = q.documentno
+                  )
+                ORDER BY q.entryno DESC
                 LIMIT ?");
             $stmt->bind_param("i", $limit);
         }
