@@ -1571,14 +1571,14 @@ async function applySelectedQuote(documentNo) {
       let stdId = parseInt(l.standard_id, 10) || 0;
 
       if (!stdId) {
-        const categoryMatch = /^TS(\\d{1,6})$/i.exec(category);
+        const categoryMatch = /^TS(\d{1,6})$/i.exec(category);
         if (categoryMatch) {
           stdId = parseInt(categoryMatch[1], 10);
         }
       }
 
       // Standard bundle line, e.g. TS0076.
-      const bundleMatch = /^TS(\\d{1,6})$/i.exec(code);
+      const bundleMatch = /^TS(\d{1,6})$/i.exec(code);
       if (bundleMatch) {
         const bundleStdId = parseInt(bundleMatch[1], 10);
 
