@@ -1,0 +1,180 @@
+/* Shared UX polish for parameter and standard management screens.
+   Presentation-only styles: no workflow, selectors, IDs, or database behavior changed. */
+:root {
+  --lims-ux-ink: #243447;
+  --lims-ux-muted: #64748b;
+  --lims-ux-border: #d8e0e8;
+  --lims-ux-surface: #ffffff;
+  --lims-ux-soft: #f5f8fb;
+  --lims-ux-focus: rgba(43, 108, 176, .18);
+}
+.container.mt-5:has(> h3.text-center) {
+  max-width: none;
+  margin-top: 1rem !important;
+  margin-bottom: .85rem;
+  padding: 0 1rem;
+}
+.container.mt-5 > h3.text-center {
+  margin: 0;
+  padding: .8rem 0 .75rem;
+  border-bottom: 1px solid var(--lims-ux-border);
+  color: var(--lims-ux-ink);
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -.02em;
+  text-align: left !important;
+}
+.container.mt-5 > h3.text-center::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 3px;
+  margin-top: .55rem;
+  border-radius: 2px;
+  background: #2b6cb0;
+}
+#baseparametersTable, .table-wrap, .table-responsive {
+  border: 1px solid var(--lims-ux-border);
+  border-radius: 7px;
+  background: var(--lims-ux-surface);
+}
+#baseparametersTable, .table-wrap { overflow: auto; }
+#baseparametersTableInner, #standardsGrid, #parametersTable, #paramTable {
+  margin-bottom: 0;
+  color: var(--lims-ux-ink);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#baseparametersTableInner thead th,
+#standardsGrid thead th,
+#parametersTable thead th,
+#paramTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eef3f8;
+  color: #34465a;
+  border-bottom: 1px solid #cbd5e1;
+  font-weight: 650;
+  vertical-align: middle;
+}
+#baseparametersTableInner tbody tr:hover td,
+#standardsGrid tbody tr:hover td,
+#parametersTable tbody tr:hover td,
+#paramTable tbody tr:hover td {
+  background-color: #edf5ff;
+}
+#baseparametersTableInner td, #baseparametersTableInner th,
+#standardsGrid td, #standardsGrid th,
+#parametersTable td, #parametersTable th,
+#paramTable td, #paramTable th {
+  border-color: #e1e7ee;
+}
+.ts-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  gap: 7px;
+  padding: 9px;
+  margin: 0 0 10px;
+  border: 1px solid var(--lims-ux-border);
+  border-radius: 7px;
+  box-shadow: 0 2px 5px rgba(25, 45, 70, .04);
+}
+.ts-toolbar .btn, #baseparametersTable .btn, #paginationControls .btn {
+  min-height: 30px;
+  border-radius: 4px;
+  font-weight: 550;
+}
+.ts-toolbar input, #gridSearch, #filterColumn, #filterOperator, #filterValue {
+  min-height: 32px;
+  border-color: #cbd5e1;
+  border-radius: 4px;
+}
+#filterColumn, #filterOperator, #filterValue { max-width: 100%; }
+#paginationControls {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  gap: 8px;
+  border-top: 1px solid var(--lims-ux-border);
+  border-radius: 0 0 7px 7px;
+}
+#paginationControls .page-indicator {
+  color: var(--lims-ux-ink);
+  font-size: 12px;
+}
+#parametersTable, #paramTable { width: 100%; }
+#parametersTable td, #paramTable td { vertical-align: middle; }
+#standardSearch {
+  max-width: 440px;
+  min-width: min(100%, 260px);
+  margin: 0 0 .7rem;
+}
+#standardName {
+  color: #1f4f82;
+  font-weight: 650;
+}
+#addParameterBtn, #importParametersBtn, #paramSaveChangesBtn,
+#saveAllBtn, #addRowsBtn, #cloneSelectedBtn, #deleteSelectedBtn,
+#uploadStandardsBtn, #addStandardMethodBtn, #syncStandardsToERP,
+#syncToERP, #importParametersBtn {
+  border-radius: 4px;
+  font-weight: 550;
+}
+#addParameterBtn, #importParametersBtn {
+  padding: .4rem .7rem;
+  margin: 0 .35rem .6rem 0;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+#addParameterBtn:hover, #importParametersBtn:hover {
+  background: #eef5fc;
+  border-color: #9db7d3;
+}
+input.form-control, select.form-select, textarea.form-control,
+input[type="text"], input[type="number"], select {
+  accent-color: #2b6cb0;
+}
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+  border-color: #6a9bcf !important;
+  box-shadow: 0 0 0 3px var(--lims-ux-focus) !important;
+}
+.modal-content {
+  border: 1px solid var(--lims-ux-border);
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, .18);
+}
+.modal-header {
+  background: #f5f8fb;
+  border-bottom-color: var(--lims-ux-border);
+}
+.modal-title { color: var(--lims-ux-ink); font-weight: 650; }
+.modal-footer { border-top-color: var(--lims-ux-border); }
+#ParameterModalRecord .modal-dialog,
+#parameterAddModal .modal-dialog { max-width: 760px; }
+#ParameterForm .form-label, #paramAddForm .form-label {
+  color: #475569;
+  font-weight: 600;
+}
+#ParameterForm input[readonly], #paramAddForm input[readonly] {
+  background: #f3f6f9;
+  color: #475569;
+}
+.row-dirty td { box-shadow: inset 0 1px 0 #e8c56b, inset 0 -1px 0 #e8c56b; }
+.row-new td { box-shadow: inset 0 1px 0 #9bd4ad, inset 0 -1px 0 #9bd4ad; }
+@media (max-width: 900px) {
+  .container.mt-5:has(> h3.text-center) { padding: 0 .65rem; }
+  .ts-toolbar { position: static; }
+  .ts-toolbar .vr { display: none; }
+  .ts-toolbar input { width: 100%; max-width: 100%; }
+  #standardSearch { width: 100% !important; max-width: 100%; }
+  #baseparametersTableInner, #standardsGrid, #parametersTable, #paramTable {
+    min-width: 760px;
+  }
+  #parametersModal .modal-dialog { width: calc(100% - 1rem) !important; margin: .5rem auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #baseparametersTableInner tbody tr, #standardsGrid tbody tr { transition: none !important; }
+}
