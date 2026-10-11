@@ -1246,62 +1246,105 @@ class LimsSalesApi{
             return;
         }
 
-        $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference
-            FROM salesheader
-            WHERE documenttype = 54 AND documentno = ?
-            LIMIT 1");
-        $stmt->bind_param("s", $documentNo);
-        $stmt->execute();
-        $hdr = $stmt->get_result()->fetch_assoc();
-        if (!$hdr) {
-            $this->jsonResponse(['success' => false, 'message' => 'Quote not found: ' . $documentNo], 404);
-            return;
-        }
-
-        $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.category, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
-            FROM salesline sl
-            LEFT JOIN stockmaster sm ON sm.itemcode = sl.code
-            WHERE sl.documenttype = 54 AND sl.documentno = ?
-            ORDER BY sl.entryno ASC");
-        $stmt->bind_param("s", $documentNo);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $lines = [];
-        while ($row = $result->fetch_assoc()) {
-            $category = trim((string)($row['category'] ?? ''));
-            $standardId = 0;
-            if (preg_match('/^TS(\\d{1,6})$/', $category, $m)) {
-                $standardId = (int)$m[1];
-            } elseif (preg_match('/^TS(\\d{1,6})$/', trim((string)$row['code']), $m)) {
-                // The bundle line itself identifies its StandardID.
-                $standardId = (int)$m[1];
+        $stage = 'header_prepare';
+        try {
+            $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference
+                FROM salesheader
+                WHERE documenttype = 54 AND documentno = ?
+                LIMIT 1");
+            if (!$stmt) {
+                throw new RuntimeException('salesheader prepare failed: ' . $this->db->error);
             }
 
-            $lines[] = [
-                'code' => trim((string)$row['code']),
-                'labid' => (int)($row['labid'] ?? 0),
-                'standard_id' => $standardId,
-                'category' => $category,
-                'description' => trim((string)$row['description']),
-                'Quantity' => (float)($row['Quantity'] ?? 0),
-                'UnitPrice' => (float)($row['UnitPrice'] ?? 0),
-                'unitofmeasure' => trim((string)$row['unitofmeasure']),
-                'PartPerUnit' => (float)($row['PartPerUnit'] ?? 1)
-            ];
-        }
+            $stage = 'header_execute';
+            if (!$stmt->bind_param("s", $documentNo) || !$stmt->execute()) {
+                throw new RuntimeException('salesheader execute failed: ' . $stmt->error);
+            }
 
-        $this->jsonResponse([
-            'success' => true,
-            'quote' => [
-                'documentno' => trim((string)$hdr['documentno']),
-                'docdate' => $hdr['docdate'],
-                'customercode' => trim((string)$hdr['customercode']),
-                'customername' => trim((string)$hdr['customername']),
-                'currencycode' => trim((string)$hdr['currencycode']),
-                'yourreference' => trim((string)$hdr['yourreference']),
-            ],
-            'lines' => $lines
-        ]);
+            $stage = 'header_fetch';
+            $headerResult = $stmt->get_result();
+            if (!$headerResult) {
+                throw new RuntimeException('salesheader result failed: ' . $stmt->error);
+            }
+            $hdr = $headerResult->fetch_assoc();
+            $stmt->close();
+
+            if (!$hdr) {
+                $this->jsonResponse(['success' => false, 'message' => 'Quote not found: ' . $documentNo], 404);
+                return;
+            }
+
+            $stage = 'lines_prepare';
+            $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sl.category, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
+                FROM salesline sl
+                LEFT JOIN stockmaster sm ON sm.itemcode = sl.code
+                WHERE sl.documenttype = 54 AND sl.documentno = ?
+                ORDER BY sl.entryno ASC");
+            if (!$stmt) {
+                throw new RuntimeException('salesline prepare failed: ' . $this->db->error);
+            }
+
+            $stage = 'lines_execute';
+            if (!$stmt->bind_param("s", $documentNo) || !$stmt->execute()) {
+                throw new RuntimeException('salesline execute failed: ' . $stmt->error);
+            }
+
+            $stage = 'lines_fetch';
+            $result = $stmt->get_result();
+            if (!$result) {
+                throw new RuntimeException('salesline result failed: ' . $stmt->error);
+            }
+
+            $lines = [];
+            while ($row = $result->fetch_assoc()) {
+                $category = trim((string)($row['category'] ?? ''));
+                $standardId = 0;
+                if (preg_match('/^TS(\\d{1,6})$/', $category, $m)) {
+                    $standardId = (int)$m[1];
+                } elseif (preg_match('/^TS(\\d{1,6})$/', trim((string)$row['code']), $m)) {
+                    $standardId = (int)$m[1];
+                }
+
+                $lines[] = [
+                    'code' => trim((string)$row['code']),
+                    'labid' => (int)($row['labid'] ?? 0),
+                    'standard_id' => $standardId,
+                    'category' => $category,
+                    'description' => trim((string)$row['description']),
+                    'Quantity' => (float)($row['Quantity'] ?? 0),
+                    'UnitPrice' => (float)($row['UnitPrice'] ?? 0),
+                    'unitofmeasure' => trim((string)$row['unitofmeasure']),
+                    'PartPerUnit' => (float)($row['PartPerUnit'] ?? 1)
+                ];
+            }
+            $stmt->close();
+
+            $this->jsonResponse([
+                'success' => true,
+                'quote' => [
+                    'documentno' => trim((string)$hdr['documentno']),
+                    'docdate' => $hdr['docdate'],
+                    'customercode' => trim((string)$hdr['customercode']),
+                    'customername' => trim((string)$hdr['customername']),
+                    'currencycode' => trim((string)$hdr['currencycode']),
+                    'yourreference' => trim((string)$hdr['yourreference']),
+                ],
+                'lines' => $lines
+            ]);
+        } catch (Throwable $e) {
+            error_log('[LimsSalesApi::getQuote] stage=' . $stage
+                . ' documentno=' . $documentNo
+                . ' error=' . $e->getMessage());
+
+            // Include the failing stage and database error temporarily so this
+            // specific API failure can be diagnosed from the HTTP response.
+            $this->jsonResponse([
+                'success' => false,
+                'message' => 'Quotation retrieval failed',
+                'stage' => $stage,
+                'diagnostic' => $e->getMessage()
+            ], 500);
+        }
     }
 
     private function jsonResponse($data, $code = 200)
