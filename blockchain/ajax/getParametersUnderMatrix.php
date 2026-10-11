@@ -9,31 +9,41 @@ $matrixid = isset($_GET['matrixid']) ? intval($_GET['matrixid']) : NULL;
 
 if ($matrixid === 0) {
 
-    // Recursive CTE to get all descendant ParameterIDs
-    $sql = "
-    SELECT 
-        s.StandardID,
-        s.StandardName,
-        s.StandardCode,
-        p.ParameterID,
-        p.ParameterName,
-        p.Method
-    FROM  teststandards s 
-    JOIN testparameters p ON  p.StandardID = s.StandardID
-    WHERE s.StandardID = ?
-    ORDER BY s.StandardName, p.ParameterName
-    ";
+    // Always return BaseID so quotation lines can be matched to testparameters.BaseID.
+    // When a quotation supplies BaseIDs, include those exact quoted parameters even
+    // when testparameters assigns them to a parent standard, while retaining the
+    // selected standard's other parameters as unchecked options.
+    $quotedBaseIds = [];
+    if (isset($_GET['baseIds']) && trim((string)$_GET['baseIds']) !== '') {
+        foreach (explode(',', (string)$_GET['baseIds']) as $id) {
+            $id = (int)trim($id);
+            if ($id > 0) $quotedBaseIds[] = $id;
+        }
+        $quotedBaseIds = array_values(array_unique($quotedBaseIds));
+    }
 
-    // Prepare & bind
+    $sql = "
+        SELECT DISTINCT
+            s.StandardID,
+            s.StandardName,
+            s.StandardCode,
+            p.ParameterID,
+            p.BaseID,
+            p.ParameterName,
+            p.Method
+        FROM testparameters p
+        JOIN teststandards s ON s.StandardID = p.StandardID
+        WHERE s.StandardID = ?";
+    if (!empty($quotedBaseIds)) {
+        $sql .= " OR p.BaseID IN (" . implode(',', $quotedBaseIds) . ")";
+    }
+    $sql .= " ORDER BY s.StandardName, p.ParameterName";
+
     $stmt = $conn->prepare($sql);
-    if ($conn->error) {
-        die(json_encode(['success' => false, 'message' => 'Statement execution failed: ' . $conn->error]));
+    if (!$stmt) {
+        die(json_encode(['success' => false, 'message' => 'Statement preparation failed: ' . $conn->error]));
     }
-    $stmt->bind_param("i",$stdId);
-    if ($conn->error) {
-        die(json_encode(['success' => false, 'message' => 'Statement execution failed: ' . $conn->error]));
-    }
-    
+    $stmt->bind_param("i", $stdId);
     
 }else{
 
