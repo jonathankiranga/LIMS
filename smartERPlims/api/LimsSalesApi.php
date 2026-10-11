@@ -1275,7 +1275,20 @@ class LimsSalesApi{
             }
 
             $stage = 'lines_prepare';
-            $stmt = $this->db->prepare("SELECT sl.code, sm.labid, IFNULL(sm.category, '') AS category, sl.description, sl.Quantity, sl.UnitPrice, IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure, IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
+            $stmt = $this->db->prepare("SELECT sl.code, sm.labid,
+                    COALESCE(
+                        (SELECT dt.categoryid
+                         FROM discounttable dt
+                         WHERE dt.itemcode = sl.code
+                           AND dt.is_active = 1
+                           AND dt.categoryid LIKE 'TS____'
+                         ORDER BY dt.categoryid
+                         LIMIT 1),
+                        IFNULL(sm.category, '')
+                    ) AS category,
+                    sl.description, sl.Quantity, sl.UnitPrice,
+                    IFNULL(sl.unitofmeasure, 'PCS') AS unitofmeasure,
+                    IFNULL(sl.PartPerUnit, 1) AS PartPerUnit
                 FROM salesline sl
                 LEFT JOIN stockmaster sm ON sm.itemcode = sl.code
                 WHERE sl.documenttype = 54 AND sl.documentno = ?
