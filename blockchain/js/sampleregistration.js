@@ -551,6 +551,13 @@ function reindexSampleRows() {
         tblBody.appendChild(mainRow);
 
         // Parameter row (below the main row): display selected parameters as a plain list.
+        const paramRow = document.createElement('tr');
+        paramRow.id = `group_param_row_${rowNum}_${headerIndex}`;
+        paramRow.className = 'group-param-row';
+        paramRow.style.display = '';
+        const paramTd = document.createElement('td');
+        paramTd.colSpan = 14;
+
         const paramList = document.createElement('ul');
         paramList.className = 'test-list';
         const selectedParameterIds = new Set(master.map(function(p) {
