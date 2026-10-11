@@ -47,10 +47,8 @@ function addSampleRow() {
         <input type="text" id="StandardName_${irow}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm" />
         <input type="hidden" id="StandardID_${irow}" name="standard_id[]" />
       </td>
-      <td>
-        <input type="text" id="MatrixName_${irow}" name="MatrixName[]" autocomplete="off" onkeyup="handleMatrixInput(event)" class="form-control form-control-sm"
-          onmouseenter="showPreview(event, document.getElementById('StandardID_${irow}').value)" onmouseleave="hidePreview(event)" />
-        <input type="hidden" id="MatrixID_${irow}" name="matrix_id[]" />
+      <td style="display:none">
+        <input type="hidden" id="MatrixID_${irow}" name="matrix_id[]" value="0" />
       </td>
       <td>
         <input type="number" id="samples_${irow}" name="samples[]" class="form-control form-control-sm" min="1" value="1" />
@@ -426,6 +424,7 @@ function reindexSampleRows() {
         const tblHead = document.createElement('thead');
         tblHead.innerHTML = `<tr>
           <th style="min-width: 140px;">Sample ID</th>
+          <th style="min-width: 150px;">Sample Name</th>
           <th style="min-width: 150px;">Standard Kit Units</th>
           <th style="min-width: 150px;">Product Batch No</th>
           <th style="min-width: 120px;">Batch Size</th>
@@ -435,7 +434,6 @@ function reindexSampleRows() {
           <th style="min-width: 160px;">Frozen Date Exp</th>
           <th style="min-width: 250px;">Picture of Sample</th>
           <th style="min-width: 150px;">Sample Source</th>
-          <th style="min-width: 150px;">Sample Name</th>
           <th style="min-width: 150px;">Sample Method</th>
           <th style="min-width: 150px;">Condition</th>
           <th style="min-width: 80px;">Action</th>
@@ -462,6 +460,12 @@ function reindexSampleRows() {
         tdSampleId.style.fontWeight = '600';
         tdSampleId.textContent = labRef || '';
         mainRow.appendChild(tdSampleId);
+
+        const tdSampleName = document.createElement('td');
+        const sampleNameInput = document.createElement('input'); sampleNameInput.type = 'text'; sampleNameInput.className = 'form-control form-control-sm header-sample-name'; sampleNameInput.placeholder = 'Sample Name';
+        if (mainTr) sampleNameInput.value = (mainTr.querySelector('[name="sample_name[]"]') || {}).value || '';
+        tdSampleName.appendChild(sampleNameInput);
+        mainRow.appendChild(tdSampleName);
 
         const tdSku = document.createElement('td');
         const skuInput = document.createElement('input'); skuInput.type = 'text'; skuInput.className = 'form-control form-control-sm header-sku'; skuInput.placeholder = 'SKU';
@@ -516,11 +520,6 @@ function reindexSampleRows() {
         tdSource.appendChild(sourceInput);
         mainRow.appendChild(tdSource);
 
-        const tdSampleName = document.createElement('td');
-        const sampleNameInput = document.createElement('input'); sampleNameInput.type = 'text'; sampleNameInput.className = 'form-control form-control-sm header-sample-name'; sampleNameInput.placeholder = 'Sample Name';
-        if (mainTr) sampleNameInput.value = (mainTr.querySelector('[name="sample_name[]"]') || {}).value || '';
-        tdSampleName.appendChild(sampleNameInput);
-        mainRow.appendChild(tdSampleName);
 
         const tdSampleMethod = document.createElement('td');
         const sampleMethodInput = document.createElement('input'); sampleMethodInput.type = 'text'; sampleMethodInput.className = 'form-control form-control-sm header-sample-method'; sampleMethodInput.placeholder = 'Sample Method';
