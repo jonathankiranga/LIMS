@@ -90,9 +90,6 @@ function addSampleRow() {
         <input type="text" id="condition_of_sample_${irow}" name="condition_of_sample[]" class="form-control form-control-sm"/>
           
       </td>
-      <td class="text-center">
-        <button type="button" class="btn btn-danger removeRow" title="Remove row"><i class="fas fa-trash-alt"></i></button>
-      </td>
     `;
 
     document.getElementById('sampleRows').appendChild(row);
@@ -436,7 +433,6 @@ function reindexSampleRows() {
           <th style="min-width: 150px;">Sample Source</th>
           <th style="min-width: 150px;">Sample Method</th>
           <th style="min-width: 150px;">Condition</th>
-          <th style="min-width: 80px;">Action</th>
         </tr>`;
         tbl.appendChild(tblHead);
         const tblBody = document.createElement('tbody');
@@ -537,15 +533,6 @@ function reindexSampleRows() {
         tdCondition.appendChild(conditionSelect);
         mainRow.appendChild(tdCondition);
 
-        const tdAction = document.createElement('td');
-        tdAction.className = 'text-center';
-        const toggleBtn = document.createElement('button'); toggleBtn.type = 'button'; toggleBtn.className = 'btn btn-outline-secondary btn-sm toggle-params'; toggleBtn.textContent = 'Params';
-        toggleBtn.addEventListener('click', function() {
-          const pr = document.getElementById(`group_param_row_${rowNum}_${headerIndex}`);
-          if (pr) pr.style.display = (pr.style.display === 'none') ? '' : 'none';
-        });
-        tdAction.appendChild(toggleBtn);
-        mainRow.appendChild(tdAction);
 
         tblBody.appendChild(mainRow);
 
@@ -555,7 +542,7 @@ function reindexSampleRows() {
         paramRow.className = 'group-param-row';
         paramRow.style.display = '';
         const paramTd = document.createElement('td');
-        paramTd.colSpan = 14;
+        paramTd.colSpan = 13;
 
         const paramList = document.createElement('ul');
         paramList.className = 'test-list';
