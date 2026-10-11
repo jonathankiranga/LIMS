@@ -263,6 +263,9 @@ function initQuoteTable() {
     height: 420,
     placeholder: 'No lines yet — use Add Sample Standard.',
     groupBy: 'stdGroup',
+    // Tabulator determines row order from its active sort, not input-array order alone.
+    // Sort bundle rows (Test Standards) before individual tests inside each group.
+    initialSort: [{ column: 'isBundle', dir: 'desc' }],
     groupStartOpen: true,
     groupToggleElement: 'arrow',
     groupHeader: function (value, count, data) {
@@ -285,6 +288,7 @@ function initQuoteTable() {
     columns: [
       { title: 'Item Code / Description', field: 'label', headerSort: false, widthGrow: 3 },
       { title: 'Code', field: 'code', visible: false },
+      { title: 'Bundle Sort', field: 'isBundle', visible: false, sorter: 'boolean', headerSort: false },
       { title: 'No Units', field: 'quantity', editor: 'number', editorParams: { min: 0, step: 1 }, hozAlign: 'center', width: 95 },
       { title: 'Unit Descrip', field: 'units', width: 105 },
       { title: 'Sales Price', field: 'price', editor: 'number', editorParams: { min: 0, step: 0.01 }, hozAlign: 'right', width: 115 },
