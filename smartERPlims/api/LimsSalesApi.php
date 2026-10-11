@@ -1275,7 +1275,7 @@ class LimsSalesApi{
             }
 
             $stage = 'lines_prepare';
-            $stmt = $this->db->prepare("SELECT sl.code, sm.labid,
+            $stmt = $this->db->prepare("SELECT sl.code, sm.labid, sm.category AS stock_category,
                     (SELECT dt.categoryid
                      FROM discounttable dt
                      WHERE dt.itemcode = sl.code
@@ -1305,14 +1305,56 @@ class LimsSalesApi{
                 throw new RuntimeException('salesline result failed: ' . $stmt->error);
             }
 
-            $lines = [];
+            $rawLines = [];
+            $quotedStandards = [];
             while ($row = $result->fetch_assoc()) {
-                $category = trim((string)($row['category'] ?? ''));
+                $code = strtoupper(trim((string)($row['code'] ?? '')));
+                $stockCategory = strtoupper(trim((string)($row['stock_category'] ?? '')));
+                $category = strtoupper(trim((string)($row['category'] ?? '')));
+
+                // A quoted TS#### stock item identifies the standard being purchased.
+                // Use stockmaster as the item record; do not infer a relationship
+                // from unrelated tables or choose an arbitrary parameter category.
+                if (preg_match('/^TS(\d{4})$/', $code, $m)
+                    && ($stockCategory === $code || $category === $code || $stockCategory === '')) {
+                    $quotedStandards[$code] = (int)$m[1];
+                }
+
+                $row['_code'] = $code;
+                $row['_category'] = $category;
+                $rawLines[] = $row;
+            }
+            $stmt->close();
+
+            $singleQuotedStandardCode = count($quotedStandards) === 1
+                ? (string)array_key_first($quotedStandards)
+                : '';
+
+            $lines = [];
+            foreach ($rawLines as $row) {
+                $code = $row['_code'];
+                $category = $row['_category'];
                 $standardId = 0;
-                if (preg_match('/^TS(\\d{1,6})$/', $category, $m)) {
-                    $standardId = (int)$m[1];
-                } elseif (preg_match('/^TS(\\d{1,6})$/', trim((string)$row['code']), $m)) {
-                    $standardId = (int)$m[1];
+
+                if (isset($quotedStandards[$code])) {
+                    // The standard bundle line is authoritative, even if no
+                    // discounttable row exists for the bundle itself.
+                    $category = $code;
+                    $standardId = $quotedStandards[$code];
+                } else {
+                    // A parameter may be linked in discounttable to its parent
+                    // standard while the quotation contains one specific TS bundle.
+                    // In a single-standard quote, associate its quoted parameter
+                    // lines with that quoted bundle. For multi-standard quotes,
+                    // only accept a direct category match to avoid guessing.
+                    if ($singleQuotedStandardCode !== ''
+                        && ($category === '' || !isset($quotedStandards[$category]))) {
+                        $category = $singleQuotedStandardCode;
+                    }
+
+                    if (preg_match('/^TS(\d{1,6})$/', $category, $m)) {
+                        $standardId = (int)$m[1];
+                    }
                 }
 
                 $lines[] = [
@@ -1327,7 +1369,6 @@ class LimsSalesApi{
                     'PartPerUnit' => (float)($row['PartPerUnit'] ?? 1)
                 ];
             }
-            $stmt->close();
 
             $this->jsonResponse([
                 'success' => true,
@@ -1346,8 +1387,6 @@ class LimsSalesApi{
                 . ' documentno=' . $documentNo
                 . ' error=' . $e->getMessage());
 
-            // Include the failing stage and database error temporarily so this
-            // specific API failure can be diagnosed from the HTTP response.
             $this->jsonResponse([
                 'success' => false,
                 'message' => 'Quotation retrieval failed',
