@@ -465,11 +465,9 @@ try {
 
     // --- ERP API sync (call external LIMS sales API using curl + JSON) ---
     $erpSyncResult = null;
-    $configPath = __DIR__ . '/../include/config.php';
-    if (file_exists($configPath)) {
-        $cfg = include $configPath;
-        $erpUrl = $cfg['ERP_API_URL'] ?? null;
-        if (!empty($erpUrl)) {
+    $config = include '../include/config.php';
+    $erpApiUrl = $config['ERP_API_URL'] ?? null;
+    if (!empty($erpApiUrl)) {
             // Build payload that matches LimsSalesApi::registerSample expectations
             $payload = [
                 'action' => 'sync_sample',
@@ -529,7 +527,7 @@ try {
             }
             }
 
-            $ch = curl_init($erpUrl);
+            $ch = curl_init($erpApiUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -541,7 +539,7 @@ try {
             curl_close($ch);
 
             $erpSyncResult = [
-                'url' => $erpUrl,
+                'url' => $erpApiUrl,
                 'http_code' => $erpHttp,
                 'response' => $erpResp,
                 'error' => $erpErr
