@@ -550,33 +550,26 @@ function reindexSampleRows() {
 
         tblBody.appendChild(mainRow);
 
-        // Parameter row (below the main row) containing checkboxes and hidden inputs
-        const paramRow = document.createElement('tr');
-        paramRow.id = `group_param_row_${rowNum}_${headerIndex}`;
-        paramRow.className = 'group-param-row';
-        paramRow.style.display = '';
-        const paramTd = document.createElement('td'); paramTd.colSpan = 14;
-
-        // build param list
-        const paramList = document.createElement('div'); paramList.className = 'param-list';
-        paramsForRow.forEach(p => {
+        // Parameter row (below the main row): display selected parameters as a plain list.
+        const paramList = document.createElement('ul');
+        paramList.className = 'test-list';
+        const selectedParameterIds = new Set(master.map(function(p) {
+          return String(p.ParameterID || p.parameterId || '');
+        }));
+        paramsForRow.forEach(function(p) {
           const pid = p.ParameterID || p.parameterId || '';
+          if (!selectedParameterIds.has(String(pid))) return;
           const pname = p.ParameterName || p.Parameter || '';
-          const found = master.some(m => String(m.ParameterID) === String(pid));
-          const chk = document.createElement('input');
-          chk.type = 'checkbox';
-          chk.className = 'param-checkbox';
-          chk.dataset.row = rowNum;
-          chk.dataset.paramId = pid;
-          chk.dataset.groupIndex = headerIndex;
-          chk.checked = !!found;
-          const label = document.createElement('label');
-          label.style.display = 'inline-block';
-          label.style.marginRight = '10px';
-          label.appendChild(chk);
-          label.appendChild(document.createTextNode(` ${pname}`));
-          paramList.appendChild(label);
+          const li = document.createElement('li');
+          li.textContent = pname;
+          paramList.appendChild(li);
         });
+        if (!paramList.children.length) {
+          const li = document.createElement('li');
+          li.className = 'text-muted';
+          li.textContent = 'No parameters selected.';
+          paramList.appendChild(li);
+        }
 
         paramTd.appendChild(paramList);
 
@@ -609,10 +602,15 @@ function reindexSampleRows() {
         // store the client-side labRef/sample id for this group (preview only)
         addHidden('labref', labRef || '');
 
-        // create parameter hidden inputs for currently-checked parameters
-        const checkedBoxes = Array.from(paramList.querySelectorAll('input.param-checkbox')).filter(cb => cb.checked);
-        checkedBoxes.forEach(cb => {
-          const ip = document.createElement('input'); ip.type = 'hidden'; ip.name = `${base}[parameters][]`; ip.value = cb.dataset.paramId || ''; hiddenGroup.appendChild(ip);
+        // Submit selected parameters as hidden inputs; the visible list is read-only.
+        master.forEach(function(p) {
+          const parameterId = p.ParameterID || p.parameterId || '';
+          if (!parameterId) return;
+          const ip = document.createElement('input');
+          ip.type = 'hidden';
+          ip.name = `${base}[parameters][]`;
+          ip.value = parameterId;
+          hiddenGroup.appendChild(ip);
         });
 
         // Sync visible header inputs to hidden ones
@@ -649,48 +647,7 @@ function reindexSampleRows() {
 
       paramsContainer.appendChild(groupsContainer);
 
-      // checkbox changes: update master selection and group hidden inputs
-      groupsContainer.addEventListener('change', function (e) {
-        const target = e.target;
-        if (!target || !target.classList.contains('param-checkbox')) return;
-        const r = target.dataset.row;
-        const pid = target.dataset.paramId;
-        const groupIdx = target.dataset.groupIndex;
-        handleParamCheckboxToggle(r, pid, target.checked);
-
-        // Ensure group hidden container exists
-        let hiddenGroup = document.getElementById(`sample_header_group_${r}_${groupIdx}`);
-        if (!hiddenGroup) {
-          const headersRoot = document.getElementById(`sample_headers_inputs_${r}`);
-          if (headersRoot) {
-            hiddenGroup = document.createElement('div');
-            hiddenGroup.id = `sample_header_group_${r}_${groupIdx}`;
-            hiddenGroup.style.display = 'none';
-            headersRoot.appendChild(hiddenGroup);
-          }
-        }
-
-        if (!hiddenGroup) return;
-
-        const order = getRowOrderIndexByRowNum(r);
-        if (target.checked) {
-          // add parameter hidden input if not already present
-          const exists = Array.from(hiddenGroup.querySelectorAll('input')).some(i => i.name && i.name.indexOf('[parameters][]') !== -1 && String(i.value) === String(pid));
-          if (!exists) {
-            const ip = document.createElement('input'); ip.type = 'hidden'; ip.name = `sample_headers[${order}][${groupIdx}][parameters][]`; ip.value = pid || ''; hiddenGroup.appendChild(ip);
-          }
-        } else {
-          // remove parameter hidden input(s)
-          Array.from(hiddenGroup.querySelectorAll('input')).forEach(function(inp) {
-            if (inp.name && inp.name.indexOf('[parameters][]') !== -1 && String(inp.value) === String(pid)) inp.remove();
-          });
-        }
-
-        // show/hide the visible header block for this group depending on whether any checkboxes are checked
-        const anyChecked = Array.from(groupsContainer.querySelectorAll(`input.param-checkbox[data-group-index="${groupIdx}"][data-row="${r}"]`)).some(cb => cb.checked);
-        const hb = paramsContainer.querySelector(`.group-main-row[data-group-index="${groupIdx}"][data-row-num="${r}"]`);
-        if (hb) hb.style.display = anyChecked ? '' : 'none';
-      });
+      // Parameter list is read-only; selected parameters are submitted via hidden inputs.
   }
 
   function refreshHiddenSelectedParamsInputs(rowNum) {
@@ -761,32 +718,6 @@ function reindexSampleRows() {
     });
   }
 
-  function handleParamCheckboxToggle(rowNum, parameterId, checked) {
-    if (!rowNum) return;
-    const master = window.masterSelectedParams[rowNum] || [];
-    const foundIndex = master.findIndex(m => String(m.ParameterID) === String(parameterId));
-    if (checked) {
-      if (foundIndex === -1) {
-        const src = (window.sampleParamsCache[rowNum] || []).find(p => String(p.ParameterID) === String(parameterId) || String(p.parameterId) === String(parameterId));
-        if (src) {
-          master.push({ ParameterID: src.ParameterID, ParameterName: src.ParameterName || '', StandardID: src.StandardID || '', BaseID: src.BaseID || src.BasePID || null });
-        } else {
-          master.push({ ParameterID: parameterId, ParameterName: '', StandardID: '', BaseID: '' });
-        }
-      }
-    } else {
-      if (foundIndex !== -1) master.splice(foundIndex, 1);
-    }
-    window.masterSelectedParams[rowNum] = master;
-    // Persist master selection on the params container so it survives row reindexing
-    try {
-      const paramsContainer = document.getElementById(`params_container_${rowNum}`);
-      if (paramsContainer) paramsContainer.dataset.masterSelected = JSON.stringify(master);
-    } catch (e) { /* ignore */ }
-    document.querySelectorAll(`#params_container_${rowNum} .param-checkbox`).forEach(cb => {
-      if (String(cb.dataset.paramId) === String(parameterId)) cb.checked = checked;
-    });
-  }
 // ----------------------------
 // PRE-FILL: load and render a row's parameters under a standard (+ optional matrix)
 // ----------------------------
