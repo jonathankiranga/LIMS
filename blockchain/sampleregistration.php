@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratory Registration</title>
     <link href="css/sampleregistration.css" rel="stylesheet">
+    <link href="css/sampleregistration-ux.css?v=1" rel="stylesheet">
     <link href="css/typing.css" rel="stylesheet"> 
     <script src="js/fetchTransactionData.js"  type="text/javascript"></script>
     <style>
