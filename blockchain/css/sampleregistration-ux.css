@@ -213,3 +213,73 @@
         width: 100%;
     }
 }
+
+/* Parameter selection grid: readable labels and consistently styled native checkboxes */
+#sampleRows .sample-group-table .group-param-row > td {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-top: 0;
+}
+#sampleRows .sample-group-table .param-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    padding: 2px 0;
+}
+#sampleRows .sample-group-table .param-list > label {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
+    padding: 7px 11px;
+    max-width: 100%;
+    border: 1px solid #d6deea;
+    border-radius: 5px;
+    background: #fff;
+    color: #27364b;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+#sampleRows .sample-group-table .param-list > label:has(input:checked) {
+    border-color: #5278b9;
+    background: #edf4ff;
+    box-shadow: inset 0 0 0 1px rgba(82,120,185,.12);
+}
+#sampleRows .sample-group-table .param-list input.param-checkbox {
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+    flex: 0 0 17px;
+    width: 17px !important;
+    min-width: 17px !important;
+    max-width: 17px;
+    height: 17px;
+    min-height: 17px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    accent-color: #315fa8;
+    border: 1px solid #7d8da5;
+    border-radius: 3px;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+#sampleRows .sample-group-table .param-list input.param-checkbox:focus-visible {
+    outline: 2px solid #7aa2e8;
+    outline-offset: 2px;
+}
+#sampleRows .sample-group-table .group-main-row td {
+    background: #fff;
+}
+@media (max-width: 768px) {
+    #sampleRows .sample-group-table .param-list {
+        gap: 6px;
+    }
+    #sampleRows .sample-group-table .param-list > label {
+        padding: 7px 9px;
+        font-size: 12px;
+    }
+}
+
