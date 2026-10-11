@@ -271,17 +271,10 @@ function initQuoteTable() {
       (data || []).forEach(function (d) {
         gross += parseFloat(d.gross) || 0;
       });
-      var mode = quoteModeClean(data && data[0] && data[0].pricingMode);
       var gkey = quoteEsc(value);
       return '<span style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px 12px; max-width:100%;">' +
         '<span>' + quoteEsc(name) + ' (' + count + ')</span>' +
         '<span style="font-weight:400;">Gross: ' + gross.toFixed(2) + '</span>' +
-        '<select class="form-control form-control-sm qgroup-mode" data-group="' + gkey + '" title="Pricing: Auto 80/20, Standard price, or Test price" ' +
-        'style="display:inline-block; width:auto; padding:2px 6px; font-size:12px;">' +
-        '<option value="auto"' + (mode === 'auto' ? ' selected' : '') + '>Auto 80/20</option>' +
-        '<option value="standard"' + (mode === 'standard' ? ' selected' : '') + '>Standard price</option>' +
-        '<option value="pertest"' + (mode === 'pertest' ? ' selected' : '') + '>Test price</option>' +
-        '</select>' +
         '<button type="button" class="btn btn-danger btn-sm qgroup-remove" data-group="' +
         gkey + '"><i class="fas fa-trash"></i> Remove</button></span>';
     },
@@ -298,6 +291,19 @@ function initQuoteTable() {
       { title: 'No Units', field: 'quantity', editor: 'number', editorParams: { min: 0, step: 1 }, hozAlign: 'center', width: 95 },
       { title: 'Unit Descrip', field: 'units', width: 105 },
       { title: 'Sales Price', field: 'price', editor: 'number', editorParams: { min: 0, step: 0.01 }, hozAlign: 'right', width: 115 },
+      {
+        title: 'Price Selection', field: 'pricingMode', headerSort: false, width: 145,
+        formatter: function (cell) {
+          var d = cell.getRow().getData();
+          if (!d || !d.isBundle) return '';
+          var mode = quoteModeClean(d.pricingMode);
+          return '<select class="form-control form-control-sm qrow-mode" data-group="' + quoteEsc(d.stdGroup) + '" title="Choose pricing for this Test Standard">' +
+            '<option value="auto"' + (mode === 'auto' ? ' selected' : '') + '>Auto 80/20</option>' +
+            '<option value="standard"' + (mode === 'standard' ? ' selected' : '') + '>Standard price</option>' +
+            '<option value="pertest"' + (mode === 'pertest' ? ' selected' : '') + '>Test price</option>' +
+            '</select>';
+        }
+      },
       { title: 'Disc (%)', field: 'disc', editor: 'number', editorParams: { min: 0, max: 100, step: 0.01 }, hozAlign: 'right', width: 95 },
       { title: 'Net Amount', field: 'net', hozAlign: 'right', formatter: 'money', formatterParams: { precision: 2 }, width: 115 },
       { title: 'VAT Amount', field: 'vatAmt', hozAlign: 'right', formatter: 'money', formatterParams: { precision: 2 }, width: 115 },
@@ -747,6 +753,13 @@ function loadQuote() {
         rowseq: ''
       });
     });
+    // Keep each Test Standard (bundle) row above its individual test rows.
+    // Sorting is stable across different standards, preserving their load order.
+    rows.sort(function (a, b) {
+      if (String(a.stdGroup) !== String(b.stdGroup)) return 0;
+      if (a.isBundle === b.isBundle) return 0;
+      return a.isBundle ? -1 : 1;
+    });
     // Lines arrive priced from the server: one setData paint, no recompute.
     quoteStampRowSeq(rows);
     if (window.quoteTable) {
@@ -928,11 +941,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   if (tab) tab.addEventListener('change', function (e) {
-    var sel = e.target.closest && e.target.closest('.qgroup-mode');
+    var sel = e.target.closest && e.target.closest('.qrow-mode');
     if (!sel) return;
     e.stopPropagation();
-    // Server reprices with this group's new mode: one request, one paint,
-    // no local rebuild for the interaction to race with.
+    // Price selection is available only on the Test Standard (bundle) row.
+    // Server reprices with this group's selected mode.
     quoteReprice('full', { group: sel.getAttribute('data-group'), mode: quoteModeClean(sel.value) });
   });
 
