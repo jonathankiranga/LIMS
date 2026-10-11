@@ -1,0 +1,215 @@
+/* Sample registration UX layer — presentation only */
+#labform {
+    color: #243247;
+    font-size: 13px;
+}
+#labform > .form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+    background: #fff;
+}
+#labform .form-group {
+    min-width: 0;
+    gap: 5px;
+}
+#labform .form-group label {
+    color: #4a586b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .025em;
+    text-transform: uppercase;
+}
+#labform .form-group input,
+#labform .form-group select {
+    min-width: 0;
+    min-height: 34px;
+    padding: 6px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #1f2937;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+#labform .form-group input:focus,
+#labform .form-group select:focus,
+#sampleTable input:focus,
+#sampleTable select:focus {
+    border-color: #5074b8;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(80,116,184,.14);
+}
+#labform .d-flex.align-items-center {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+}
+#labform #quoteno {
+    flex: 1 1 auto;
+    width: 1%;
+}
+#findQuoteBtn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+#labform hr {
+    margin: 14px 0;
+    border-color: #e1e7ef;
+    opacity: 1;
+}
+#labform > .btn,
+#labform button[type="submit"] {
+    min-height: 34px;
+    font-size: 12px;
+    font-weight: 600;
+}
+#sampleTableContainer {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid #d8e0ea;
+    border-radius: 6px;
+    background: #fff;
+    overscroll-behavior-x: contain;
+}
+#sampleTable {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    box-shadow: none;
+}
+#sampleTable th,
+#sampleTable td {
+    min-width: 118px;
+    max-width: 220px;
+    padding: 7px;
+    border-right: 1px solid #e0e6ed;
+    border-bottom: 1px solid #e0e6ed;
+    vertical-align: middle;
+    background-clip: padding-box;
+}
+#sampleTable th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #eaf0f7;
+    color: #243247;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .025em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    white-space: normal;
+}
+#sampleTable tbody tr:nth-child(even) td {
+    background-color: #f8fafc;
+}
+#sampleTable tbody tr:hover td {
+    background-color: #eef5fc;
+}
+#sampleTable input,
+#sampleTable select {
+    min-width: 105px;
+    min-height: 31px;
+    padding: 5px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+#sampleTable input[type="file"] {
+    min-width: 170px;
+    max-width: 205px;
+    font-size: 11px;
+}
+#sampleTable td:last-child {
+    min-width: 62px;
+    text-align: center;
+}
+#registrationsumary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    padding: 10px 12px;
+    border: 1px solid #d8e3f0;
+    border-left: 3px solid #5074b8;
+    border-radius: 5px;
+    background: #f5f8fc;
+    color: #34445b;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+#registrationsumary strong {
+    color: #1f3555;
+}
+#samplehtml {
+    margin-top: 10px;
+}
+#labform > div:last-of-type {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 0 2px;
+}
+#labform button[type="submit"] {
+    min-width: 120px;
+    padding: 8px 18px;
+}
+#labform .action-buttons {
+    flex-wrap: wrap;
+}
+#modal .modal-body {
+    padding: 18px;
+}
+#customerForm .form-group input,
+#customerForm .form-group select {
+    min-height: 36px;
+    padding: 7px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 13px;
+}
+#customerForm .form-group input:focus,
+#customerForm .form-group select:focus {
+    border-color: #5074b8;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(80,116,184,.14);
+}
+@media (max-width: 1100px) {
+    #labform > .form-grid {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+}
+@media (max-width: 576px) {
+    #labform > .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 10px;
+        gap: 10px;
+    }
+    #labform .d-flex.align-items-center {
+        flex-wrap: wrap;
+    }
+    #findQuoteBtn {
+        width: 100%;
+    }
+    #sampleTable th,
+    #sampleTable td {
+        min-width: 112px;
+        padding: 6px;
+    }
+    #labform > div:last-of-type {
+        justify-content: stretch;
+    }
+    #labform button[type="submit"] {
+        width: 100%;
+    }
+}
