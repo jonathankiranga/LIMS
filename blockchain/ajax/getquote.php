@@ -50,10 +50,25 @@ try {
     if ($response === false || $httpCode !== 200) {
         getQuoteLog('ERP API request failed; URL=' . $erpApiUrl . '; HTTP=' . $httpCode . '; cURL=' . $curlError . '; response=' . substr((string)$response, 0, 1000));
         http_response_code(502);
+        $erpError = null;
+        $decodedResponse = json_decode((string)$response, true);
+        if (is_array($decodedResponse)) {
+            $erpError = $decodedResponse['message'] ?? $decodedResponse['error'] ?? null;
+            if (isset($decodedResponse['detail'])) {
+                $erpError = trim((string)$erpError . ' ' . (string)$decodedResponse['detail']);
+            }
+        }
+
         echo json_encode([
             'success' => false,
             'message' => 'ERP quotation request failed.',
-            'detail' => ($curlError !== '' ? $curlError : 'ERP API returned HTTP ' . $httpCode)
+            'detail' => ($curlError !== ''
+                ? $curlError
+                : 'ERP API returned HTTP ' . $httpCode),
+            'erp_error' => $erpError,
+            'erp_response_preview' => is_array($decodedResponse)
+                ? null
+                : substr(trim(strip_tags((string)$response)), 0, 600)
         ]);
         exit;
     }
