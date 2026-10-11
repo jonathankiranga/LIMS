@@ -10,9 +10,9 @@ function searchQuotesLog($message) {
 }
 
 try {
-require_once __DIR__ . '/../db_connection.php';
+require_once '../db_connection.php';
 
-$config = include __DIR__ . '/../include/config.php';
+$config = include '../include/config.php';
 $erpApiUrl = $config['ERP_API_URL'];
 
 if (!isset($_GET['query']) && !isset($_POST['query'])) {
