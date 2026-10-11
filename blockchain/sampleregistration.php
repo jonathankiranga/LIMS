@@ -153,7 +153,6 @@
                             <th>Sample Name</th>
                             <th>Sample Method</th>
                             <th>Condition of Sample</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="sampleRows"></tbody>
