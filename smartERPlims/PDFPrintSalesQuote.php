@@ -377,7 +377,7 @@ if(isset($_GET['No'])){
     foreach ($lineItems as $i => $item) {
         $group = trim((string)($item['stdgroup'] ?? ''));
         $code = trim((string)($item['itemcode'] ?? $item['barcode'] ?? ''));
-        if ($group === '' && preg_match('/^TS\\d{4}$/', $code)) {
+        if ($group === '' && preg_match('/^TS\d{4}$/', $code)) {
             $group = $code;
             $lineItems[$i]['stdgroup'] = $group;
         }
@@ -399,7 +399,7 @@ if(isset($_GET['No'])){
         foreach ($indexes as $i) {
             $code = trim((string)($lineItems[$i]['itemcode'] ?? $lineItems[$i]['barcode'] ?? ''));
             $discount = (float)($lineItems[$i]['discountpercent'] ?? 0);
-            if (preg_match('/^TS\\d{4}$/', $code)) {
+            if (preg_match('/^TS\d{4}$/', $code)) {
                 $bundleDiscount = $discount;
             } elseif ($discount >= 99.999) {
                 $hasTestAt100 = true;
@@ -420,7 +420,7 @@ if(isset($_GET['No'])){
     foreach ($lineItems as $i => $item) {
         $group = trim((string)($item['stdgroup'] ?? ''));
         $code = trim((string)($item['itemcode'] ?? $item['barcode'] ?? ''));
-        $isBundle = preg_match('/^TS\\d{4}$/', $code) === 1;
+        $isBundle = preg_match('/^TS\d{4}$/', $code) === 1;
         $mode = $groupPricingModes[$group] ?? null;
         $lineDiscountPercent = (float)($item['discountpercent'] ?? 0);
         $structuralDiscount = (($mode === 'standard' && !$isBundle) || ($mode === 'pertest' && $isBundle));
