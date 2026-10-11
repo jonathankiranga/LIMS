@@ -1246,7 +1246,7 @@ class LimsSalesApi{
             return;
         }
 
-        $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference, IFNULL(paymentterms, '') AS paymentterms
+        $stmt = $this->db->prepare("SELECT documentno, docdate, customercode, customername, currencycode, IFNULL(yourreference, '') AS yourreference
             FROM salesheader
             WHERE documenttype = 54 AND documentno = ?
             LIMIT 1");
@@ -1299,7 +1299,6 @@ class LimsSalesApi{
                 'customername' => trim((string)$hdr['customername']),
                 'currencycode' => trim((string)$hdr['currencycode']),
                 'yourreference' => trim((string)$hdr['yourreference']),
-                'paymentterms' => trim((string)$hdr['paymentterms'])
             ],
             'lines' => $lines
         ]);
