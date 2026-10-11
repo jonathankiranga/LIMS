@@ -755,8 +755,15 @@ function loadQuote() {
     });
     // Keep each Test Standard (bundle) row above its individual test rows.
     // Sorting is stable across different standards, preserving their load order.
+    var quoteGroupOrder = {};
+    rows.forEach(function (row) {
+      var key = String(row.stdGroup || '');
+      if (!(key in quoteGroupOrder)) quoteGroupOrder[key] = Object.keys(quoteGroupOrder).length;
+    });
     rows.sort(function (a, b) {
-      if (String(a.stdGroup) !== String(b.stdGroup)) return 0;
+      var aGroup = String(a.stdGroup || '');
+      var bGroup = String(b.stdGroup || '');
+      if (aGroup !== bGroup) return quoteGroupOrder[aGroup] - quoteGroupOrder[bGroup];
       if (a.isBundle === b.isBundle) return 0;
       return a.isBundle ? -1 : 1;
     });
