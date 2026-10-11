@@ -426,6 +426,7 @@ if (isset($_POST['submit']) && $_POST['submit'] === 'Save Quote') {
     }
     #entryPanel .form-group label { font-size: 0.8rem; font-weight: 600; color: #495057; }
 </style>
+<link rel="stylesheet" href="css/salesquotation-ux.css?v=1" />
        <div id="quotemessages"></div>
 
 <div class="card">
