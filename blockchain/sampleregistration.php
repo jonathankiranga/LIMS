@@ -140,7 +140,6 @@
                     <thead class="table-light">
                         <tr>
                             <th>Standard Name</th>
-                            <th>Matrix Package</th>
                             <th>Number of Samples</th>
                             <th>Standard Kit Units</th>
                             <th>Product Batch No</th>
