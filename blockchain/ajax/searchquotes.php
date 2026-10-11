@@ -10,8 +10,6 @@ function searchQuotesLog($message) {
 }
 
 try {
-require_once '../db_connection.php';
-
 $config = include '../include/config.php';
 $erpApiUrl = $config['ERP_API_URL'];
 
@@ -70,48 +68,9 @@ if (!is_array($quotes)) {
     $quotes = [];
 }
 
-// One quotation represents one complete sample registration.
-// Exclude any quotation number already present in sample_header.QuoteNo.
-$registeredQuotes = [];
-$sql = "SELECT DISTINCT TRIM(QuoteNo) AS QuoteNo
-        FROM sample_header
-        WHERE QuoteNo IS NOT NULL AND TRIM(QuoteNo) <> ''";
-$dbResult = $conn->query($sql);
-
-if ($dbResult === false) {
-    $dbError = $conn->error;
-    searchQuotesLog('Could not read registered quotation numbers: ' . $dbError);
-    http_response_code(500);
-    echo json_encode(['message' => 'Unable to check existing sample registrations.', 'detail' => $dbError]);
-    exit;
-}
-
-while ($row = $dbResult->fetch_assoc()) {
-    $quoteNo = trim((string)($row['QuoteNo'] ?? ''));
-    if ($quoteNo !== '') {
-        $registeredQuotes[strtoupper($quoteNo)] = true;
-    }
-}
-$dbResult->free();
-
-$availableQuotes = [];
-foreach ($quotes as $quote) {
-    if (!is_array($quote)) {
-        continue;
-    }
-
-    $documentNo = trim((string)($quote['documentno'] ?? ''));
-    if ($documentNo === '') {
-        // Keep records without a document number out of the selectable results.
-        continue;
-    }
-
-    if (!isset($registeredQuotes[strtoupper($documentNo)])) {
-        $availableQuotes[] = $quote;
-    }
-}
-
-echo json_encode($availableQuotes);
+// The accounting API now filters quotations that already have a sales order.
+// Return its available quotation list directly; no local LIMS query is needed.
+echo json_encode($quotes);
 
 } catch (Throwable $e) {
     searchQuotesLog(get_class($e) . ': ' . $e->getMessage());
