@@ -271,12 +271,9 @@ function initQuoteTable() {
       (data || []).forEach(function (d) {
         gross += parseFloat(d.gross) || 0;
       });
-      var gkey = quoteEsc(value);
       return '<span style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px 12px; max-width:100%;">' +
         '<span>' + quoteEsc(name) + ' (' + count + ')</span>' +
-        '<span style="font-weight:400;">Gross: ' + gross.toFixed(2) + '</span>' +
-        '<button type="button" class="btn btn-danger btn-sm qgroup-remove" data-group="' +
-        gkey + '"><i class="fas fa-trash"></i> Remove</button></span>';
+        '<span style="font-weight:400;">Gross: ' + gross.toFixed(2) + '</span></span>';
     },
     rowFormatter: function (row) {
       var d = row.getData();
@@ -311,12 +308,22 @@ function initQuoteTable() {
       { title: 'TAT (days)', field: 'tat', editor: 'number', editorParams: { min: 0, step: 1 }, hozAlign: 'center', width: 95 },
       {
         title: 'Action', field: '__act', headerSort: false, width: 80, hozAlign: 'center',
-        formatter: function () { return '<button type="button" class="btn btn-outline-danger btn-sm qrow-del" title="Delete line"><i class="fas fa-trash"></i></button>'; },
+        formatter: function (cell) {
+          var d = cell.getRow().getData();
+          var title = d && d.isBundle ? 'Remove Test Standard and all its tests' : 'Delete line';
+          return '<button type="button" class="btn btn-outline-danger btn-sm qrow-del" title="' + title + '"><i class="fas fa-trash"></i></button>';
+        },
         cellClick: function (e, cell) {
           if (e) { e.stopPropagation(); }
           var row = cell.getRow();
+          var data = row.getData();
+          if (data && data.isBundle) {
+            // Removing the Test Standard removes its entire group, including every test row.
+            quoteRemoveGroup(data.stdGroup);
+            return;
+          }
           try { row.delete(); } catch (err) { /* ignore */ }
-          quotePaintTotals(); // deletion only affects totals, no reprice needed
+          quotePaintTotals(); // deleting an individual test only affects totals
         }
       }
     ]
@@ -936,15 +943,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!btn) return;
     var el = document.getElementById(btn.getAttribute('data-remove-pending'));
     if (el) el.remove();
-  });
-
-  var tab = document.getElementById('quoteTabulator');
-  if (tab) tab.addEventListener('click', function (e) {
-    var btn = e.target.closest && e.target.closest('.qgroup-remove');
-    if (!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-    quoteRemoveGroup(btn.getAttribute('data-group'));
   });
 
   if (tab) tab.addEventListener('change', function (e) {
