@@ -40,6 +40,12 @@ if (!$header) {
     exit('Registration not found.');
 }
 
+$companyName = '';
+$companyResult = $conn->query("SELECT company_name FROM company_master ORDER BY company_id DESC LIMIT 1");
+if ($companyResult && ($companyRecord = $companyResult->fetch_assoc())) {
+    $companyName = trim((string)($companyRecord['company_name'] ?? ''));
+}
+
 $sql = "
     SELECT
         st.SampleID,
@@ -94,6 +100,7 @@ $html = '
 <table cellpadding="5" cellspacing="0" border="0" width="100%">
   <tr>
     <td width="100%" align="center">
+      <span style="font-size:15px;font-weight:bold;">' . $esc($companyName) . '</span><br>
       <span style="font-size:16px;font-weight:bold;">LABORATORY SAMPLE REGISTRATION</span><br>
       <span style="font-size:10px;">ANONYMOUS INTERNAL RECEIPT</span><br>
       <span style="font-size:11px;font-weight:bold;">' . $esc($departments[$department]['label']) . '</span>
