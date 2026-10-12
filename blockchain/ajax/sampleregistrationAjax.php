@@ -550,7 +550,13 @@ try {
         'success' => true,
         'message' => "Sample Registration no: $documentNo Successful",
         'email_status' => $emailLogStatus,
-        'email_note' => $emailLogError
+        'email_note' => $emailLogError,
+        'header_id' => (int)$HeaderID,
+        'document_no' => (string)$documentNo,
+        'receipts' => [
+            'chemical' => 'ajax/printAnonymousSampleReceipt.php?header_id=' . (int)$HeaderID . '&department=chemical',
+            'microbiological' => 'ajax/printAnonymousSampleReceipt.php?header_id=' . (int)$HeaderID . '&department=microbiological'
+        ]
     ];
 
     if ($erpSyncResult !== null) {
