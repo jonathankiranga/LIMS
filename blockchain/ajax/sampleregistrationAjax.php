@@ -351,7 +351,7 @@ try {
         
         // Bind and execute sample_tests
         $stmt->bind_param(
-            "isisssssssssissss",
+            "isisssissssisssss",
             $HeaderID,
             $datarows['imageno'],
             $datarows['sampleType'],
