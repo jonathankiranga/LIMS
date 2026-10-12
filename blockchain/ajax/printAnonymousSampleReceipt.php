@@ -43,9 +43,11 @@ if (!$header) {
 $sql = "
     SELECT
         st.SampleID,
-        COALESCE(st.sample_name, '') AS SampleName,
+        COALESCE(NULLIF(ts.StandardName, ''), NULLIF(st.sample_name, ''), '') AS SampleName,
         tp.ParameterName
     FROM sample_tests st
+    LEFT JOIN teststandards ts
+        ON ts.StandardID = st.sampleType
     INNER JOIN test_results tr
         ON tr.HeaderID = st.HeaderID
        AND tr.TestID = st.TestID
@@ -113,7 +115,7 @@ $html = '
   </tr>
 </table>
 <br>
-<table cellpadding="5" cellspacing="0" border="1" width="100%">
+<table cellpadding="4" cellspacing="0" border="1" width="100%">
   <thead>
     <tr style="background-color:#e9ecef;font-weight:bold;">
       <th width="19%">Sample ID</th>
@@ -132,11 +134,11 @@ if (!$rows) {
         // Each registered test parameter is printed as a normal body row.
         // Do not print StandardName/sample-standard values as a separate sample-type heading.
         $html .= '<tr>'
-            . '<td>' . $esc($row['SampleID']) . '</td>'
-            . '<td>' . $esc($row['SampleName']) . '</td>'
-            . '<td>' . $esc($row['ParameterName']) . '</td>'
-            . '<td>&nbsp;<br><br></td>'
-            . '<td>&nbsp;<br><br></td>'
+            . '<td width="19%">' . $esc($row['SampleID']) . '</td>'
+            . '<td width="23%">' . $esc($row['SampleName']) . '</td>'
+            . '<td width="30%">' . $esc($row['ParameterName']) . '</td>'
+            . '<td width="14%">&nbsp;<br><br></td>'
+            . '<td width="14%">&nbsp;<br><br></td>'
             . '</tr>';
     }
 }
