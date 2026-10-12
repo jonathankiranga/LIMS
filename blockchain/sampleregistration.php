@@ -149,20 +149,11 @@
                 <table class="table table-bordered table-hover table-sm align-middle table-responsive" id="sampleTable">
                     <thead class="table-light">
                         <tr>
-                            <th>Standard Name</th>
-                            <th>Number of Samples</th>
-                            <th>Standard Kit Units</th>
-                            <th>Product Batch No</th>
-                            <th>Batch Size</th>
-                            <th>Date of Manufacture</th>
-                            <th>Date of Expiry</th>
-                            <th>Chilled Date of Expiry</th>
-                            <th>Frozen Date of Expiry</th>
-                            <th>Picture of Sample</th>
-                            <th>Sample Source</th>
-                            <th>Sample Name</th>
-                            <th>Sample Method</th>
-                            <th>Condition of Sample</th>
+                            <th>Standard / Sample Count</th>
+                            <th>Product / Batch Details</th>
+                            <th>Manufacture / Expiry Dates</th>
+                            <th>Sample Details</th>
+                            <th>Picture</th>
                         </tr>
                     </thead>
                     <tbody id="sampleRows"></tbody>
