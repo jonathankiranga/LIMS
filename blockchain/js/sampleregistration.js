@@ -1035,6 +1035,58 @@ function promptSendSampleReceivedEmail(onDecision) {
 
 
 $(document).ready(function() {
+  // Search existing registrations for anonymous department receipt reprinting.
+  $(document).off('click', '#searchReceiptsBtn').on('click', '#searchReceiptsBtn', function () {
+    const query = ($('#receiptSearchQuery').val() || '').trim();
+    const output = document.getElementById('receiptSearchResults');
+    if (!query) {
+      if (output) output.innerHTML = '<div class="alert alert-warning py-2">Enter a Batch Ref or Sample ID.</div>';
+      return;
+    }
+    if (output) output.innerHTML = '<span class="text-muted">Searching registrations...</span>';
+    fetch('ajax/searchSampleReceipts.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!output) return;
+        if (!data.success) {
+          output.innerHTML = '<div class="alert alert-danger py-2">' + escapeReceiptText(data.message || 'Search failed.') + '</div>';
+          return;
+        }
+        if (!data.registrations || !data.registrations.length) {
+          output.innerHTML = '<div class="alert alert-info py-2">No matching registrations found.</div>';
+          return;
+        }
+        output.innerHTML = data.registrations.map(function (item) {
+          const chemicalUrl = 'ajax/printAnonymousSampleReceipt.php?header_id=' + encodeURIComponent(item.header_id) + '&department=chemical';
+          const microUrl = 'ajax/printAnonymousSampleReceipt.php?header_id=' + encodeURIComponent(item.header_id) + '&department=microbiological';
+          return '<div class="border rounded bg-white p-2 mb-2 d-flex flex-wrap align-items-center justify-content-between gap-2">' +
+            '<div><strong>Batch Ref:</strong> ' + escapeReceiptText(item.document_no) +
+            ' <span class="text-muted">| ' + escapeReceiptText(item.date || '') +
+            ' | Samples: ' + Number(item.sample_count || 0) + '</span></div>' +
+            '<div class="d-flex flex-wrap gap-2">' +
+            '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + chemicalUrl + '">Chemical PDF</a>' +
+            '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + microUrl + '">Microbiological PDF</a>' +
+            '</div></div>';
+        }).join('');
+      })
+      .catch(function (error) {
+        console.error('Receipt search failed:', error);
+        if (output) output.innerHTML = '<div class="alert alert-danger py-2">Could not search registrations. Please try again.</div>';
+      });
+  });
+  $(document).off('keydown', '#receiptSearchQuery').on('keydown', '#receiptSearchQuery', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#searchReceiptsBtn').trigger('click');
+    }
+  });
+
+  function escapeReceiptText(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+    });
+  }
+
   const username = localStorage.getItem('username');
   if (!username) {
         localStorage.clear();
@@ -1131,7 +1183,18 @@ $(document).ready(function() {
                                     if (res.email_note && emailStatus !== 'SUCCESS') {
                                       toastr.info(res.email_note);
                                     }
-                                    setTimeout(function () { window.location.href = "homepage.php"; }, 5000);
+                                    if (res.receipts && res.receipts.chemical && res.receipts.microbiological) {
+                                      const links = document.getElementById('newReceiptLinks');
+                                      if (links) {
+                                        links.innerHTML =
+                                          '<div class="alert alert-success mb-2"><strong>Registration saved.</strong> Print or save the two anonymous department receipts:</div>' +
+                                          '<div class="d-flex flex-wrap gap-2">' +
+                                          '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.chemical + '">Chemical Department PDF</a>' +
+                                          '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.microbiological + '">Microbiological Department PDF</a>' +
+                                          '</div>';
+                                        links.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                      }
+                                    }
                                 } else {
                                     toastr.error('Error: ' + (res.message || 'Unknown server error.'));
                                     $submitBtns.prop('disabled', false).each(function (i) { $(this).html(originalHtmls[i] || '<i class="fas fa-save"></i> Save'); });
