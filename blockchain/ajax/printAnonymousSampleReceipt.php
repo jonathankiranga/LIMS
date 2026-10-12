@@ -44,7 +44,6 @@ $sql = "
     SELECT
         st.SampleID,
         COALESCE(st.sample_name, '') AS SampleName,
-        COALESCE(ts.StandardName, '') AS SampleType,
         tp.ParameterName
     FROM sample_tests st
     INNER JOIN test_results tr
@@ -54,7 +53,6 @@ $sql = "
     INNER JOIN testparameters tp
         ON tp.ParameterID = tr.ParameterID
        AND tp.StandardID = tr.StandardID
-    LEFT JOIN teststandards ts ON ts.StandardID = st.StandardID
     WHERE st.HeaderID = ?
       AND LOWER(tp.Category) = ?
     ORDER BY st.SampleID, tp.ParameterName
@@ -127,19 +125,12 @@ $html = '
   </thead>
   <tbody>';
 
-$lastGroup = '';
 if (!$rows) {
     $html .= '<tr><td colspan="5" align="center">No test parameters are assigned to this department for this registration.</td></tr>';
 } else {
     foreach ($rows as $row) {
-        $groupKey = (string)$row['SampleID'] . '|' . (string)$row['SampleName'] . '|' . (string)$row['SampleType'];
-        if ($groupKey !== $lastGroup) {
-            $html .= '<tr style="background-color:#f5f5f5;">'
-                . '<td colspan="2"><b>Sample Type</b></td>'
-                . '<td colspan="3">' . $esc($row['SampleType']) . '</td>'
-                . '</tr>';
-            $lastGroup = $groupKey;
-        }
+        // Each registered test parameter is printed as a normal body row.
+        // Do not print StandardName/sample-standard values as a separate sample-type heading.
         $html .= '<tr>'
             . '<td>' . $esc($row['SampleID']) . '</td>'
             . '<td>' . $esc($row['SampleName']) . '</td>'
