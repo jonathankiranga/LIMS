@@ -20,7 +20,7 @@ if ($headerId <= 0 || !isset($departments[$department])) {
 }
 
 $metaStmt = $conn->prepare("
-    SELECT sh.HeaderID, sh.DocumentNo, sh.Date, sh.SamplingDate, sh.SampledBy
+    SELECT sh.HeaderID, sh.DocumentNo, sh.Date
     FROM sample_header sh
     WHERE sh.HeaderID = ?
     LIMIT 1
@@ -88,9 +88,7 @@ $esc = static function ($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
 $regDate = !empty($header['Date']) ? date('d M Y', strtotime($header['Date'])) : '';
-$samplingDate = !empty($header['SamplingDate']) ? date('d M Y', strtotime($header['SamplingDate'])) : '';
 $batchRef = $esc($header['DocumentNo'] ?? '');
-$sampledBy = $esc($header['SampledBy'] ?? '');
 
 $html = '
 <table cellpadding="5" cellspacing="0" border="0" width="100%">
@@ -109,9 +107,14 @@ $html = '
     <td width="50%"><b>REGISTRATION DATE:</b> ' . $esc($regDate) . '</td>
   </tr>
   <tr>
-    <td width="50%"><b>SAMPLING DATE:</b> ' . $esc($samplingDate) . '</td>
-    <td width="50%"><b>SAMPLED BY:</b> ' . $sampledBy . '</td>
+    <td width="100%"><b>RESULTS EXPECTED ON DATE:</b> ______________________________</td>
   </tr>
+  <tr>
+    <td width="100%"><b>SPECIFY ANY INFORMATION FROM THE CUSTOMER THAT CAN AFFECT THE RESULTS:</b></td>
+  </tr>
+  <tr><td width="100%">________________________________________________________________________________</td></tr>
+  <tr><td width="100%">________________________________________________________________________________</td></tr>
+  <tr><td width="100%">________________________________________________________________________________</td></tr>
 </table>
 <br>
 <table cellpadding="4" cellspacing="0" border="1" width="100%">
