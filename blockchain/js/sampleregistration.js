@@ -430,6 +430,14 @@ function reindexSampleRows() {
           if (ridEl && String(ridEl.value) === String(rowNum)) mainTr = tr;
         });
 
+        const standardCaption = document.createElement('caption');
+        standardCaption.style.captionSide = 'top';
+        standardCaption.style.textAlign = 'left';
+        standardCaption.style.fontWeight = '600';
+        standardCaption.style.padding = '4px 0';
+        standardCaption.textContent = 'Sample Standard: ' + (mainTr ? ((mainTr.querySelector('[name="StandardName[]"]') || {}).value || '') : '');
+        tbl.insertBefore(standardCaption, tblHead);
+
         const mainRow = document.createElement('tr');
         mainRow.className = 'group-main-row';
         mainRow.dataset.groupIndex = headerIndex;
