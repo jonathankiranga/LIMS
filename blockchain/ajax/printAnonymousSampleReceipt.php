@@ -43,11 +43,9 @@ if (!$header) {
 $sql = "
     SELECT
         st.SampleID,
-        COALESCE(NULLIF(ts.StandardName, ''), NULLIF(st.sample_name, ''), '') AS SampleName,
+        COALESCE(st.sample_name, '') AS SampleName,
         tp.ParameterName
     FROM sample_tests st
-    LEFT JOIN teststandards ts
-        ON ts.StandardID = st.sampleType
     INNER JOIN test_results tr
         ON tr.HeaderID = st.HeaderID
        AND tr.TestID = st.TestID
@@ -61,8 +59,9 @@ $sql = "
 ";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
+    error_log('Anonymous sample receipt SQL prepare failed: ' . $conn->error);
     http_response_code(500);
-    exit('Unable to prepare department parameter lookup.');
+    exit('Unable to prepare department parameter lookup. Please check the server PHP error log.');
 }
 $category = $departments[$department]['category'];
 $stmt->bind_param('is', $headerId, $category);
