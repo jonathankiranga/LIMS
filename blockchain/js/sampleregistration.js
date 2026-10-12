@@ -410,142 +410,143 @@ function reindexSampleRows() {
 
       const orderIndex = getRowOrderIndexByRowNum(rowNum);
 
-      // For each labRef create a separate table so the header appears above each group's rows
+      // Render each individual sample with fewer columns by grouping related fields.
+      // Keep every per-sample field and the existing sample_headers submission names.
       labRefsForRow.forEach((labRef, grpIdx) => {
         const headerIndex = grpIdx;
-
-        // Create table for this group with its own thead and tbody
         const tbl = document.createElement('table');
         tbl.className = 'table table-sm sample-group-table';
         tbl.style.width = '100%';
+        tbl.style.tableLayout = 'fixed';
+
         const tblHead = document.createElement('thead');
-        tblHead.innerHTML = `<tr>
-          <th style="min-width: 140px;">Sample ID</th>
-          <th style="min-width: 150px;">Sample Name</th>
-          <th style="min-width: 150px;">Standard Kit Units</th>
-          <th style="min-width: 150px;">Product Batch No</th>
-          <th style="min-width: 120px;">Batch Size</th>
-          <th style="min-width: 160px;">Date of Manufacture</th>
-          <th style="min-width: 160px;">Date of Expiry</th>
-          <th style="min-width: 160px;">Chilled Date Exp</th>
-          <th style="min-width: 160px;">Frozen Date Exp</th>
-          <th style="min-width: 250px;">Picture of Sample</th>
-          <th style="min-width: 150px;">Sample Source</th>
-          <th style="min-width: 150px;">Sample Method</th>
-          <th style="min-width: 150px;">Condition</th>
-        </tr>`;
+        tblHead.innerHTML = '<tr><th style="width:115px;">Sample ID</th><th style="width:28%;">Sample Details</th><th style="width:24%;">Product / Batch</th><th style="width:30%;">Dates</th><th style="width:130px;">Picture</th></tr>';
         tbl.appendChild(tblHead);
         const tblBody = document.createElement('tbody');
 
-        // Prefill values from the main sample row if present
         let mainTr = null;
         document.querySelectorAll('#sampleRows tr.main-row').forEach(function(tr) {
           const ridEl = tr.querySelector('input[name="rowindex[]"]');
           if (ridEl && String(ridEl.value) === String(rowNum)) mainTr = tr;
         });
 
-        // Main visible row for header-level inputs
         const mainRow = document.createElement('tr');
         mainRow.className = 'group-main-row';
         mainRow.dataset.groupIndex = headerIndex;
         mainRow.dataset.rowNum = rowNum;
 
-        // Sample ID cell (show the labRef/sample identifier)
+        const getMainValue = function(selector) {
+          return mainTr ? ((mainTr.querySelector(selector) || {}).value || '') : '';
+        };
+        const makeField = function(labelText, input) {
+          const wrapper = document.createElement('label');
+          wrapper.style.display = 'flex';
+          wrapper.style.flexDirection = 'column';
+          wrapper.style.minWidth = '0';
+          wrapper.style.gap = '2px';
+          wrapper.style.margin = '0';
+          const label = document.createElement('span');
+          label.textContent = labelText;
+          label.style.fontSize = '0.72rem';
+          label.style.color = '#6c757d';
+          wrapper.appendChild(label);
+          wrapper.appendChild(input);
+          return wrapper;
+        };
+        const makeInput = function(type, className, placeholder, value) {
+          const input = document.createElement('input');
+          input.type = type;
+          input.className = 'form-control form-control-sm ' + className;
+          if (placeholder) input.placeholder = placeholder;
+          if (value !== undefined && value !== null) input.value = value;
+          input.style.minWidth = '0';
+          input.style.width = '100%';
+          return input;
+        };
+        const makeBlock = function() {
+          const block = document.createElement('div');
+          block.style.display = 'grid';
+          block.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+          block.style.gap = '4px 6px';
+          block.style.alignItems = 'end';
+          return block;
+        };
+
         const tdSampleId = document.createElement('td');
         tdSampleId.className = 'sample-id-cell';
         tdSampleId.style.fontWeight = '600';
         tdSampleId.textContent = labRef || '';
         mainRow.appendChild(tdSampleId);
 
-        const tdSampleName = document.createElement('td');
-        const sampleNameInput = document.createElement('input'); sampleNameInput.type = 'text'; sampleNameInput.className = 'form-control form-control-sm header-sample-name'; sampleNameInput.placeholder = 'Sample Name';
-        if (mainTr) sampleNameInput.value = (mainTr.querySelector('[name="sample_name[]"]') || {}).value || '';
-        tdSampleName.appendChild(sampleNameInput);
-        mainRow.appendChild(tdSampleName);
+        const tdDetails = document.createElement('td');
+        const detailsBlock = makeBlock();
+        const sampleNameInput = makeInput('text', 'header-sample-name', 'Sample name', getMainValue('[name="sample_name[]"]'));
+        const sourceInput = makeInput('text', 'header-source', 'Sample source', getMainValue('[name="sample_source[]"]'));
+        const sampleMethodInput = makeInput('text', 'header-sample-method', 'Sample method', getMainValue('[name="sample_method[]"]'));
+        const conditionSelect = document.createElement('select');
+        conditionSelect.className = 'form-control form-control-sm header-condition';
+        conditionSelect.innerHTML = '<option value="">Condition</option><option value="Fresh">Fresh</option><option value="Chilled">Chilled</option><option value="Frozen">Frozen</option><option value="Dried">Dried</option><option value="Preserved">Preserved</option>';
+        conditionSelect.value = getMainValue('[name="condition_of_sample[]"]');
+        detailsBlock.appendChild(makeField('Sample Name', sampleNameInput));
+        detailsBlock.appendChild(makeField('Sample Source', sourceInput));
+        detailsBlock.appendChild(makeField('Sample Method', sampleMethodInput));
+        detailsBlock.appendChild(makeField('Condition', conditionSelect));
+        tdDetails.appendChild(detailsBlock);
+        mainRow.appendChild(tdDetails);
 
-        const tdSku = document.createElement('td');
-        const skuInput = document.createElement('input'); skuInput.type = 'text'; skuInput.className = 'form-control form-control-sm header-sku'; skuInput.placeholder = 'SKU';
-        if (mainTr) skuInput.value = (mainTr.querySelector('[name="standard_kit_units[]"]') || {}).value || '';
-        tdSku.appendChild(skuInput);
-        mainRow.appendChild(tdSku);
+        const tdBatchDetails = document.createElement('td');
+        const batchBlock = makeBlock();
+        const skuInput = makeInput('text', 'header-sku', 'SKU units', getMainValue('[name="standard_kit_units[]"]'));
+        const batchNoInput = makeInput('text', 'header-batch', 'Batch number', getMainValue('[name="product_batch_no[]"]'));
+        const batchSizeInput = makeInput('number', 'header-size', 'Batch size', getMainValue('[name="batch_size[]"]'));
+        batchSizeInput.min = '1';
+        batchBlock.appendChild(makeField('Standard Kit Units', skuInput));
+        batchBlock.appendChild(makeField('Product Batch No', batchNoInput));
+        batchBlock.appendChild(makeField('Batch Size', batchSizeInput));
+        tdBatchDetails.appendChild(batchBlock);
+        mainRow.appendChild(tdBatchDetails);
 
-        const tdBatch = document.createElement('td');
-        const batchNoInput = document.createElement('input'); batchNoInput.type = 'text'; batchNoInput.className = 'form-control form-control-sm header-batch'; batchNoInput.placeholder = 'Batch No';
-        if (mainTr) batchNoInput.value = (mainTr.querySelector('[name="product_batch_no[]"]') || {}).value || '';
-        tdBatch.appendChild(batchNoInput);
-        mainRow.appendChild(tdBatch);
-
-        const tdSize = document.createElement('td');
-        const batchSizeInput = document.createElement('input'); batchSizeInput.type = 'number'; batchSizeInput.className = 'form-control form-control-sm header-size'; batchSizeInput.placeholder = 'Batch Size'; batchSizeInput.min = '1'; batchSizeInput.style.width = '90px';
-        if (mainTr) batchSizeInput.value = (mainTr.querySelector('[name="batch_size[]"]') || {}).value || '';
-        tdSize.appendChild(batchSizeInput);
-        mainRow.appendChild(tdSize);
-
-        const tdMfg = document.createElement('td');
-        const mfgInput = document.createElement('input'); mfgInput.type = 'date'; mfgInput.className = 'form-control form-control-sm header-mfg'; mfgInput.style.width = '150px';
-        if (mainTr) mfgInput.value = (mainTr.querySelector('[name="date_of_manufacture[]"]') || {}).value || '';
-        tdMfg.appendChild(mfgInput);
-        mainRow.appendChild(tdMfg);
-
-        const tdExp = document.createElement('td');
-        const expInput = document.createElement('input'); expInput.type = 'date'; expInput.className = 'form-control form-control-sm header-exp'; expInput.style.width = '150px';
-        if (mainTr) expInput.value = (mainTr.querySelector('[name="date_of_expiry[]"]') || {}).value || '';
-        tdExp.appendChild(expInput);
-        mainRow.appendChild(tdExp);
-
-        const tdChilledExp = document.createElement('td');
-        const chilledExpInput = document.createElement('input'); chilledExpInput.type = 'date'; chilledExpInput.className = 'form-control form-control-sm header-chilled-exp'; chilledExpInput.style.width = '150px';
-        if (mainTr) chilledExpInput.value = (mainTr.querySelector('[name="chilled_date_of_expiry[]"]') || {}).value || '';
-        tdChilledExp.appendChild(chilledExpInput);
-        mainRow.appendChild(tdChilledExp);
-
-        const tdFrozenExp = document.createElement('td');
-        const frozenExpInput = document.createElement('input'); frozenExpInput.type = 'date'; frozenExpInput.className = 'form-control form-control-sm header-frozen-exp'; frozenExpInput.style.width = '150px';
-        if (mainTr) frozenExpInput.value = (mainTr.querySelector('[name="frozen_date_of_expiry[]"]') || {}).value || '';
-        tdFrozenExp.appendChild(frozenExpInput);
-        mainRow.appendChild(tdFrozenExp);
+        const tdDates = document.createElement('td');
+        const datesBlock = makeBlock();
+        const mfgInput = makeInput('date', 'header-mfg', '', getMainValue('[name="date_of_manufacture[]"]'));
+        const expInput = makeInput('date', 'header-exp', '', getMainValue('[name="date_of_expiry[]"]'));
+        const chilledExpInput = makeInput('date', 'header-chilled-exp', '', getMainValue('[name="chilled_date_of_expiry[]"]'));
+        const frozenExpInput = makeInput('date', 'header-frozen-exp', '', getMainValue('[name="frozen_date_of_expiry[]"]'));
+        datesBlock.appendChild(makeField('Date of Manufacture', mfgInput));
+        datesBlock.appendChild(makeField('Date of Expiry', expInput));
+        datesBlock.appendChild(makeField('Chilled Date Expiry', chilledExpInput));
+        datesBlock.appendChild(makeField('Frozen Date Expiry', frozenExpInput));
+        tdDates.appendChild(datesBlock);
+        mainRow.appendChild(tdDates);
 
         const tdPic = document.createElement('td');
-        const picInput = document.createElement('input'); picInput.type = 'file'; picInput.accept = 'image/jpeg,image/gif'; picInput.className = 'form-control-file header-image';
+        const picInput = document.createElement('input');
+        picInput.type = 'file';
+        picInput.accept = 'image/jpeg,image/gif';
+        picInput.className = 'form-control-file header-image';
+        picInput.style.maxWidth = '100%';
         tdPic.appendChild(picInput);
         mainRow.appendChild(tdPic);
-
-        const tdSource = document.createElement('td');
-        const sourceInput = document.createElement('input'); sourceInput.type = 'text'; sourceInput.className = 'form-control form-control-sm header-source'; sourceInput.placeholder = 'Source';
-        if (mainTr) sourceInput.value = (mainTr.querySelector('[name="sample_source[]"]') || {}).value || '';
-        tdSource.appendChild(sourceInput);
-        mainRow.appendChild(tdSource);
-
-
-        const tdSampleMethod = document.createElement('td');
-        const sampleMethodInput = document.createElement('input'); sampleMethodInput.type = 'text'; sampleMethodInput.className = 'form-control form-control-sm header-sample-method'; sampleMethodInput.placeholder = 'Sample Method';
-        if (mainTr) sampleMethodInput.value = (mainTr.querySelector('[name="sample_method[]"]') || {}).value || '';
-        tdSampleMethod.appendChild(sampleMethodInput);
-        mainRow.appendChild(tdSampleMethod);
-
-        const tdCondition = document.createElement('td');
-        const conditionSelect = document.createElement('select'); conditionSelect.className = 'form-control form-control-sm header-condition';
-        conditionSelect.innerHTML = '<option value="">Select</option><option value="Fresh">Fresh</option><option value="Chilled">Chilled</option><option value="Frozen">Frozen</option><option value="Dried">Dried</option><option value="Preserved">Preserved</option>';
-        if (mainTr) {
-            const conditionVal = (mainTr.querySelector('[name="condition_of_sample[]"]') || {}).value || '';
-            conditionSelect.value = conditionVal;
-        }
-        tdCondition.appendChild(conditionSelect);
-        mainRow.appendChild(tdCondition);
-
-
         tblBody.appendChild(mainRow);
 
-        // Parameter row (below the main row): display selected parameters as a plain list.
+        // Selected quotation parameters display in compact side-by-side blocks.
         const paramRow = document.createElement('tr');
-        paramRow.id = `group_param_row_${rowNum}_${headerIndex}`;
+        paramRow.id = 'group_param_row_' + rowNum + '_' + headerIndex;
         paramRow.className = 'group-param-row';
-        paramRow.style.display = '';
         const paramTd = document.createElement('td');
-        paramTd.colSpan = 13;
+        paramTd.colSpan = 5;
+        const paramHeading = document.createElement('div');
+        paramHeading.textContent = 'Selected Parameters';
+        paramHeading.style.fontSize = '0.75rem';
+        paramHeading.style.fontWeight = '600';
+        paramHeading.style.marginBottom = '4px';
+        const paramBlocks = document.createElement('div');
+        paramBlocks.className = 'test-list';
+        paramBlocks.style.display = 'flex';
+        paramBlocks.style.flexWrap = 'wrap';
+        paramBlocks.style.gap = '4px';
+        paramBlocks.style.margin = '0';
 
-        const paramList = document.createElement('ul');
-        paramList.className = 'test-list';
         const selectedParameterIds = new Set(master.map(function(p) {
           return String(p.ParameterID || p.parameterId || '');
         }));
@@ -553,29 +554,38 @@ function reindexSampleRows() {
           const pid = p.ParameterID || p.parameterId || '';
           if (!selectedParameterIds.has(String(pid))) return;
           const pname = p.ParameterName || p.Parameter || '';
-          const li = document.createElement('li');
-          li.textContent = pname;
-          paramList.appendChild(li);
+          const block = document.createElement('span');
+          block.textContent = pname;
+          block.style.display = 'inline-block';
+          block.style.padding = '3px 7px';
+          block.style.border = '1px solid #dee2e6';
+          block.style.borderRadius = '3px';
+          block.style.background = '#f8f9fa';
+          block.style.fontSize = '0.78rem';
+          paramBlocks.appendChild(block);
         });
-        if (!paramList.children.length) {
-          const li = document.createElement('li');
-          li.className = 'text-muted';
-          li.textContent = 'No parameters selected.';
-          paramList.appendChild(li);
+        if (!paramBlocks.children.length) {
+          const empty = document.createElement('span');
+          empty.className = 'text-muted';
+          empty.textContent = 'No parameters selected.';
+          paramBlocks.appendChild(empty);
         }
+        paramTd.appendChild(paramHeading);
+        paramTd.appendChild(paramBlocks);
 
-        paramTd.appendChild(paramList);
-
-        // Hidden inputs per group
+        // Preserve the hidden payload structure expected by sampleregistrationAjax.php.
         const hiddenGroup = document.createElement('div');
-        hiddenGroup.id = `sample_header_group_${rowNum}_${headerIndex}`;
+        hiddenGroup.id = 'sample_header_group_' + rowNum + '_' + headerIndex;
         hiddenGroup.style.display = 'none';
         hiddenHeaders.appendChild(hiddenGroup);
 
-        const base = `sample_headers[${orderIndex}][${headerIndex}]`;
+        const base = 'sample_headers[' + orderIndex + '][' + headerIndex + ']';
         const addHidden = function(name, val, suffix) {
-          const i = document.createElement('input'); i.type = 'hidden'; i.name = `${base}[${name}]`; i.value = val || '';
-          i.id = `sample_header_input_${rowNum}_${headerIndex}_${suffix || name}`;
+          const i = document.createElement('input');
+          i.type = 'hidden';
+          i.name = base + '[' + name + ']';
+          i.value = val || '';
+          i.id = 'sample_header_input_' + rowNum + '_' + headerIndex + '_' + (suffix || name);
           hiddenGroup.appendChild(i);
           return i;
         };
@@ -592,45 +602,39 @@ function reindexSampleRows() {
         addHidden('sample_method', sampleMethodInput.value, 'sample_method');
         addHidden('condition_of_sample', conditionSelect.value, 'condition');
         addHidden('StandardID', (master[0] && master[0].StandardID) || '');
-        // store the client-side labRef/sample id for this group (preview only)
         addHidden('labref', labRef || '');
 
-        // Submit selected parameters as hidden inputs; the visible list is read-only.
         master.forEach(function(p) {
           const parameterId = p.ParameterID || p.parameterId || '';
           if (!parameterId) return;
           const ip = document.createElement('input');
           ip.type = 'hidden';
-          ip.name = `${base}[parameters][]`;
+          ip.name = base + '[parameters][]';
           ip.value = parameterId;
           hiddenGroup.appendChild(ip);
         });
 
-        // Sync visible header inputs to hidden ones
         const syncHidden = function() {
-          const skuEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_sku`); if (skuEl) skuEl.value = skuInput.value || '';
-          const batchEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_batch`); if (batchEl) batchEl.value = batchNoInput.value || '';
-          const sizeEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_size`); if (sizeEl) sizeEl.value = batchSizeInput.value || '';
-          const mfgEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_mfg`); if (mfgEl) mfgEl.value = mfgInput.value || '';
-          const expEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_exp`); if (expEl) expEl.value = expInput.value || '';
-          const chilledExpEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_chilled_exp`); if (chilledExpEl) chilledExpEl.value = chilledExpInput.value || '';
-          const frozenExpEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_frozen_exp`); if (frozenExpEl) frozenExpEl.value = frozenExpInput.value || '';
-          const srcEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_src`); if (srcEl) srcEl.value = sourceInput.value || '';
-          const sampleNameEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_sample_name`); if (sampleNameEl) sampleNameEl.value = sampleNameInput.value || '';
-          const sampleMethodEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_sample_method`); if (sampleMethodEl) sampleMethodEl.value = sampleMethodInput.value || '';
-          const conditionEl = document.getElementById(`sample_header_input_${rowNum}_${headerIndex}_condition`); if (conditionEl) conditionEl.value = conditionSelect.value || '';
+          const sync = function(suffix, value) {
+            const el = document.getElementById('sample_header_input_' + rowNum + '_' + headerIndex + '_' + suffix);
+            if (el) el.value = value || '';
+          };
+          sync('sku', skuInput.value);
+          sync('batch', batchNoInput.value);
+          sync('size', batchSizeInput.value);
+          sync('mfg', mfgInput.value);
+          sync('exp', expInput.value);
+          sync('chilled_exp', chilledExpInput.value);
+          sync('frozen_exp', frozenExpInput.value);
+          sync('src', sourceInput.value);
+          sync('sample_name', sampleNameInput.value);
+          sync('sample_method', sampleMethodInput.value);
+          sync('condition', conditionSelect.value);
         };
-        skuInput.addEventListener('change', syncHidden);
-        batchNoInput.addEventListener('change', syncHidden);
-        batchSizeInput.addEventListener('change', syncHidden);
-        mfgInput.addEventListener('change', syncHidden);
-        expInput.addEventListener('change', syncHidden);
-        chilledExpInput.addEventListener('change', syncHidden);
-        frozenExpInput.addEventListener('change', syncHidden);
-        sourceInput.addEventListener('change', syncHidden);
-        sampleNameInput.addEventListener('change', syncHidden);
-        sampleMethodInput.addEventListener('change', syncHidden);
-        conditionSelect.addEventListener('change', syncHidden);
+        [skuInput, batchNoInput, batchSizeInput, mfgInput, expInput, chilledExpInput, frozenExpInput, sourceInput, sampleNameInput, sampleMethodInput, conditionSelect].forEach(function(input) {
+          input.addEventListener('input', syncHidden);
+          input.addEventListener('change', syncHidden);
+        });
 
         paramRow.appendChild(paramTd);
         tblBody.appendChild(paramRow);
