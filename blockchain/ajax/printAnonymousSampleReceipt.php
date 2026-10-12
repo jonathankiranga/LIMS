@@ -130,14 +130,13 @@ $html = '
       <th width="19%">Sample ID</th>
       <th width="23%">Sample Name</th>
       <th width="30%">TEST Parameter</th>
-      <th width="14%">RESULTS</th>
-      <th width="14%">USER</th>
+      <th width="28%">Comments</th>
     </tr>
   </thead>
   <tbody>';
 
 if (!$rows) {
-    $html .= '<tr><td colspan="5" align="center">No test parameters are assigned to this department for this registration.</td></tr>';
+    $html .= '<tr><td colspan="4" align="center">No test parameters are assigned to this department for this registration.</td></tr>';
 } else {
     foreach ($rows as $row) {
         // Each registered test parameter is printed as a normal body row.
@@ -146,8 +145,7 @@ if (!$rows) {
             . '<td width="19%">' . $esc($row['SampleID']) . '</td>'
             . '<td width="23%">' . $esc($row['SampleName']) . '</td>'
             . '<td width="30%">' . $esc($row['ParameterName']) . '</td>'
-            . '<td width="14%">&nbsp;<br><br></td>'
-            . '<td width="14%">&nbsp;<br><br></td>'
+            . '<td width="28%">&nbsp;<br><br></td>'
             . '</tr>';
     }
 }
