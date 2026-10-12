@@ -44,51 +44,43 @@ function addSampleRow() {
     row.innerHTML = `
       <td>
         <input type="hidden" id="rowindex_${irow}" name="rowindex[]" value="${irow}" />
-        <input type="text" id="StandardName_${irow}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm" />
-        <input type="hidden" id="StandardID_${irow}" name="standard_id[]" />
-      </td>
-      <td style="display:none">
         <input type="hidden" id="MatrixID_${irow}" name="matrix_id[]" value="0" />
-      </td>
-      <td>
+        <input type="hidden" id="StandardID_${irow}" name="standard_id[]" />
+        <label class="small text-muted" for="StandardName_${irow}">Standard</label>
+        <input type="text" id="StandardName_${irow}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="samples_${irow}">Number of Samples</label>
         <input type="number" id="samples_${irow}" name="samples[]" class="form-control form-control-sm" min="1" value="1" />
       </td>
       <td>
-        <input type="text" placeholder="Enter SKU units" id="standard_kit_units_${irow}" name="standard_kit_units[]" class="form-control form-control-sm"/>
-      </td>
-      <td>
-        <input type="text" id="product_batch_no_${irow}" name="product_batch_no[]" class="form-control form-control-sm" />
-      </td>
-      <td>
+        <label class="small text-muted" for="standard_kit_units_${irow}">Standard Kit Units</label>
+        <input type="text" placeholder="Enter SKU units" id="standard_kit_units_${irow}" name="standard_kit_units[]" class="form-control form-control-sm mb-2"/>
+        <label class="small text-muted" for="product_batch_no_${irow}">Product Batch No</label>
+        <input type="text" id="product_batch_no_${irow}" name="product_batch_no[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="batch_size_${irow}">Batch Size</label>
         <input type="number" id="batch_size_${irow}" name="batch_size[]" class="form-control form-control-sm" />
       </td>
       <td>
-        <input type="date" id="date_of_manufacture_${irow}" name="date_of_manufacture[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <input type="date" id="date_of_expiry_${irow}" name="date_of_expiry[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <input type="date" id="chilled_date_of_expiry_${irow}" name="chilled_date_of_expiry[]" class="form-control form-control-sm" />
-      </td>
-      <td>
+        <label class="small text-muted" for="date_of_manufacture_${irow}">Date of Manufacture</label>
+        <input type="date" id="date_of_manufacture_${irow}" name="date_of_manufacture[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="date_of_expiry_${irow}">Date of Expiry</label>
+        <input type="date" id="date_of_expiry_${irow}" name="date_of_expiry[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="chilled_date_of_expiry_${irow}">Chilled Date of Expiry</label>
+        <input type="date" id="chilled_date_of_expiry_${irow}" name="chilled_date_of_expiry[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="frozen_date_of_expiry_${irow}">Frozen Date of Expiry</label>
         <input type="date" id="frozen_date_of_expiry_${irow}" name="frozen_date_of_expiry[]" class="form-control form-control-sm" />
       </td>
       <td>
-        <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/gif" name="sample_images[]" class="form-control-file" />
+        <label class="small text-muted" for="sample_source_${irow}">Sample Source</label>
+        <input type="text" id="sample_source_${irow}" name="sample_source[]" class="form-control form-control-sm mb-2" onkeyup="handleSampleSourceInput(event)" />
+        <label class="small text-muted" for="sample_name_${irow}">Sample Name</label>
+        <input type="text" id="sample_name_${irow}" name="sample_name[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="sample_method_${irow}">Sample Method</label>
+        <input type="text" id="sample_method_${irow}" name="sample_method[]" class="form-control form-control-sm mb-2" />
+        <label class="small text-muted" for="condition_of_sample_${irow}">Condition of Sample</label>
+        <input type="text" id="condition_of_sample_${irow}" name="condition_of_sample[]" class="form-control form-control-sm" />
       </td>
       <td>
-        <input type="text" id="sample_source_${irow}" name="sample_source[]" class="form-control form-control-sm" onkeyup="handleSampleSourceInput(event)" />
-      </td>
-      <td>
-        <input type="text" id="sample_name_${irow}" name="sample_name[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <input type="text" id="sample_method_${irow}" name="sample_method[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <input type="text" id="condition_of_sample_${irow}" name="condition_of_sample[]" class="form-control form-control-sm"/>
-          
+        <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/gif" name="sample_images[]" class="form-control form-control-sm" />
       </td>
     `;
 
@@ -99,7 +91,7 @@ function addSampleRow() {
     paramsRow.id = `params_row_${irow}`;
     paramsRow.style.display = '';
     paramsRow.innerHTML = `
-      <td colspan="11">
+      <td colspan="5">
         <div id="params_container_${irow}"></div>
       </td>
     `;
