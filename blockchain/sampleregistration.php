@@ -88,6 +88,16 @@
     <div class="card-header">
     </div>
     <div class="card-body">
+        <section class="border rounded p-3 mb-4 bg-light" id="receiptReprintPanel">
+            <h5 class="mb-2">Reprint Anonymous Sample Receipts</h5>
+            <p class="small text-muted mb-2">Search by Batch Ref or Sample ID. Customer details are not shown on the receipts.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <input type="text" id="receiptSearchQuery" class="form-control form-control-sm" style="max-width:360px" placeholder="Enter Batch Ref or Sample ID">
+                <button type="button" id="searchReceiptsBtn" class="btn btn-outline-primary btn-sm">Search Receipts</button>
+            </div>
+            <div id="receiptSearchResults" class="mt-3" aria-live="polite"></div>
+            <div id="newReceiptLinks" class="mt-3" aria-live="polite"></div>
+        </section>
         <form id="labform" enctype="multipart/form-data">
             <div class="form-grid">
                 <div class="form-group">
