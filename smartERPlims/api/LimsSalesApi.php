@@ -1299,7 +1299,7 @@ class LimsSalesApi{
                   AND NOT EXISTS (
                       SELECT 1
                       FROM salesheader so
-                      WHERE so.documenttype = 10
+                      WHERE so.documenttype = 1
                         AND so.sourcequoteno = q.documentno
                   )
                 ORDER BY q.entryno DESC
@@ -1312,7 +1312,7 @@ class LimsSalesApi{
                   AND NOT EXISTS (
                       SELECT 1
                       FROM salesheader so
-                      WHERE so.documenttype = 10
+                      WHERE so.documenttype = 1
                         AND so.sourcequoteno = q.documentno
                   )
                 ORDER BY q.entryno DESC
