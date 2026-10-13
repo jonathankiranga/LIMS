@@ -464,91 +464,77 @@ try {
     $conn->autocommit(true);
 
     // --- ERP API sync (call external LIMS sales API using curl + JSON) ---
-    $erpSyncResult = null;
     $config = include '../include/config.php';
     $erpApiUrl = $config['ERP_API_URL'] ?? null;
+    $erpSyncResult = [
+        'success' => false,
+        'http_code' => 0,
+        'response' => null,
+        'error' => '',
+        'message' => ''
+    ];
+
     if (!empty($erpApiUrl)) {
-            // Build payload that matches LimsSalesApi::registerSample expectations
-            $payload = [
-                'action' => 'sync_sample',
-                'documentno' => $documentNo,
-                'docdate' => $dateFormatted,
-                'oderdate' => $dateFormatted,
-                'duedate' => $dateFormatted,
-                'customercode' => $customerId,
-                'customername' => $customerName,
-                'yourreference' => $orderNo,
-                'externaldocumentno' => $HeaderID,
-                'userid' => $username,
-                'quoteno' => $quoteNo,
-                'lines' => []
-            ];
+        // The ERP creates the Sales Order from the linked quotation.
+        $payload = [
+            'action' => 'sync_sample',
+            'documentno' => $documentNo,
+            'docdate' => $dateFormatted,
+            'oderdate' => $dateFormatted,
+            'duedate' => $dateFormatted,
+            'customercode' => $customerId,
+            'customername' => $customerName,
+            'yourreference' => $orderNo,
+            'externaldocumentno' => $HeaderID,
+            'userid' => $username,
+            'quoteno' => $quoteNo,
+            'lines' => []
+        ];
 
-            if ($quoteNo === '') {
-                foreach ($parameterData as $idx => $pd) {
-                $paramsForHeader = $testData[$idx] ?? [];
-                
-                foreach ($paramsForHeader as $p) {
-                    $paramId = (int)($p['parameterId'] ?? 0);
-                    if ($paramId <= 0) continue;
-
-                    // get parameter name and baseid from testparameters
-                    $paramName = null;
-                    $code = 0;
-                    $pstmt = $conn->prepare("SELECT p.ParameterName, p.BaseID FROM testparameters p WHERE p.ParameterID = ? LIMIT 1");
-                    if ($pstmt) {
-                        $pstmt->bind_param('i', $paramId);
-                        $pstmt->execute();
-                        $pres = $pstmt->get_result();
-                        if ($pres && ($prow = $pres->fetch_assoc())) {
-                            $paramName = $prow['ParameterName'] ?? null;
-                            $code = (int)($prow['BaseID'] ?? 0);
-                        }
-                        $pstmt->close();
-                    }
-                    
-                    // fallback to parameterId if baseid is 0
-                    if ($code <= 0) {
-                        $code = $paramId;
-                    }
-
-                    $lineItem = [
-                        'documentno' => $documentNo,
-                        'code' => (string)$code,
-                        'description' => $paramName ?? ('Parameter ' . $code),
-                        'sampleID' => $pd['imageno'] ?? '',
-                        'Quantity' =>  1,
-                        'Qunatity_delivered' =>  1,
-                        'UnitPrice' => 0,
-                        'locationcode' => $config['locationcode'] ?? null
-                    ];
-                    $payload['lines'][] = $lineItem;
-                }
-            }
-            }
-
-            $ch = curl_init($erpApiUrl);
+        $ch = curl_init($erpApiUrl);
+        if ($ch !== false) {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json']);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
             $erpResp = curl_exec($ch);
-            $erpHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $erpHttp = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $erpErr = curl_error($ch);
             curl_close($ch);
 
+            $erpJson = is_string($erpResp) ? json_decode($erpResp, true) : null;
+            $apiSuccess = is_array($erpJson) && !empty($erpJson['success']);
+            $transportSuccess = ($erpResp !== false && $erpErr === '' && $erpHttp >= 200 && $erpHttp < 300);
+
             $erpSyncResult = [
-                'url' => $erpApiUrl,
+                'success' => ($transportSuccess && $apiSuccess),
                 'http_code' => $erpHttp,
                 'response' => $erpResp,
-                'error' => $erpErr
+                'error' => $erpErr,
+                'message' => ($transportSuccess && $apiSuccess)
+                    ? ($erpJson['message'] ?? 'Sales Order synchronized.')
+                    : ($erpErr !== '' ? $erpErr : (is_array($erpJson) ? ($erpJson['message'] ?? 'ERP rejected the Sales Order sync.') : 'ERP API returned HTTP ' . $erpHttp . ' or an invalid response.'))
             ];
+        } else {
+            $erpSyncResult['message'] = 'Could not initialize cURL for the ERP request.';
+        }
+    } else {
+        $erpSyncResult['message'] = 'ERP_API_URL is not configured; no Sales Order sync was attempted.';
+    }
+
+    $erpSyncOk = !empty($erpSyncResult['success']);
+    $registrationMessage = "Sample Registration no: $documentNo Successful";
+    if (!$erpSyncOk) {
+        $registrationMessage .= ". WARNING: sample saved, but Sales Order sync failed: " . ($erpSyncResult['message'] ?? 'Unknown ERP error');
     }
 
     $responsePayload = [
+        // LIMS registration is already committed. Keep success true to prevent
+        // the user from retrying and accidentally registering the sample twice.
         'success' => true,
-        'message' => "Sample Registration no: $documentNo Successful",
+        'message' => $registrationMessage,
         'email_status' => $emailLogStatus,
         'email_note' => $emailLogError,
         'header_id' => (int)$HeaderID,
@@ -559,9 +545,7 @@ try {
         ]
     ];
 
-    if ($erpSyncResult !== null) {
-        $responsePayload['erp_sync'] = $erpSyncResult;
-    }
+    $responsePayload['erp_sync'] = $erpSyncResult;
 
     echo json_encode($responsePayload);
     exit;
