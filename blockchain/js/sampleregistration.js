@@ -1165,6 +1165,7 @@ $(document).ready(function() {
                     formData.append('send_sample_received_email', shouldSendSampleReceivedEmail ? '1' : '0');
 
                     // AJAX submit
+                    let registrationSaved = false;
                     $.ajax({
                         url: 'ajax/sampleregistrationAjax.php',
                         type: 'POST',
@@ -1195,17 +1196,28 @@ $(document).ready(function() {
                                     if (res.email_note && emailStatus !== 'SUCCESS') {
                                       toastr.info(res.email_note);
                                     }
+                                    // A successful save is final for this screen: remove the registration
+                                    // form so the user cannot accidentally create a duplicate with a new number.
+                                    registrationSaved = true;
                                     if (res.receipts && res.receipts.chemical && res.receipts.microbiological) {
+                                      const receiptMarkup =
+                                        '<div class="alert alert-success"><strong>Sample registration saved.</strong><br>Registration No: ' +
+                                        $('<div>').text(res.document_no || '').html() +
+                                        '<br>The registration form has been cleared to prevent duplicate submission.</div>' +
+                                        '<div class="d-flex flex-wrap gap-2">' +
+                                        '<a class="btn btn-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.chemical + '">Chemical Department PDF Report</a>' +
+                                        '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.microbiological + '">Microbiological Department PDF Report</a>' +
+                                        '</div>';
                                       const links = document.getElementById('newReceiptLinks');
                                       if (links) {
-                                        links.innerHTML =
-                                          '<div class="alert alert-success mb-2"><strong>Registration saved.</strong> Print or save the two anonymous department receipts:</div>' +
-                                          '<div class="d-flex flex-wrap gap-2">' +
-                                          '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.chemical + '">Chemical Department PDF</a>' +
-                                          '<a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="' + res.receipts.microbiological + '">Microbiological Department PDF</a>' +
-                                          '</div>';
+                                        links.innerHTML = receiptMarkup;
                                         links.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                                       }
+                                      form.innerHTML = '<div class="p-3">' + receiptMarkup + '</div>';
+                                    } else {
+                                      form.innerHTML = '<div class="alert alert-success m-3">Sample registration saved: ' +
+                                        $('<div>').text(res.document_no || '').html() +
+                                        '. The form has been cleared to prevent duplicate submission.</div>';
                                     }
                                 } else {
                                     toastr.error('Error: ' + (res.message || 'Unknown server error.'));
@@ -1222,6 +1234,8 @@ $(document).ready(function() {
                             $submitBtns.prop('disabled', false).each(function (i) { $(this).html(originalHtmls[i] || '<i class="fas fa-save"></i> Save'); });
                         },
                         complete: function () {
+                            // Do not restore the Save button or rebuild the form after a successful save.
+                            if (registrationSaved) return;
                             $submitBtns.prop('disabled', false).each(function (i) { $(this).html(originalHtmls[i] || '<i class="fas fa-save"></i> Save'); });
                             updateRegistrationSummary();
                         }
