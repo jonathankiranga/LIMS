@@ -949,6 +949,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (el) el.remove();
   });
 
+  var tab = document.getElementById('quoteTabulator');
   if (tab) tab.addEventListener('change', function (e) {
     var sel = e.target.closest && e.target.closest('.qrow-mode');
     if (!sel) return;
