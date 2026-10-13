@@ -334,9 +334,16 @@ class LimsSalesApi{
                     FROM salesline WHERE documenttype = 54 AND documentno = ? ORDER BY entryno ASC";
             $stmt = $this->db->prepare($sql);
             if (!$stmt) {
-                throw new RuntimeException('Quotation query prepare failed: ' . $this->db->error);
+                $prepareError = $this->db->error;
+                $log('quotation_query_prepare_failed', [
+                    'failed_step' => $step,
+                    'mysql_errno' => $this->db->errno,
+                    'mysql_error' => $prepareError,
+                    'sql' => $sql
+                ]);
+                throw new RuntimeException('Quotation query prepare failed: ' . $prepareError);
             }
-            $log($step, ['quote_no' => $quoteNo]);
+            $log($step, ['quote_no' => $quoteNo, 'mysql_errno' => $this->db->errno]);
 
             $step = 'execute_quotation_query';
             if (!$stmt->bind_param('s', $quoteNo)) {
