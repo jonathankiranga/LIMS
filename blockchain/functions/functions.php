@@ -406,8 +406,19 @@ function log_transaction_metadata($conn, $blockId, $recordId,$tablename) {
 }
 
 function signData($data, $privateKey) {
-    openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-    return base64_encode($signature);  // Encode to store in the database
+    // Signing is used by the LIMS blockchain only. Missing or invalid key
+    // material should return a failure value without emitting an OpenSSL
+    // warning or interrupting ordinary sample registration.
+    if (!is_string($privateKey) || trim($privateKey) === '') {
+        return false;
+    }
+
+    $signature = '';
+    if (!@openssl_sign((string)$data, $signature, $privateKey, OPENSSL_ALGO_SHA256)) {
+        return false;
+    }
+
+    return base64_encode($signature); // Encode for storage in the blockchain ledger.
 }
 
 function verifySignature($data, $signature, $publicKey) {
