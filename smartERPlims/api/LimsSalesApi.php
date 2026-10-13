@@ -318,7 +318,7 @@ class LimsSalesApi{
                 'printed' => '1',
                 'released' => '1',
                 'status' => '1',
-                'documenttype' => 10
+                'documenttype' => 1
             ];
 
             $quoteNo = trim((string)($limsData['quoteno'] ?? ''));
