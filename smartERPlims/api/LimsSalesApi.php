@@ -299,7 +299,7 @@ class LimsSalesApi{
             'sourcequoteno' => trim((string)($limsData['quoteno'] ?? '')),
             'userid' => $limsData['userid'] ?? 'system',
             'printed' => '1','released' => '1','status' => '1',
-            'documenttype' => $this->config['documenttype']
+            'documenttype' => 10
         ];
 
         $quoteNo = trim((string)($limsData['quoteno'] ?? ''));
@@ -328,16 +328,18 @@ class LimsSalesApi{
             return;
         }
 
+        $documentType = (int)$headerData['documenttype'];
         $this->db->begin_transaction();
         try {
             // Re-syncing rewrites the lines rather than appending a second set.
             $del = $this->db->prepare("DELETE FROM salesline WHERE documenttype = ? AND documentno = ?");
-            $del->bind_param('is', $this->config['documenttype'], $headerResult['documentno']);
+            $del->bind_param('is', $documentType, $headerResult['documentno']);
             $del->execute();
 
             $lineResults = [];
             while ($ql = $quoteLines->fetch_assoc()) {
                 $lineData = [
+                    'documenttype' => $documentType,
                     'documentno' => $headerResult['documentno'],
                     'docdate' => $headerResult['docdate'],
                     'code' => trim((string)$ql['code']),
@@ -871,7 +873,7 @@ class LimsSalesApi{
     private function insertSalesLine($data, $headerEntryNo)
     {
         $fields = ['documenttype', 'docdate', 'documentno'];
-        $values = [$this->config['documenttype'], date('Y-m-d H:i:s'), $data['documentno']];
+        $values = [(int)($data['documenttype'] ?? $this->config['documenttype']), date('Y-m-d H:i:s'), $data['documentno']];
         $placeholders = ['?', '?', '?'];
 
         $optionalFields = [
