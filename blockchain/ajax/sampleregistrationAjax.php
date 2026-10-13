@@ -474,19 +474,31 @@ try {
     $conn->commit();
     $conn->autocommit(true);
 
-    // --- ERP API sync (call external LIMS sales API using curl + JSON) ---
+    // --- ERP API sync (step-by-step diagnostic logging) ---
     $config = include '../include/config.php';
     $erpApiUrl = $config['ERP_API_URL'] ?? null;
+    $erpTraceId = 'LIMS-ERP-' . date('Ymd-His') . '-' . substr(uniqid('', true), -6);
+    $erpLog = function ($stage, $details = []) use ($erpTraceId) {
+        error_log('[SampleRegistrationERP][' . $erpTraceId . '] ' . $stage . ' ' . json_encode($details, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    };
     $erpSyncResult = [
         'success' => false,
         'http_code' => 0,
         'response' => null,
         'error' => '',
-        'message' => ''
+        'message' => '',
+        'trace_id' => $erpTraceId
     ];
 
+    $erpLog('sync_start', [
+        'documentno' => $documentNo,
+        'header_id' => (int)$HeaderID,
+        'quote_no' => $quoteNo,
+        'api_configured' => !empty($erpApiUrl),
+        'api_host' => $erpApiUrl ? (parse_url($erpApiUrl, PHP_URL_HOST) ?: 'unparsed') : null
+    ]);
+
     if (!empty($erpApiUrl)) {
-        // The ERP creates the Sales Order from the linked quotation.
         $payload = [
             'action' => 'sync_sample',
             'documentno' => $documentNo,
@@ -502,38 +514,69 @@ try {
             'lines' => []
         ];
 
+        $jsonPayload = json_encode($payload);
+        $erpLog('request_prepared', [
+            'action' => 'sync_sample',
+            'payload_bytes' => is_string($jsonPayload) ? strlen($jsonPayload) : 0,
+            'documentno' => $documentNo,
+            'quote_no' => $quoteNo,
+            'json_encode_error' => json_last_error_msg()
+        ]);
+
         $ch = curl_init($erpApiUrl);
         if ($ch !== false) {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json']);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json', 'X-Request-ID: ' . $erpTraceId]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+            $erpLog('http_request_sending', ['timeout_seconds' => 15]);
             $erpResp = curl_exec($ch);
             $erpHttp = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $erpErr = curl_error($ch);
+            $erpInfo = [
+                'http_code' => $erpHttp,
+                'total_time_seconds' => curl_getinfo($ch, CURLINFO_TOTAL_TIME),
+                'connect_time_seconds' => curl_getinfo($ch, CURLINFO_CONNECT_TIME),
+                'content_type' => curl_getinfo($ch, CURLINFO_CONTENT_TYPE),
+                'response_bytes' => is_string($erpResp) ? strlen($erpResp) : 0
+            ];
             curl_close($ch);
 
             $erpJson = is_string($erpResp) ? json_decode($erpResp, true) : null;
             $apiSuccess = is_array($erpJson) && !empty($erpJson['success']);
             $transportSuccess = ($erpResp !== false && $erpErr === '' && $erpHttp >= 200 && $erpHttp < 300);
 
+            $erpLog('http_response_received', $erpInfo + [
+                'curl_error' => $erpErr,
+                'json_valid' => is_array($erpJson),
+                'api_success' => $apiSuccess,
+                'api_trace_id' => is_array($erpJson) ? ($erpJson['trace_id'] ?? null) : null,
+                'response_body_excerpt' => is_string($erpResp) ? substr($erpResp, 0, 3000) : null
+            ]);
+
             $erpSyncResult = [
                 'success' => ($transportSuccess && $apiSuccess),
                 'http_code' => $erpHttp,
                 'response' => $erpResp,
                 'error' => $erpErr,
+                'trace_id' => $erpTraceId,
+                'api_trace_id' => is_array($erpJson) ? ($erpJson['trace_id'] ?? null) : null,
                 'message' => ($transportSuccess && $apiSuccess)
                     ? ($erpJson['message'] ?? 'Sales Order synchronized.')
                     : ($erpErr !== '' ? $erpErr : (is_array($erpJson) ? ($erpJson['message'] ?? 'ERP rejected the Sales Order sync.') : 'ERP API returned HTTP ' . $erpHttp . ' or an invalid response.'))
             ];
         } else {
             $erpSyncResult['message'] = 'Could not initialize cURL for the ERP request.';
+            $erpLog('curl_init_failed');
         }
     } else {
         $erpSyncResult['message'] = 'ERP_API_URL is not configured; no Sales Order sync was attempted.';
+        $erpLog('configuration_failed', ['reason' => 'ERP_API_URL is empty']);
     }
+    $erpLog('sync_finished', ['success' => !empty($erpSyncResult['success']), 'http_code' => $erpSyncResult['http_code'], 'message' => $erpSyncResult['message']]);
 
     $erpSyncOk = !empty($erpSyncResult['success']);
     $registrationMessage = "Sample Registration no: $documentNo Successful";
