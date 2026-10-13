@@ -1183,7 +1183,15 @@ $(document).ready(function() {
                                     };
                                     const emailStatus = (res.email_status || '').toUpperCase();
                                     const statusMessage = statusMessageMap[emailStatus] || '';
-                                    toastr.success(baseMessage + statusMessage);
+                                    const erpSyncFailed = !!(res.erp_sync && res.erp_sync.success === false);
+                                    if (erpSyncFailed) {
+                                      toastr.warning(baseMessage + statusMessage, 'Sample saved; Sales Order sync failed', { timeOut: 12000, extendedTimeOut: 5000 });
+                                      if (res.erp_sync.message) {
+                                        toastr.error('ERP Sales Order: ' + res.erp_sync.message, 'Accounts integration', { timeOut: 15000 });
+                                      }
+                                    } else {
+                                      toastr.success(baseMessage + statusMessage);
+                                    }
                                     if (res.email_note && emailStatus !== 'SUCCESS') {
                                       toastr.info(res.email_note);
                                     }
