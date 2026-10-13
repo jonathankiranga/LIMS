@@ -306,22 +306,22 @@ try {
     // entry unsigned instead of aborting the sample/ERP workflow.
     $digital_signature = signData($current_hash, $privateKey);
     $signatureValid = ($digital_signature !== false);
-    if (!$signatureValid) {
-        $digital_signature = '';
-    }
-    $encryptdata = encryptPrivateKey($dataToHash, $privateKey);
-    $ledgerStatus = $signatureValid ? 'active' : 'unsigned';
+    $blockId = 0;
 
     // Start transaction
     $conn->autocommit(false);
 
-    // Insert into blockchain_ledger
-    $stmt = $conn->prepare("INSERT INTO `blockchain_ledger` (`timestamp`, `previous_hash`, `current_hash`, `digital_signature`, `encrypted_data`, `status`, `userid`) VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?)");
-    if (!$stmt) throw new Exception("Prepare blockchain insert failed: " . $conn->error);
-    $stmt->bind_param("ssssss", $previousHash, $current_hash, $digital_signature, $encryptdata, $ledgerStatus, $user_id);
-    $stmt->execute();
-    $blockId = $conn->insert_id;
-    $stmt->close();
+    // Only write a blockchain ledger block when its digital signature is valid.
+    // Sample registration itself continues if signing is unavailable.
+    if ($signatureValid) {
+        $encryptdata = encryptPrivateKey($dataToHash, $privateKey);
+        $stmt = $conn->prepare("INSERT INTO `blockchain_ledger` (`timestamp`, `previous_hash`, `current_hash`, `digital_signature`, `encrypted_data`, `status`, `userid`) VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)");
+        if (!$stmt) throw new Exception("Prepare blockchain insert failed: " . $conn->error);
+        $stmt->bind_param("sssss", $previousHash, $current_hash, $digital_signature, $encryptdata, $user_id);
+        if (!$stmt->execute()) throw new Exception("Blockchain ledger insert failed: " . $stmt->error);
+        $blockId = $conn->insert_id;
+        $stmt->close();
+    }
 
     // Now insert into sample_header
     $documentNo = GetNextLabrefNo('10'); // looks like you reset documentNo here intentionally
@@ -332,8 +332,10 @@ try {
     $HeaderID = $conn->insert_id;
     $stmt->close();
 
-    // Log blockchain linkage
-    log_transaction_metadata($conn, $blockId, $HeaderID, 'sample_header');
+    // Link the sample to the blockchain only when a signed block was created.
+    if ($blockId > 0) {
+        log_transaction_metadata($conn, $blockId, $HeaderID, 'sample_header');
+    }
 
     // Prepare sample_tests insert
     $stmt = $conn->prepare("INSERT INTO `sample_tests` "
