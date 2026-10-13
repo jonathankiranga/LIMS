@@ -286,6 +286,7 @@ class LimsSalesApi{
         };
 
         $log($step, [
+            'caller_request_id' => $_SERVER['HTTP_X_REQUEST_ID'] ?? null,
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'action' => $data['action'] ?? '',
             'documentno' => $data['documentno'] ?? null,
