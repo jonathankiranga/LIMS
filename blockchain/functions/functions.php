@@ -409,7 +409,7 @@ function signData($data, $privateKey) {
     // Signing is used by the LIMS blockchain only. Missing or invalid key
     // material should return a failure value without emitting an OpenSSL
     // warning or interrupting ordinary sample registration.
-    if (!is_string($privateKey) || trim($privateKey) === '') {
+    if (!function_exists('openssl_sign') || !is_string($privateKey) || trim($privateKey) === '') {
         return false;
     }
 
