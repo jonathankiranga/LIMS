@@ -279,65 +279,124 @@ class LimsSalesApi{
 
     private function syncSample($data)
     {
-        // Blockchain sends payload directly, not wrapped in 'lims_data'
-        $limsData = $data; // Use data directly instead of $data['lims_data']
-        
-        if (empty($limsData['documentno'])) {
-            $this->jsonResponse(['success' => false, 'message' => 'Missing DocumentNo'], 400);
-            return;
-        }
+        $traceId = 'ERP-SYNC-' . date('Ymd-His') . '-' . substr(uniqid('', true), -6);
+        $step = 'request_received';
+        $log = function ($stage, $details = []) use ($traceId) {
+            error_log('[LimsSalesApi][' . $traceId . '] ' . $stage . ' ' . json_encode($details, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        };
 
-        $headerData = [
-            'documentno' => $limsData['documentno'],
-            'docdate' => $limsData['docdate'] ?? date('Y-m-d H:i:s'),
-            'oderdate' => $limsData['oderdate'] ?? $limsData['docdate'] ?? date('Y-m-d H:i:s'),
-            'duedate' => $limsData['duedate'] ?? $limsData['docdate'] ?? date('Y-m-d H:i:s'),
-            'customercode' => $limsData['customercode'] ?? $limsData['CustomerID'] ?? '',
-            'customername' => $limsData['customername'] ?? $limsData['CustomerName'] ?? '',
-            'yourreference' => $limsData['yourreference'] ?? $limsData['Orderno'] ?? '',
-            'externaldocumentno' => $limsData['externaldocumentno'] ?? $limsData['HeaderID'] ?? '',
-            'sourcequoteno' => trim((string)($limsData['quoteno'] ?? '')),
-            'userid' => $limsData['userid'] ?? 'system',
-            'printed' => '1','released' => '1','status' => '1',
-            'documenttype' => 10
-        ];
+        $log($step, [
+            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+            'action' => $data['action'] ?? '',
+            'documentno' => $data['documentno'] ?? null,
+            'quoteno' => $data['quoteno'] ?? null,
+            'customer_code_present' => !empty($data['customercode']),
+            'payload_keys' => array_keys($data)
+        ]);
 
-        $quoteNo = trim((string)($limsData['quoteno'] ?? ''));
-        if ($quoteNo === '') {
-            $this->jsonResponse(['success' => false, 'message' => 'No quotation linked. Create and link a quotation before the sales order can be raised.'], 400);
-            return;
-        }
-
-        // Validate the source quotation BEFORE writing the order: a failed
-        // lookup used to leave an empty sales header behind.
-        $stmt = $this->db->prepare("SELECT code, category, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
-            FROM salesline WHERE documenttype = 54 AND documentno = ? ORDER BY entryno ASC");
-        $stmt->bind_param("s", $quoteNo);
-        $stmt->execute();
-        $quoteLines = $stmt->get_result();
-        if ($quoteLines->num_rows === 0) {
-            $this->jsonResponse(['success' => false, 'message' => 'Quotation ' . $quoteNo . ' not found or has no lines.'], 404);
-            return;
-        }
-
-        // Upsert on the LIMS document number instead of appending a new order
-        // every time the same sample is sent.
-        $headerResult = $this->insertSalesHeader($headerData);
-        if (!$headerResult) {
-            $this->jsonResponse(['success' => false, 'message' => 'Failed to sync header'], 500);
-            return;
-        }
-
-        $documentType = (int)$headerData['documenttype'];
-        $this->db->begin_transaction();
         try {
-            // Re-syncing rewrites the lines rather than appending a second set.
-            $del = $this->db->prepare("DELETE FROM salesline WHERE documenttype = ? AND documentno = ?");
-            $del->bind_param('is', $documentType, $headerResult['documentno']);
-            $del->execute();
+            $limsData = $data;
+            $step = 'validate_document_number';
+            if (empty($limsData['documentno'])) {
+                $log('validation_failed', ['step' => $step, 'reason' => 'Missing DocumentNo']);
+                $this->jsonResponse(['success' => false, 'message' => 'Missing DocumentNo', 'trace_id' => $traceId], 400);
+                return;
+            }
+
+            $headerData = [
+                'documentno' => $limsData['documentno'],
+                'docdate' => $limsData['docdate'] ?? date('Y-m-d H:i:s'),
+                'oderdate' => $limsData['oderdate'] ?? $limsData['docdate'] ?? date('Y-m-d H:i:s'),
+                'duedate' => $limsData['duedate'] ?? $limsData['docdate'] ?? date('Y-m-d H:i:s'),
+                'customercode' => $limsData['customercode'] ?? $limsData['CustomerID'] ?? '',
+                'customername' => $limsData['customername'] ?? $limsData['CustomerName'] ?? '',
+                'yourreference' => $limsData['yourreference'] ?? $limsData['Orderno'] ?? '',
+                'externaldocumentno' => $limsData['externaldocumentno'] ?? $limsData['HeaderID'] ?? '',
+                'sourcequoteno' => trim((string)($limsData['quoteno'] ?? '')),
+                'userid' => $limsData['userid'] ?? 'system',
+                'printed' => '1',
+                'released' => '1',
+                'status' => '1',
+                'documenttype' => 10
+            ];
+
+            $quoteNo = trim((string)($limsData['quoteno'] ?? ''));
+            $step = 'validate_quotation_number';
+            if ($quoteNo === '') {
+                $log('validation_failed', ['step' => $step, 'reason' => 'No quotation linked']);
+                $this->jsonResponse(['success' => false, 'message' => 'No quotation linked. Create and link a quotation before the sales order can be raised.', 'trace_id' => $traceId], 400);
+                return;
+            }
+
+            $step = 'prepare_quotation_query';
+            $sql = "SELECT code, category, description, unitofmeasure, Quantity, UnitPrice, PartPerUnit, IFNULL(sampleID, '') AS sampleID
+                    FROM salesline WHERE documenttype = 54 AND documentno = ? ORDER BY entryno ASC";
+            $stmt = $this->db->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException('Quotation query prepare failed: ' . $this->db->error);
+            }
+            $log($step, ['quote_no' => $quoteNo]);
+
+            $step = 'execute_quotation_query';
+            if (!$stmt->bind_param('s', $quoteNo)) {
+                throw new RuntimeException('Quotation query bind failed: ' . $stmt->error);
+            }
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Quotation query execute failed: ' . $stmt->error);
+            }
+            $quoteLines = $stmt->get_result();
+            if (!$quoteLines) {
+                throw new RuntimeException('Quotation query result failed: ' . $stmt->error);
+            }
+            $quoteLineCount = $quoteLines->num_rows;
+            $log($step, ['quote_no' => $quoteNo, 'line_count' => $quoteLineCount]);
+
+            if ($quoteLineCount === 0) {
+                $log('quotation_not_found', ['quote_no' => $quoteNo]);
+                $this->jsonResponse(['success' => false, 'message' => 'Quotation ' . $quoteNo . ' not found or has no lines.', 'trace_id' => $traceId], 404);
+                $stmt->close();
+                return;
+            }
+
+            $step = 'upsert_sales_header';
+            $headerResult = $this->insertSalesHeader($headerData);
+            $log($step, [
+                'success' => (bool)$headerResult,
+                'documentno' => $headerResult['documentno'] ?? null,
+                'entryno' => $headerResult['entryno'] ?? null,
+                'created' => $headerResult['created'] ?? null,
+                'db_error' => $this->db->error
+            ]);
+            if (!$headerResult) {
+                throw new RuntimeException('Failed to sync sales header: ' . $this->db->error);
+            }
+
+            $documentType = (int)$headerData['documenttype'];
+            $step = 'begin_sales_lines_transaction';
+            if (!$this->db->begin_transaction()) {
+                throw new RuntimeException('Could not begin sales-line transaction: ' . $this->db->error);
+            }
+            $log($step, ['documentno' => $headerResult['documentno'], 'documenttype' => $documentType]);
 
             $lineResults = [];
+            $lineIndex = 0;
+            $step = 'delete_existing_sales_lines';
+            $del = $this->db->prepare("DELETE FROM salesline WHERE documenttype = ? AND documentno = ?");
+            if (!$del) {
+                throw new RuntimeException('Delete existing sales lines prepare failed: ' . $this->db->error);
+            }
+            if (!$del->bind_param('is', $documentType, $headerResult['documentno'])) {
+                throw new RuntimeException('Delete existing sales lines bind failed: ' . $del->error);
+            }
+            if (!$del->execute()) {
+                throw new RuntimeException('Delete existing sales lines execute failed: ' . $del->error);
+            }
+            $log($step, ['affected_rows' => $del->affected_rows]);
+            $del->close();
+
+            $step = 'insert_sales_order_lines';
             while ($ql = $quoteLines->fetch_assoc()) {
+                $lineIndex++;
                 $lineData = [
                     'documenttype' => $documentType,
                     'documentno' => $headerResult['documentno'],
@@ -352,28 +411,56 @@ class LimsSalesApi{
                     'sampleID' => trim((string)($ql['sampleID'] ?? '')),
                     'PartPerUnit' => (float)($ql['PartPerUnit'] ?? 1)
                 ];
+                $log('sales_line_start', [
+                    'line_number' => $lineIndex,
+                    'code' => $lineData['code'],
+                    'quantity' => $lineData['Quantity'],
+                    'unit_price' => $lineData['UnitPrice']
+                ]);
                 $lineResult = $this->insertSalesLine($lineData, $headerResult['entryno']);
                 if ($lineResult === false) {
-                    throw new RuntimeException('Failed to insert line for ' . $lineData['code']);
+                    throw new RuntimeException('Failed to insert sales line ' . $lineIndex . ' (code ' . $lineData['code'] . '): ' . $this->db->error);
                 }
                 $lineResults[] = $lineResult;
+                $log('sales_line_success', ['line_number' => $lineIndex, 'result' => $lineResult]);
             }
-            $this->db->commit();
-        } catch (Throwable $e) {
-            $this->db->rollback();
-            $this->jsonResponse(['success' => false, 'message' => 'Failed to sync order lines: ' . $e->getMessage()], 500);
-            return;
-        }
+            $quoteLines->free();
+            $stmt->close();
 
-        $this->jsonResponse([
-            'success' => true,
-            'message' => ($headerResult['created'] ? 'Sales order created' : 'Sales order updated') . ' from quotation ' . $quoteNo,
-            'data' => [
-                'header' => $headerResult,
-                'source_quotation' => $quoteNo,
-                'lines' => $lineResults
-            ]
-        ]);
+            $step = 'commit_sales_lines';
+            if (!$this->db->commit()) {
+                throw new RuntimeException('Sales-line transaction commit failed: ' . $this->db->error);
+            }
+            $log($step, ['line_count_inserted' => count($lineResults)]);
+
+            $step = 'response_success';
+            $log($step, ['documentno' => $headerResult['documentno'], 'quote_no' => $quoteNo, 'line_count' => count($lineResults)]);
+            $this->jsonResponse([
+                'success' => true,
+                'message' => ($headerResult['created'] ? 'Sales order created' : 'Sales order updated') . ' from quotation ' . $quoteNo,
+                'trace_id' => $traceId,
+                'data' => [
+                    'header' => $headerResult,
+                    'source_quotation' => $quoteNo,
+                    'lines' => $lineResults
+                ]
+            ]);
+        } catch (Throwable $e) {
+            @$this->db->rollback();
+            $log('exception', [
+                'failed_step' => $step,
+                'exception_class' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine(),
+                'db_error' => $this->db instanceof mysqli ? $this->db->error : null
+            ]);
+            $this->jsonResponse([
+                'success' => false,
+                'message' => 'ERP sync failed at step: ' . $step,
+                'trace_id' => $traceId
+            ], 500);
+        }
     }
 
     private function mapParameter($data)
