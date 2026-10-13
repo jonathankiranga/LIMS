@@ -19,21 +19,21 @@ if ($username === '' || $user_id === '') {
     exit;
 }
 
-// keys folder and reading keys
+// Blockchain signing is optional for sample registration. A missing or invalid
+// key must not prevent the sample from being saved or synchronized to the ERP.
 $dir = __DIR__ . "/userkeys/$user_id";
 $privateKeyPath = "$dir/private_key.pem";
 $publicKeyPath  = "$dir/public_key.pem";
-
-if (!file_exists($privateKeyPath)) {
-    echo json_encode(['success' => false, 'message' => 'Error: Private key file does not exist.']);
-    exit;
+$privateKey = '';
+if (is_file($privateKeyPath) && is_readable($privateKeyPath)) {
+    $keyContents = file_get_contents($privateKeyPath);
+    if ($keyContents !== false) {
+        $privateKey = $keyContents;
+    }
 }
-$privateKey = file_get_contents($privateKeyPath);
-if ($privateKey === false) {
-    echo json_encode(['success' => false, 'message' => 'Error: Unable to read private key file.']);
-    exit;
-}
-$publicKey = file_exists($publicKeyPath) ? file_get_contents($publicKeyPath) : null;
+$publicKey = (is_file($publicKeyPath) && is_readable($publicKeyPath))
+    ? file_get_contents($publicKeyPath)
+    : null;
 
 // --- Required form fields validation (explicit keys) ---
 $requiredKeys = [
@@ -300,16 +300,25 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 
     $current_hash = hash('sha256', $dataToHash);
+
+    // Digital signatures are only a blockchain feature. If signing is
+    // unavailable, continue registration and explicitly mark this ledger
+    // entry unsigned instead of aborting the sample/ERP workflow.
     $digital_signature = signData($current_hash, $privateKey);
+    $signatureValid = ($digital_signature !== false);
+    if (!$signatureValid) {
+        $digital_signature = '';
+    }
     $encryptdata = encryptPrivateKey($dataToHash, $privateKey);
+    $ledgerStatus = $signatureValid ? 'active' : 'unsigned';
 
     // Start transaction
     $conn->autocommit(false);
 
     // Insert into blockchain_ledger
-    $stmt = $conn->prepare("INSERT INTO `blockchain_ledger` (`timestamp`, `previous_hash`, `current_hash`, `digital_signature`, `encrypted_data`, `status`, `userid`) VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)");
+    $stmt = $conn->prepare("INSERT INTO `blockchain_ledger` (`timestamp`, `previous_hash`, `current_hash`, `digital_signature`, `encrypted_data`, `status`, `userid`) VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?)");
     if (!$stmt) throw new Exception("Prepare blockchain insert failed: " . $conn->error);
-    $stmt->bind_param("sssss", $previousHash, $current_hash, $digital_signature, $encryptdata, $user_id);
+    $stmt->bind_param("ssssss", $previousHash, $current_hash, $digital_signature, $encryptdata, $ledgerStatus, $user_id);
     $stmt->execute();
     $blockId = $conn->insert_id;
     $stmt->close();
