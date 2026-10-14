@@ -437,23 +437,40 @@ $(document).ready(function () {
 
 
     // Delete Parameter
-  //////  $(document).on('click', '.deleteParameter', function () {
     $(document).off('click', '.deleteParameter').on('click', '.deleteParameter', function () {
-        const parameterID = $(this).data('parameterid');
+        // Read the exact HTML attributes to avoid jQuery data-cache/case-normalization issues.
+        const parameterID = parseInt($(this).attr('data-parameterid'), 10);
+        const standardID = parseInt($(this).attr('data-standardid'), 10);
+
+        if (!Number.isInteger(parameterID) || parameterID <= 0) {
+            toastr.error('Cannot delete parameter: the row has an invalid ParameterID.');
+            console.error('Invalid delete ParameterID:', $(this).attr('data-parameterid'), this);
+            return;
+        }
+        if (!Number.isInteger(standardID) || standardID <= 0) {
+            toastr.error('Cannot delete parameter: the row has an invalid StandardID.');
+            console.error('Invalid delete StandardID:', $(this).attr('data-standardid'), this);
+            return;
+        }
+
         if (confirm('Are you sure you want to delete this parameter?')) {
             $.ajax({
                 url: 'ajax/deleteparameter.php',
                 type: 'POST',
-                data: { parameterID },
+                data: { parameterID: parameterID, standardID: standardID },
                 dataType: 'json',
                 success: function (response) {
-                    toastr.succes(response.message);
                     if (response.success) {
-                        fetchParameters(response.standardID);
+                        toastr.success(response.message);
+                        fetchParameters(standardID);
+                    } else {
+                        toastr.error(response.message || 'Failed to delete parameter.');
+                        console.error('Delete parameter failed:', response, { parameterID, standardID });
                     }
                 },
-                error: function () {
-                    toastr.error('Failed to delete parameter.');
+                error: function (xhr, status, error) {
+                    toastr.error('Failed to delete parameter: ' + error);
+                    console.error('Delete parameter AJAX error:', xhr.responseText);
                 }
             });
         }
@@ -590,8 +607,8 @@ function fetchParameters(standardID, page = 1) {
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-sm deleteParameter" 
-                                data-ParameterID="${parameter.ParameterID}"  
-                                data-StandardID="${parameter.StandardID}">
+                                data-parameterid="${parameter.ParameterID}"  
+                                data-standardid="${parameter.StandardID}">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
