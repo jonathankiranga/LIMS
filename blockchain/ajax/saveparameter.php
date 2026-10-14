@@ -290,6 +290,7 @@ try {
             $Method,
             $matrixID,
             $Category,
+            $AccreditationStatus,
             $MRL,
             $MRLUnit,
             $createdAt
