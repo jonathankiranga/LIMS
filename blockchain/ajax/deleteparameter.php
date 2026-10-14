@@ -34,17 +34,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['parameterID'])) {
             $response['message'] = 'Parameter is in use by ' . $used . ' test result(s) and cannot be deleted.';
         } else {
             $conn->begin_transaction();
-            $stmt = $conn->prepare("DELETE FROM testparameters WHERE ParameterID = ?");
-            $stmt->bind_param('i', $parameterID);
-            if ($stmt->execute() && $stmt->affected_rows > 0) {
-                $conn->commit();
-                $response['success'] = true;
-                $response['message'] = 'Parameter deleted successfully.';
-            } else {
+            try {
+                $stmt = $conn->prepare("DELETE FROM testparameters WHERE ParameterID = ?");
+                if (!$stmt) {
+                    throw new Exception('DELETE PREPARE ERROR: ' . $conn->errno . ' - ' . $conn->error);
+                }
+
+                $stmt->bind_param('i', $parameterID);
+                if (!$stmt->execute()) {
+                    $dbError = 'DELETE EXECUTE ERROR: ' . $stmt->errno . ' - ' . $stmt->error;
+                    error_log(date('c') . ' ParameterID=' . $parameterID . ' StandardID=' . (string)$standardID . ' ' . $dbError . PHP_EOL, 3, __DIR__ . '/deleteparameter_debug.log');
+                    throw new Exception($dbError);
+                }
+
+                if ($stmt->affected_rows > 0) {
+                    $conn->commit();
+                    $response['success'] = true;
+                    $response['message'] = 'Parameter deleted successfully.';
+                } else {
+                    $conn->rollback();
+                    $response['message'] = 'No row was deleted. Check that the parameter still exists and matches the selected standard.';
+                }
+                $stmt->close();
+            } catch (Throwable $e) {
                 $conn->rollback();
-                $response['message'] = 'Failed to delete parameter. It may still be referenced by sample tests or results.';
+                $dbError = $e->getMessage();
+                error_log(date('c') . ' ParameterID=' . $parameterID . ' StandardID=' . (string)$standardID . ' ' . $dbError . PHP_EOL, 3, __DIR__ . '/deleteparameter_debug.log');
+                $response['message'] = 'Database could not delete this parameter: ' . $dbError;
+                if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                    $stmt->close();
+                }
             }
-            $stmt->close();
         }
     }
 }
