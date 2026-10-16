@@ -1,5 +1,8 @@
 <?php
-// Microbiological Sample Approval - grouped sample-level approval
+// Approval scope must be supplied by the calling page/request parameter.
+$approvalDepartment = strtolower(trim((string)($_GET['department'] ?? $_POST['department'] ?? '')));
+$validApprovalDepartments = ['microbiological', 'chemical', 'admin'];
+$approvalDepartmentValid = in_array($approvalDepartment, $validApprovalDepartments, true);
 ?>
 <style>
     .wr-table-wrap { overflow-x: auto; }
@@ -24,7 +27,7 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Admin Sample Approval — All Departments</h5>
+        <h5 class="mb-0"><?php echo $approvalDepartment === 'admin' ? 'Admin Sample Approval — All Departments' : 'Sample Approval — ' . htmlspecialchars(ucfirst($approvalDepartment), ENT_QUOTES, 'UTF-8'); ?></h5>
         <input type="text" id="searchInput" class="form-control" style="max-width:320px" placeholder="Search Sample ID / Batch No / Test..." onkeyup="searchTable()">
     </div>
 
@@ -105,7 +108,7 @@
 
                 <input type="hidden" id="blockHeaderID">
                 <input type="hidden" id="flag" value="3">
-                <input type="hidden" id="blockDepartment" value="admin">
+                <input type="hidden" id="blockDepartment" value="<?php echo htmlspecialchars($approvalDepartment, ENT_QUOTES, 'UTF-8'); ?>">
             </div>
         </div>
     </div>
@@ -193,6 +196,13 @@ function searchTable() {
 function fetchTestResults(flag) {
     const tbody = document.querySelector('#testResultsTable tbody');
     const department = document.getElementById('blockDepartment').value;
+
+    if (!department) {
+        wrRows = [];
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Missing department parameter. Open this page with ?department=admin, ?department=microbiological, or ?department=chemical.</td></tr>';
+        wrRenderPager(1, 0);
+        return;
+    }
 
     tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
 
@@ -320,7 +330,12 @@ function submitApproval() {
         if (data.success) {
             toastr.success(data.message);
             bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();
-            fetchTestResults(2);
+            <?php if ($approvalDepartmentValid): ?>
+fetchTestResults(2);
+<?php else: ?>
+document.querySelector('#testResultsTable tbody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Invalid or missing department parameter. Supply department=admin, department=microbiological, or department=chemical.</td></tr>';
+wrRenderPager(1, 0);
+<?php endif; ?>
         } else {
             toastr.error(data.message || 'Block approval failed.');
         }
