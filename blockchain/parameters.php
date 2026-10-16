@@ -37,6 +37,7 @@
 <th>MRLUnit</th>
 <th>Category</th>
 <th>Accreditation</th>
+<th>Status</th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -391,40 +392,41 @@ uploadButton.prop('disabled', false).html('<i class="fas fa-upload"></i> Upload'
 });
 });
 
-$(document).off('click', '.deleteParameter').on('click', '.deleteParameter', function () {
-const parameterID = parseInt($(this).attr('data-parameterid'), 10);
-const standardID = parseInt($(this).attr('data-standardid'), 10);
-if (!Number.isInteger(parameterID) || parameterID <= 0) {
-toastr.error('Cannot delete parameter: the row has an invalid ParameterID.');
-console.error('Invalid delete ParameterID:', $(this).attr('data-parameterid'), this);
+$(document).off('click', '.toggleParameterStatus').on('click', '.toggleParameterStatus', function () {
+const button = $(this);
+const parameterID = parseInt(button.attr('data-parameterid'), 10);
+const standardID = parseInt(button.attr('data-standardid'), 10);
+const currentStatus = parseInt(button.attr('data-isactive'), 10);
+const nextStatus = currentStatus === 1 ? 0 : 1;
+if (!Number.isInteger(parameterID) || parameterID <= 0 ||
+    !Number.isInteger(standardID) || standardID <= 0 ||
+    (currentStatus !== 0 && currentStatus !== 1)) {
+toastr.error('Cannot change status: invalid parameter identifiers or status.');
 return;
 }
-if (!Number.isInteger(standardID) || standardID <= 0) {
-toastr.error('Cannot delete parameter: the row has an invalid StandardID.');
-console.error('Invalid delete StandardID:', $(this).attr('data-standardid'), this);
-return;
-}
-if (confirm('Are you sure you want to delete this parameter?')) {
+const action = nextStatus === 1 ? 'activate' : 'hide';
+if (!confirm('Are you sure you want to ' + action + ' this parameter?')) return;
+button.prop('disabled', true);
 $.ajax({
-url: 'ajax/deleteparameter.php',
+url: 'ajax/setparameterstatus.php',
 type: 'POST',
-data: { parameterID: parameterID, standardID: standardID },
+data: { parameterID: parameterID, standardID: standardID, isActive: nextStatus },
 dataType: 'json',
 success: function (response) {
 if (response.success) {
 toastr.success(response.message);
 fetchParameters(standardID);
 } else {
-toastr.error(response.message || 'Failed to delete parameter.');
-console.error('Delete parameter failed:', response, { parameterID, standardID });
+toastr.error(response.message || 'Could not change parameter status.');
+button.prop('disabled', false);
 }
 },
 error: function (xhr, status, error) {
-toastr.error('Failed to delete parameter: ' + error);
-console.error('Delete parameter AJAX error:', xhr.responseText);
+toastr.error('Could not change parameter status: ' + error);
+console.error('Parameter status AJAX error:', xhr.responseText);
+button.prop('disabled', false);
 }
 });
-}
 });
 
 function updateLimits() {}
@@ -499,7 +501,7 @@ function fetchParameters(standardID, page = 1) {
 $.ajax({
 url: 'ajax/fetchparameters.php',
 type: 'GET',
-data: { standardID, page },
+data: { standardID, page, includeInactive: 1 },
 dataType: 'json',
 success: function (response) {
 const tbody = $('#parametersTable tbody');
@@ -523,6 +525,12 @@ ${parameter.AccreditationStatus === 'accredited'
 }
 </td>
 <td>
+${Number(parameter.IsActive) === 1
+? '<span class="badge bg-success">Active</span>'
+: '<span class="badge bg-secondary">Inactive</span>'
+}
+</td>
+<td>
 <button class="btn btn-warning btn-sm editParameter"
 data-ParameterID="${parameter.ParameterID}"
 data-matrixid="${parameter.BaseID}"
@@ -540,10 +548,13 @@ data-Category="${parameter.Category}"
 data-AccreditationStatus="${parameter.AccreditationStatus || 'not_accredited'}">
 <i class="fas fa-edit"></i>
 </button>
-<button class="btn btn-danger btn-sm deleteParameter"
+<button class="btn btn-sm ${Number(parameter.IsActive) === 1 ? 'btn-outline-danger' : 'btn-outline-success'} toggleParameterStatus"
 data-parameterid="${parameter.ParameterID}"
-data-standardid="${parameter.StandardID}">
-<i class="fas fa-trash-alt"></i>
+data-standardid="${parameter.StandardID}"
+data-isactive="${Number(parameter.IsActive) === 1 ? 1 : 0}"
+title="${Number(parameter.IsActive) === 1 ? 'Hide parameter' : 'Activate parameter'}">
+<i class="fas ${Number(parameter.IsActive) === 1 ? 'fa-eye-slash' : 'fa-eye'}"></i>
+${Number(parameter.IsActive) === 1 ? 'Hide' : 'Activate'}
 </button>
 </td>
 </tr>
