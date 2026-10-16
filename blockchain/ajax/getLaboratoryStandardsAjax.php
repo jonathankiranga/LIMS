@@ -106,7 +106,7 @@ function GetLaboratoryStandards($sampleTypeId) {
         tp.Vital
  FROM testparameters tp
  INNER JOIN TestStandards ts ON tp.StandardID = ts.StandardID
-WHERE tp.StandardID = ? order by Category asc";
+WHERE tp.StandardID = ? AND tp.IsActive = 1 order by Category asc";
     $stmt = $conn->prepare($query);
 
     if ($stmt) {
