@@ -6,6 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 $standardID = isset($_GET['standardID']) ? (int)$_GET['standardID'] : 0;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $includeInactive = isset($_GET['includeInactive']) && (string)$_GET['includeInactive'] === '1';
+$includeAll = isset($_GET['includeAll']) && (string)$_GET['includeAll'] === '1';
 $perPage = 10;
 
 if ($standardID <= 0) {
@@ -74,8 +75,11 @@ $sql = "SELECT
         FROM testparameters tp
         INNER JOIN teststandards ts ON tp.StandardID = ts.StandardID
         WHERE tp.StandardID = ?" . $activeFilter . "
-        ORDER BY ts.StandardName ASC, tp.ParameterName ASC
-        LIMIT ? OFFSET ?";
+        ORDER BY ts.StandardName ASC, tp.ParameterName ASC";
+
+if (!$includeAll) {
+    $sql .= " LIMIT ? OFFSET ?";
+}
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -84,7 +88,11 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param('iii', $standardID, $perPage, $offset);
+if ($includeAll) {
+    $stmt->bind_param('i', $standardID);
+} else {
+    $stmt->bind_param('iii', $standardID, $perPage, $offset);
+}
 if (!$stmt->execute()) {
     http_response_code(500);
     echo json_encode(['data' => [], 'error' => 'Failed to fetch parameters.'], JSON_INVALID_UTF8_SUBSTITUTE);
