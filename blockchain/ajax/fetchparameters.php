@@ -2,6 +2,7 @@
 // Database connection
 require '../db_connection.php'; // Adjust to your database connection file
 $standardID = isset($_REQUEST['standardID']) ? intval($_REQUEST['standardID']) : NULL;
+$includeInactive = isset($_REQUEST['includeInactive']) && (string)$_REQUEST['includeInactive'] === '1';
   
 header('Content-Type: application/json');
 if ($standardID != NULL) {
@@ -20,10 +21,12 @@ if ($standardID != NULL) {
         tp.BaseID,
         tp.UnitOfMeasure,
         tp.ResultType,
-        tp.AccreditationStatus
+        tp.AccreditationStatus,
+        tp.IsActive
  FROM testparameters tp
  INNER JOIN TestStandards ts ON tp.StandardID = ts.StandardID
  WHERE tp.StandardID = ? 
+ " . ($includeInactive ? "" : " AND tp.IsActive = 1 ") . "
  ORDER BY ts.StandardName ASC, 
  tp.ParameterName ASC
 ");
