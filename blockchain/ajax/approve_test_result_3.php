@@ -86,19 +86,162 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         if($updated!==count($testIDs))throw new Exception('Sample review changed during approval. No partial review block was committed.');
         $ph=implode(',',array_fill(0,count($testIDs),'?'));$stmt=$conn->prepare("UPDATE sample_tests SET datetestended=NOW() WHERE TestID IN ($ph)");
         if(!$stmt)throw new Exception('Failed to prepare review completion update: '.$conn->error);$types=str_repeat('i',count($testIDs));$bind=[$types];foreach($testIDs as $id)$bind[]=$id;$refs=[];foreach($bind as $k=>$v)$refs[$k]=&$bind[$k];call_user_func_array([$stmt,'bind_param'],$refs);if(!$stmt->execute())throw new Exception('Failed to update review completion dates: '.$stmt->error);$stmt->close();
-                // Blockchain is best-effort: never let its failure block an authorized approval.
+        // Blockchain audit is best-effort and must never block approval.
         $blockchainSavepoint = false;
         try {
-            if (!$conn->query("SAVEPOINT blockchain_attempt")) {
-                throw new Exception('Unable to create blockchain savepoint: ' . $conn->error);
-            }
+            if (!$conn->query("SAVEPOINT blockchain_attempt")) throw new Exception('Unable to create blockchain savepoint: ' . $conn->error);
             $blockchainSavepoint = true;
-                    // Blockchain is best-effort: never let its failure block an authorized approval.
+            $privateKey = getOrCreateSystemPrivateKey();
+            $decisionText=[1=>'APPROVED',4=>'REJECTED'][$approvalStatus];
+            $ledgerPayload=['event'=>'SAMPLE_REVIEW_BLOCK_DECISION','sampleID'=>$sampleID,'HeaderID'=>$headerID,'decision'=>$approvalStatus,'decisionText'=>$decisionText,'testCount'=>$updated,'user_id'=>$userID,'timestamp'=>date('Y-m-d H:i:s')];
+            $q=$conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");
+            if(!$q) throw new Exception('Unable to read previous blockchain block: '.$conn->error);
+            $last=$q->fetch_assoc();$previousHash=$last?$last['current_hash']:str_repeat('0',64);
+            $payloadJson=json_encode($ledgerPayload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+            if($payloadJson===false) throw new Exception('Unable to create blockchain payload.');
+            $dataString=$payloadJson.'|'.$previousHash;$currentHash=hash('sha256',$dataString);
+            $digitalSignature=signData($currentHash,$privateKey);
+            if($digitalSignature===false||$digitalSignature===null||$digitalSignature==='') throw new Exception('Unable to sign blockchain transaction.');
+            $encryptedData=encryptPrivateKey($dataString,$privateKey);
+            if($encryptedData===false||$encryptedData===null||$encryptedData==='') throw new Exception('Unable to encrypt blockchain transaction.');
+            $stmtLedger=$conn->prepare("INSERT INTO blockchain_ledger (timestamp,previous_hash,current_hash,digital_signature,encrypted_data,status,userid) VALUES (CURRENT_TIMESTAMP,?,?,?,?,'active',?)");
+            if(!$stmtLedger) throw new Exception('Failed to prepare blockchain ledger entry: '.$conn->error);
+            $stmtLedger->bind_param('sssss',$previousHash,$currentHash,$digitalSignature,$encryptedData,$userID);
+            if(!$stmtLedger->execute()) throw new Exception('Failed to write blockchain ledger entry: '.$stmtLedger->error);
+            $blockId=$conn->insert_id;$stmtLedger->close();
+            foreach($testIDs as $recordID) log_transaction_metadata($conn,$blockId,$recordID,'test_results');
+            logAction($conn,'SAMPLE_REVIEW_BLOCK_'.$decisionText,$sampleID,$currentHash,$userID,'SUCCESS');
+            $conn->query("RELEASE SAVEPOINT blockchain_attempt");
+        } catch (Throwable $blockchainError) {
+            if ($blockchainSavepoint) {
+                $conn->query("ROLLBACK TO SAVEPOINT blockchain_attempt");
+                $conn->query("RELEASE SAVEPOINT blockchain_attempt");
+            }
+            error_log('[LIMS blockchain approval audit failure] Sample review block ' . $sampleID . ', user ' . $userID . ': ' . $blockchainError->getMessage());
+        }
+        $conn->commit();
+        $word=[1=>'approved',4=>'rejected'][$approvalStatus];
+        echo json_encode(['success'=>true,'message'=>'Sample '.$sampleID.' has been '.$word.' as a review block. '.$updated.' test result(s) updated.']);
+        $conn->close();
+        exit;
+    }catch(Exception $e){$conn->rollback();$conn->close();echo json_encode(['success'=>false,'message'=>$e->getMessage()]);exit;}
+}
+
+/* Sample block approval mode */
+if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
+    $headerID = (int)($_POST['HeaderID'] ?? 0);
+    $sampleID = trim($_POST['SampleID'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $flag = (int)($_POST['flag'] ?? 3);
+    $approvalStatus = (int)($_POST['approvalStatus'] ?? 0);
+    $userID = trim($_POST['user_id'] ?? '');
+
+    /*
+     * IMPORTANT: department is supplied by the calling approval program.
+     * It is NOT taken from the logged-in user's department because a
+     * super-user/admin may legitimately have no department assignment.
+     */
+    $department = strtolower($department);
+    $isAdminApproval = ($department === 'admin');
+    $allowedDepartments = ['microbiological', 'chemical', 'admin'];
+
+    $statusMap = [1 => 4, 2 => 1, 4 => 0];
+
+    if ($headerID <= 0 || $sampleID === '' || $userID === '') {
+        echo json_encode(['success'=>false,'message'=>'Sample, header or user information is missing.']);
+        exit;
+    }
+    if (!in_array($department, $allowedDepartments, true)) {
+        echo json_encode(['success'=>false,'message'=>'Invalid department supplied by the calling program.']);
+        exit;
+    }
+    if (!isset($statusMap[$approvalStatus])) {
+        echo json_encode(['success'=>false,'message'=>'Invalid block decision.']);
+        exit;
+    }
+
+    $statusID = $statusMap[$approvalStatus];
+    $level = ($flag === 2) ? 'reviewedby' : 'approvedby';
+
+    $conn->begin_transaction();
+
+    try {
+        $sql = "SELECT tr.TestID
+                FROM test_results tr
+                JOIN sample_tests st ON st.TestID = tr.TestID
+                JOIN testparameters tp
+                  ON tp.ParameterID = tr.ParameterID
+                 AND tp.StandardID = tr.StandardID
+                WHERE tr.HeaderID = ?
+                  AND st.SampleID = ?
+                  AND tr.StatusID = 2";
+        if (!$isAdminApproval) {
+            $sql .= " AND tp.Category = ?";
+        }
+
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
+
+        if ($isAdminApproval) {
+            $stmt->bind_param('is', $headerID, $sampleID);
+        } else {
+            $stmt->bind_param('iss', $headerID, $sampleID, $department);
+        }
+
+        if (!$stmt->execute()) throw new Exception('Failed to load sample tests: '.$stmt->error);
+
+        $rs = $stmt->get_result();
+        $testIDs = [];
+        while ($r = $rs->fetch_assoc()) $testIDs[] = (int)$r['TestID'];
+        $stmt->close();
+
+        if (!$testIDs) throw new Exception('No pending tests were found for this sample block.');
+
+        $sql = "UPDATE test_results tr
+                JOIN testparameters tp
+                  ON tp.ParameterID = tr.ParameterID
+                 AND tp.StandardID = tr.StandardID
+                SET tr.`$level` = ?, tr.StatusID = ?
+                WHERE tr.HeaderID = ?
+                  AND tr.StatusID = 2";
+        if (!$isAdminApproval) {
+            $sql .= " AND tp.Category = ?";
+        }
+
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
+
+        if ($isAdminApproval) {
+            $stmt->bind_param('sii', $userID, $statusID, $headerID);
+        } else {
+            $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
+        }
+
+        if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
+        $updated = $stmt->affected_rows;
+        $stmt->close();
+
+        if ($updated <= 0) throw new Exception('No test results were updated.');
+
+        $placeholders = implode(',', array_fill(0, count($testIDs), '?'));
+        $sql = "UPDATE sample_tests SET datetestended = NOW() WHERE TestID IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception('Failed to prepare completion update: '.$conn->error);
+
+        $types = str_repeat('i', count($testIDs));
+        $bind = [$types];
+        foreach ($testIDs as $id) $bind[] = $id;
+        $refs = [];
+        foreach ($bind as $k => $v) $refs[$k] = &$bind[$k];
+        call_user_func_array([$stmt, 'bind_param'], $refs);
+
+        if (!$stmt->execute()) throw new Exception('Failed to update completion dates: '.$stmt->error);
+        $stmt->close();
+
+        // Blockchain audit is best-effort and must never block approval.
         $blockchainSavepoint = false;
         try {
-            if (!$conn->query("SAVEPOINT blockchain_attempt")) {
-                throw new Exception('Unable to create blockchain savepoint: ' . $conn->error);
-            }
+            if (!$conn->query("SAVEPOINT blockchain_attempt")) throw new Exception('Unable to create blockchain savepoint: ' . $conn->error);
             $blockchainSavepoint = true;
             $privateKey = getOrCreateSystemPrivateKey();
             $ledgerPayload = [
@@ -124,11 +267,7 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
             if ($digitalSignature === false || $digitalSignature === null || $digitalSignature === '') throw new Exception('Unable to sign blockchain transaction.');
             $encryptedData = encryptPrivateKey($dataString, $privateKey);
             if ($encryptedData === false || $encryptedData === null || $encryptedData === '') throw new Exception('Unable to encrypt blockchain transaction.');
-            $stmtLedger = $conn->prepare(
-                "INSERT INTO blockchain_ledger
-                 (timestamp, previous_hash, current_hash, digital_signature, encrypted_data, status, userid)
-                 VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)"
-            );
+            $stmtLedger = $conn->prepare("INSERT INTO blockchain_ledger (timestamp, previous_hash, current_hash, digital_signature, encrypted_data, status, userid) VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)");
             if (!$stmtLedger) throw new Exception('Failed to prepare blockchain ledger entry: ' . $conn->error);
             $stmtLedger->bind_param('sssss', $previousHash, $currentHash, $digitalSignature, $encryptedData, $userID);
             if (!$stmtLedger->execute()) throw new Exception('Failed to write blockchain ledger entry: ' . $stmtLedger->error);
@@ -146,7 +285,6 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         }
         $conn->commit();
         $words = [1=>'approved',2=>'sent for reanalysis',4=>'rejected'];
-
         echo json_encode([
             'success'=>true,
             'message'=>'Sample '.$sampleID.' has been '.$words[$approvalStatus].' as a block. '.$updated.' test result(s) updated.'
