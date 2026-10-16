@@ -49,6 +49,7 @@ $stmt = $conn->prepare("SELECT DISTINCT tp.BaseID AS ParameterID, bp.ParameterNa
                         FROM testparameters tp
                         JOIN baseparameters bp ON bp.ParameterID = tp.BaseID
                         WHERE tp.BaseID IS NOT NULL
+                          AND tp.IsActive = 1
                         ORDER BY tp.BaseID");
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Failed to prepare parameters query: ' . $conn->error]);
@@ -72,7 +73,7 @@ $stmt->close();
 
 // ── Fetch all testparameters links (BaseID + StandardID) ──
 $links = [];
-$stmt = $conn->prepare("SELECT tp.BaseID, tp.StandardID, COALESCE(ts.StandardName,'') AS StandardName FROM testparameters tp JOIN teststandards ts ON tp.StandardID = ts.StandardID WHERE tp.BaseID IS NOT NULL ORDER BY tp.BaseID");
+$stmt = $conn->prepare("SELECT tp.BaseID, tp.StandardID, COALESCE(ts.StandardName,'') AS StandardName FROM testparameters tp JOIN teststandards ts ON tp.StandardID = ts.StandardID WHERE tp.BaseID IS NOT NULL AND tp.IsActive = 1 ORDER BY tp.BaseID");
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Failed to prepare links query: ' . $conn->error]);
     exit;
