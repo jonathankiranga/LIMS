@@ -23,7 +23,7 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         if($updated!==count($testIDs))throw new Exception('Sample review changed during approval. No partial review block was committed.');
         $ph=implode(',',array_fill(0,count($testIDs),'?'));$stmt=$conn->prepare("UPDATE sample_tests SET datetestended=NOW() WHERE TestID IN ($ph)");
         if(!$stmt)throw new Exception('Failed to prepare review completion update: '.$conn->error);$types=str_repeat('i',count($testIDs));$bind=[$types];foreach($testIDs as $id)$bind[]=$id;$refs=[];foreach($bind as $k=>$v)$refs[$k]=&$bind[$k];call_user_func_array([$stmt,'bind_param'],$refs);if(!$stmt->execute())throw new Exception('Failed to update review completion dates: '.$stmt->error);$stmt->close();
-        $privateKeyPath=dirname(__DIR__)."/userkeys/".$userID."/private_key.pem";if(!file_exists($privateKeyPath))throw new Exception('Blockchain private key not found for user '.$userID.'. Approval was not committed.');$privateKey=file_get_contents($privateKeyPath);if($privateKey===false||trim($privateKey)==='')throw new Exception('Blockchain private key could not be read. Approval was not committed.');
+        $privateKeyPath=__DIR__."/userkeys/".$userID."/private_key.pem";if(!file_exists($privateKeyPath))throw new Exception('Blockchain private key not found for user '.$userID.'. Approval was not committed.');$privateKey=file_get_contents($privateKeyPath);if($privateKey===false||trim($privateKey)==='')throw new Exception('Blockchain private key could not be read. Approval was not committed.');
         $decisionText=[1=>'APPROVED',4=>'REJECTED'][$approvalStatus];$ledgerPayload=['event'=>'SAMPLE_REVIEW_BLOCK_DECISION','sampleID'=>$sampleID,'HeaderID'=>$headerID,'decision'=>$approvalStatus,'decisionText'=>$decisionText,'testCount'=>$updated,'user_id'=>$userID,'timestamp'=>date('Y-m-d H:i:s')];
         $q=$conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");if(!$q)throw new Exception('Unable to read the previous blockchain block: '.$conn->error);$last=$q->fetch_assoc();$previousHash=$last?$last['current_hash']:str_repeat('0',64);
         $payloadJson=json_encode($ledgerPayload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($payloadJson===false)throw new Exception('Unable to create blockchain payload.');$dataString=$payloadJson.'|'.$previousHash;$currentHash=hash('sha256',$dataString);$digitalSignature=signData($currentHash,$privateKey);$encryptedData=encryptPrivateKey($dataString,$privateKey);
@@ -147,7 +147,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
          * 4. Write ONE blockchain block for the complete sample decision.
          * The database approval and ledger entry are committed together.
          */
-        $privateKeyPath = dirname(__DIR__) . "/userkeys/" . $userID . "/private_key.pem";
+        $privateKeyPath = __DIR__ . "/userkeys/" . $userID . "/private_key.pem";
         if (!file_exists($privateKeyPath)) {
             throw new Exception('Blockchain private key not found for user ' . $userID . '. Approval was not committed.');
         }
