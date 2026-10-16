@@ -292,17 +292,16 @@ function submitApproval() {
     }
 
     const formData = new FormData();
-    formData.append('blockApproval', '1');
-    formData.append('HeaderID', headerID);
-    formData.append('SampleID', sampleID);
-    formData.append('department', department);
-    formData.append('flag', flag);
-    formData.append('approvalStatus', approvalStatus);
-
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        formData.append(key, localStorage.getItem(key));
+        if (key === 'user_id') formData.set(key, localStorage.getItem(key));
     }
+    formData.set('blockApproval', '1');
+    formData.set('HeaderID', headerID);
+    formData.set('SampleID', sampleID);
+    formData.set('department', department);
+    formData.set('flag', flag);
+    formData.set('approvalStatus', approvalStatus);
 
     if (!formData.get('user_id')) {
         toastr.error('User identity was not found. Please log in again.');
