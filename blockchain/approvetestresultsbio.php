@@ -1,6 +1,6 @@
 <?php
 // Approval scope must be supplied by the calling page/request parameter.
-$approvalDepartment = strtolower(trim((string)($_GET['department'] ?? $_POST['department'] ?? '')));
+$approvalDepartment = strtolower(trim((string)($_GET['department'] ?? 'microbiological')));
 $validApprovalDepartments = ['microbiological', 'chemical', 'admin'];
 $approvalDepartmentValid = in_array($approvalDepartment, $validApprovalDepartments, true);
 ?>
@@ -207,7 +207,8 @@ function fetchTestResults(flag) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
 
     fetch('ajax/get_test_results.php?statusID=' + encodeURIComponent(flag) +
-          '&department=' + encodeURIComponent(department) + '&groupBySample=1&wholeSample=1')
+          '&department=' + encodeURIComponent(department) + '&groupBySample=1' +
+          (department === 'admin' ? '&wholeSample=1' : ''))
         .then(function(response){ return response.json(); })
         .then(function(data) {
             if (!data.success) {
@@ -333,7 +334,7 @@ function submitApproval() {
             <?php if ($approvalDepartmentValid): ?>
 fetchTestResults(2);
 <?php else: ?>
-document.querySelector('#testResultsTable tbody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Invalid or missing department parameter. Supply department=admin, department=microbiological, or department=chemical.</td></tr>';
+document.querySelector('#testResultsTable tbody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Invalid department parameter. Use department=microbiological, department=chemical, or department=admin.</td></tr>';
 wrRenderPager(1, 0);
 <?php endif; ?>
         } else {
