@@ -40,6 +40,7 @@ $sql = "
     INNER JOIN testparameters p
         ON p.StandardID = s.StandardID
     WHERE s.StandardID = ?
+      AND p.IsActive = 1
 ";
 
 if (!empty($baseIds)) {
