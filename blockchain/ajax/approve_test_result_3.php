@@ -15,6 +15,7 @@ function getOrCreateSystemPrivateKey() {
     if (!is_dir($keyDir) && !mkdir($keyDir, 0700, true) && !is_dir($keyDir)) {
         throw new Exception('Unable to create the system blockchain key directory.');
     }
+    @chmod($keyDir, 0700);
 
     $privateKey = (is_file($privateKeyPath) && is_readable($privateKeyPath))
         ? file_get_contents($privateKeyPath)
