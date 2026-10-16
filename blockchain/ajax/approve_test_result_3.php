@@ -2,7 +2,72 @@
 require '../db_connection.php';
 require_once '../functions/functions.php';
 
+
 header('Content-Type: application/json');
+
+function getOrCreateUserPrivateKey($userID) {
+    $dir = __DIR__ . "/userkeys/" . $userID;
+    $privateKeyPath = $dir . "/private_key.pem";
+    $publicKeyPath = $dir . "/public_key.pem";
+
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new Exception('Unable to create the blockchain key directory.');
+    }
+
+    $privateKey = (is_file($privateKeyPath) && is_readable($privateKeyPath))
+        ? file_get_contents($privateKeyPath)
+        : false;
+
+    if ($privateKey !== false && trim($privateKey) !== '') {
+        $keyResource = openssl_pkey_get_private($privateKey);
+        if ($keyResource !== false) {
+            $publicDetails = openssl_pkey_get_details($keyResource);
+            if ($publicDetails === false || empty($publicDetails['key'])) {
+                throw new Exception('Unable to read the public key from the existing private key.');
+            }
+
+            $publicKey = (is_file($publicKeyPath) && is_readable($publicKeyPath))
+                ? file_get_contents($publicKeyPath)
+                : false;
+
+            if ($publicKey === false || trim($publicKey) === '') {
+                if (file_put_contents($publicKeyPath, $publicDetails['key'], LOCK_EX) === false) {
+                    throw new Exception('Unable to restore the public key file.');
+                }
+                chmod($publicKeyPath, 0644);
+            }
+
+            return $privateKey;
+        }
+    }
+
+    $keyPair = openssl_pkey_new();
+    if ($keyPair === false) {
+        throw new Exception('Unable to generate a replacement blockchain key pair.');
+    }
+
+    $newPrivateKey = '';
+    if (!openssl_pkey_export($keyPair, $newPrivateKey) || trim($newPrivateKey) === '') {
+        throw new Exception('Unable to export the replacement blockchain private key.');
+    }
+
+    $details = openssl_pkey_get_details($keyPair);
+    if ($details === false || empty($details['key'])) {
+        throw new Exception('Unable to export the replacement blockchain public key.');
+    }
+
+    if (file_put_contents($privateKeyPath, $newPrivateKey, LOCK_EX) === false) {
+        throw new Exception('Unable to save the replacement blockchain private key.');
+    }
+    chmod($privateKeyPath, 0600);
+
+    if (file_put_contents($publicKeyPath, $details['key'], LOCK_EX) === false) {
+        throw new Exception('Unable to save the replacement blockchain public key.');
+    }
+    chmod($publicKeyPath, 0644);
+
+    return $newPrivateKey;
+}
 
 /* Whole-sample review block approval mode */
 if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] === 1) {
@@ -23,7 +88,7 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         if($updated!==count($testIDs))throw new Exception('Sample review changed during approval. No partial review block was committed.');
         $ph=implode(',',array_fill(0,count($testIDs),'?'));$stmt=$conn->prepare("UPDATE sample_tests SET datetestended=NOW() WHERE TestID IN ($ph)");
         if(!$stmt)throw new Exception('Failed to prepare review completion update: '.$conn->error);$types=str_repeat('i',count($testIDs));$bind=[$types];foreach($testIDs as $id)$bind[]=$id;$refs=[];foreach($bind as $k=>$v)$refs[$k]=&$bind[$k];call_user_func_array([$stmt,'bind_param'],$refs);if(!$stmt->execute())throw new Exception('Failed to update review completion dates: '.$stmt->error);$stmt->close();
-        $privateKeyPath=__DIR__."/userkeys/".$userID."/private_key.pem";if(!file_exists($privateKeyPath))throw new Exception('Blockchain private key not found for user '.$userID.'. Approval was not committed.');$privateKey=file_get_contents($privateKeyPath);if($privateKey===false||trim($privateKey)==='')throw new Exception('Blockchain private key could not be read. Approval was not committed.');
+        $privateKey = getOrCreateUserPrivateKey($userID);
         $decisionText=[1=>'APPROVED',4=>'REJECTED'][$approvalStatus];$ledgerPayload=['event'=>'SAMPLE_REVIEW_BLOCK_DECISION','sampleID'=>$sampleID,'HeaderID'=>$headerID,'decision'=>$approvalStatus,'decisionText'=>$decisionText,'testCount'=>$updated,'user_id'=>$userID,'timestamp'=>date('Y-m-d H:i:s')];
         $q=$conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");if(!$q)throw new Exception('Unable to read the previous blockchain block: '.$conn->error);$last=$q->fetch_assoc();$previousHash=$last?$last['current_hash']:str_repeat('0',64);
         $payloadJson=json_encode($ledgerPayload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($payloadJson===false)throw new Exception('Unable to create blockchain payload.');$dataString=$payloadJson.'|'.$previousHash;$currentHash=hash('sha256',$dataString);$digitalSignature=signData($currentHash,$privateKey);$encryptedData=encryptPrivateKey($dataString,$privateKey);
@@ -147,15 +212,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
          * 4. Write ONE blockchain block for the complete sample decision.
          * The database approval and ledger entry are committed together.
          */
-        $privateKeyPath = __DIR__ . "/userkeys/" . $userID . "/private_key.pem";
-        if (!file_exists($privateKeyPath)) {
-            throw new Exception('Blockchain private key not found for user ' . $userID . '. Approval was not committed.');
-        }
-
-        $privateKey = file_get_contents($privateKeyPath);
-        if ($privateKey === false || trim($privateKey) === '') {
-            throw new Exception('Blockchain private key could not be read. Approval was not committed.');
-        }
+        $privateKey = getOrCreateUserPrivateKey($userID);
 
         $ledgerPayload = [
             'event' => 'SAMPLE_TEST_BLOCK_DECISION',
