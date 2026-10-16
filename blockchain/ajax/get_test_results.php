@@ -52,7 +52,11 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param($types, ...$params);
+$bindParams = [$types];
+foreach ($params as $paramKey => $paramValue) {
+    $bindParams[] = &$params[$paramKey];
+}
+call_user_func_array([$stmt, 'bind_param'], $bindParams);
 
 if (!$stmt->execute()) {
     header('Content-Type: application/json');
@@ -96,6 +100,7 @@ if ($groupBySample) {
 header('Content-Type: application/json');
 echo json_encode([
     'success' => count($groups) > 0,
+    'message' => count($groups) > 0 ? '' : 'No test results found for StatusID ' . $statusID . '. The query returned no matching rows.',
     'results' => $groups
 ]);
 
