@@ -46,8 +46,9 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
      * It is NOT taken from the logged-in user's department because a
      * super-user/admin may legitimately have no department assignment.
      */
-    $allowedDepartments = ['microbiological', 'chemical'];
     $department = strtolower($department);
+    $isAdminApproval = ($department === 'admin');
+    $allowedDepartments = ['microbiological', 'chemical', 'admin'];
 
     $statusMap = [1 => 4, 2 => 1, 4 => 0];
 
@@ -79,12 +80,18 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                 WHERE tr.HeaderID = ?
                   AND sp.SampleID = ?
                   AND tr.StatusID = 2";
-        $sql .= " AND tp.Category = ?";
+        if (!$isAdminApproval) {
+            $sql .= " AND tp.Category = ?";
+        }
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
 
-        $stmt->bind_param('iss', $headerID, $sampleID, $department);
+        if ($isAdminApproval) {
+            $stmt->bind_param('is', $headerID, $sampleID);
+        } else {
+            $stmt->bind_param('iss', $headerID, $sampleID, $department);
+        }
 
         if (!$stmt->execute()) throw new Exception('Failed to load sample tests: '.$stmt->error);
 
@@ -102,12 +109,18 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                 SET tr.`$level` = ?, tr.StatusID = ?
                 WHERE tr.HeaderID = ?
                   AND tr.StatusID = 2";
-        $sql .= " AND tp.Category = ?";
+        if (!$isAdminApproval) {
+            $sql .= " AND tp.Category = ?";
+        }
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
 
-        $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
+        if ($isAdminApproval) {
+            $stmt->bind_param('sii', $userID, $statusID, $headerID);
+        } else {
+            $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
+        }
 
         if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
         $updated = $stmt->affected_rows;
@@ -148,7 +161,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
             'event' => 'SAMPLE_TEST_BLOCK_DECISION',
             'sampleID' => $sampleID,
             'HeaderID' => $headerID,
-            'department' => $department,
+            'department' => $isAdminApproval ? 'all_departments' : $department,
             'decision' => $approvalStatus,
             'decisionText' => [1=>'APPROVED',2=>'REANALYSIS_REQUIRED',4=>'REJECTED'][$approvalStatus],
             'testCount' => $updated,
