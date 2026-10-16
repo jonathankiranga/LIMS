@@ -24,7 +24,7 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Microbiological Sample Approval</h5>
+        <h5 class="mb-0">Admin Sample Approval — All Departments</h5>
         <input type="text" id="searchInput" class="form-control" style="max-width:320px" placeholder="Search Sample ID / Batch No / Test..." onkeyup="searchTable()">
     </div>
 
@@ -105,7 +105,7 @@
 
                 <input type="hidden" id="blockHeaderID">
                 <input type="hidden" id="flag" value="3">
-                <input type="hidden" id="blockDepartment" value="microbiological">
+                <input type="hidden" id="blockDepartment" value="admin">
             </div>
         </div>
     </div>
@@ -197,7 +197,7 @@ function fetchTestResults(flag) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
 
     fetch('ajax/get_test_results.php?statusID=' + encodeURIComponent(flag) +
-          '&department=' + encodeURIComponent(department) + '&groupBySample=1')
+          '&department=' + encodeURIComponent(department) + '&groupBySample=1&wholeSample=1')
         .then(function(response){ return response.json(); })
         .then(function(data) {
             if (!data.success) {
