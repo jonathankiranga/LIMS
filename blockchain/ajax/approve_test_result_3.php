@@ -12,7 +12,7 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
     $statusMap=[1=>4,4=>0]; if(!isset($statusMap[$approvalStatus])){echo json_encode(['success'=>false,'message'=>'Invalid sample review decision.']);exit;}
     $statusID=$statusMap[$approvalStatus]; $conn->begin_transaction();
     try {
-        $stmt=$conn->prepare("SELECT tr.TestID FROM test_results tr JOIN Sample_Header sp ON sp.HeaderID=tr.HeaderID WHERE tr.HeaderID=? AND sp.SampleID=? AND tr.StatusID=3");
+        $stmt=$conn->prepare("SELECT tr.TestID FROM test_results tr JOIN sample_tests st ON st.TestID=tr.TestID WHERE tr.HeaderID=? AND st.SampleID=? AND tr.StatusID=3");
         if(!$stmt)throw new Exception('Failed to prepare sample review lookup: '.$conn->error);
         $stmt->bind_param('is',$headerID,$sampleID); if(!$stmt->execute())throw new Exception('Failed to load sample review tests: '.$stmt->error);
         $rs=$stmt->get_result();$testIDs=[];while($r=$rs->fetch_assoc())$testIDs[]=(int)$r['TestID'];$stmt->close();
@@ -73,12 +73,12 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     try {
         $sql = "SELECT tr.TestID
                 FROM test_results tr
-                JOIN Sample_Header sp ON sp.HeaderID = tr.HeaderID
+                JOIN sample_tests st ON st.TestID = tr.TestID
                 JOIN testparameters tp
                   ON tp.ParameterID = tr.ParameterID
                  AND tp.StandardID = tr.StandardID
                 WHERE tr.HeaderID = ?
-                  AND sp.SampleID = ?
+                  AND st.SampleID = ?
                   AND tr.StatusID = 2";
         if (!$isAdminApproval) {
             $sql .= " AND tp.Category = ?";
