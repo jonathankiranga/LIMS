@@ -20,19 +20,15 @@ if (!$parameterID || $parameterID <= 0 || !$standardID || $standardID <= 0) {
     exit;
 }
 
-/*
- * Delete only the selected testparameters row within the selected standard.
- * Do not delete from sample_tests, test_results, or any other table.
- * Existing foreign-key references may still cause MySQL to reject deletion.
- */
+/* Compatibility endpoint: "delete" means hide. Never physically delete rows. */
 $stmt = $conn->prepare(
-    "DELETE FROM testparameters WHERE ParameterID = ? AND StandardID = ?"
+    "UPDATE testparameters SET IsActive = 0 WHERE ParameterID = ? AND StandardID = ?"
 );
 
 if (!$stmt) {
-    error_log(date('c') . " DELETE PREPARE ERROR: " . $conn->errno . " - " . $conn->error . PHP_EOL,
+    error_log(date('c') . " HIDE PREPARE ERROR: " . $conn->errno . " - " . $conn->error . PHP_EOL,
         3, __DIR__ . '/deleteparameter_debug.log');
-    $response['message'] = 'Could not prepare parameter deletion.';
+    $response['message'] = 'Could not prepare parameter status change.';
     echo json_encode($response);
     exit;
 }
@@ -40,22 +36,34 @@ if (!$stmt) {
 $stmt->bind_param('ii', $parameterID, $standardID);
 
 if (!$stmt->execute()) {
-    $dbError = 'DELETE EXECUTE ERROR: ' . $stmt->errno . ' - ' . $stmt->error;
+    $dbError = 'HIDE EXECUTE ERROR: ' . $stmt->errno . ' - ' . $stmt->error;
     error_log(date('c') . ' ParameterID=' . $parameterID .
         ' StandardID=' . $standardID . ' ' . $dbError . PHP_EOL,
         3, __DIR__ . '/deleteparameter_debug.log');
-
-    $response['message'] = 'Could not delete this parameter from the selected standard: ' . $dbError;
-} elseif ($stmt->affected_rows > 0) {
-    $response['success'] = true;
-    $response['standardID'] = $standardID;
-    $response['message'] = 'Parameter deleted successfully from the selected standard.';
+    $response['message'] = 'Could not hide this parameter: ' . $dbError;
 } else {
-    $response['message'] = 'No parameter matched the supplied ParameterID and StandardID.';
+    $check = $conn->prepare(
+        "SELECT IsActive FROM testparameters WHERE ParameterID = ? AND StandardID = ?"
+    );
+    if ($check) {
+        $check->bind_param('ii', $parameterID, $standardID);
+        $check->execute();
+        $result = $check->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $response['success'] = true;
+            $response['standardID'] = $standardID;
+            $response['isActive'] = (int)$row['IsActive'];
+            $response['message'] = 'Parameter hidden. Existing records were preserved.';
+        } else {
+            $response['message'] = 'No parameter matched the supplied ParameterID and StandardID.';
+        }
+        $check->close();
+    } else {
+        $response['message'] = 'Status changed, but confirmation query could not be prepared.';
+    }
 }
 
 $stmt->close();
 $conn->close();
-
 echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
 ?>
