@@ -345,13 +345,6 @@ const editModal = new bootstrap.Modal($('#uploadStandardsModal'));
 editModal.show();
 });
 
-$(document).on('click', '#pagination .page-link', function (e) {
-e.preventDefault();
-const page = $(this).data('page');
-localStorage.setItem('currentPageforteststandards', page);
-fetchStandards(page);
-});
-
 $('#uploadStandardsForm').on('submit', function (e) {
 e.preventDefault();
 const uploadButton = $('#uploadStandardsForm button[type="submit"]');
@@ -571,34 +564,44 @@ toastr.error('Failed to fetch parameters.');
 function renderPagination(currentPage, totalPages, standardID = null) {
 const pagination = $('#pagination');
 pagination.empty();
+
+currentPage = parseInt(currentPage, 10) || 1;
+totalPages = parseInt(totalPages, 10) || 0;
+standardID = parseInt(standardID, 10) || 0;
+
+if (totalPages <= 1 || standardID <= 0) {
+return;
+}
+
 pagination.append(`
-<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-<a class="page-link" href="#" data-page="${currentPage - 1}" data-standard="${standardID || ''}">Previous</a>
+<li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+<a class="page-link" href="#" data-page="${currentPage - 1}" data-standard="${standardID}">Previous</a>
 </li>
 `);
+
 for (let i = 1; i <= totalPages; i++) {
 pagination.append(`
 <li class="page-item ${i === currentPage ? 'active' : ''}">
-<a class="page-link" href="#" data-page="${i}" data-standard="${standardID || ''}">${i}</a>
-</li>
-`);
-}
-pagination.append(`
-<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-<a class="page-link" href="#" data-page="${currentPage + 1}" data-standard="${standardID || ''}">Next</a>
+<a class="page-link" href="#" data-page="${i}" data-standard="${standardID}">${i}</a>
 </li>
 `);
 }
 
-$(document).on('click', '#pagination .page-link', function (e) {
-e.preventDefault();
-const page = $(this).data('page');
-const standardID = $(this).data('standard');
-if (standardID) {
-fetchParameters(standardID, page);
-} else {
-fetchStandards(page);
+pagination.append(`
+<li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+<a class="page-link" href="#" data-page="${currentPage + 1}" data-standard="${standardID}">Next</a>
+</li>
+`);
 }
+
+$(document).off('click', '#pagination .page-link').on('click', '#pagination .page-link', function (e) {
+e.preventDefault();
+const page = parseInt($(this).data('page'), 10);
+const standardID = parseInt($(this).data('standard'), 10);
+if (!Number.isInteger(page) || page < 1 || !Number.isInteger(standardID) || standardID < 1) {
+return;
+}
+fetchParameters(standardID, page);
 });
 
 });
