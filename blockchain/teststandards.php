@@ -78,6 +78,18 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
     max-width: 1400px !important;
     width: 95% !important;
 }
+#parametersModal .table-responsive {
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+    overflow-x: auto;
+}
+#parametersModal #paramTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #f3f6fb;
+    white-space: nowrap;
+}
 </style>
 
 <div class="container mt-5">
@@ -1220,7 +1232,7 @@ $('#paramSaveChangesBtn').click(function() {
 });
 
 function loadParameters(sid) {
-    $.getJSON('ajax/fetchparameters.php', { standardID: sid, includeInactive: 1 }, function(res) {
+    $.getJSON('ajax/fetchparameters.php', { standardID: sid, includeInactive: 1, includeAll: 1 }, function(res) {
         var tbody = $('#paramTable tbody');
         tbody.empty();
         if (res.data && res.data.length) {
