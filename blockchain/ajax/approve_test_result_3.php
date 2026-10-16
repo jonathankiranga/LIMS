@@ -145,7 +145,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     $isAdminApproval = ($department === 'admin');
     $allowedDepartments = ['microbiological', 'chemical', 'admin'];
 
-    $statusMap = [1 => 4, 2 => 1, 4 => 0];
+    $statusMap = [1 => 3, 2 => 1, 4 => 0];
 
     if ($headerID <= 0 || $sampleID === '' || $userID === '') {
         echo json_encode(['success'=>false,'message'=>'Sample, header or user information is missing.']);
