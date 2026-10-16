@@ -265,6 +265,7 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                                 <th>MRL Unit</th>
                                 <th>Category</th>
                                 <th>Accreditation</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -1219,7 +1220,7 @@ $('#paramSaveChangesBtn').click(function() {
 });
 
 function loadParameters(sid) {
-    $.getJSON('ajax/fetchparameters.php', { standardID: sid }, function(res) {
+    $.getJSON('ajax/fetchparameters.php', { standardID: sid, includeInactive: 1 }, function(res) {
         var tbody = $('#paramTable tbody');
         tbody.empty();
         if (res.data && res.data.length) {
@@ -1258,11 +1259,21 @@ function loadParameters(sid) {
                     '</select>' +
                     '</td>' +
                     '<td>' +
+                    (Number(p.IsActive) === 1
+                        ? '<span class="badge bg-success">Active</span>'
+                        : '<span class="badge bg-secondary">Inactive</span>') +
+                    '</td>' +
+                    '<td>' +
                     '<button class="btn btn-warning btn-sm edit-param" title="Edit">' +
                     '<i class="fas fa-edit"></i></button> ' +
-                    '<button class="btn btn-danger btn-sm delete-param" ' +
-                    'data-parameterid="' + pid + '">' +
-                    '<i class="fas fa-trash-alt"></i></button>' +
+                    '<button class="btn btn-sm ' + (Number(p.IsActive) === 1 ? 'btn-outline-danger' : 'btn-outline-success') +
+                    ' toggle-param-status" data-parameterid="' + pid +
+                    '" data-standardid="' + currentParamStandardID +
+                    '" data-isactive="' + (Number(p.IsActive) === 1 ? 1 : 0) +
+                    '" title="' + (Number(p.IsActive) === 1 ? 'Hide parameter' : 'Activate parameter') + '">' +
+                    '<i class="fas ' + (Number(p.IsActive) === 1 ? 'fa-eye-slash' : 'fa-eye') + '"></i> ' +
+                    (Number(p.IsActive) === 1 ? 'Hide' : 'Activate') +
+                    '</button>' +
                     '</td></tr>'
                 );
             });
@@ -1358,28 +1369,37 @@ $('#paramAddForm').on('submit', function(e) {
     });
 });
 
-// Delete Parameter
-$(document).on('click', '.delete-param', function() {
-    if (!confirm('Delete this parameter?')) return;
-    var pid = $(this).data('parameterid');
+// Hide / activate parameter without deleting its database row.
+$(document).on('click', '.toggle-param-status', function() {
     var btn = $(this);
+    var pid = parseInt(btn.attr('data-parameterid'), 10);
+    var sid = parseInt(btn.attr('data-standardid'), 10);
+    var current = parseInt(btn.attr('data-isactive'), 10);
+    var next = current === 1 ? 0 : 1;
+    if (!pid || !sid || (current !== 0 && current !== 1)) {
+        generalPurposeTypeLine('Cannot change status: invalid parameter details.');
+        return;
+    }
+    var action = next === 1 ? 'activate' : 'hide';
+    if (!confirm('Are you sure you want to ' + action + ' this parameter?')) return;
     btn.prop('disabled', true);
     $.ajax({
-        url: 'ajax/deleteparameter.php',
+        url: 'ajax/setparameterstatus.php',
         type: 'POST',
-        data: { parameterID: pid, standardID: currentParamStandardID },
+        data: { parameterID: pid, standardID: sid, isActive: next },
         dataType: 'json',
         success: function(res) {
             if (res.success) {
-                generalPurposeTypeLine('Parameter deleted.');
-                loadParameters(currentParamStandardID);
+                generalPurposeTypeLine(res.message);
+                loadParameters(sid);
             } else {
                 generalPurposeTypeLine('Error: ' + res.message);
                 btn.prop('disabled', false);
             }
         },
-        error: function() {
-            generalPurposeTypeLine('Delete failed.');
+        error: function(xhr) {
+            generalPurposeTypeLine('Status update failed.');
+            console.error('Parameter status AJAX error:', xhr.responseText);
             btn.prop('disabled', false);
         }
     });
