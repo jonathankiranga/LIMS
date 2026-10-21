@@ -56,7 +56,7 @@ public function Header() {
 
     if ($includeCompanyWatermark && !empty($record['company_name'])) {
         $watermarkSeries = '';
-        $wmStmt = $conn->prepare("SELECT sh.DocumentNo FROM sample_header sh JOIN test_results tr ON sh.HeaderID = tr.HeaderID WHERE tr.TestID = ?");
+        $wmStmt = $conn->prepare("SELECT sh.DocumentNo FROM sample_header sh JOIN test_results tr ON sh.HeaderID = tr.HeaderID WHERE tr.SampleID = ?");
         if ($wmStmt) {
             $wmSampleId = isset($_REQUEST['sampleID']) ? $_REQUEST['sampleID'] : '';
             $wmStmt->bind_param("s", $wmSampleId);
@@ -148,10 +148,10 @@ public function Header() {
         tr.TestID AS ResultTestID,
         tr.StandardID AS ResultStandardID
     FROM sample_header sh
-    JOIN debtors dr ON sh.CustomerID = dr.itemcode
+    LEFT JOIN debtors dr ON sh.CustomerID = dr.itemcode
     JOIN test_results tr ON sh.HeaderID = tr.HeaderID
     LEFT JOIN sample_tests st ON st.TestID = tr.TestID
-    WHERE tr.TestID = ? ");
+    WHERE tr.SampleID = ? ");
     $stmt->bind_param("s",$sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -622,7 +622,7 @@ function findLABCODEFile($PathPrefix) {
 function getdatesamplereceived($sampleID){
     global $conn;
     $stmt = $conn->prepare("SELECT  MIN(created_at) as last_created, 
-            MAX(updated_at) as last_updated  FROM test_results WHERE TestID = ?");
+            MAX(updated_at) as last_updated  FROM test_results WHERE SampleID = ?");
     
     
     $stmt->bind_param("s",$sampleID);
@@ -636,7 +636,7 @@ function getdatesamplereceived($sampleID){
 function getdatesamplecompleteed($sampleID){
     global $conn;
     $stmt = $conn->prepare("SELECT  MIN(created_at) as last_created, 
-            MAX(updated_at) as last_updated  FROM test_results WHERE TestID = ?");
+            MAX(updated_at) as last_updated  FROM test_results WHERE SampleID = ?");
     
     
     $stmt->bind_param("s",$sampleID);
@@ -649,7 +649,7 @@ function getdatesamplecompleteed($sampleID){
 
 function getdatesampleid($sampleID){
     global $conn;
-    $stmt = $conn->prepare("SELECT  SampleID,`rollback`  FROM test_results WHERE TestID = ?");
+    $stmt = $conn->prepare("SELECT  SampleID,`rollback`  FROM test_results WHERE SampleID = ?");
     $stmt->bind_param("s",$sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -767,7 +767,7 @@ function TSDescription($sampleid){
   $stmt = $conn->prepare("SELECT ts.Description
           FROM test_results tr
           JOIN teststandards ts ON ts.StandardID = tr.StandardID
-          WHERE tr.TestID = ?
+          WHERE tr.SampleID = ?
           ORDER BY tr.resultsID DESC
           LIMIT 1");
   if (!$stmt) {
