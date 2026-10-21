@@ -158,38 +158,38 @@ public function Header() {
     
    
             // Shared recipient section: QR code at the top, customer details below.
-    $this->Image($qrcodelink,155,10,18,18);
+    $this->Image($qrcodelink,143,9,18,18);
     
     $this->SetXY(105, 30);
 $this->SetXY(105, 30);
-    $fitFontSize = $this->fitText($record['customer'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['customer'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['customer'], 50), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 4, $this->truncateText($record['customer'], 50), 0, 'L', 0, 1, '', '', true); // Limit characters
    
     $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['company'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['company'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['company'], 50), 0, 'L', 0, 1, '', '', true);
+    $this->MultiCell(95, 4, $this->truncateText($record['company'], 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['postcode'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['postcode'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['postcode'], 50), 0, 'L', 0, 1, '', '', true);
+    $this->MultiCell(95, 4, $this->truncateText($record['postcode'], 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['city'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['city'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['city'], 50), 0, 'L', 0, 1, '', '', true);
+    $this->MultiCell(95, 4, $this->truncateText($record['city'], 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['phone'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['phone'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['phone'], 50), 0, 'L', 0, 1, '', '', true);
+    $this->MultiCell(95, 4, $this->truncateText($record['phone'], 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['email'], 78,$DefaultFont);
+    $fitFontSize = $this->fitText($record['email'], 95,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(78, 5, $this->truncateText($record['email'], 50), 0, 'L', 0, 1, '', '', true);
+    $this->MultiCell(95, 4, $this->truncateText($record['email'], 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(106, 53);
     $this->SetFont('helvetica', 'B', 8);
