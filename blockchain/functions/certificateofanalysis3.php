@@ -158,9 +158,11 @@ class CustomPDF extends TCPDF {
     $record = $result->fetch_assoc();
     
    
-        $this->Image($qrcodelink,187,10,12,12);
+            // Shared recipient section: QR code at the top, customer details below.
+    $this->Image($qrcodelink,155,10,18,18);
     
-$this->SetXY(105, 12);
+    $this->SetXY(105, 30);
+$this->SetXY(105, 30);
     $fitFontSize = $this->fitText($record['customer'], 78,$DefaultFont);
     $this->SetFont('helvetica', 'B', $fitFontSize);
     $this->MultiCell(78, 5, $this->truncateText($record['customer'], 50), 0, 'L', 0, 1, '', '', true); // Limit characters
