@@ -60,20 +60,58 @@ if ($stmt->error) {
 
 // Fetch the results
 $result = $stmt->get_result();
-$samples = [];
+// Keep the existing SQL query. TestID/StatusID determine which test rows
+// qualify; the display data is then grouped by SampleID in PHP.
+$groupedSamples = [];
 while ($row = $result->fetch_assoc()) {
-    $SampleID=trim($row['SampleID']);
-    $SampleFileKey=trim($row['SampleFileKey']);
-    if(file_exists($SampleFileKey)){
-        $fileInfo = pathinfo($SampleFileKey);
-        $fileName = $fileInfo['filename'];     // Output: photo
-        $extension = $fileInfo['extension'];   // Output: jpg
-        $row['SampleFileKey']="uploads/$fileName.$extension";
-    }else{
-        $row['SampleFileKey']='uploads/icons8-no-image-100.png';
+    $sampleKey = trim((string)($row['ResultSampleID'] ?? $row['SampleID'] ?? ''));
+    if ($sampleKey === '') {
+        continue;
     }
-    $samples[] = $row;
+
+    if (!isset($groupedSamples[$sampleKey])) {
+        $SampleFileKey = trim((string)($row['SampleFileKey'] ?? ''));
+        if ($SampleFileKey !== '' && file_exists($SampleFileKey)) {
+            $fileInfo = pathinfo($SampleFileKey);
+            $fileName = $fileInfo['filename'] ?? '';
+            $extension = $fileInfo['extension'] ?? '';
+            $row['SampleFileKey'] = $fileName !== '' && $extension !== ''
+                ? "uploads/$fileName.$extension"
+                : 'uploads/icons8-no-image-100.png';
+        } else {
+            $row['SampleFileKey'] = 'uploads/icons8-no-image-100.png';
+        }
+
+        $row['ResultSampleID'] = $sampleKey;
+        $row['ApprovedTestCount'] = 0;
+        $row['ApprovedTestIDs'] = [];
+        $row['ApprovedResultsIDs'] = [];
+        $groupedSamples[$sampleKey] = $row;
+    }
+
+    $groupedSamples[$sampleKey]['ApprovedTestCount']++;
+    if (isset($row['TestID'])) {
+        $groupedSamples[$sampleKey]['ApprovedTestIDs'][] = $row['TestID'];
+    }
+    if (isset($row['resultsID'])) {
+        $groupedSamples[$sampleKey]['ApprovedResultsIDs'][] = $row['resultsID'];
+    }
+
+    // Prefer the latest email tracking values present in the joined row.
+    if (!empty($row['COALastEmailedAt'])) {
+        $groupedSamples[$sampleKey]['COALastEmailedAt'] = $row['COALastEmailedAt'];
+    }
+    if (!empty($row['COALastEmailStatus'])) {
+        $groupedSamples[$sampleKey]['COALastEmailStatus'] = $row['COALastEmailStatus'];
+    }
+    if (isset($row['COAEmailSendCount'])) {
+        $groupedSamples[$sampleKey]['COAEmailSendCount'] = max(
+            (int)($groupedSamples[$sampleKey]['COAEmailSendCount'] ?? 0),
+            (int)$row['COAEmailSendCount']
+        );
+    }
 }
+$samples = array_values($groupedSamples);
 
 // Get total records for pagination
 $total_query = "SELECT COUNT(*) AS total FROM test_results TR WHERE TR.StatusID = 4";
