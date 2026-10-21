@@ -429,7 +429,7 @@
 	                    <td class="send-status"><span class="status-chip ${statusClass}">${status}</span></td>
 	                    <td>
 	                        <div class="table-actions">
-	                            <button class="send-mail-btn printpdf" data-sampleid="${sample.TestID}" title="Email certificate">
+	                            <button class="send-mail-btn printpdf" data-sampleid="${escapeHtml(sample.ResultSampleID)}" title="Email certificate">
 	                                <i class="fa-solid fa-paper-plane"></i>
 	                            </button>
 	                            <button
@@ -549,7 +549,7 @@
     }
 
     function updateRowSendTracking(sampleID, response) {
-        const row = $(`#data-table tbody tr[data-testid="${sampleID}"]`);
+        const row = $(`#data-table tbody tr[data-sampleid="${sampleID}"]`);
         if (!row.length) {
             return;
         }
