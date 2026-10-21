@@ -346,7 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
                 <thead>
     <tr style="background-color: #3498db; color: white;">
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 55%;">PARAMETER</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">METHOD</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;"><strong>Method</strong></th>
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">RESULTS</th>
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">LIMITS</th>
     </tr>
@@ -362,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
  
       $html .= '<tr>
             <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . '<strong>' . htmlspecialchars(ucwords(strtolower(trim((string)$sample['Method']))), ENT_QUOTES, 'UTF-8') . '</strong>' . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $resutlts . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $standard . '</td>
           </tr>';
@@ -394,7 +394,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
  $reportFooterHtml = buildFooterHtml(getsignature());
 
     // Write the HTML content to the PDF
-$html = str_replace('X2', '-', $html);
     $pdf->writeHTML($html, true, false, true, false, '');
 
 // Output the PDF as a string for AJAX
@@ -712,7 +711,7 @@ function validateresults($row){
      
      if($row['ResultStatus']){
          $results['results'] = $row['ResultStatus'];
-         $results['standard']='X²';
+         $results['standard'] = '-';
          $results['grade']   ='';
      }
      
