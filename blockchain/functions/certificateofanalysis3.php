@@ -324,9 +324,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $SampletypeNotes = TSDescription($sampleID);
  
     $stmt = $conn->prepare("SELECT tr.*,tp.*,ts.* FROM test_results tr 
-    join testparameters tp on tp.ParameterID=tr.ParameterID and tp.StandardID=tr.StandardID
-    join teststandards ts on ts.StandardID=tr.StandardID 
-    WHERE tr.`SampleID` = ?   and tr.`StatusID`=4 ");
+    LEFT JOIN testparameters tp ON tp.ParameterID=tr.ParameterID AND tp.StandardID=tr.StandardID
+    LEFT JOIN teststandards ts ON ts.StandardID=tr.StandardID
+    WHERE tr.`SampleID` = ? AND tr.`StatusID` = 4 ");
     $stmt->bind_param("s",$sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -705,7 +705,7 @@ function accreditationParameterName($sample){
 }
 
 function validateresults($row){
-     $results=array();
+     $results = array('results' => '', 'standard' => '', 'grade' => '');
      if($row['MRL_Result']){
          $results['results'] = formatResultNumber($row, $row['MRL_Result']).' '.$row['MRLUnit'];
          $results['standard']= $row['MRL'];
