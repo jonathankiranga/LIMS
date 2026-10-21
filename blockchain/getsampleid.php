@@ -617,7 +617,7 @@ function validateresults($row){
      
      if($row['ResultStatus']){
          $results['results'] = $row['ResultStatus'];
-         $results['standard']='X²';
+         $results['standard'] = '-';
          $results['grade']   ='';
      }
      
