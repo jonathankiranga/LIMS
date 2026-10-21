@@ -1158,12 +1158,12 @@ class LimsSalesApi{
             $stmt = $this->db->prepare("
                 SELECT itemcode, customer, company, postcode, city, country, phone, altcontact, email,
                        curr_cod, IFNULL(salesman, '') AS salespersoncode
-                FROM debtors 
-                WHERE customer LIKE CONCAT('%', ?, '%') 
-                ORDER BY customer ASC
+                FROM debtors
+                WHERE itemcode = ? OR customer LIKE CONCAT('%', ?, '%')
+                ORDER BY CASE WHEN itemcode = ? THEN 0 ELSE 1 END, customer ASC
                 LIMIT ?, ?
             ");
-            $stmt->bind_param("sii", $query, $offset, $limit);
+            $stmt->bind_param("sssii", $query, $query, $query, $offset, $limit);
         } else {
             $stmt = $this->db->prepare("
                 SELECT itemcode, customer, company, postcode, city, country, phone, altcontact, email,
