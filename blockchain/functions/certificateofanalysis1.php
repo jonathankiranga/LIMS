@@ -336,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
                 <thead>
     <tr style="background-color: #3498db; color: white;">
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 46%;">PARAMETER</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">METHOD</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">RESULTS</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 5%;">Low</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 5%;">Opt</th>
@@ -354,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
  
       $html .= '<tr>
             <td style="border: 1px solid #ddd; padding: 17px; width: 46%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . '<strong>' . htmlspecialchars(ucwords(strtolower(trim((string)$sample['Method']))), ENT_QUOTES, 'UTF-8') . '</strong>' . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $sample['Method'] . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $resutlts . '</td>
             <td style="border: 1px solid #ddd; padding: 5px; width: 5%; ' . 
                 ($validatedresults['grade'] == 'blue' ? 'background-color: blue; color: white;' : '') . '">' . 
@@ -393,8 +393,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
    }
  $html .='</div>';
  $reportFooterHtml = buildFooterHtml(getsignature());
-
-    $html = str_replace('X2', '-', $html);
     $pdf->writeHTML($html, true, false, true, false, '');
 
 if($pdf->getPage()>$initialPage){
@@ -716,7 +714,7 @@ function validateresults($row){
      }
      if($row['ResultStatus']){
          $results['results'] = $row['ResultStatus'];
-         $results['standard']= 'X²';
+         $results['standard'] = '-';
          $results['grade']   = '';
      }
      if($row['RangeResult']){
