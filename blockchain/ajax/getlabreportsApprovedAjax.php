@@ -18,25 +18,26 @@ $offset = ($page - 1) * $records_per_page;
 $searchtext = isset($_GET['query']) ? trim($_GET['query']) : '';
 
 // Prepare the query to fetch samples
-$query = "SELECT 
-    st.*, 
-    sh.*, 
-	    dr.*, 
-	    tr.SampleID AS ResultSampleID ,
-	    tr.resultsID,
-	    tr.StatusID AS ResultStatusID,
-	    COALESCE(st.coa_email_send_count, 0) AS COAEmailSendCount,
-	    st.coa_last_emailed_at AS COALastEmailedAt,
-	    st.coa_last_email_status AS COALastEmailStatus
-FROM Sample_Tests st
-JOIN sample_header sh ON st.HeaderID = sh.HeaderID
+$query = "SELECT
+    st.*,
+    sh.*,
+    dr.*,
+    tr.SampleID AS ResultSampleID,
+    tr.TestID AS TestID,
+    tr.resultsID,
+    tr.StatusID AS ResultStatusID,
+    COALESCE(st.coa_email_send_count, 0) AS COAEmailSendCount,
+    st.coa_last_emailed_at AS COALastEmailedAt,
+    st.coa_last_email_status AS COALastEmailStatus
+FROM test_results tr
+JOIN sample_header sh ON tr.HeaderID = sh.HeaderID
 JOIN debtors dr ON sh.CustomerID = dr.itemcode
-JOIN test_results tr ON sh.HeaderID = tr.HeaderID 
+LEFT JOIN Sample_Tests st ON st.TestID = tr.TestID
 WHERE tr.StatusID = 4";
-            if(mb_strlen($searchtext)>2){
-               $query .= " AND (st.SampleID LIKE CONCAT('%', ?, '%') OR sh.DocumentNo LIKE CONCAT('%', ?, '%'))";
-            }
-            $query .=  " order by st.sampleid asc LIMIT ?, ?    ";
+if (mb_strlen($searchtext) > 2) {
+    $query .= " AND (tr.SampleID LIKE CONCAT('%', ?, '%') OR sh.DocumentNo LIKE CONCAT('%', ?, '%'))";
+}
+$query .= " ORDER BY tr.SampleID ASC, tr.TestID ASC LIMIT ?, ?";
       
 // Prepare the statement
 $stmt = $conn->prepare($query);
@@ -77,10 +78,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Get total records for pagination
-$total_query = "SELECT COUNT(*) AS total 
-    FROM sample_tests ST
-         join `test_results` TR on  ST.`TestID` = TR.`TestID` 
-    WHERE TR.StatusID =4";
+$total_query = "SELECT COUNT(*) AS total FROM test_results TR WHERE TR.StatusID = 4";
 $total_result = $conn->query($total_query);
 if (!$total_result) {
      header('Content-Type: application/json');
