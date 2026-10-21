@@ -23,13 +23,13 @@ $sql = "
         tp.Category AS ParamCategory
     FROM test_results tr
     JOIN Sample_Header sp ON tr.HeaderID = sp.HeaderID
-    JOIN testparameters tp
+    LEFT JOIN testparameters tp
       ON tp.StandardID = tr.StandardID
      AND (
           tp.ParameterID = tr.ParameterID
           OR tp.BaseID = tr.ParameterID
      )
-    JOIN teststandards ts ON ts.StandardID = tr.StandardID
+    LEFT JOIN teststandards ts ON ts.StandardID = tr.StandardID
     LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
     WHERE tr.StatusID = ?
 ";
