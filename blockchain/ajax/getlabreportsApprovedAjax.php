@@ -113,6 +113,58 @@ while ($row = $result->fetch_assoc()) {
 }
 $samples = array_values($groupedSamples);
 
+// Resolve debtor emails from ERP by exact CustomerID/itemcode match.
+// The approved-results SQL above remains unchanged.
+$erpConfig = include('../include/config.php');
+$erpApiUrl = is_array($erpConfig) ? trim((string)($erpConfig['ERP_API_URL'] ?? '')) : '';
+$customerEmailCache = [];
+
+foreach ($samples as &$sampleRow) {
+    $customerCode = trim((string)($sampleRow['CustomerID'] ?? ''));
+    $sampleRow['CustomerEmail'] = '';
+
+    if ($customerCode === '' || $erpApiUrl === '') {
+        continue;
+    }
+    if (!array_key_exists($customerCode, $customerEmailCache)) {
+        $postData = json_encode([
+            'action' => 'search_customers',
+            'query' => $customerCode,
+            'limit' => 10,
+            'offset' => 0
+        ]);
+        $ch = curl_init($erpApiUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $erpResponse = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $matchedEmail = '';
+        if ($httpCode === 200 && is_string($erpResponse) && $erpResponse !== '') {
+            $erpData = json_decode($erpResponse, true);
+            foreach (($erpData['customers'] ?? []) as $debtor) {
+                $debtorCode = trim((string)($debtor['itemcode'] ?? $debtor['code'] ?? ''));
+                if ($debtorCode !== '' && strcasecmp($debtorCode, $customerCode) === 0) {
+                    $candidateEmail = trim((string)($debtor['email'] ?? ''));
+                    if ($candidateEmail !== '' && filter_var($candidateEmail, FILTER_VALIDATE_EMAIL)) {
+                        $matchedEmail = $candidateEmail;
+                    }
+                    break;
+                }
+            }
+        }
+        $customerEmailCache[$customerCode] = $matchedEmail;
+    }
+
+    $sampleRow['CustomerEmail'] = $customerEmailCache[$customerCode];
+}
+unset($sampleRow);
+
 // Get total records for pagination
 $total_query = "SELECT COUNT(*) AS total FROM test_results TR WHERE TR.StatusID = 4";
 $total_result = $conn->query($total_query);
