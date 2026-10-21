@@ -85,7 +85,8 @@
               <div class="mb-3">
                 <label for="signature_file" class="form-label">Select Signature Image</label>
                 <image src="" id="blobimage"/>
-                <input type="file" class="form-control" id="signature_file" name="signature_image" accept="image/*" required />
+                <input type="file" class="form-control" id="signature_file" name="signature_image" accept=".png,image/png" required />
+                <small class="form-text text-muted">Transparent PNG only (maximum 5 MB). PNGs with a solid background will be rejected.</small>
               </div>
               <button type="button"  onclick="updateSignature();" class="btn btn-primary">Update Signature</button>
             </form>
