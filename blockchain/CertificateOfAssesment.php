@@ -423,7 +423,7 @@
 	                    <td>${formatDate(sample.Date)}</td>
 	                    <td>${sample.DocumentNo}</td>
 	                    <td>${sample.ResultSampleID}</td>
-	                    <td>${sample.customer}</td>
+	                    <td>${escapeHtml(sample.CustomerName || sample.customer || sample.CustomerID || '')}</td>
 	                    <td>${sample.ExternalSample || ''}</td>
 	                    <td class="send-count">${sample.COAEmailSendCount || 0}</td>
 	                    <td class="send-status"><span class="status-chip ${statusClass}">${status}</span></td>
