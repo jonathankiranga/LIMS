@@ -326,7 +326,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $stmt = $conn->prepare("SELECT tr.*,tp.*,ts.* FROM test_results tr 
     join testparameters tp on tp.ParameterID=tr.ParameterID and tp.StandardID=tr.StandardID
     join teststandards ts on ts.StandardID=tr.StandardID 
-    WHERE tr.`TestID` = ?   and tr.`StatusID`=4 ");
+    WHERE tr.`SampleID` = ?   and tr.`StatusID`=4 ");
     $stmt->bind_param("s",$sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
