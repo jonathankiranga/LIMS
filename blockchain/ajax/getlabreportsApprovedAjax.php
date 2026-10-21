@@ -21,7 +21,6 @@ $searchtext = isset($_GET['query']) ? trim($_GET['query']) : '';
 $query = "SELECT
     st.*,
     sh.*,
-    dr.*,
     tr.SampleID AS ResultSampleID,
     tr.TestID AS TestID,
     tr.resultsID,
@@ -31,7 +30,6 @@ $query = "SELECT
     st.coa_last_email_status AS COALastEmailStatus
 FROM test_results tr
 JOIN sample_header sh ON tr.HeaderID = sh.HeaderID
-JOIN debtors dr ON sh.CustomerID = dr.itemcode
 LEFT JOIN Sample_Tests st ON st.TestID = tr.TestID
 WHERE tr.StatusID = 4";
 if (mb_strlen($searchtext) > 2) {
