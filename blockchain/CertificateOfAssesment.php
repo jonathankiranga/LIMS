@@ -257,6 +257,7 @@
                     <th>Batch No</th>
                     <th>Sample ID</th>
                     <th>Customer Name</th>
+                    <th>Customer Email</th>
                     <th>Sample Source</th>
                     <th>Emails Sent</th>
                     <th>Last Status</th>
@@ -424,6 +425,7 @@
 	                    <td>${sample.DocumentNo}</td>
 	                    <td>${sample.ResultSampleID}</td>
 	                    <td>${escapeHtml(sample.CustomerName || sample.customer || sample.CustomerID || '')}</td>
+	                    <td class="customer-email" data-customerid="${escapeHtml(sample.CustomerID || '')}">${escapeHtml(sample.CustomerEmail || 'Email not found')}</td>
 	                    <td>${sample.ExternalSample || ''}</td>
 	                    <td class="send-count">${sample.COAEmailSendCount || 0}</td>
 	                    <td class="send-status"><span class="status-chip ${statusClass}">${status}</span></td>
@@ -434,7 +436,7 @@
 	                            </button>
 	                            <button
 	                                class="preview-btn coa-preview"
-	                                data-sampleid="${sample.TestID}"
+	                                data-sampleid="${escapeHtml(sample.ResultSampleID)}"
 	                                title="Preview COA"
 	                            >
 	                                <i class="fa-solid fa-eye"></i>
