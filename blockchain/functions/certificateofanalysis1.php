@@ -779,13 +779,29 @@ function getsignature(){
         $candidates = [];
 
         if ($rawPath !== '') {
+            // Try the exact stored path first when it is a filesystem path.
             if (preg_match('/^[A-Za-z]:[\\\\\\/]/', $rawPath) || strpos($rawPath, '/') === 0 || strpos($rawPath, '\\\\') === 0) {
                 $candidates[] = $rawPath;
             } else {
-$candidates[] = __DIR__ . '/../' . ltrim($rawPath, '/\\');
-            $candidates[] = __DIR__ . '/' . ltrim($rawPath, '/\\');
-            $candidates[] = __DIR__ . '/../images/' . ltrim($rawPath, '/\\');
-            $candidates[] = dirname(__DIR__) . '/' . ltrim($rawPath, '/\\');
+                $relativePath = ltrim(str_replace('\\\\', '/', $rawPath), '/');
+                $candidates[] = __DIR__ . '/../' . $relativePath;
+                $candidates[] = __DIR__ . '/' . $relativePath;
+            }
+
+            // Signatures uploaded by update_signature.php are stored in blockchain/images/
+            // and the database normally stores only the filename (for example, sig12.png).
+            // Also try the basename so paths saved on another server still resolve here.
+            $pathPart = parse_url(str_replace('\\\\', '/', $rawPath), PHP_URL_PATH);
+            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $rawPath));
+            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
+                $candidates[] = __DIR__ . '/../images/' . $fileName;
+                $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
+            }
+
+            // Handle older values saved as images/<filename>.
+            $relativePath = ltrim(str_replace('\\\\', '/', $rawPath), '/');
+            if (strpos($relativePath, 'images/') === 0) {
+                $candidates[] = dirname(__DIR__) . '/' . $relativePath;
             }
         }
 
@@ -793,11 +809,12 @@ $candidates[] = __DIR__ . '/../' . ltrim($rawPath, '/\\');
 
         foreach ($candidates as $candidate) {
             if ($candidate && is_file($candidate) && is_readable($candidate)) {
-                return str_replace('\\', '/', $candidate);
+                $resolvedPath = realpath($candidate);
+                return str_replace('\\\\', '/', $resolvedPath !== false ? $resolvedPath : $candidate);
             }
         }
 
-        return str_replace('\\', '/', $defaultSignaturePath);
+        return str_replace('\\\\', '/', $defaultSignaturePath);
     };
 
     $companyRow = [];
