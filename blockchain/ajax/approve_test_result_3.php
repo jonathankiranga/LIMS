@@ -75,17 +75,47 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
     $statusMap=[1=>4,4=>0]; if(!isset($statusMap[$approvalStatus])){echo json_encode(['success'=>false,'message'=>'Invalid sample review decision.']);exit;}
     $statusID=$statusMap[$approvalStatus]; $conn->begin_transaction();
     try {
-        $stmt=$conn->prepare("SELECT tr.TestID FROM test_results tr JOIN sample_tests st ON st.TestID=tr.TestID WHERE tr.HeaderID=? AND st.SampleID=? AND tr.StatusID=3");
-        if(!$stmt)throw new Exception('Failed to prepare sample review lookup: '.$conn->error);
-        $stmt->bind_param('is',$headerID,$sampleID); if(!$stmt->execute())throw new Exception('Failed to load sample review tests: '.$stmt->error);
-        $rs=$stmt->get_result();$testIDs=[];while($r=$rs->fetch_assoc())$testIDs[]=(int)$r['TestID'];$stmt->close();
-        if(!$testIDs)throw new Exception('No pending review tests were found for this sample block.');
-        $stmt=$conn->prepare("UPDATE test_results SET approvedby=?, StatusID=? WHERE HeaderID=? AND StatusID=3");
-        if(!$stmt)throw new Exception('Failed to prepare sample review update: '.$conn->error);
-        $stmt->bind_param('sii',$userID,$statusID,$headerID);if(!$stmt->execute())throw new Exception('Failed to update sample review block: '.$stmt->error);$updated=$stmt->affected_rows;$stmt->close();
-        if($updated!==count($testIDs))throw new Exception('Sample review changed during approval. No partial review block was committed.');
-        $ph=implode(',',array_fill(0,count($testIDs),'?'));$stmt=$conn->prepare("UPDATE sample_tests SET datetestended=NOW() WHERE TestID IN ($ph)");
-        if(!$stmt)throw new Exception('Failed to prepare review completion update: '.$conn->error);$types=str_repeat('i',count($testIDs));$bind=[$types];foreach($testIDs as $id)$bind[]=$id;$refs=[];foreach($bind as $k=>$v)$refs[$k]=&$bind[$k];call_user_func_array([$stmt,'bind_param'],$refs);if(!$stmt->execute())throw new Exception('Failed to update review completion dates: '.$stmt->error);$stmt->close();
+        // test_results is authoritative for this workflow. Do not depend on
+        // sample_tests, which is no longer populated by current registration.
+        // Lock the exact pending result rows for this HeaderID + SampleID.
+        $stmt = $conn->prepare("SELECT tr.resultsID, tr.TestID
+                                FROM test_results tr
+                                WHERE tr.HeaderID = ?
+                                  AND tr.SampleID = ?
+                                  AND tr.StatusID = 3
+                                FOR UPDATE");
+        if (!$stmt) throw new Exception('Failed to prepare sample review lookup: ' . $conn->error);
+        $stmt->bind_param('is', $headerID, $sampleID);
+        if (!$stmt->execute()) throw new Exception('Failed to load sample review tests: ' . $stmt->error);
+        $rs = $stmt->get_result();
+        $resultIDs = [];
+        $testIDs = [];
+        while ($r = $rs->fetch_assoc()) {
+            $resultIDs[] = (int)$r['resultsID'];
+            $testIDs[] = (int)$r['TestID'];
+        }
+        $stmt->close();
+
+        if (!$resultIDs) {
+            throw new Exception('No pending review results were found for this sample block (HeaderID ' . $headerID . ', SampleID ' . $sampleID . ', StatusID 3).');
+        }
+
+        // Update only the exact sample block; avoid changing other samples
+        // that happen to share the same HeaderID.
+        $stmt = $conn->prepare("UPDATE test_results
+                                SET approvedby = ?, StatusID = ?
+                                WHERE HeaderID = ?
+                                  AND SampleID = ?
+                                  AND StatusID = 3");
+        if (!$stmt) throw new Exception('Failed to prepare sample review update: ' . $conn->error);
+        $stmt->bind_param('siis', $userID, $statusID, $headerID, $sampleID);
+        if (!$stmt->execute()) throw new Exception('Failed to update sample review block: ' . $stmt->error);
+        $updated = $stmt->affected_rows;
+        $stmt->close();
+
+        if ($updated !== count($resultIDs)) {
+            throw new Exception('Sample review changed during approval. Expected ' . count($resultIDs) . ' result row(s), updated ' . $updated . '. No partial review block was committed.');
+        }
         // Blockchain audit is best-effort and must never block approval.
         $blockchainSavepoint = false;
         try {
@@ -109,7 +139,7 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
             $stmtLedger->bind_param('sssss',$previousHash,$currentHash,$digitalSignature,$encryptedData,$userID);
             if(!$stmtLedger->execute()) throw new Exception('Failed to write blockchain ledger entry: '.$stmtLedger->error);
             $blockId=$conn->insert_id;$stmtLedger->close();
-            foreach($testIDs as $recordID) log_transaction_metadata($conn,$blockId,$recordID,'test_results');
+            foreach($resultIDs as $recordID) log_transaction_metadata($conn,$blockId,$recordID,'test_results');
             logAction($conn,'SAMPLE_REVIEW_BLOCK_'.$decisionText,$sampleID,$currentHash,$userID,'SUCCESS');
             $conn->query("RELEASE SAVEPOINT blockchain_attempt");
         } catch (Throwable $blockchainError) {
