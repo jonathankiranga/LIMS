@@ -266,30 +266,29 @@ function enqueue_certificate_email_job(mysqli $conn, $testId, $reportOption, $re
     return $jobId;
 }
 
-function get_certificate_email_context(mysqli $conn, $testId)
+function get_certificate_email_context(mysqli $conn, $sampleID)
 {
+    $sampleID = trim((string)$sampleID);
     $sql = "
         SELECT
-            st.TestID,
-            st.SampleID,
-            st.StandardID,
-            COALESCE(st.coa_email_send_count, 0) AS coa_email_send_count,
-            st.coa_last_emailed_at,
-            st.coa_last_email_status,
+            tr.SampleID,
+            MIN(tr.TestID) AS TestID,
+            MIN(tr.StandardID) AS StandardID,
             sh.HeaderID,
             sh.DocumentNo,
             sh.Date,
             sh.CustomerName,
             sh.CustomerID,
-            dr.customer,
-            dr.company,
-            dr.email,
+            sh.CustomerName AS customer,
+            '' AS company,
+            '' AS email,
             ts.StandardName
-        FROM sample_tests st
-        INNER JOIN sample_header sh ON st.HeaderID = sh.HeaderID
-        LEFT JOIN debtors dr ON sh.CustomerID = dr.itemcode
-        LEFT JOIN teststandards ts ON st.StandardID = ts.StandardID
-        WHERE st.TestID = ?
+        FROM test_results tr
+        INNER JOIN sample_header sh ON tr.HeaderID = sh.HeaderID
+        LEFT JOIN teststandards ts ON ts.StandardID = tr.StandardID
+        WHERE tr.SampleID = ? AND tr.StatusID = 4
+        GROUP BY tr.SampleID, sh.HeaderID, sh.DocumentNo, sh.Date, sh.CustomerName, sh.CustomerID, ts.StandardName
+        ORDER BY MIN(tr.resultsID) ASC
         LIMIT 1
     ";
 
@@ -298,11 +297,73 @@ function get_certificate_email_context(mysqli $conn, $testId)
         throw new RuntimeException('Failed to prepare certificate email context query: ' . $conn->error);
     }
 
-    $stmt->bind_param('i', $testId);
+    $stmt->bind_param('s', $sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
     $context = $result ? ($result->fetch_assoc() ?: []) : [];
     $stmt->close();
+
+    if (!$context) {
+        return [];
+    }
+
+    $customerCode = trim((string)($context['CustomerID'] ?? ''));
+    if ($customerCode === '') {
+        throw new RuntimeException('The selected sample has no CustomerID; the ERP debtor cannot be identified.');
+    }
+
+    // ERP debtor master is authoritative. Match the returned itemcode exactly.
+    $config = include('../include/config.php');
+    $erpApiUrl = is_array($config) ? trim((string)($config['ERP_API_URL'] ?? '')) : '';
+    if ($erpApiUrl === '') {
+        throw new RuntimeException('ERP_API_URL is not configured; customer email could not be verified.');
+    }
+
+    $postData = json_encode([
+        'action' => 'search_customers',
+        'query' => $customerCode,
+        'limit' => 10,
+        'offset' => 0
+    ]);
+    $ch = curl_init($erpApiUrl);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $erpResponse = curl_exec($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($httpCode !== 200 || !is_string($erpResponse) || $erpResponse === '') {
+        throw new RuntimeException('ERP debtor lookup failed' . ($curlError !== '' ? ': ' . $curlError : '.'));
+    }
+
+    $erpData = json_decode($erpResponse, true);
+    $matched = null;
+    foreach (($erpData['customers'] ?? []) as $debtor) {
+        $debtorCode = trim((string)($debtor['itemcode'] ?? $debtor['code'] ?? ''));
+        if ($debtorCode !== '' && strcasecmp($debtorCode, $customerCode) === 0) {
+            $matched = $debtor;
+            break;
+        }
+    }
+
+    if (!$matched) {
+        throw new RuntimeException('No exact ERP debtor match was found for CustomerID ' . $customerCode . '.');
+    }
+
+    $email = trim((string)($matched['email'] ?? ''));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('The matched ERP debtor has no valid email address.');
+    }
+
+    $context['email'] = $email;
+    $context['customer'] = (string)($matched['customer'] ?? $matched['name'] ?? $context['CustomerName'] ?? '');
+    $context['company'] = (string)($matched['company'] ?? '');
+    $context['company_name'] = (string)($matched['company'] ?? 'Lab Team');
 
     return $context;
 }
