@@ -1,7 +1,12 @@
--- Qualitative result options for ResultType = 'qualitativeField'.
--- Run once against the LIMS database. Existing test_results rows are not modified.
--- Add options by INSERTing rows; hide options by setting IsActive = 0.
--- Do not delete options that may already be referenced by historical results.
+-- Safe, additive migration: qualitative result options only.
+-- Target database: lims_encrpted (verify the selected database before running).
+-- This migration does NOT ALTER existing tables or modify test_results.
+-- Back up the database before applying any production migration.
+-- Safe to rerun: table creation is conditional and seed rows are inserted only if absent.
+--
+-- After running, verify with:
+-- SELECT OptionID, OptionValue, OptionLabel, IsActive
+-- FROM qualitative_result_options ORDER BY DisplayOrder, OptionLabel;
 
 CREATE TABLE IF NOT EXISTS qualitative_result_options (
     OptionID INT NOT NULL AUTO_INCREMENT,
@@ -9,13 +14,14 @@ CREATE TABLE IF NOT EXISTS qualitative_result_options (
     OptionLabel VARCHAR(150) NOT NULL,
     DisplayOrder INT NOT NULL DEFAULT 0,
     IsActive TINYINT(1) NOT NULL DEFAULT 1,
-    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CreatedAt DATETIME NULL DEFAULT NULL,
+    UpdatedAt DATETIME NULL DEFAULT NULL,
     PRIMARY KEY (OptionID),
     UNIQUE KEY uq_qualitative_result_options_value (OptionValue),
     KEY idx_qualitative_result_options_active_order (IsActive, DisplayOrder)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Preserve existing rows and any admin changes if this migration is rerun.
 INSERT IGNORE INTO qualitative_result_options
     (OptionValue, OptionLabel, DisplayOrder, IsActive)
 VALUES
@@ -29,14 +35,15 @@ VALUES
     ('Error', 'Error', 8, 1),
     ('Invalid', 'Invalid', 9, 1);
 
--- Example: hide an option without deleting it:
+-- Hide an option without deleting it:
 -- UPDATE qualitative_result_options SET IsActive = 0 WHERE OptionValue = 'Trace';
 
--- Example: add a new option:
--- INSERT INTO qualitative_result_options (OptionValue, OptionLabel, DisplayOrder, IsActive)
+-- Add an option:
+-- INSERT INTO qualitative_result_options
+--     (OptionValue, OptionLabel, DisplayOrder, IsActive)
 -- VALUES ('Not Applicable', 'Not Applicable', 10, 1);
 
--- Qualitative result forms should load selectable options using:
+-- Forms should select active options only:
 -- SELECT OptionValue, OptionLabel
 -- FROM qualitative_result_options
 -- WHERE IsActive = 1
