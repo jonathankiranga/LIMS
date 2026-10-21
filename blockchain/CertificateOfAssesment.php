@@ -585,7 +585,7 @@
         fetchData(1,searchQuery);
     });
     
-    let casPreviewMode = false;
+    window.casPreviewMode = window.casPreviewMode || false;
 
     document.getElementById("casNoPic").addEventListener("click", function () {
          const sampleID = $("#optionprint").val();
@@ -593,7 +593,7 @@
          const modal = bootstrap.Modal.getInstance(modalElement);
  // Hide the modal
           modal.hide();
-         if (casPreviewMode) {
+         if (window.casPreviewMode) {
              previewCertificate(sampleID, 1);
          } else {
              getreportwithoption(sampleID,1);
@@ -607,7 +607,7 @@
 
     // Hide the modal
     modal.hide();
-        if (casPreviewMode) {
+        if (window.casPreviewMode) {
             previewCertificate(sampleID, 2);
         } else {
             getreportwithoption(sampleID,2);
@@ -619,7 +619,7 @@
            const modalElement = document.getElementById('casModal');
            const modal = bootstrap.Modal.getInstance(modalElement);
            modal.hide();
-           if (casPreviewMode) {
+           if (window.casPreviewMode) {
                previewCertificate(sampleID, 3);
            } else {
                getreportwithoption(sampleID,3);
@@ -630,7 +630,7 @@
 	        const activeRow = $(this); // Use 'this' to get the clicked button
 	        const sampleID = activeRow.data("sampleid");
 	        $("#optionprint").val(sampleID);
-	        casPreviewMode = false;
+	        window.casPreviewMode = false;
 	        $("#casModalLabel").text("Email Certificate of Analysis");
 	        $("#casModalDesc").text("Select the Certificate of Analysis (COA) format to email to the customer:");
 	        const modal = new bootstrap.Modal(document.getElementById('casModal'), { backdrop: 'static', keyboard: false });
@@ -641,7 +641,7 @@
 	        const activeRow = $(this);
 	        const sampleID = activeRow.data("sampleid");
 	        $("#optionprint").val(sampleID);
-	        casPreviewMode = true;
+	        window.casPreviewMode = true;
 	        $("#casModalLabel").text("Select Certificate of Analysis (COA) format to preview");
 	        $("#casModalDesc").text("Select the Certificate of Analysis (COA) format to preview:");
 	        const modal = new bootstrap.Modal(document.getElementById('casModal'), { backdrop: 'static', keyboard: false });
