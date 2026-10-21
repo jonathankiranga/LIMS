@@ -776,32 +776,29 @@ function getsignature(){
 
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
         $rawPath = trim((string)$rawPath);
+        $normalizedPath = str_replace(chr(92), '/', $rawPath);
         $candidates = [];
 
         if ($rawPath !== '') {
-            // Try the exact stored path first when it is a filesystem path.
-            if (preg_match('/^[A-Za-z]:[\\\\\\/]/', $rawPath) || strpos($rawPath, '/') === 0 || strpos($rawPath, '\\\\') === 0) {
+            // Try the exact stored path first.
+            if (preg_match('/^[A-Za-z]:\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) {
                 $candidates[] = $rawPath;
             } else {
-                $relativePath = ltrim(str_replace('\\\\', '/', $rawPath), '/');
-                $candidates[] = __DIR__ . '/../' . $relativePath;
-                $candidates[] = __DIR__ . '/' . $relativePath;
+                $candidates[] = __DIR__ . '/../' . ltrim($normalizedPath, '/');
+                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
             }
 
-            // Signatures uploaded by update_signature.php are stored in blockchain/images/
-            // and the database normally stores only the filename (for example, sig12.png).
-            // Also try the basename so paths saved on another server still resolve here.
-            $pathPart = parse_url(str_replace('\\\\', '/', $rawPath), PHP_URL_PATH);
-            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $rawPath));
+            // Signatures uploaded by update_signature.php are saved in blockchain/images/.
+            // The database commonly stores only the filename; try that location even if
+            // the database contains a stale absolute path from another server.
+            $pathPart = parse_url($normalizedPath, PHP_URL_PATH);
+            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
             if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
-                $candidates[] = __DIR__ . '/../images/' . $fileName;
                 $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
             }
 
-            // Handle older values saved as images/<filename>.
-            $relativePath = ltrim(str_replace('\\\\', '/', $rawPath), '/');
-            if (strpos($relativePath, 'images/') === 0) {
-                $candidates[] = dirname(__DIR__) . '/' . $relativePath;
+            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) {
+                $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
             }
         }
 
@@ -810,11 +807,11 @@ function getsignature(){
         foreach ($candidates as $candidate) {
             if ($candidate && is_file($candidate) && is_readable($candidate)) {
                 $resolvedPath = realpath($candidate);
-                return str_replace('\\\\', '/', $resolvedPath !== false ? $resolvedPath : $candidate);
+                return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate);
             }
         }
 
-        return str_replace('\\\\', '/', $defaultSignaturePath);
+        return str_replace(chr(92), '/', $defaultSignaturePath);
     };
 
     $companyRow = [];
