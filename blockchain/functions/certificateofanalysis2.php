@@ -141,13 +141,11 @@ public function Header() {
     $stmt = $conn->prepare("
     SELECT
         sh.*,
-        dr.*,
         st.*,
         tr.SampleID AS ResultSampleID,
         tr.TestID AS ResultTestID,
         tr.StandardID AS ResultStandardID
     FROM sample_header sh
-    LEFT JOIN debtors dr ON sh.CustomerID = dr.itemcode
     JOIN test_results tr ON sh.HeaderID = tr.HeaderID
     LEFT JOIN sample_tests st ON st.TestID = tr.TestID
     WHERE tr.SampleID = ? ");
@@ -155,6 +153,9 @@ public function Header() {
     $stmt->execute();
     $result = $stmt->get_result();
     $record = $result->fetch_assoc();
+    $customerCode = trim((string)($record['CustomerID'] ?? ''));
+    $customerDetails = $this->fetchErpCustomerDetails($customerCode);
+    $record = array_merge(is_array($record) ? $record : [], $customerDetails);
     
    
             // Shared recipient section: QR code at the top, customer details below.
@@ -248,6 +249,74 @@ $this->SetXY(105, 30);
     $this->MultiCell(95, 5,'Condition:'. $record['condition_of_sample'], 0, 'L', 0, 1, '', '', true); // Limit characters
     
  
+}
+
+
+private function fetchErpCustomerDetails($customerCode) {
+    global $config;
+
+    static $customerCache = [];
+    $customerCode = trim((string)$customerCode);
+    $emptyDetails = [
+        'customer' => '',
+        'company' => '',
+        'postcode' => '',
+        'city' => '',
+        'phone' => '',
+        'email' => ''
+    ];
+
+    if ($customerCode === '') {
+        return $emptyDetails;
+    }
+    if (array_key_exists($customerCode, $customerCache)) {
+        return $customerCache[$customerCode];
+    }
+
+    $erpApiUrl = is_array($config) ? trim((string)($config['ERP_API_URL'] ?? '')) : '';
+    if ($erpApiUrl === '' || !function_exists('curl_init')) {
+        $customerCache[$customerCode] = $emptyDetails;
+        return $customerCache[$customerCode];
+    }
+
+    $postData = json_encode([
+        'action' => 'search_customers',
+        'query' => $customerCode,
+        'limit' => 10,
+        'offset' => 0
+    ]);
+
+    $ch = curl_init($erpApiUrl);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $erpResponse = curl_exec($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200 && is_string($erpResponse) && $erpResponse !== '') {
+        $erpData = json_decode($erpResponse, true);
+        foreach (($erpData['customers'] ?? []) as $debtor) {
+            $debtorCode = trim((string)($debtor['itemcode'] ?? $debtor['code'] ?? ''));
+            if ($debtorCode !== '' && strcasecmp($debtorCode, $customerCode) === 0) {
+                $customerCache[$customerCode] = [
+                    'customer' => trim((string)($debtor['customer'] ?? $debtor['name'] ?? '')),
+                    'company' => trim((string)($debtor['company'] ?? '')),
+                    'postcode' => trim((string)($debtor['postcode'] ?? '')),
+                    'city' => trim((string)($debtor['city'] ?? '')),
+                    'phone' => trim((string)($debtor['phone'] ?? '')),
+                    'email' => trim((string)($debtor['email'] ?? ''))
+                ];
+                return $customerCache[$customerCode];
+            }
+        }
+    }
+
+    $customerCache[$customerCode] = $emptyDetails;
+    return $customerCache[$customerCode];
 }
 
 private function drawCompanyWatermark($watermarkText) {
