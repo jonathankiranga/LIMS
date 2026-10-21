@@ -47,6 +47,35 @@
 
 <script>
 var currentPage = 1;
+var qualitativeResultOptions = [];
+var qualitativeOptionsLoaded = false;
+
+function loadQualitativeOptions(callback) {
+    $.ajax({
+        url: 'ajax/get_qualitative_result_options.php',
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            if (response && response.success && Array.isArray(response.options)) {
+                qualitativeResultOptions = response.options;
+                qualitativeOptionsLoaded = true;
+            } else {
+                qualitativeResultOptions = [];
+                qualitativeOptionsLoaded = false;
+                console.error('Could not load qualitative result options:', response && response.message);
+            }
+        },
+        error: function(xhr) {
+            qualitativeResultOptions = [];
+            qualitativeOptionsLoaded = false;
+            console.error('Could not load qualitative result options:', xhr.responseText);
+        },
+        complete: function() {
+            if (typeof callback === 'function') callback();
+        }
+    });
+}
 
 // Bind filter & global result type
 function bindFilter() {
@@ -142,16 +171,17 @@ function showRowEditor($tr, type) {
     if (type === 'quantitativeField') {
         $input = $('<input>', { type: 'number', class: 'result-value form-control', placeholder: 'Enter value' });
     } else if (type === 'qualitativeField') {
-        $input = $('<select>', { class: 'result-value form-control' }).html(`
-            <option value="">-- Select --</option>
-            <option value="ND">Not Detected</option>
-            <option value="Absent">Absent</option>
-            <option value="Detected">Detected</option>
-            <option value="Below Limit">Below Limit</option>
-            <option value="Trace">Trace</option>
-			<option value="Above Limit">Above Limit</option><option value="Inconclusive">Inconclusive</option>
-			<option value="Error">Error</option><option value="Invalid">Invalid</option>
-        `);
+        $input = $('<select>', { class: 'result-value form-control' });
+        $input.append($('<option>', { value: '' }).text(
+            qualitativeOptionsLoaded ? '-- Select --' : 'Qualitative options unavailable'
+        ));
+        if (qualitativeOptionsLoaded) {
+            qualitativeResultOptions.forEach(function(option) {
+                $input.append(
+                    $('<option>').val(option.value).text(option.label)
+                );
+            });
+        }
     } else if (type === 'rangeField') {
         $input = $('<input>', { type: 'text', class: 'result-value form-control', placeholder: 'e.g. <2 or 1-5' });
     }
@@ -236,7 +266,9 @@ function renderPagination(totalPages, page) {
 }
 
 $(function() {
-    loadGrid(1);
     bindFilter();
+    loadQualitativeOptions(function() {
+        loadGrid(1);
+    });
 });
 </script>
