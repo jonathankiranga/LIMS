@@ -86,7 +86,19 @@
                 <label for="signature_file" class="form-label">Select Signature Image</label>
                 <image src="" id="blobimage"/>
                 <input type="file" class="form-control" id="signature_file" name="signature_image" accept=".png,image/png" required />
-                <small class="form-text text-muted">Transparent PNG only (maximum 5 MB). PNGs with a solid background will be rejected.</small>
+                <div class="form-text text-muted mt-2">
+                  <strong>Preparing Your Signature</strong>
+                  <ol class="mb-2 mt-1 ps-3">
+                    <li>Sign on plain white paper and take a clear photo, or create a digital signature.</li>
+                    <li>Remove the white background using <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> or <a href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Canva</a>.</li>
+                    <li>Download or export the image as a <strong>PNG with a transparent background</strong>. Do not save it as JPEG/JPG.</li>
+                    <li>Select the resulting PNG file and upload it here.</li>
+                  </ol>
+                  <div class="alert alert-warning py-2 px-3 mb-0" role="note">
+                    <strong>Important:</strong> A PNG file is not automatically transparent. The background must actually be removed. The application rejects PNG images that contain no transparent pixels.
+                    <br><strong>Maximum file size:</strong> 5 MB.
+                  </div>
+                </div>
               </div>
               <button type="button"  onclick="updateSignature();" class="btn btn-primary">Update Signature</button>
             </form>
