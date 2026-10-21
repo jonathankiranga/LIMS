@@ -56,7 +56,7 @@ public function Header() {
 
     if ($includeCompanyWatermark && !empty($record['company_name'])) {
         $watermarkSeries = '';
-        $wmStmt = $conn->prepare("SELECT sh.DocumentNo FROM sample_header sh JOIN sample_tests st ON sh.HeaderID = st.HeaderID WHERE st.TestID = ?");
+        $wmStmt = $conn->prepare("SELECT sh.DocumentNo FROM sample_header sh JOIN test_results tr ON sh.HeaderID = tr.HeaderID WHERE tr.TestID = ?");
         if ($wmStmt) {
             $wmSampleId = isset($_REQUEST['sampleID']) ? $_REQUEST['sampleID'] : '';
             $wmStmt->bind_param("s", $wmSampleId);
@@ -140,14 +140,18 @@ public function Header() {
     $qrcodelink = $QRcode->getQr($sampleID);
 
     $stmt = $conn->prepare("
-    SELECT 
-        sh.*, 
-        dr.*, 
-        st.*
-    FROM sample_header sh 
-    JOIN debtors dr ON sh.CustomerID = dr.itemcode 
-    JOIN sample_tests st ON sh.HeaderID = st.HeaderID
-     WHERE st.TestID = ? ");
+    SELECT
+        sh.*,
+        dr.*,
+        st.*,
+        tr.SampleID AS ResultSampleID,
+        tr.TestID AS ResultTestID,
+        tr.StandardID AS ResultStandardID
+    FROM sample_header sh
+    JOIN debtors dr ON sh.CustomerID = dr.itemcode
+    JOIN test_results tr ON sh.HeaderID = tr.HeaderID
+    LEFT JOIN sample_tests st ON st.TestID = tr.TestID
+    WHERE tr.TestID = ? ");
     $stmt->bind_param("s",$sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -760,14 +764,24 @@ function validateresults($row){
  
 function TSDescription($sampleid){
   global $conn;
-  
-  $sql =sprintf("SELECT `Description` FROM teststandards TS "
-          . "join `Sample_Tests` ST on TS.StandardID=ST.StandardID where `SampleID`='%s'",$sampleid);
-   $result = $conn->query($sql);
-   $record = $result ? $result->fetch_assoc() : null;
-   $description = $record['Description'] ?? '';
-    
-   return  htmlspecialchars($description);
+  $stmt = $conn->prepare("SELECT ts.Description
+          FROM test_results tr
+          JOIN teststandards ts ON ts.StandardID = tr.StandardID
+          WHERE tr.TestID = ?
+          ORDER BY tr.resultsID DESC
+          LIMIT 1");
+  if (!$stmt) {
+      return '';
+  }
+  $stmt->bind_param("s", $sampleid);
+  if (!$stmt->execute()) {
+      $stmt->close();
+      return '';
+  }
+  $result = $stmt->get_result();
+  $record = $result ? $result->fetch_assoc() : null;
+  $stmt->close();
+  return $record['Description'] ?? '';
 }
 
 function statementofconformity(){
