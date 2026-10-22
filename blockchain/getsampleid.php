@@ -462,13 +462,13 @@ $pdf->MultiCell(95, 5,$wazito['authorisation']['full_name'], 0, 'L', 0, 1, '', '
 $pdf->SetXY(10,$wazitorow+17);
 $pdf->MultiCell(95, 5,'Authorization', 0, 'L', 0, 1, '', '', true); // Limit characters
 $pdf->SetXY(80,$wazitorow);
-$pdf->Image($wazito['technician']['signature_path'],15,$iconrow,10,10);
+$pdf->Image($wazito['technician']['signature_path'],85,$iconrow,10,10);
 $pdf->SetXY(80,$wazitorow+12);
 $pdf->MultiCell(95, 5,$wazito['technician']['full_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
 $pdf->SetXY(80,$wazitorow+17);
 $pdf->MultiCell(95, 5,'Laboratory Technician', 0, 'L', 0, 1, '', '', true); // Limit characters
 $pdf->SetXY(155,$wazitorow);
-$pdf->Image($wazito['technician2']['signature_path'],15,$iconrow,10,10);
+$pdf->Image($wazito['technician2']['signature_path'],160,$iconrow,10,10);
 $pdf->SetXY(155,$wazitorow+12);
 $pdf->MultiCell(95, 5,$wazito['technician2']['full_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
 $pdf->SetXY(155,$wazitorow+17);
