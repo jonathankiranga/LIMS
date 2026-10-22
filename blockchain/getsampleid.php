@@ -198,36 +198,46 @@ class CustomPDF extends TCPDF {
     $testended = getdatesamplecompleteed($sampleID);
     $realsampleid = getdatesampleid($sampleID);
     
-    // Bottom Section
+    // Bottom Section — labels and order match the COA report headers.
     $this->SetXY(10, 62);
-    $this->MultiCell(95, 5,'Sample Batch No:'.($record['DocumentNo'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Sample Batch No:'.($record['DocumentNo'] ?? ''), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Received:'.formatDate($record['Date'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Date Received:'.formatDate($record['Date'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Date:'.formatDate($record['SamplingDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Sampling Date:'.formatDate($record['SamplingDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Started:'.formatDate($testreceived,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Date Test Started:'.formatDate($testreceived,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Ended:'.formatDate($testended,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Date Test Ended:'.formatDate($testended,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampled By:'. ($record['SampledBy'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Sampled By:'.($record['SampledBy'] ?? ''), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Method:'. ($record['SamplingMethod'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
-    
-     $this->SetXY(105, 62);
-    $this->MultiCell(95, 5,'Sample ID:'. $realsampleid, 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Sampling Method:'.($record['SamplingMethod'] ?? ''), 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(10, $this->GetY());
+    $this->MultiCell(95, 5,'Sample Source:'.($record['ExternalSample'] ?? ''), 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(10, $this->GetY());
+    $this->MultiCell(95, 5,'Sample Name:'.($record['sample_name'] ?? ''), 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(10, $this->GetY());
+    $this->MultiCell(95, 5,'Sample Method:'.($record['sample_method'] ?? ''), 0, 'L', 0, 1, '', '', true);
+
+    $this->SetXY(105, 62);
+    $this->MultiCell(95, 5,'Sample ID:'.$realsampleid, 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/No:'.($record['BatchNo'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'B/No:'.($record['BatchNo'] ?? ''), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/size:'.($record['BatchSize'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'B/size:'.($record['BatchSize'] ?? ''), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Man:'.formatDate($record['ManufactureDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Date of Man:'.formatDate($record['ManufactureDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Exp:'.formatDate($record['ExpDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Date of Exp:'.formatDate($record['ExpDate'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'SKU:'.($record['SKU'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Chilled Exp:'.formatDate($record['chilled_date_of_expiry'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'External Sample ID:'. ($record['ExternalSample'] ?? ''), 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->MultiCell(95, 5,'Frozen Exp:'.formatDate($record['frozen_date_of_expiry'] ?? null,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(105, $this->GetY());
+    $this->MultiCell(95, 5,'SKU:'.($record['SKU'] ?? ''), 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(105, $this->GetY());
+    $this->MultiCell(95, 5,'Condition:'.($record['condition_of_sample'] ?? ''), 0, 'L', 0, 1, '', '', true);
  
    
 }
