@@ -81,11 +81,16 @@
      
    
 <script>
+       // Initialize search state before the first fetch.
+       var customerSearchTerm = '';
+       var customerSearchTimer = null;
+
        var fetchStandards = function(page, search) {
+        customerSearchTerm = (typeof search === 'string') ? search : customerSearchTerm;
         $.ajax({
             url: 'ajax/fetchcustomers.php', // Create a separate PHP script to fetch all standards
             type: 'GET',
-            data: { page, q: customerSearchTerm },
+            data: { page: page, q: customerSearchTerm },
             dataType: 'json',
             success: function (response) {
                 const tbody = $('#customersTable tbody');
