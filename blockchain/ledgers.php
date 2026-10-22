@@ -82,8 +82,8 @@
 <script>
 
    // Initialize search state before the first fetch.
-   let contractorSearchTerm = '';
-   let contractorSearchTimer = null;
+   var contractorSearchTerm = '';
+   var contractorSearchTimer = null;
 
    fetchStandards = (page = 1, search = contractorSearchTerm) => {
         contractorSearchTerm = (typeof search === 'string') ? search : contractorSearchTerm;
