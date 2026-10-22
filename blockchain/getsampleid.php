@@ -845,45 +845,61 @@ function statementofconformity(){
 }
 
 function getsignature(){
-     global $conn;
+    global $conn;
 
-    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png') ?: (__DIR__ . '/images/icons8-no-image-100.png');
+    // getsampleid.php is in blockchain/, and signature uploads are stored in blockchain/images/.
+    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png')
+        ?: (__DIR__ . '/images/icons8-no-image-100.png');
 
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
         $rawPath = trim((string)$rawPath);
+        $normalizedPath = str_replace(chr(92), '/', $rawPath);
         $candidates = [];
 
         if ($rawPath !== '') {
-            $candidates[] = $rawPath;
-            $candidates[] = __DIR__ . '/' . ltrim($rawPath, '/\\');
-            $candidates[] = __DIR__ . '/images/' . ltrim($rawPath, '/\\');
+            // Keep a valid absolute path as the first choice.
+            if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) {
+                $candidates[] = $rawPath;
+            } else {
+                // Stored relative paths may be "filename.png" or "images/filename.png".
+                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
+                $candidates[] = __DIR__ . '/images/' . ltrim($normalizedPath, '/');
+            }
+
+            // Uploads are saved under blockchain/images/. The database commonly stores
+            // only the filename, or an old path from another server.
+            $pathPart = parse_url($normalizedPath, PHP_URL_PATH);
+            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
+            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
+                $candidates[] = __DIR__ . '/images/' . $fileName;
+            }
+
+            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) {
+                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
+            }
         }
 
         $candidates[] = $defaultSignaturePath;
 
         foreach ($candidates as $candidate) {
             if ($candidate && is_file($candidate) && is_readable($candidate)) {
-                return str_replace('\\', '/', $candidate);
+                $resolvedPath = realpath($candidate);
+                return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate);
             }
         }
 
-        return str_replace('\\', '/', $defaultSignaturePath);
+        return str_replace(chr(92), '/', $defaultSignaturePath);
     };
 
     $companyRow = [];
     $companyResult = $conn->query("SELECT authorisation, technician, technician2 FROM company_master ORDER BY company_id DESC LIMIT 1");
-    if ($companyResult && $companyResult->num_rows > 0) {
+    if ($companyResult) {
         $companyRow = $companyResult->fetch_assoc() ?: [];
     }
 
     $fetchUser = function ($userId) use ($conn, $resolveSignaturePath) {
         $defaultName = 'Not Assigned';
         $userId = trim((string)$userId);
-
-        if ($userId === '') {
-            return ['full_name' => $defaultName, 'signature_path' => $resolveSignaturePath('')];
-        }
-
         $stmt = $conn->prepare("SELECT full_name, signature_path FROM users WHERE user_id = ? LIMIT 1");
         if (!$stmt) {
             return ['full_name' => $defaultName, 'signature_path' => $resolveSignaturePath('')];
@@ -901,13 +917,11 @@ function getsignature(){
         ];
     };
 
-    $authorisation = $fetchUser($companyRow['authorisation'] ?? '');
-    $technician = $fetchUser($companyRow['technician'] ?? '');
-    $technician2 = $fetchUser($companyRow['technician2'] ?? '');
-
-    return array('authorisation'=>array('full_name'=>$authorisation['full_name'],'signature_path'=>$authorisation['signature_path']),
-        'technician'=>array('full_name'=>$technician['full_name'],'signature_path'=>$technician['signature_path']),
-        'technician2'=>array('full_name'=>$technician2['full_name'],'signature_path'=>$technician2['signature_path']));
+    return [
+        'authorisation' => $fetchUser($companyRow['authorisation'] ?? ''),
+        'technician' => $fetchUser($companyRow['technician'] ?? ''),
+        'technician2' => $fetchUser($companyRow['technician2'] ?? '')
+    ];
 }
 ?>
 <canvas id="pdf-canvas"></canvas>
