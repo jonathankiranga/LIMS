@@ -30,14 +30,24 @@ if (!$customer) {
 $template = get_email_template($conn, 'sample_subcontrating');
 $subject = (string)($template['subject'] ?? '');
 $body = (string)($template['body'] ?? '');
-$body = str_replace('{{contractor_name}}', (string)$customer['name'], $body);
+$safeContractorName = htmlspecialchars((string)$customer['name'], ENT_QUOTES, 'UTF-8');
+$body = str_replace('{{contractor_name}}', $safeContractorName, $body);
 
-$query = "SELECT tp.ParameterName
+// Include only outstanding tests assigned to this subcontractor and explicitly
+// marked as contracted, matching the sample list and subcontractor work queue.
+$query = "SELECT DISTINCT tp.ParameterName
           FROM sample_tests ST
           JOIN test_results TR ON ST.TestID = TR.TestID
           JOIN TestParameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
           JOIN test_assignments ta ON TR.resultsID = ta.resultsID
-          WHERE ST.SampleID = ? AND ta.subcontractor = ?";
+          WHERE ST.SampleID = ?
+            AND ta.subcontractor = ?
+            AND tp.AccreditationStatus = 'contracted'
+            AND TR.StatusID = 1
+            AND TR.MRL_Result IS NULL
+            AND TR.ResultStatus IS NULL
+            AND TR.RangeResult IS NULL
+          ORDER BY tp.ParameterName";
 $stmt = $conn->prepare($query);
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Statement preparation failed: ' . $conn->error]);
@@ -51,6 +61,14 @@ while ($row = $result->fetch_assoc()) {
     $samples[] = $row;
 }
 $stmt->close();
+
+if (count($samples) === 0) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'No outstanding contracted tests are assigned to this subcontractor for the selected sample.'
+    ]);
+    exit;
+}
 
 $emailTemplate = "<ol style='list-style-position: inside; text-align: center; margin: 0 auto; padding: 0;'>";
 foreach ($samples as $sample) {
