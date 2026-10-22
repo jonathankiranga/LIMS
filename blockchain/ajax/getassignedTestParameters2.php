@@ -21,8 +21,9 @@ FROM sample_tests ST
     ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
  JOIN test_assignments ta 
     ON TR.resultsID = ta.resultsID   
-WHERE ST.SampleID = ? and ta.subcontractor = ? 
-AND (TR.MRL_Result IS NULL AND TR.ResultStatus IS NULL  AND TR.RangeResult IS NULL )";
+WHERE ST.SampleID = ? AND ta.subcontractor = ?
+AND tp.AccreditationStatus = 'contracted'
+AND (TR.MRL_Result IS NULL AND TR.ResultStatus IS NULL AND TR.RangeResult IS NULL)";
       
 // Prepare the statement
 $stmt = $conn->prepare($query);
