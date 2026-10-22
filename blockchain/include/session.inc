@@ -8,8 +8,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$PathPrefix = dirname(__FILE__) . '/';
-$configFile = $PathPrefix . 'config.php';
+$sessionIncludePath = __DIR__ . DIRECTORY_SEPARATOR;
+$configFile = $sessionIncludePath . 'config.php';
 
 if (!file_exists($configFile)) {
     error_log('Blockchain LIMS configuration file not found: ' . $configFile);
