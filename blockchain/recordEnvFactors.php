@@ -192,6 +192,110 @@ select.form-control {
     background-color: #cc0000; /* Darker red on hover */
 }
 </style>
+
+<style>
+/* Consistent, compact table styling aligned with reviewtestresults.php */
+.container.my-5 {
+    max-width: 100%;
+    margin-top: 1.5rem !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    overflow-x: auto;
+}
+#sampleTable {
+    width: 100%;
+    min-width: 1050px;
+    margin: 1rem 0 1.5rem;
+    border-collapse: collapse;
+    table-layout: auto;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13px;
+    color: #1f2937;
+    background: #fff;
+}
+#sampleTable thead th {
+    background: #17324d;
+    color: #fff;
+    border: 1px solid #29465f;
+    padding: 10px 9px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .03em;
+}
+#sampleTable tbody td {
+    padding: 9px;
+    border: 1px solid #e1e7ee;
+    vertical-align: middle;
+    text-align: left;
+    line-height: 1.35 !important;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+#sampleTable tbody tr:nth-child(even) { background: #f7f9fc; }
+#sampleTable tbody tr:hover { background: #edf4fa; }
+#sampleTable .btn {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+#sampleTable .btn-primary {
+    background: #17324d;
+    border: 1px solid #17324d;
+}
+#sampleTable .btn-primary:hover { background: #254b6d; }
+
+/* Keep both dialogs readable and prevent earlier duplicate rules from compressing them. */
+#scheduleModal .modal-content,
+#modal .modal-content {
+    padding: 0;
+    border: 1px solid #d7e0e9;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(23, 50, 77, .16);
+    background: #fff;
+}
+#scheduleModal .modal-header,
+#modal .modal-header {
+    padding: 14px 18px;
+    border-radius: 7px 7px 0 0;
+    background: #17324d;
+    color: #fff;
+}
+#scheduleModal .modal-title,
+#modal .modal-title { font-size: 16px; font-weight: 600; }
+#scheduleModal .modal-body,
+#modal .modal-body {
+    padding: 18px;
+    line-height: 1.4;
+}
+#scheduleModal .modal-footer,
+#modal .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid #e5eaf0;
+    gap: 8px;
+}
+#scheduleModal .form-control,
+#modal .form-control {
+    min-height: 36px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    border: 1px solid #ccd6e0;
+    border-radius: 4px;
+}
+#modal table { width: 100%; }
+#modal table td { padding: 5px 8px; vertical-align: middle; }
+#modal input, #modal select { max-width: 100%; }
+@media (max-width: 768px) {
+    .container.my-5 { padding-left: .5rem; padding-right: .5rem; }
+    #sampleTable { min-width: 1050px; }
+    #scheduleModal .modal-body, #modal .modal-body { padding: 12px; }
+}
+</style>
+
 </head>
 <body>
     
