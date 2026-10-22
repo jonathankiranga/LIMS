@@ -12,6 +12,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Validate the entire request before writing anything. Only parameters explicitly
+    // marked as contracted may be assigned to a subcontractor.
+    $validatedAssignments = [];
+    $checkContracted = $conn->prepare("
+        SELECT tr.resultsID
+        FROM test_results tr
+        INNER JOIN testparameters tp
+            ON tp.ParameterID = tr.ParameterID
+           AND tp.StandardID = tr.StandardID
+        WHERE tr.resultsID = ?
+          AND tp.AccreditationStatus = 'contracted'
+        LIMIT 1
+    ");
+
+    if (!$checkContracted) {
+        echo json_encode(['success' => false, 'message' => 'Could not validate subcontractor assignments.']);
+        exit;
+    }
+
+    foreach ($assignments as $userID => $tests) {
+        $userID = filter_var($userID, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($userID === false || !is_array($tests) || count($tests) === 0) {
+            $checkContracted->close();
+            echo json_encode(['success' => false, 'message' => 'Invalid subcontractor assignment data.']);
+            exit;
+        }
+
+        foreach ($tests as $resultsID) {
+            $resultsID = filter_var($resultsID, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($resultsID === false) {
+                $checkContracted->close();
+                echo json_encode(['success' => false, 'message' => 'Invalid test result in assignment.']);
+                exit;
+            }
+
+            $checkContracted->bind_param('i', $resultsID);
+            if (!$checkContracted->execute()) {
+                $checkContracted->close();
+                echo json_encode(['success' => false, 'message' => 'Failed to validate test accreditation status.']);
+                exit;
+            }
+
+            $eligible = $checkContracted->get_result();
+            if (!$eligible || $eligible->num_rows !== 1) {
+                $checkContracted->close();
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Assignment rejected: only test parameters marked contracted can be subcontracted.'
+                ]);
+                exit;
+            }
+
+            $validatedAssignments[$userID][] = $resultsID;
+        }
+    }
+    $checkContracted->close();
+    $assignments = $validatedAssignments;
+
     $getcontorID='';
     // Insert assignments into the database
     $stmt = $conn->prepare("INSERT INTO test_assignments (subcontractor, resultsID,category, assigned_at) VALUES (?, ?,'admin', NOW()) ON DUPLICATE KEY UPDATE assigned_at = NOW(); ");
