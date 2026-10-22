@@ -247,10 +247,6 @@ $this->SetXY(105, 30);
     $this->SetXY(105, $this->GetY());
     $this->MultiCell(95, 5,'SKU:'.$record['SKU'], 0, 'L', 0, 1, '', '', true); // Limit characters
     $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'SKU:'.$record['SKU'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'External Sample ID:'. $record['ExternalSample'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
     $this->MultiCell(95, 5,'Condition:'. $record['condition_of_sample'], 0, 'L', 0, 1, '', '', true); // Limit characters
  
    
