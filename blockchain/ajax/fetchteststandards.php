@@ -1,73 +1,82 @@
 <?php
-// Database connection
-require '../db_connection.php'; // Ensure this connects to your PDO instance and sets $pdo
+require '../db_connection.php';
 
-// Retrieve input values
-$page       = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+header('Content-Type: application/json; charset=utf-8');
+
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $searchTerm = isset($_GET['q']) ? trim($_GET['q']) : '';
-$limit      = 10; // records per page
-$offset     = ($page - 1) * $limit;
+$contractedOnly = isset($_GET['contractedOnly']) && (string)$_GET['contractedOnly'] === '1';
+$limit = 10;
+$offset = ($page - 1) * $limit;
 
-$where = '';
-$bindTypes = '';
-$bindValues = [];
-
+$conditions = [];
 if ($searchTerm !== '') {
-    $where = "WHERE StandardID LIKE ? OR StandardCode LIKE ? OR StandardName LIKE ? OR Description LIKE ?";
-    $searchPattern = '%' . $searchTerm . '%';
-    $bindTypes = 'ssss';
-    $bindValues = [$searchPattern, $searchPattern, $searchPattern, $searchPattern];
+    $conditions[] = "(ts.StandardID LIKE ? OR ts.StandardCode LIKE ? OR ts.StandardName LIKE ? OR ts.Description LIKE ?)";
 }
+if ($contractedOnly) {
+    $conditions[] = "EXISTS (
+        SELECT 1 FROM testparameters tp
+        WHERE tp.StandardID = ts.StandardID
+          AND tp.AccreditationStatus = 'contracted'
+    )";
+}
+$where = count($conditions) ? ' WHERE ' . implode(' AND ', $conditions) : '';
 
-// Build the SQL query for counting total records
-$countSql = "SELECT COUNT(*) FROM TestStandards $where";
-$stmt = $conn->prepare($countSql);
-
-// Bind parameters if a search term was provided
+$countSql = "SELECT COUNT(*) AS total FROM TestStandards ts" . $where;
+$countStmt = $conn->prepare($countSql);
+if (!$countStmt) {
+    http_response_code(500);
+    echo json_encode(['data' => [], 'total_pages' => 0, 'message' => 'Failed to prepare standards count query.']);
+    exit;
+}
 if ($searchTerm !== '') {
-    $stmt->bind_param($bindTypes, ...$bindValues);
+    $pattern = '%' . $searchTerm . '%';
+    $countStmt->bind_param('ssss', $pattern, $pattern, $pattern, $pattern);
 }
+if (!$countStmt->execute()) {
+    http_response_code(500);
+    echo json_encode(['data' => [], 'total_pages' => 0, 'message' => 'Failed to count standards.']);
+    exit;
+}
+$countResult = $countStmt->get_result();
+$countRow = $countResult->fetch_assoc();
+$totalRecords = (int)($countRow['total'] ?? 0);
+$countStmt->close();
+$totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $limit) : 0;
 
-// Execute the statement
-$stmt->execute();
-$stmt->bind_result($totalRecords);
-$stmt->fetch();
-$stmt->close();
-$totalPages = ceil($totalRecords / $limit);
-
-
-$where      = '';
-$bindTypes  = '';
-$bindValues = [];
+$sql = "SELECT ts.*, sm.*
+        FROM TestStandards ts
+        LEFT JOIN standard_methods sm ON ts.sm = sm.MethodID" . $where . "
+        ORDER BY ts.StandardName ASC
+        LIMIT ? OFFSET ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    http_response_code(500);
+    echo json_encode(['data' => [], 'total_pages' => 0, 'message' => 'Failed to prepare standards query.']);
+    exit;
+}
 if ($searchTerm !== '') {
-    $where = "WHERE ts.StandardID LIKE ? OR ts.StandardCode LIKE ? OR ts.StandardName LIKE ? OR ts.Description LIKE ?";
-    $searchPattern = '%' . $searchTerm . '%';
-    $bindTypes = 'ssssii';
-    $bindValues = [$searchPattern, $searchPattern, $searchPattern, $searchPattern,$offset,$limit];
-}else{
-    $bindTypes = 'ii';
-    $bindValues = [$offset,$limit];
+    $pattern = '%' . $searchTerm . '%';
+    $stmt->bind_param('ssssii', $pattern, $pattern, $pattern, $pattern, $limit, $offset);
+} else {
+    $stmt->bind_param('ii', $limit, $offset);
 }
-
-// Fetch paginated records
-$query = $conn->prepare("SELECT  ts.*, sm.*  FROM TestStandards ts  "
-        . "left join standard_methods sm on ts.sm=sm.MethodID $where LIMIT ?, ?");
-$query->bind_param($bindTypes, ...$bindValues);
-$query->execute();
-$result = $query->get_result();
+if (!$stmt->execute()) {
+    http_response_code(500);
+    echo json_encode(['data' => [], 'total_pages' => 0, 'message' => 'Failed to fetch standards.']);
+    exit;
+}
+$result = $stmt->get_result();
 $data = [];
 while ($row = $result->fetch_assoc()) {
     $data[] = $row;
 }
-
-
-header('Content-Type: application/json');
 echo json_encode([
     'data' => $data,
     'current_page' => $page,
     'total_pages' => $totalPages,
-]);
-
+    'total_records' => $totalRecords
+], JSON_INVALID_UTF8_SUBSTITUTE);
+$stmt->close();
+$conn->close();
 ?>
-
-
