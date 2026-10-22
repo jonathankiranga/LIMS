@@ -7,6 +7,8 @@ $standardID = isset($_GET['standardID']) ? (int)$_GET['standardID'] : 0;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $includeInactive = isset($_GET['includeInactive']) && (string)$_GET['includeInactive'] === '1';
 $includeAll = isset($_GET['includeAll']) && (string)$_GET['includeAll'] === '1';
+$contractedOnly = isset($_GET['accreditationStatus']) && (string)$_GET['accreditationStatus'] === 'contracted';
+$contractedFilter = $contractedOnly ? " AND tp.AccreditationStatus = 'contracted' " : '';
 $perPage = 10;
 
 if ($standardID <= 0) {
@@ -28,7 +30,7 @@ $activeFilter = $includeInactive ? '' : ' AND tp.IsActive = 1 ';
 
 $countSql = "SELECT COUNT(*) AS total
              FROM testparameters tp
-             WHERE tp.StandardID = ?" . $activeFilter;
+             WHERE tp.StandardID = ?" . $activeFilter . $contractedFilter;
 $countStmt = $conn->prepare($countSql);
 
 if (!$countStmt) {
@@ -74,7 +76,7 @@ $sql = "SELECT
             tp.IsActive
         FROM testparameters tp
         INNER JOIN teststandards ts ON tp.StandardID = ts.StandardID
-        WHERE tp.StandardID = ?" . $activeFilter . "
+        WHERE tp.StandardID = ?" . $activeFilter . $contractedFilter . "
         ORDER BY ts.StandardName ASC, tp.ParameterName ASC";
 
 if (!$includeAll) {
