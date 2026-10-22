@@ -46,15 +46,13 @@ if ($stmt->error) {
 $result = $stmt->get_result();
 $samples = [];
 while ($row = $result->fetch_assoc()) {
-    // Match the image URL handling already used by SamplesRecievedList.php.
-    $SampleID = trim($row['SampleID']);
-    $SampleFileKey = trim($row['SampleFileKey']);
+    // Keep the actual uploaded filename; uploads use generated filenames, not necessarily SampleID.
+    $SampleFileKey = trim((string)($row['SampleFileKey'] ?? ''));
 
     if ($SampleFileKey !== '' && file_exists($SampleFileKey)) {
-        $fileExtension = pathinfo($SampleFileKey, PATHINFO_EXTENSION);
-        $row['SampleFileKey'] = $fileExtension !== ''
-            ? "uploads/$SampleID.$fileExtension"
-            : 'uploads/icons8-no-image-100.png';
+        // Normalize Windows paths before extracting the filename for the browser URL.
+        $fileName = basename(str_replace('\\', '/', $SampleFileKey));
+        $row['SampleFileKey'] = 'uploads/' . rawurlencode($fileName);
     } else {
         $row['SampleFileKey'] = 'uploads/icons8-no-image-100.png';
     }
