@@ -167,11 +167,11 @@ input[type="text"] {
             </div>
             <div class="modal-body" id="modalBody">
                 <div>
-                    <label for="to">To:</label>
+                    <label for="emailto">To:</label>
                     <input type="email" id="emailto" placeholder="Recipient's email">
                 </div>
                 <div>
-                    <label for="to">cc:</label>
+                    <label for="emailcc">CC:</label>
                     <input type="email" id="emailcc" placeholder="cc email">
                 </div>
                 <div>
@@ -192,169 +192,168 @@ input[type="text"] {
  
 <script src="js/quilljs/1.3.7/quill.min.js"></script>
 <script>
-   
-     // Initialize Quill editor
-    quill = new Quill('#editor', {
-        theme: 'snow'
-    });
+(function () {
+    // Initialize Quill once when this page fragment is loaded.
+    const editorElement = document.getElementById('editor');
+    if (!editorElement) return;
 
-    // Send button functionality
-    document.getElementById('send').addEventListener('click', function() {
-        const emailto = document.getElementById('emailto').value;
-        const emailcc = document.getElementById('emailcc').value;
-        const subject = document.getElementById('subject').value;
+    const quill = new Quill(editorElement, { theme: 'snow' });
+    const sendButton = document.getElementById('send');
+    const modalElement = document.getElementById('emailModal');
+
+    sendButton.addEventListener('click', function () {
+        const emailto = document.getElementById('emailto').value.trim();
+        const emailcc = document.getElementById('emailcc').value.trim();
+        const subject = document.getElementById('subject').value.trim();
         const content = quill.root.innerHTML;
+        const plainContent = quill.getText().trim();
 
-        // Here you can implement the logic to send the email
-        console.log('Email Details:', { to, subject, content });
-        
+        if (!emailto || !subject || !plainContent) {
+            toastr.error('Recipient, subject and email message are required.');
+            return;
+        }
+
+        if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(emailto)) {
+            toastr.error('Enter a valid recipient email address.');
+            return;
+        }
+
+        if (emailcc && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(emailcc)) {
+            toastr.error('Enter a valid CC email address or leave it blank.');
+            return;
+        }
+
+        sendButton.disabled = true;
         $.ajax({
-           url: 'functions/sendemails.php',
-           type: 'POST',
-           data: {
-               sendcc:emailcc,
-               sendto:emailto,
-               subject:subject,
-               content:content  
-           },
-           beforeSend: function () {
-               toastr.info("sending...");
-           },
-           success: function (response) {
-               if(response.success){
-                 toastr.info('email sent') ;
-               }else{
-                 toastr.error(response) ;
-               }
-           },
-           error: function () {
-               toastr.error("Failed to send email.");
-           }
-       });
-        
-        $('#emailModal').fadeOut();
-        // For example, you could use AJAX to send the email
+            url: 'functions/sendemails.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                sendcc: emailcc,
+                sendto: emailto,
+                subject: subject,
+                content: content
+            },
+            beforeSend: function () {
+                toastr.info('Sending email...');
+            },
+            success: function (response) {
+                if (response && response.success) {
+                    toastr.success('Email sent successfully.');
+                    bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+                } else {
+                    toastr.error((response && (response.error || response.message)) || 'Email could not be sent.');
+                }
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                toastr.error((response && (response.error || response.message)) || 'Failed to send email. Please try again.');
+            },
+            complete: function () {
+                sendButton.disabled = false;
+            }
+        });
     });
-    
-    
+
     $(document).ready(function () {
         fetchSampleIDs();
-   });
+    });
 
-function fetchSampleIDs() {
-    $.ajax({
-        url: 'ajax/getassinedsubcontractedlabtestAjax.php',
-        method: 'GET',
-        data: {
-            category: "admin",
-            department: "admin"
-        },
-       success: function (data) {
-            const sampleList = $('#sampleList');
-            sampleList.empty();
-            const samples = data.samples;
-          // Group by subcontractor
-            const groupedSamples = samples.reduce((acc, sample) => {
-                const subcontractorId = sample.subcontractor;
-                if (!acc[subcontractorId]) {
-                    acc[subcontractorId] = {
-                        name: sample.name, // Using the name field for the header
-                        samples: []
-                    };
+    function fetchSampleIDs() {
+        $.ajax({
+            url: 'ajax/getassinedsubcontractedlabtestAjax.php',
+            method: 'GET',
+            dataType: 'json',
+            data: { category: 'admin', department: 'admin' },
+            success: function (response) {
+                const sampleList = $('#sampleList');
+                sampleList.empty();
+
+                if (!response || response.success !== true || !Array.isArray(response.samples) || response.samples.length === 0) {
+                    sampleList.text((response && response.message) || 'No outstanding contracted samples are available.');
+                    return;
                 }
-                acc[subcontractorId].samples.push(sample);
-                return acc;
-            }, {});
 
-            for (const subcontractorId in groupedSamples) {
-                const group = groupedSamples[subcontractorId];
+                // Group samples by contractor, then show each unique SampleID once.
+                const groups = new Map();
+                response.samples.forEach(function (sample) {
+                    const contractorId = String(sample.subcontractor || '');
+                    if (!contractorId) return;
 
-                if (!$(`#contractor-section-${subcontractorId}`).length) {
-      // Create a section for each subcontractor
-                const subcontractorHeader = document.createElement('h4');
-                subcontractorHeader.textContent = group.name;
-                subcontractorHeader.id = `contractor-section-${subcontractorId}`;
-                sampleList.append(subcontractorHeader);
-                const createdSampleIDs = new Set();
-                // Create buttons for each sample under the subcontractor
-                group.samples.forEach(sample => {
-
-                    if (!createdSampleIDs.has(sample.SampleID)) {
-                        createdSampleIDs.add(sample.SampleID);
-
-                        const button = document.createElement('button');
-                        button.className = 'btn btn-outline-primary btn-block mb-2 sample-btn';
-                        button.setAttribute('data-sampleid', sample.SampleID);
-                        button.setAttribute('data-contractor', sample.subcontractor);
-                        button.textContent = sample.SampleID;
-                        sampleList.append(button);
+                    if (!groups.has(contractorId)) {
+                        groups.set(contractorId, {
+                            name: String(sample.name || ('Subcontractor ' + contractorId)),
+                            samples: new Map()
+                        });
                     }
-
+                    groups.get(contractorId).samples.set(String(sample.SampleID), sample);
                 });
-            }
 
-            // Add click event to dynamically generated buttons
-            $('.sample-btn').on('click', function () {
-                const sampleID = $(this).data('sampleid');
-                const contractor = $(this).data('contractor');
-                loadTestParameters(sampleID, contractor);
-            });
-            
-           }
-       
-            },
-              error: function (err) {
-                    console.error("Error loading SampleIDs:", err);
+                groups.forEach(function (group, contractorId) {
+                    const section = $('<section class="mb-3"></section>');
+                    $('<h4></h4>').text(group.name).appendTo(section);
+
+                    group.samples.forEach(function (sample, sampleID) {
+                        const button = $('<button type="button" class="btn btn-outline-primary mb-2 me-2 sample-btn"></button>');
+                        button.attr('data-sampleid', sampleID);
+                        button.attr('data-contractor', contractorId);
+                        button.text(sampleID);
+                        section.append(button);
+                    });
+
+                    sampleList.append(section);
+                });
+
+                if (groups.size === 0) {
+                    sampleList.text('No outstanding contracted samples are available.');
                 }
-            });
-}
-
-
-function loadTestParameters(sampleID, userid) {
-    // Validate input before making the request
-    if (!sampleID || !userid) {
-        toastr.error("Invalid Sample ID or User ID provided.");
-        return;
+            },
+            error: function (xhr) {
+                console.error('Error loading subcontracted samples:', xhr.status, xhr.responseText);
+                $('#sampleList').text('Failed to load subcontracted samples. Please refresh and try again.');
+            }
+        });
     }
 
-    // AJAX call to fetch test parameters
-    $.ajax({
-        url: 'ajax/getcomposedemail.php', // Backend script for fetching email details
-        method: 'POST',
-        data: { 
-            sampleID: sampleID,
-            contractor: userid
-        },
-        success: function (response) {
-                 console.log('assigned',response);
-       
-               // Ensure response is parsed correctly
-                if (response.success) {
-                    // Populate modal form fields
-                    $('#emailto').val(response.emailto || ""); // Fallback to empty string
-                    $('#emailcc').val(localStorage.getItem('email') || ""); // Fallback to localStorage email
-                    $('#subject').val(response.subject || "");
-                    
-                    // Set content in Quill editor
-                    quill.root.innerHTML = response.body || "";
-
-                    // Initialize and display Bootstrap modal
-                    const modal = new bootstrap.Modal(document.getElementById('emailModal'), {
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                    modal.show();
-                } else {
-                    // Handle unsuccessful response
-                    toastr.error(response.message || "Failed to load data.");
-                }
-             
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error);
-            toastr.error("Failed to fetch test parameters. Please try again.");
-        }
+    // Delegated event handler works for dynamically created sample buttons without
+    // attaching duplicate handlers each time the sample list is refreshed.
+    $('#sampleList').on('click', '.sample-btn', function () {
+        loadComposedEmailDetails($(this).attr('data-sampleid'), $(this).attr('data-contractor'));
     });
-}
 
+    function loadComposedEmailDetails(sampleID, contractorID) {
+        if (!sampleID || !contractorID) {
+            toastr.error('A sample and subcontractor must be selected.');
+            return;
+        }
+
+        $.ajax({
+            url: 'ajax/getcomposedemail.php',
+            method: 'POST',
+            dataType: 'json',
+            data: { sampleID: sampleID, contractor: contractorID },
+            success: function (response) {
+                if (!response || response.success !== true) {
+                    toastr.error((response && response.message) || 'Could not prepare the subcontractor email.');
+                    return;
+                }
+
+                $('#emailto').val(response.emailto || '');
+                $('#emailcc').val(localStorage.getItem('email') || '');
+                $('#subject').val(response.subject || '');
+                quill.root.innerHTML = response.body || '';
+
+                bootstrap.Modal.getOrCreateInstance(modalElement, {
+                    backdrop: 'static',
+                    keyboard: false
+                }).show();
+            },
+            error: function (xhr) {
+                console.error('Error preparing subcontractor email:', xhr.status, xhr.responseText);
+                const response = xhr.responseJSON;
+                toastr.error((response && response.message) || 'Failed to prepare the subcontractor email.');
+            }
+        });
+    }
+})();
 </script>
