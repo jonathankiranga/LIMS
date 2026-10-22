@@ -8,25 +8,53 @@
 <link rel="stylesheet" href="css/parametersetup.css">
 <link rel="stylesheet" href="js/tom-select/tom-select.css" type="text/css"/>
 
-<div class="container mt-5">
-<h3 class="text-center">Parameter Management</h3>
-</div>
-
-<i class="fas fa-magnifying-glass"></i>
-<select id="standardSearch" style="width: 20%;" placeholder="Search Standards..."></select>
-
-<div class="table-responsive">
-<div><h5><i class="fas fa-cogs"></i> Manage Parameters for <span id="standardName"></span></h5></div>
-
-<button data-id="" data-name="" id="addParameterBtn">
-<i class="fas fa-plus"></i> Add Parameters
-</button>
-
-<button data-id="" data-name="" id="importParametersBtn">
-<i class="fas fa-file-excel"></i> Import Parameters
-</button>
-
-<table class="table table-sm table-hover" id="parametersTable">
+<style>
+/* Parameter Management grid follows the Review Test Results grid */
+.parameter-page { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; color:#1f2937; }
+.parameter-page .grid-container { background:#fff; border:1px solid #e5edf5; border-radius:8px; padding:18px; box-shadow:0 2px 8px rgba(23,50,77,.06); }
+.parameter-page .page-heading { color:#17324d; font-size:20px; font-weight:700; margin:0 0 16px; }
+.parameter-page .filter-row { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.parameter-page .filter-row label { color:#17324d; font-size:13px; font-weight:600; margin:0; }
+.parameter-page .filter-row select { min-width:220px; }
+.parameter-page .action-row { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 16px; }
+.parameter-page .grid-table { width:100%; border-collapse:collapse; min-width:1000px; }
+.parameter-page .grid-table th { background:#17324d; color:#fff; padding:12px 10px; text-align:left; font-size:12px; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; }
+.parameter-page .grid-table td { padding:10px; border-bottom:1px solid #e5edf5; font-size:13px; color:#1f2937; vertical-align:middle; }
+.parameter-page .grid-table tbody tr:nth-child(even) { background:#f9fbfd; }
+.parameter-page .grid-table tbody tr:hover { background:#f0f6fb; }
+.parameter-page #pagination { margin-top:14px; }
+.parameter-page #pagination .page-link { color:#17324d; border-color:#d4deea; }
+.parameter-page #pagination .page-item.active .page-link { background:#17324d; border-color:#17324d; color:#fff; }
+@media(max-width:768px) { .parameter-page .grid-container { padding:12px; } .parameter-page .filter-row { align-items:stretch; flex-direction:column; } .parameter-page .filter-row select { width:100% !important; } }
+</style>
+<div class="container mt-4 parameter-page">
+  <div class="grid-container">
+    <h3 class="page-heading"><i class="fas fa-cogs"></i> Parameter Management</h3>
+    <div class="filter-row">
+      <label for="standardSearch"><i class="fas fa-search"></i> Standard</label>
+      <select id="standardSearch" style="width:32%;" placeholder="Search Standards..."></select>
+      <label for="contractedStandardsFilter">Standards</label>
+      <select id="contractedStandardsFilter" class="form-select form-select-sm" style="width:220px;">
+        <option value="0">All standards</option>
+        <option value="1">Standards with contracted tests</option>
+      </select>
+    </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0">Manage Parameters for <span id="standardName"></span></h5>
+      <div class="action-row">
+        <button type="button" class="btn btn-primary btn-sm" data-id="" data-name="" id="addParameterBtn"><i class="fas fa-plus"></i> Add Parameters</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-id="" data-name="" id="importParametersBtn"><i class="fas fa-file-excel"></i> Import Parameters</button>
+      </div>
+    </div>
+    <div class="filter-row mt-2">
+      <label for="parameterAccreditationFilter">Test filter</label>
+      <select id="parameterAccreditationFilter" class="form-select form-select-sm" style="width:240px;">
+        <option value="">All tests for selected standard</option>
+        <option value="contracted">Contracted tests only</option>
+      </select>
+    </div>
+    <div class="table-responsive">
+<table class="table table-sm table-hover grid-table" id="parametersTable">
 <thead>
 <tr>
 <th>Parameter Name</th>
@@ -45,13 +73,14 @@
 <!-- Parameters will be dynamically added here -->
 </tbody>
 </table>
-</div>
-
-<nav>
+    </div>
+    <nav>
 <ul class="pagination justify-content-center" id="pagination">
 <!-- Pagination buttons will be generated dynamically -->
 </ul>
-</nav>
+    </nav>
+  </div>
+</div>
 
 <!-- Nested Modal for Adding a Parameter -->
 <div id="ParameterModalRecord" class="modal fade" tabindex="-1" aria-hidden="true">
@@ -182,7 +211,8 @@ delay: 250,
 data: function (params) {
 return {
 q: params.term,
-page: params.page || 1
+page: params.page || 1,
+contractedOnly: $('#contractedStandardsFilter').val() || '0'
 };
 },
 processResults: function (data, params) {
@@ -203,6 +233,11 @@ more: params.page < data.total_pages
 },
 cache: true,
 }
+});
+
+$('#contractedStandardsFilter').on('change', function () {
+  $('#standardSearch').val(null).trigger('change');
+  $('#standardSearch').select2('open');
 });
 
 $('#standardSearch').on('select2:select', function (e) {
@@ -494,7 +529,7 @@ function fetchParameters(standardID, page = 1) {
 $.ajax({
 url: 'ajax/fetchparameters.php',
 type: 'GET',
-data: { standardID, page, includeInactive: 1 },
+data: { standardID, page, includeInactive: 1, accreditationStatus: $('#parameterAccreditationFilter').val() || '' },
 dataType: 'json',
 success: function (response) {
 const tbody = $('#parametersTable tbody');
@@ -593,6 +628,11 @@ pagination.append(`
 </li>
 `);
 }
+
+$('#parameterAccreditationFilter').on('change', function () {
+  const standardID = parseInt($('#addParameterBtn').attr('data-id'), 10) || 0;
+  if (standardID > 0) fetchParameters(standardID, 1);
+});
 
 $(document).off('click', '#pagination .page-link').on('click', '#pagination .page-link', function (e) {
 e.preventDefault();
