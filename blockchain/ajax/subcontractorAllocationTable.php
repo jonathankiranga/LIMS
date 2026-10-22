@@ -11,7 +11,9 @@ join testparameters tp on tp.ParameterID=tr.ParameterID and tp.StandardID=tr.Sta
 join teststandards ts on ts.StandardID=tr.StandardID 
 LEFT JOIN test_assignments SS 
      ON tr.resultsID = SS.resultsID 
-WHERE SS.resultsID IS NULL and tr.testID=?  ");
+WHERE SS.resultsID IS NULL
+      AND tr.testID = ?
+      AND tp.AccreditationStatus = 'contracted'");
 $stmt->bind_param("i",$testID);
 $stmt->execute();
 $result = $stmt->get_result();
