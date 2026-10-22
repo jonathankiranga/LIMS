@@ -9,16 +9,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $PathPrefix = dirname(__FILE__) . '/';
-if (!file_exists($PathPrefix . 'include/config.php')){
-    $RootPath = dirname(htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'));
-    if ($RootPath == '/' OR $RootPath == "\\") {
-        $RootPath = '';
-    }
-    header('Location:' . $RootPath . '/installer/index.php');
-    exit;
+$configFile = $PathPrefix . 'config.php';
+
+if (!file_exists($configFile)) {
+    error_log('Blockchain LIMS configuration file not found: ' . $configFile);
+    http_response_code(500);
+    exit('LIMS configuration file is missing. Please contact the system administrator.');
 }
 
-$config = include($PathPrefix . 'include/config.php');
+$config = include($configFile);
 
 $db_host = $config['DB_HOST'];
 $db_username = $config['DB_USERNAME'];
