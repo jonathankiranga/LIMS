@@ -46,7 +46,20 @@ if ($stmt->error) {
 $result = $stmt->get_result();
 $samples = [];
 while ($row = $result->fetch_assoc()) {
-   $samples[] = $row;
+    // Match the image URL handling already used by SamplesRecievedList.php.
+    $SampleID = trim($row['SampleID']);
+    $SampleFileKey = trim($row['SampleFileKey']);
+
+    if ($SampleFileKey !== '' && file_exists($SampleFileKey)) {
+        $fileExtension = pathinfo($SampleFileKey, PATHINFO_EXTENSION);
+        $row['SampleFileKey'] = $fileExtension !== ''
+            ? "uploads/$SampleID.$fileExtension"
+            : 'uploads/icons8-no-image-100.png';
+    } else {
+        $row['SampleFileKey'] = 'uploads/icons8-no-image-100.png';
+    }
+
+    $samples[] = $row;
 }
 
 // Get total records for pagination
