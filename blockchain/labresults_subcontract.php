@@ -1,518 +1,413 @@
-<style>
-    .container {
-        margin-top: 20px;
-    }
-</style>
-<style>
-        /* Style for draggable icon */
-        .draggable-icon {
-            display: inline-block;
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(145deg, #ff7f50, #ff6347); /* Gradient background */
-            color: white;
-            border-radius: 15px;
-            margin: 8px;
-            padding: 10px;
-            font-size: 16px;
-            line-height: 1.4;
-            cursor: grab;
-            text-align: center;
-            font-weight: bold;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2); /* Shadow to make it pop */
-            transition: all 0.3s ease; /* Smooth transition for hover */
-        }
+<link href="css/labresultsstyling.css" rel="stylesheet" type="text/css"/>
 
-        .draggable-icon:active {
-            cursor: grabbing;
-            transform: scale(0.98); /* Slight shrink when clicked */
-        }
-
-        .draggable-icon:hover {
-            box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.3); /* Hover shadow effect */
-            transform: translateY(-4px); /* Lift effect on hover */
-        }
-
-        /* Style for the user test box */
-        #userTestBox {
-            min-height: 180px;
-            width: 100%;
-            border: 2px dashed #007bff; /* Bright blue dashed border */
-            padding: 20px;
-            background-color: #f0f8ff; /* Light blue background */
-            text-align: center;
-            border-radius: 15px;
-            position: relative;
-            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15); /* Soft shadow */
-            transition: background-color 0.3s ease; /* Smooth transition for background change */
-        }
-
-        #userTestBox:hover {
-            background-color: #e6f7ff; /* Lighter blue on hover */
-        }
-
-        /* Adding some playful animations */
-        @keyframes bounce {
-            0% { transform: translateY(0); }
-            25% { transform: translateY(-5px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* Apply bouncing animation to icons when dragged */
-        .draggable-icon.dragging {
-            animation: bounce 0.5s ease infinite; /* Infinite bouncing animation */
-        }
-
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 10; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent overlay */
-        }
-
-        .modal-content {
-            background: linear-gradient(145deg, #282c34, #3c4048); /* Game-like gradient */
-            border: 2px solid #4CAF50; /* Green border for a classic game UI feel */
-            border-radius: 10px; /* Rounded edges */
-            color: #e0e0e0; /* Light text color */
-            width: 60%; /* Default width */
-            max-width: 600px; /* Maximum width */
-            height: auto; /* Adjust height automatically */
-            max-height: 80vh; /* Restrict height to viewport */
-            margin: auto; /* Center horizontally */
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%); /* Center vertically */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Subtle shadow */
-            padding: 20px; /* Inner padding */
-            text-align: center; /* Centered content */
-        }
-
-        .modal-content h2 {
-            font-size: 24px; /* Larger heading for emphasis */
-            color: #4CAF50; /* Accent green */
-            margin-bottom: 20px;
-            font-family: 'Press Start 2P', sans-serif; /* Retro game font */
-            text-shadow: 2px 2px #000; /* Shadow for depth */
-        }
-
-        .modal-content form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px; /* Space between elements */
-        }
-
-        .modal-content label {
-            font-family: 'Press Start 2P', sans-serif; /* Retro font */
-            font-size: 12px;
-            color: #fff;
-        }
-
-        .modal-content input,
-        .modal-content select {
-            padding: 10px;
-            font-size: 14px;
-            border: 2px solid #4CAF50;
-            border-radius: 5px;
-            background-color: #333;
-            color: #fff;
-            width: 80%;
-        }
-
-        .modal-content button {
-            padding: 10px 20px;
-            font-size: 16px;
-            font-family: 'Press Start 2P', sans-serif; /* Retro button style */
-            background-color: #4CAF50;
-            color: #000;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 4px #2a7f33; /* 3D button effect */
-            transition: transform 0.2s;
-        }
-
-        .modal-content button:hover {
-            transform: scale(1.1); /* Button grows slightly when hovered */
-        }
-
-        .modal-content button:active {
-            transform: scale(1); /* Button returns to normal size when clicked */
-        }
-
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #e0e0e0;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Press Start 2P', sans-serif; /* Retro font for the close button */
-        }
-
-        .close:hover {
-            color: #f00; /* Highlight close button */
-        }
-    </style>
-  
-<div class="container mt-4">
-    <!-- Accordion -->
-    <div class="accordion" id="mainAccordion">
-        <!-- Sample IDs Section -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    Sub-Contractors Samples
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#mainAccordion">
-                <div class="accordion-body">
-                    <div class="card">
-                        <div class="card-body" id="sampleList">
-                            <!-- Dynamically populated SampleIDs -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Test Parameters Section -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingTwo">
-                <button id="dynamicid" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    Contracted Test Parameters for selected sample ID
-                </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#mainAccordion">
-                <div class="accordion-body">
-                    <div class="card">
-                        <div class="card-body" id="testParameters">
-                            <!-- Draggable test parameter icons will appear here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="grid-container">
+    <div class="card mb-3">
+        <div class="card-header"><strong>Subcontractor Samples</strong></div>
+        <div class="card-body" id="sampleList">
+            <span>Loading assigned samples...</span>
         </div>
     </div>
-</div>
 
-<div id="resultsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" id="closeModal">&times;</span>
-        <h2>Test Results Input</h2>
-        <form id="testResultsForm">
-            <input type="hidden" id="resultsid" name="resultsid" readonly>
-            <div class="row">
-                <div class="form-group">
-                    <label for="sampleID">Sample ID:</label>
-                    <input type="text" id="sampleID" name="sampleID" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="parameterName">Parameter Name:</label>
-                    <input type="text" id="parameterName" name="parameterName" readonly>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label for="resultType">Result Type:</label>
-                    <select id="resultType" name="resultType" onchange="showInputField(this.value)">
-                        <option value="" disabled selected>Select a result type</option>
-                        <option value="quantitativeField">Quantitative Result</option>
-                        <option value="qualitativeField">Qualitative Result</option>
-                        <option value="rangeField">Range Result</option>
-                    </select>
+    <div class="filter-bar">
+        <strong id="selectedSampleLabel">Select an assigned sample to view its contracted parameters.</strong>
+        <div class="mt-2">
+            <input type="text" id="filterValue" placeholder="Enter search term...">
+            <select id="filterColumn">
+                <option value="">Select Filter...</option>
+                <option value="SampleID">Sample ID</option>
+                <option value="ParameterName">Parameter</option>
+            </select>
+            <button type="button" id="searchResults">Search</button>
+        </div>
 
-                    <div id="quantitativeField" class="input-field">
-                        <label for="quantitative">Enter Concentration/Value:</label>
-                        <input type="number" id="quantitative" name="quantitative" placeholder="Enter concentration/value">
-                    </div>
-
-                    <div id="qualitativeField" class="input-field">
-                        <label for="qualitative">Select Status:</label>
-                        <select id="qualitative" name="qualitative">
-                            <option value="Not Detected">Not Detected</option>
-                            <option value="Absent">Absent</option>
-                            <option value="Detected">Detected</option>
-                            <option value="Below Limit">Below Limit</option>
-                            <option value="Detected Range">Detected Range</option>
-                            <option value="Trace">Trace</option>
-                            <option value="Above Limit">Above Limit</option>
-                            <option value="Inconclusive">Inconclusive</option>
-                            <option value="Error">Error</option>
-                            <option value="Invalid">Invalid</option>
-                        </select>
-                    </div>
-
-                    <div id="rangeField" class="input-field">
-                        <label for="range">Enter Range (e.g., <2 or Between 1-2):</label>
-                        <input type="text" id="range" name="range" placeholder="Enter range">
-                    </div>
-                </div>
-            </div>
-            <button type="submit">Submit Results</button>
-        </form>
+        <div id="globalResultTypeWrapper" style="display:none; margin:10px 0;">
+            <label for="globalResultType">Global Result Type: </label>
+            <select id="globalResultType">
+                <option value="" disabled selected>Select a result type</option>
+                <option value="quantitativeField">Quantitative Result</option>
+                <option value="qualitativeField">Qualitative Result</option>
+                <option value="rangeField">Range Result</option>
+            </select>
+        </div>
     </div>
+
+    <div class="table-wrapper">
+        <table id="resultsGrid" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Sample ID</th>
+                    <th>Parameter</th>
+                    <th>Result Type</th>
+                    <th>Result Input</th>
+                    <th>
+                        Action
+                        <span id="saveSpinner" style="display:none; margin-left:10px; color:#007bff;">
+                            <i class="fas fa-spinner fa-spin"></i> Saving...
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="5">Select a sample above to load its contracted parameters.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
 </div>
 
 <script>
-$(document).ready(function () {
-    fetchSampleIDs();
+var currentPage = 1;
+var currentSampleID = '';
+var currentContractorID = '';
+var qualitativeResultOptions = [];
+var qualitativeOptionsLoaded = false;
 
-     //  Event listener for test parameter clicks
-    $(document).on('click touchstart', '.draggable-icon', function () {
-        const parameterName = $(this).text();
-        const parameterID = $(this).data('parameter-id');
-        const sampleID = $(this).data('sampleid'); // Replace with dynamic sampleID if available
-        const resultsID = $(this).data('resultsid'); // Replace with dynamic sampleID if available
-     
-      // Populate modal fields
-        $('#resultsid').val(resultsID);
-        $('#parameterName').val(parameterName);
-        $('#sampleID').val(sampleID);
-        showInputField();
-        // Show modal
-        $('#resultsModal').css('display', 'block');
-    });
-
-    // Close modal functionality
-    $('#closeModal').on('click', function () {
-        $('#resultsModal').css('display', 'none');
-    });
-
-    // Form submission
-       $('#testResultsForm').on('submit', function (event) {
-        event.preventDefault();
-
-        const resultType = $('#resultType').val();
-        var resultValue;
-
-        if (resultType === "quantitativeField") {
-            resultValue = $('#quantitative').val();
-        } else if (resultType === "qualitativeField") {
-            resultValue = $('#qualitative').val();
-        } else if (resultType === "rangeField") {
-            resultValue = $('#range').val();
+function loadQualitativeOptions(callback) {
+    $.ajax({
+        url: 'ajax/get_qualitative_result_options.php',
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            if (response && response.success && Array.isArray(response.options)) {
+                qualitativeResultOptions = response.options;
+                qualitativeOptionsLoaded = true;
+            } else {
+                qualitativeResultOptions = [];
+                qualitativeOptionsLoaded = false;
+                console.error('Could not load qualitative result options:', response && response.message);
+            }
+        },
+        error: function(xhr) {
+            qualitativeResultOptions = [];
+            qualitativeOptionsLoaded = false;
+            console.error('Could not load qualitative result options:', xhr.responseText);
+        },
+        complete: function() {
+            if (typeof callback === 'function') callback();
         }
-
-        if (!resultType || !resultValue) {
-            toastr.error("All fields are required. Please fill in all values.");
-            return;
-        }
-        
-        const formData = {
-            resultsid: $('#resultsid').val(),
-            sampleID: $('#sampleID').val(),
-            parameterName: $('#parameterName').val(),
-            resultType: resultType,
-            resultValue: resultValue
-        };
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            formData[key] = value;
-        }
-
-        fetch('ajax/submit_test_results.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    toastr.success("Results saved successfully.");
-                    $('#resultsModal').css('display','none');
-                   setTimeout(function() { clearform();  },5000);
-                    $('#resultsModal').hide();
-                    $('.sample-btn').eq(0).click(); 
-               } else {
-                    toastr.error(data.message || "Failed to save results.");
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                toastr.error("An error occurred while saving results." + error);
-            });
     });
-
-});
-
-// Event listener for closing the modal
-$('#closeModal').on('click', function () {
-    $('#resultsModal').fadeOut();
-    $('#quantitative').val("");
-    $('#qualitative').val("");
-    $('#range').val("");
-    $('#resultType').val("");
-});
-
-// Optionally, close modal when clicking outside the modal content
-$(window).on('click', function (e) {
-    if($(e.target).is('#resultsModal')) {
-    $('#resultsModal').fadeOut();
-    $('#quantitative').val("");
-    $('#qualitative').val("");
-    $('#range').val("");
-    $('#resultType').val("");
-    }
-});
-
+}
 
 function fetchSampleIDs() {
     $.ajax({
         url: 'ajax/getassinedsubcontractedlabtestAjax.php',
         method: 'GET',
+        dataType: 'json',
         data: {
-            category: "admin",
-            department: "admin"
+            category: 'admin',
+            department: 'admin'
         },
-       success: function (data) {
-            console.log('assigned', data);
-            const sampleList = $('#sampleList');
-            sampleList.empty();
-            const samples = data.samples;
-          // Group by subcontractor
-            const groupedSamples = samples.reduce((acc, sample) => {
-                const subcontractorId = sample.subcontractor;
-                if (!acc[subcontractorId]) {
-                    acc[subcontractorId] = {
-                        name: sample.name, // Using the name field for the header
+        success: function(response) {
+            var $sampleList = $('#sampleList').empty();
+            var samples = response && Array.isArray(response.samples) ? response.samples : [];
+
+            if (!samples.length) {
+                $sampleList.text('No outstanding contracted samples are currently assigned.');
+                return;
+            }
+
+            var groupedSamples = {};
+            samples.forEach(function(sample) {
+                var contractorID = String(sample.subcontractor);
+                if (!groupedSamples[contractorID]) {
+                    groupedSamples[contractorID] = {
+                        name: sample.name || ('Subcontractor ' + contractorID),
                         samples: []
                     };
                 }
-                acc[subcontractorId].samples.push(sample);
-                return acc;
-            }, {});
+                groupedSamples[contractorID].samples.push(sample);
+            });
 
-            for (const subcontractorId in groupedSamples) {
-                const group = groupedSamples[subcontractorId];
+            Object.keys(groupedSamples).forEach(function(contractorID) {
+                var group = groupedSamples[contractorID];
+                var $section = $('<div class="mb-3">');
+                $('<h5>').text(group.name).appendTo($section);
 
-                if (!$(`#contractor-section-${subcontractorId}`).length) {
-      // Create a section for each subcontractor
-                const subcontractorHeader = document.createElement('h4');
-                subcontractorHeader.textContent = group.name;
-                subcontractorHeader.id = `contractor-section-${subcontractorId}`;
-                sampleList.append(subcontractorHeader);
-                const createdSampleIDs = new Set();
-                // Create buttons for each sample under the subcontractor
-                group.samples.forEach(sample => {
+                var seenSampleIDs = {};
+                group.samples.forEach(function(sample) {
+                    var sampleID = String(sample.SampleID);
+                    if (seenSampleIDs[sampleID]) return;
+                    seenSampleIDs[sampleID] = true;
 
-                    if (!createdSampleIDs.has(sample.SampleID)) {
-                        createdSampleIDs.add(sample.SampleID);
-
-                        const button = document.createElement('button');
-                        button.className = 'btn btn-outline-primary btn-block mb-2 sample-btn';
-                        button.setAttribute('data-sampleid', sample.SampleID);
-                        button.setAttribute('data-contractor', sample.subcontractor);
-                        button.textContent = sample.SampleID;
-                        sampleList.append(button);
-                    }
-
+                    $('<button>', {
+                        type: 'button',
+                        class: 'btn btn-outline-primary mb-2 me-2 sample-btn',
+                        text: sampleID
+                    }).attr({
+                        'data-sampleid': sampleID,
+                        'data-contractor': contractorID
+                    }).appendTo($section);
                 });
+
+                $sampleList.append($section);
+            });
+        },
+        error: function(xhr) {
+            $('#sampleList').text('Unable to load assigned samples.');
+            console.error('Error loading subcontracted samples:', xhr.responseText);
+        }
+    });
+}
+
+function selectSample(sampleID, contractorID) {
+    currentSampleID = String(sampleID);
+    currentContractorID = String(contractorID);
+    currentPage = 1;
+
+    $('#selectedSampleLabel').text(
+        'Contracted parameters for Sample ID ' + currentSampleID
+    );
+    $('.sample-btn').removeClass('active');
+    $('.sample-btn').filter(function() {
+        return String($(this).data('sampleid')) === currentSampleID &&
+               String($(this).data('contractor')) === currentContractorID;
+    }).addClass('active');
+
+    loadGrid(1);
+}
+
+function bindFilter() {
+    $('#searchResults').on('click', function() {
+        loadGrid(1);
+    });
+
+    $('#filterValue').on('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            loadGrid(1);
+        }
+    });
+
+    $('#filterColumn').on('change', function() {
+        if ($(this).val() === 'ParameterName') {
+            $('#globalResultTypeWrapper').show();
+        } else {
+            $('#globalResultTypeWrapper').hide();
+        }
+    });
+
+    $('#globalResultType').on('change', function() {
+        var value = $(this).val();
+        if (!value) return;
+        $('#resultsGrid tbody select.result-type').val(value).trigger('change');
+    });
+}
+
+function loadGrid(page) {
+    page = page || 1;
+    currentPage = page;
+
+    if (!currentSampleID || !currentContractorID) {
+        $('#resultsGrid tbody').html(
+            '<tr><td colspan="5">Select a sample above to load its contracted parameters.</td></tr>'
+        );
+        $('#pagination').empty();
+        return;
+    }
+
+    $.ajax({
+        url: 'ajax/getGridData.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            page: page,
+            filterColumn: $('#filterColumn').val() || '',
+            filterValue: $('#filterValue').val() || '',
+            category: 'subcontracted',
+            sampleID: currentSampleID,
+            userid: currentContractorID
+        },
+        success: function(payload) {
+            var $tbody = $('#resultsGrid tbody').empty();
+
+            if (!payload || !Array.isArray(payload.data) || payload.data.length === 0) {
+                $tbody.html('<tr><td colspan="5">No pending contracted parameters for this sample.</td></tr>');
+                renderPagination(0, 1);
+                return;
             }
 
-            // Add click event to dynamically generated buttons
-            $('.sample-btn').on('click', function () {
-                const sampleID = $(this).data('sampleid');
-                const contractor = $(this).data('contractor');
-
-                loadTestParameters(sampleID, contractor);
+            payload.data.forEach(function(row) {
+                $tbody.append(renderRow(row));
             });
-           }
+            renderPagination(
+                payload.pagination ? payload.pagination.total : 1,
+                payload.pagination ? payload.pagination.current : 1
+            );
         },
-
-        error: function (err) {
-            console.error("Error loading SampleIDs:", err);
+        error: function(xhr) {
+            $('#resultsGrid tbody').html(
+                '<tr><td colspan="5">Unable to load contracted parameters.</td></tr>'
+            );
+            $('#pagination').empty();
+            console.error('Subcontract results grid error:', xhr.responseText);
         }
     });
 }
 
-function loadTestParameters(sampleID,userid) {
-  $('#dynamicid').text(`Test Parameters for selected sample ID ${sampleID}`);
+function renderRow(row) {
+    var $tr = $('<tr>').attr({
+        'data-resultsid': row.resultsID,
+        'data-sampleid': row.SampleID,
+        'data-parametername': row.ParameterName,
+        'data-resulttype': row.ResultType || ''
+    });
 
-   $.ajax({
-        url: 'ajax/getassignedTestParameters2.php', // Endpoint for fetching test parameters
-        method: 'POST',
-        data: { 
-            sampleID:sampleID ,
-            userid:userid
-        },
-        success: function (data) {
-             const samples=data.samples;
-            const testParameters = $('#testParameters');
-            testParameters.empty();
-            samples.forEach(param => {
-                testParameters.append(createDraggableIcon(param));
+    var $tdSample = $('<td>').text(row.SampleID);
+    var $tdParam = $('<td>').text(row.ParameterName);
+    var $tdType = $('<td>');
+    var $tdInput = $('<td>');
+    var $tdAction = $('<td>');
+
+    var $select = $('<select>', {
+        class: 'result-type form-control'
+    }).html(
+        '<option value="">-- Select --</option>' +
+        '<option value="quantitativeField">Quantitative</option>' +
+        '<option value="qualitativeField">Qualitative</option>' +
+        '<option value="rangeField">Range</option>'
+    ).on('change', function() {
+        showRowEditor($tr, $(this).val());
+    });
+
+    var $saveButton = $('<button>', {
+        type: 'button',
+        class: 'btn-save-row',
+        title: 'Save this result'
+    }).html('<i class="fas fa-save"></i> Save').on('click', function() {
+        prepareSave($tr);
+    });
+
+    $tdType.append($select);
+    $tdAction.append($saveButton);
+    $tr.append($tdSample, $tdParam, $tdType, $tdInput, $tdAction);
+
+    if (row.ResultType) {
+        $select.val(row.ResultType);
+        showRowEditor($tr, row.ResultType);
+    }
+
+    return $tr;
+}
+
+function showRowEditor($tr, type) {
+    var $inputCell = $tr.children().eq(3).empty();
+    var $input;
+
+    if (type === 'quantitativeField') {
+        $input = $('<input>', {
+            type: 'number',
+            step: 'any',
+            class: 'result-value form-control',
+            placeholder: 'Enter value'
+        });
+    } else if (type === 'qualitativeField') {
+        $input = $('<select>', { class: 'result-value form-control' });
+        $input.append($('<option>', { value: '' }).text(
+            qualitativeOptionsLoaded ? '-- Select --' : 'Qualitative options unavailable'
+        ));
+
+        if (qualitativeOptionsLoaded) {
+            qualitativeResultOptions.forEach(function(option) {
+                $input.append($('<option>').val(option.value).text(option.label));
             });
+        }
+    } else if (type === 'rangeField') {
+        $input = $('<input>', {
+            type: 'text',
+            class: 'result-value form-control',
+            placeholder: 'e.g. <2 or 1-5'
+        });
+    }
+
+    if ($input) $inputCell.append($input);
+}
+
+function prepareSave($tr) {
+    var resultsid = $tr.attr('data-resultsid');
+    var sampleID = $tr.attr('data-sampleid');
+    var parameterName = $tr.attr('data-parametername');
+    var resultType = $tr.find('.result-type').val();
+    var resultValue = $tr.find('.result-value').val();
+
+    if (!resultType || resultValue === '' || resultValue === null || typeof resultValue === 'undefined') {
+        alert('Please select a result type and enter a result value.');
+        return;
+    }
+
+    saveResult({
+        resultsid: resultsid,
+        sampleID: sampleID,
+        parameterName: parameterName,
+        resultType: resultType,
+        resultValue: resultValue
+    });
+}
+
+function saveResult(row) {
+    $('#saveSpinner').show();
+    var payload = Object.assign({}, row);
+
+    // Preserve the user/session context used by the existing result handler.
+    for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        payload[key] = localStorage.getItem(key);
+    }
+
+    $.ajax({
+        url: 'ajax/submit_test_results.php',
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            $('#saveSpinner').hide();
+            if (response && response.success) {
+                loadGrid(1);
+            } else {
+                alert('Save failed: ' + (response && response.message ? response.message : 'Unknown error'));
+            }
         },
-        error: function (err) {
-            console.error("Error loading test parameters:", err);
+        error: function(xhr) {
+            $('#saveSpinner').hide();
+            console.error('Result save failed:', xhr.responseText);
+            alert('A server error occurred while saving the result.');
         }
     });
 }
 
-function createDraggableIcon(rowsdata) {
-    const parameterName = rowsdata.ParameterName;
-    const parameterID = rowsdata.ParameterID;
-    const SampleID = rowsdata.SampleID;
-    const resultsID = rowsdata.resultsID;
-    
-    const iconDiv = document.createElement('div');
-    iconDiv.classList.add('draggable-icon', 'text-center', 'mb-3');
-    iconDiv.setAttribute('draggable', true);
-    iconDiv.setAttribute('data-resultsid', resultsID);
-    iconDiv.setAttribute('data-sampleid', SampleID);
-    iconDiv.setAttribute('data-parameter-id', parameterID);
-    iconDiv.textContent = parameterName;
+function renderPagination(totalPages, page) {
+    var $container = $('#pagination').empty();
+    if (!totalPages || totalPages <= 1) return;
 
-    // Add drag event
-    iconDiv.addEventListener('dragstart', function (event) {
-        event.dataTransfer.setData("parameterID", parameterID);
+    function makeButton(label, target, disabled, active) {
+        return $('<button>', {
+            type: 'button',
+            text: label,
+            disabled: !!disabled,
+            class: active ? 'active' : ''
+        }).on('click', function() {
+            loadGrid(target);
+        });
+    }
+
+    $container.append(makeButton('« Prev', Math.max(1, page - 1), page === 1, false));
+    for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+            $container.append(makeButton(String(i), i, false, i === page));
+        }
+    }
+    $container.append(makeButton('Next »', Math.min(totalPages, page + 1), page === totalPages, false));
+}
+
+$(function() {
+    bindFilter();
+    $(document).on('click', '.sample-btn', function() {
+        selectSample($(this).data('sampleid'), $(this).data('contractor'));
     });
-
-    return iconDiv;
-}
-
-function allowDrop(event) {
-    event.preventDefault(); // Allow the drop operation
-}
-
-function drop(event) {
-    event.preventDefault();
-
-    const parameterID = event.dataTransfer.getData("parameterID");
-    const draggedElement = document.querySelector(`[data-parameter-id="${parameterID}"]`);
-
-    if (draggedElement) {
-        const userTestBox = document.getElementById('userTestBox');
-        userTestBox.appendChild(draggedElement.cloneNode(true)); // Add a copy to the User Test Box
-    }
-}
-
-// Function to toggle input fields based on result type
-function showInputField(value) {
-    document.getElementById('quantitativeField').style.display = 'none';
-    document.getElementById('qualitativeField').style.display = 'none';
-    document.getElementById('rangeField').style.display = 'none';
-
-    if (value) {
-        document.getElementById(value).style.display = 'block';
-    }
-}
-
-function clearform(){
-    $('#quantitative').val("");
-    $('#qualitative').val("");
-    $('#range').val("");
-    $('#resultType').val("");
-}
+    loadQualitativeOptions(function() {
+        fetchSampleIDs();
+    });
+});
 </script>
