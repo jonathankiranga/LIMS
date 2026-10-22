@@ -81,8 +81,12 @@
 
 <script>
 
+   // Initialize search state before the first fetch.
+   let contractorSearchTerm = '';
+   let contractorSearchTimer = null;
+
    fetchStandards = (page = 1, search = contractorSearchTerm) => {
-        contractorSearchTerm = search;
+        contractorSearchTerm = (typeof search === 'string') ? search : contractorSearchTerm;
         $.ajax({
             url: 'ajax/fetchcontractors.php', // Create a separate PHP script to fetch all standards
             type: 'GET',
