@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/all.min.css">
     <link rel="stylesheet" href="css/homepage.css" type="text/css">
-    <link rel="stylesheet" href="css/lims-standard-ui.css?v=1">
     <link rel="stylesheet" href="js/toastr/toastr.min.css">
     <link rel="stylesheet" href="css/select2.min.css">
   
