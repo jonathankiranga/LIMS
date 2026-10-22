@@ -1,7 +1,3 @@
-<?php
-$PathPrefix = './';
-include($PathPrefix . 'include/session.inc');
-?>
 <!DOCTYPE html>
 <html>
 <head>
