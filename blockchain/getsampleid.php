@@ -123,21 +123,34 @@ class CustomPDF extends TCPDF {
 
     // Right Top Section-------------------------------------------------------------------------------------------------------------
     
-    $sampleID = $_GET['id'] ?? '';
+    $sampleID = trim((string)($_GET['id'] ?? ''));
     $record = [];
     if ($sampleID !== '') {
-        $stmt = $conn->prepare("SELECT sh.*,dr.* ,st.*
-            FROM  sample_header sh 
-            join debtors dr on sh.CustomerID = dr.itemcode 
-            join sample_tests st on sh.HeaderID=st.HeaderID
-        WHERE st.TestID = ?");
+        $stmt = $conn->prepare("
+            SELECT
+                sh.*,
+                st.*,
+                tr.SampleID AS ResultSampleID,
+                tr.TestID AS ResultTestID,
+                tr.StandardID AS ResultStandardID
+            FROM sample_header sh
+            JOIN test_results tr ON sh.HeaderID = tr.HeaderID
+            LEFT JOIN sample_tests st ON st.TestID = tr.TestID
+            WHERE tr.SampleID = ?
+            ORDER BY tr.resultsID DESC
+            LIMIT 1
+        ");
         if ($stmt) {
-            $stmt->bind_param("s",$sampleID);
+            $stmt->bind_param("s", $sampleID);
             $stmt->execute();
             $result = $stmt->get_result();
             $record = $result ? ($result->fetch_assoc() ?: []) : [];
             $stmt->close();
         }
+
+        $customerCode = trim((string)($record['CustomerID'] ?? ''));
+        $customerDetails = $this->fetchErpCustomerDetails($customerCode);
+        $record = array_merge($record, $customerDetails);
     }
     
     $this->SetXY(105, 12);
@@ -219,8 +232,75 @@ class CustomPDF extends TCPDF {
    
 }
    
+    private function fetchErpCustomerDetails($customerCode) {
+        global $config;
+
+        static $customerCache = [];
+        $customerCode = trim((string)$customerCode);
+        $emptyDetails = [
+            'customer' => '',
+            'company' => '',
+            'postcode' => '',
+            'city' => '',
+            'phone' => '',
+            'email' => ''
+        ];
+
+        if ($customerCode === '') {
+            return $emptyDetails;
+        }
+        if (array_key_exists($customerCode, $customerCache)) {
+            return $customerCache[$customerCode];
+        }
+
+        $erpApiUrl = is_array($config) ? trim((string)($config['ERP_API_URL'] ?? '')) : '';
+        if ($erpApiUrl === '' || !function_exists('curl_init')) {
+            $customerCache[$customerCode] = $emptyDetails;
+            return $customerCache[$customerCode];
+        }
+
+        $postData = json_encode([
+            'action' => 'search_customers',
+            'query' => $customerCode,
+            'limit' => 10,
+            'offset' => 0
+        ]);
+
+        $ch = curl_init($erpApiUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $erpResponse = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200 && is_string($erpResponse) && $erpResponse !== '') {
+            $erpData = json_decode($erpResponse, true);
+            foreach (($erpData['customers'] ?? []) as $customer) {
+                $erpCustomerCode = trim((string)($customer['itemcode'] ?? $customer['code'] ?? ''));
+                if ($erpCustomerCode !== '' && strcasecmp($erpCustomerCode, $customerCode) === 0) {
+                    $customerCache[$customerCode] = [
+                        'customer' => trim((string)($customer['customer'] ?? $customer['name'] ?? '')),
+                        'company' => trim((string)($customer['company'] ?? '')),
+                        'postcode' => trim((string)($customer['postcode'] ?? '')),
+                        'city' => trim((string)($customer['city'] ?? '')),
+                        'phone' => trim((string)($customer['phone'] ?? '')),
+                        'email' => trim((string)($customer['email'] ?? ''))
+                    ];
+                    return $customerCache[$customerCode];
+                }
+            }
+        }
+
+        $customerCache[$customerCode] = $emptyDetails;
+        return $customerCache[$customerCode];
+    }
+
     private function truncateText($text, $maxLength) {
-        return mb_strimwidth($text, 0, $maxLength, '...');
+        return mb_strimwidth((string)$text, 0, $maxLength, '...');
     }
 
     function fitText($text, $width, $maxFontSize, $minFontSize = 8) {
@@ -273,16 +353,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $SampletypeNotes = TSDescription($sampleID);
     $samples = [];
  
-    $stmt = $conn->prepare("SELECT tr.*,tp.*,ts.* FROM test_results tr 
-    join testparameters tp on tp.ParameterID=tr.ParameterID and tp.StandardID=tr.StandardID
-    join teststandards ts on ts.StandardID=tr.StandardID 
-    WHERE tr.`TestID` = ? and tr.`StatusID` = 4");
-    $stmt->bind_param("s",$sampleID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-     while ($row = $result->fetch_assoc()) {
+    $stmt = $conn->prepare("
+        SELECT tr.*, tp.*, ts.*
+        FROM test_results tr
+        LEFT JOIN testparameters tp
+            ON tp.ParameterID = tr.ParameterID
+            AND tp.StandardID = tr.StandardID
+        LEFT JOIN teststandards ts
+            ON ts.StandardID = tr.StandardID
+        WHERE tr.SampleID = ?
+          AND tr.StatusID = 4
+        ORDER BY tr.resultsID ASC
+    ");
+    if ($stmt) {
+        $stmt->bind_param("s", $sampleID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($result && ($row = $result->fetch_assoc())) {
             $samples[] = $row;
         }
+        $stmt->close();
+    }
   
     // Initialize custom PDF
     $pdf = new CustomPDF('P', 'mm', 'A4', true, 'UTF-8', false);
@@ -299,27 +390,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 55%;">PARAMETER</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">METHOD</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">RESULTS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">STD LIMITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 46%;">PARAMETER</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">RESULTS</th>
+        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 5%;">Low</th>
+        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 5%;">Opt</th>
+        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 5%;">High</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">LIMITS</th>
     </tr>
 </thead><tbody>';
- 
-    // Generate table rows dynamically
-    foreach ($samples as $sample) {
-    $validatedresults = validateresults($sample);
 
-      $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . $sample['ParameterName'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $validatedresults['results'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $validatedresults['standard'] . '</td>
+    // Use the same result formatter, accreditation markers and grade cells as the COA reports.
+    foreach ($samples as $sample) {
+        $validatedresults = validateresults($sample);
+        $resultsHtml = (strpos($validatedresults['results'], '<sup>') !== false)
+            ? $validatedresults['results']
+            : htmlentities($validatedresults['results'], ENT_QUOTES, 'UTF-8');
+        $standardHtml = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
+        $methodHtml = htmlspecialchars((string)($sample['Method'] ?? ''), ENT_QUOTES, 'UTF-8');
+
+        $html .= '<tr>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 46%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $methodHtml . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $resultsHtml . '</td>
+            <td style="border: 1px solid #ddd; padding: 5px; width: 5%; ' .
+                ($validatedresults['grade'] === 'blue' ? 'background-color: blue; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 5px; width: 5%; ' .
+                ($validatedresults['grade'] === 'green' ? 'background-color: green; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 5px; width: 5%; ' .
+                ($validatedresults['grade'] === 'red' ? 'background-color: red; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $standardHtml . '</td>
           </tr>';
-   }
+    }
 
     $html .= '</tbody></table>'; // Close the table
-    $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>'; // Add footer
+    $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
+    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Accredited &nbsp;&nbsp; † Not Accredited &nbsp;&nbsp; ‡ Contracted</div>';
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
     
     $lines = explode("\n", $SampletypeNotes);
@@ -569,83 +675,163 @@ function findLABCODEFile($PathPrefix) {
 
 function getdatesamplereceived($sampleID){
     global $conn;
-    $stmt = $conn->prepare("SELECT  MIN(created_at) as last_created, 
-            MAX(updated_at) as last_updated  FROM test_results WHERE TestID = ?");
-    
-    
-    $stmt->bind_param("s",$sampleID);
+    $stmt = $conn->prepare("SELECT MIN(created_at) AS last_created FROM test_results WHERE SampleID = ?");
+    if (!$stmt) {
+        return null;
+    }
+    $stmt->bind_param("s", $sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
-    $record = $result->fetch_assoc();
-    return $record['last_created'];
+    $record = $result ? ($result->fetch_assoc() ?: []) : [];
+    $stmt->close();
+    return $record['last_created'] ?? null;
 }
 
 
 function getdatesamplecompleteed($sampleID){
     global $conn;
-    $stmt = $conn->prepare("SELECT  MIN(created_at) as last_created, 
-            MAX(updated_at) as last_updated  FROM test_results WHERE TestID = ?");
-    
-    
-    $stmt->bind_param("s",$sampleID);
+    $stmt = $conn->prepare("SELECT MAX(updated_at) AS last_updated FROM test_results WHERE SampleID = ?");
+    if (!$stmt) {
+        return null;
+    }
+    $stmt->bind_param("s", $sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
-    $record = $result->fetch_assoc();
-    return $record['last_updated'];
+    $record = $result ? ($result->fetch_assoc() ?: []) : [];
+    $stmt->close();
+    return $record['last_updated'] ?? null;
 }
-
 
 
 function getdatesampleid($sampleID){
     global $conn;
-    $stmt = $conn->prepare("SELECT  SampleID  FROM test_results WHERE TestID = ?");
-    $stmt->bind_param("s",$sampleID);
+    $stmt = $conn->prepare("SELECT SampleID, `rollback` FROM test_results WHERE SampleID = ? LIMIT 1");
+    if (!$stmt) {
+        return '';
+    }
+    $stmt->bind_param("s", $sampleID);
     $stmt->execute();
     $result = $stmt->get_result();
     $record = $result ? ($result->fetch_assoc() ?: []) : [];
-    return $record['SampleID'] ?? '';
+    $stmt->close();
+    $realSampleId = (string)($record['SampleID'] ?? '');
+    $rollback = $record['rollback'] ?? null;
+    if ($realSampleId !== '' && !empty($rollback) && (int)$rollback > 0) {
+        return $realSampleId . ' /' . (int)$rollback;
+    }
+    return $realSampleId;
 }
 
 
+function needsPowerNotation($value){
+    $value = trim((string)$value);
+    if ($value === '' || !is_numeric($value)) {
+        return false;
+    }
+    $digits = preg_replace('/[^0-9]/', '', $value);
+    if (abs((float)$value) < 1) {
+        $digits = (string)substr($digits, 1);
+    }
+    return strlen($digits) > 2;
+}
+
+function formatCertNumber($value){
+    $value = str_replace(',', '', trim((string)$value));
+    if (!is_numeric($value) || (float)$value == 0) {
+        return $value;
+    }
+    $number = (float)$value;
+    $sign = $number < 0 ? '-' : '';
+    $absolute = abs($number);
+    $exponent10 = (int)floor(log10($absolute));
+    $mantissa = $absolute / pow(10, $exponent10 - 1);
+    $mantissaInt = (int)round($mantissa);
+    if ($mantissaInt >= 100) {
+        $mantissaInt = 10;
+        $exponent = $exponent10;
+    } else {
+        $exponent = $exponent10 - 1;
+    }
+    return $sign . $mantissaInt . ' × 10<sup>' . $exponent . '</sup>';
+}
+
+function formatResultNumber($row, $value){
+    if (isset($row['Category'], $row['ResultType'])
+        && $row['Category'] === 'microbiological'
+        && $row['ResultType'] === 'quantitativeField'
+        && needsPowerNotation($value)) {
+        return formatCertNumber($value);
+    }
+    return $value;
+}
+
+function accreditationSymbol($status){
+    switch (strtolower(trim((string)$status))) {
+        case 'accredited': return '*';
+        case 'contracted': return '‡';
+        case 'not_accredited':
+        default: return '†';
+    }
+}
+
+function accreditationParameterName($sample){
+    $name = htmlspecialchars((string)($sample['ParameterName'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $symbol = accreditationSymbol($sample['AccreditationStatus'] ?? 'not_accredited');
+    return $name . '<sup style="font-size:7px;">' . $symbol . '</sup>';
+}
+
 function validateresults($row){
-     $results=array();
-     if($row['MRL_Result']){
-         $results['results'] = $row['MRL_Result'].' '.$row['MRLUnit'];
-         $results['standard']= $row['MRL'];
-         $results['grade']   = ($row['MRL']>$row['MRL_Result'])?'green':'red';
-     }
-     
-     if($row['ResultStatus']){
-         $results['results'] = $row['ResultStatus'];
-         $results['standard'] = '-';
-         $results['grade']   ='';
-     }
-     
-     if($row['RangeResult']){
-         $results['results']  = $row['RangeResult'].' '.$row['UnitOfMeasure'];
-         $results['standard'] = $row['MinLimit'].' - '.$row['MaxLimit'];
-         $results['grade']    = 'green';
-         if($row['MinLimit']>$row['RangeResult']){
-              $results['grade']    = 'blue';
-         }
-         
-         if($row['RangeResult']>$row['MaxLimit']){
-              $results['grade']    = 'red';
-         }
-        
-     }
-     return $results;
+    $results = ['results' => '', 'standard' => '', 'grade' => ''];
+
+    if (!empty($row['MRL_Result'])) {
+        $results['results'] = formatResultNumber($row, $row['MRL_Result']) . ' ' . ($row['MRLUnit'] ?? '');
+        $results['standard'] = (string)($row['MRL'] ?? '');
+        $results['grade'] = ((float)($row['MRL'] ?? 0) > (float)$row['MRL_Result']) ? 'green' : 'red';
+    }
+
+    if (!empty($row['ResultStatus'])) {
+        $results['results'] = (string)$row['ResultStatus'];
+        $results['standard'] = '-';
+        $results['grade'] = '';
+    }
+
+    if (!empty($row['RangeResult'])) {
+        $results['results'] = formatResultNumber($row, $row['RangeResult']) . ' ' . ($row['UnitOfMeasure'] ?? '');
+        $results['standard'] = (string)($row['MinLimit'] ?? '') . ' - ' . (string)($row['MaxLimit'] ?? '');
+        $results['grade'] = 'green';
+        if ((float)($row['MinLimit'] ?? 0) > (float)$row['RangeResult']) {
+            $results['grade'] = 'blue';
+        }
+        if ((float)$row['RangeResult'] > (float)($row['MaxLimit'] ?? 0)) {
+            $results['grade'] = 'red';
+        }
+    }
+
+    return $results;
 }
  
 function TSDescription($sampleid){
-  global $conn;
-  
-  $sql =sprintf("SELECT `Description` FROM teststandards TS "
-          . "join `Sample_Tests` ST on TS.StandardID=ST.StandardID where `SampleID`='%s'",$sampleid);
-  $result = $conn->query($sql);
-   $record = $result ? $result->fetch_assoc() : null;
-    
-   return  htmlspecialchars($record['Description'] ?? '');
+    global $conn;
+    $stmt = $conn->prepare("
+        SELECT ts.Description
+        FROM test_results tr
+        JOIN teststandards ts ON ts.StandardID = tr.StandardID
+        WHERE tr.SampleID = ?
+        ORDER BY tr.resultsID DESC
+        LIMIT 1
+    ");
+    if (!$stmt) {
+        return '';
+    }
+    $stmt->bind_param("s", $sampleid);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return '';
+    }
+    $result = $stmt->get_result();
+    $record = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+    return htmlspecialchars((string)($record['Description'] ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 function statementofconformity(){
