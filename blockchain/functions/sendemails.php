@@ -66,15 +66,49 @@ function sendEmail(string $to, string $subject, string $content, string $cc = ''
 }
 
 /**
- * Backward compatibility for existing POST calls to this file
+ * Backward-compatible POST endpoint for existing callers.
  */
-if (basename($_SERVER['SCRIPT_FILENAME']) === 'sendemails.php') {
-    $sendcc  = $_POST['sendcc'] ?? '';
-    $sendto  = $_POST['sendto'] ?? '';
-    $subject = $_POST['subject'] ?? '';
-    $content = $_POST['content'] ?? '';
-    
+if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) === 'sendemails.php') {
+    header('Content-Type: application/json; charset=utf-8');
+
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'POST method required.']);
+        exit;
+    }
+
+    $sendcc  = trim((string)($_POST['sendcc'] ?? ''));
+    $sendto  = trim((string)($_POST['sendto'] ?? ''));
+    $subject = trim((string)($_POST['subject'] ?? ''));
+    $content = (string)($_POST['content'] ?? '');
+
+    if ($sendto === '' || !filter_var($sendto, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'A valid recipient email address is required.']);
+        exit;
+    }
+
+    if ($sendcc !== '' && !filter_var($sendcc, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'The CC email address is invalid.']);
+        exit;
+    }
+
+    if ($subject === '' || trim(strip_tags($content)) === '') {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'Email subject and message are required.']);
+        exit;
+    }
+
+    if (strlen($subject) > 255 || strlen($content) > 1000000) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'Email subject or message exceeds the allowed length.']);
+        exit;
+    }
+
     $result = sendEmail($sendto, $subject, $content, $sendcc);
-    header('Content-Type: application/json');
+    if (!$result['success']) {
+        http_response_code(500);
+    }
     echo json_encode($result);
 }
