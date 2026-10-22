@@ -11,9 +11,9 @@ JOIN TestStandards ts ON TR.StandardID = ts.StandardID
 JOIN TestParameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
 JOIN test_assignments ta ON TR.resultsID = ta.resultsID  
 JOIN subcontractors sc ON ta.subcontractor = sc.id  
-WHERE TR.StatusID = 1   
-AND (TR.MRL_Result IS NULL 
-AND TR.ResultStatus IS NULL  
+WHERE TR.StatusID = 1
+AND tp.AccreditationStatus = 'contracted'
+AND (TR.MRL_Result IS NULL AND TR.ResultStatus IS NULL  
 AND TR.RangeResult IS NULL)";
 
 // Prepare the statement
