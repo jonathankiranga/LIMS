@@ -429,7 +429,7 @@ public function Footer() {
   global $reportFooterHtml;
   $this->SetY(-78);
   if (!empty($reportFooterHtml)) {
-      $this->writeHTMLCell(190, 68, 10, '', $reportFooterHtml, 0, 1, 0, true, 'L', true);
+      $this->writeHTMLCell(190, 66, 10, '', $reportFooterHtml, 0, 1, 0, true, 'L', true);
   }
   $this->SetY(-8);
   $this->SetFont('montserrat', 'I', 8);
@@ -1004,10 +1004,10 @@ function buildFooterHtml($wazito){
           <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($neemaLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
         </tr>
         <tr>
-          <td colspan="2" style="border-left:1px solid #9eacb5; font-size:6px; text-align:left; color:#2f2f2f;">
+          <td colspan="2" style="border-left:1px solid #9eacb5; border-bottom:1px solid #9eacb5; font-size:6px; text-align:left; color:#2f2f2f;">
             Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)
           </td>
-          <td style="border-right:1px solid #9eacb5; font-size:6px; text-align:right; color:#2f2f2f;">
+          <td style="border-right:1px solid #9eacb5; border-bottom:1px solid #9eacb5; font-size:6px; text-align:right; color:#2f2f2f;">
             Lab Works East Africa Ltd is NEMA gazetted no 47
           </td>
         </tr>
