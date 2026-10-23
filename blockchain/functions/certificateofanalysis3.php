@@ -965,50 +965,54 @@ function getsignature(){
 }
 
 function buildFooterHtml($wazito){
-    $kenhasLogo = str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
-    $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
-    $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
+    $kenhasLogo = str_replace('\\\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
+    $ilacLogo = str_replace('\\\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
+    $neemaLogo = str_replace('\\\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
 
     $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
-    $html = '<div style="font-family:helvetica,sans-serif; color:#111;">
-      <table style="width:100%; border-collapse:collapse;" cellpadding="1">
+    $authorisationPath = htmlspecialchars(str_replace('\\\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $technicianPath = htmlspecialchars(str_replace('\\\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $technician2Path = htmlspecialchars(str_replace('\\\\', '/', $wazito['technician2']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+
+    $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
+      <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
         <tr>
-          <td style="width:33%; text-align:center;">
-            <img src="' . htmlspecialchars(str_replace('\\', '/', $wazito['authorisation']['signature_path']), ENT_QUOTES, 'UTF-8') . '" height="20"><br>
-            <span style="font-size:9.5px; font-weight:bold; line-height:1.2;">' . htmlspecialchars($wazito['authorisation']['full_name'], ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:8px; color:#4a4a4a; letter-spacing:0.2px;">Authorization</span>
+          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
+            <img src="' . $authorisationPath . '" height="20"><br>
+            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['authorisation']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
+            <span style="font-size:7px; color:#4a4a4a;">Authorization</span>
           </td>
-          <td style="width:33%; text-align:center;">
-            <img src="' . htmlspecialchars(str_replace('\\', '/', $wazito['technician']['signature_path']), ENT_QUOTES, 'UTF-8') . '" height="20"><br>
-            <span style="font-size:9.5px; font-weight:bold; line-height:1.2;">' . htmlspecialchars($wazito['technician']['full_name'], ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:8px; color:#4a4a4a; letter-spacing:0.2px;">Laboratory Technician</span>
+          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
+            <img src="' . $technicianPath . '" height="20"><br>
+            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
+            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
           </td>
-          <td style="width:33%; text-align:center;">
-            <img src="' . htmlspecialchars(str_replace('\\', '/', $wazito['technician2']['signature_path']), ENT_QUOTES, 'UTF-8') . '" height="20"><br>
-            <span style="font-size:9.5px; font-weight:bold; line-height:1.2;">' . htmlspecialchars($wazito['technician2']['full_name'], ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:8px; color:#4a4a4a; letter-spacing:0.2px;">Laboratory Technician</span>
+          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
+            <img src="' . $technician2Path . '" height="20"><br>
+            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician2']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
+            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
           </td>
         </tr>
         <tr>
-          <td colspan="3" style="font-size:5px; text-align:center; border-top:1px solid #dcdcdc; padding-top:3px;">
-            <span style="font-size:5px; font-weight:bold;">Statement of Conformity</span><br>' . $statement . '
+          <td colspan="3" style="border:1px solid #9eacb5; font-size:6px; text-align:center; vertical-align:middle;">
+            <span style="font-size:7px; font-weight:bold;">Statement of Conformity</span><br>' . $statement . '
           </td>
         </tr>
         <tr>
-          <td style="width:33%; text-align:center;"><img src="' . htmlspecialchars($kenhasLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33%; text-align:center;"><img src="' . htmlspecialchars($ilacLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33%; text-align:center;"><img src="' . htmlspecialchars($neemaLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
+          <td style="width:33.33%; border-left:1px solid #9eacb5; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($kenhasLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($ilacLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($neemaLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
         </tr>
         <tr>
-          <td colspan="2" style="font-size:5px; text-align:left; color:#2f2f2f;">
+          <td colspan="2" style="border-left:1px solid #9eacb5; font-size:6px; text-align:left; color:#2f2f2f;">
             Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)
           </td>
-          <td style="font-size:5px; text-align:right; color:#2f2f2f;">
+          <td style="border-right:1px solid #9eacb5; font-size:6px; text-align:right; color:#2f2f2f;">
             Lab Works East Africa Ltd is NEMA gazetted no 47
           </td>
         </tr>
         <tr>
-          <td colspan="3" style="font-size:5px; text-align:center; color:#2f2f2f;">
+          <td colspan="3" style="border:1px solid #1f5a75; background-color:#1f5a75; color:#ffffff; font-size:6px; text-align:center; vertical-align:middle; padding:4px;">
             This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd
           </td>
         </tr>
