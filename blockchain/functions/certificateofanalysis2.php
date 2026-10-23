@@ -1043,11 +1043,7 @@ function buildFooterHtml($wazito){
             Lab Works East Africa Ltd is NEMA gazetted no 47
           </td>
         </tr>
-        <tr>
-          <td colspan="3" style="border:1px solid #1f5a75; background-color:#1f5a75; color:#ffffff; font-size:6px; text-align:center; vertical-align:middle; padding:4px;">
-            This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd
-          </td>
-        </tr>
+
       </table></div>';
 
     return $html;
