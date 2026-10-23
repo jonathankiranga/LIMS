@@ -417,7 +417,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->AddPage();
 
     // Start creating HTML content
-    $html = '<div style="width: 100%; font-family: Arial, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
+    $html = '<div style="width: 100%; font-family: Helvetica, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
@@ -451,11 +451,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     
     $lines = explode("\n", $SampletypeNotes);
     foreach ($lines as $line) {
-      $html .= '<div style="text-align: left; font-family: Arial, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">'.$line.'</div>'; // Add footer
+      $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">'.$line.'</div>'; // Add footer
     }
     
    $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>'; // Add footer
-   $html .= '<div style="text-align: left; font-family: Arial, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">' ; 
+   $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">' ; 
  
     foreach ($samples as $sample) {
         $validatedresults = validateresults($sample);
