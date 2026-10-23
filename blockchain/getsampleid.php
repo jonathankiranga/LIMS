@@ -218,36 +218,25 @@ class CustomPDF extends TCPDF {
         $record = array_merge($record, $customerDetails);
     }
     
+    // Customer labels are required in the generated sample report.
+    $customerLabelRows = [
+        ['Customer: ', $record['customer'] ?? ''],
+        ['Company: ', $record['company'] ?? ''],
+        ['Postal Code: ', $record['postcode'] ?? ''],
+        ['City: ', $record['city'] ?? ''],
+        ['Telephone: ', $record['phone'] ?? ''],
+        ['Email: ', $record['email'] ?? '']
+    ];
+
     $this->SetXY(105, 12);
-    $fitFontSize = $this->fitText($record['customer'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['customer'] ?? '', 50), 0, 'L', 0, 1, '', '', true); // Limit characters
-   
-    $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['company'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['company'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['postcode'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['postcode'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['city'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['city'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['phone'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['phone'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(105, $this->GetY());
-    $fitFontSize = $this->fitText($record['email'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['email'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
-    
+    foreach ($customerLabelRows as $customerRow) {
+        $label = $customerRow[0];
+        $value = $this->truncateText((string)$customerRow[1], 50);
+        $this->SetFont('helvetica', 'B', $DefaultFont);
+        $this->MultiCell(95, 5, $label . $value, 0, 'L', 0, 1, '', '', true);
+        $this->SetXY(105, $this->GetY());
+    }
+
     $this->SetXY(106, 53);
     $this->SetFont('helvetica', 'B', 8);
     $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
