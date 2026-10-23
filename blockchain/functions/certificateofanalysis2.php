@@ -219,20 +219,20 @@ public function Header() {
     $result = $stmt->get_result();
     $record = $result->fetch_assoc();
     $customerCode = trim((string)($record['CustomerID'] ?? ''));
-    $customerDetails = $this->fetchErpCustomerDetails($customerCode);
-    $record = array_merge(is_array($record) ? $record : [], $customerDetails);
+    // Keep ERP customer values separate from the sample/report query array.
+    $customerData = $this->fetchErpCustomerDetails($customerCode);
     
    
             // Shared recipient section: QR code at the top, labeled customer details below.
     $this->Image($qrcodelink,143,9,18,18);
 
     $customerLabelRows = [
-        ['Customer: ', (($record['customer'] ?? '') !== '' ? $record['customer'] : ($customerCode ?? ''))],
-        ['Company: ', $record['company'] ?? ''],
-        ['Postal Code: ', $record['postcode'] ?? ''],
-        ['City: ', $record['city'] ?? ''],
-        ['Telephone: ', $record['phone'] ?? ''],
-        ['Email: ', $record['email'] ?? '']
+        ['Customer: ', $customerData['customer'] ?? ''],
+        ['Company: ', $customerData['company'] ?? ''],
+        ['Postal Code: ', $customerData['postcode'] ?? ''],
+        ['City: ', $customerData['city'] ?? ''],
+        ['Telephone: ', $customerData['phone'] ?? ''],
+        ['Email: ', $customerData['email'] ?? '']
     ];
 
     $this->SetXY(105, 30);
