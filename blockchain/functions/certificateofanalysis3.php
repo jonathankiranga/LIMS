@@ -965,14 +965,14 @@ function getsignature(){
 }
 
 function buildFooterHtml($wazito){
-    $kenhasLogo = str_replace('\\\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
-    $ilacLogo = str_replace('\\\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
-    $neemaLogo = str_replace('\\\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
+    $kenhasLogo = str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
+    $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
+    $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
 
     $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
-    $authorisationPath = htmlspecialchars(str_replace('\\\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technicianPath = htmlspecialchars(str_replace('\\\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technician2Path = htmlspecialchars(str_replace('\\\\', '/', $wazito['technician2']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $authorisationPath = htmlspecialchars(str_replace('\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $technicianPath = htmlspecialchars(str_replace('\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $technician2Path = htmlspecialchars(str_replace('\\', '/', $wazito['technician2']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
