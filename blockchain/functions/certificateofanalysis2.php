@@ -49,47 +49,70 @@ $includeCompanyWatermark =& $GLOBALS['includeCompanyWatermark'];
 class CustomPDF extends TCPDF {
     
 public function Header() {
-    // Single wavy page border with four circular corner details.
-    $this->SetLineStyle(['width' => 0.3, 'color' => [180, 200, 220]]);
-    $borderLeft = 3;
-    $borderTop = 3;
-    $borderRight = 207;
-    $borderBottom = 294;
-    $cornerRadius = 2;
-    $waveAmplitude = 0.55;
-    $waveLength = 4.5;
-    $step = 0.5;
+    // Decorative multi-line wave border matching the report reference.
+    $borderLeft = 2;
+    $borderTop = 2;
+    $borderRight = 208;
+    $borderBottom = 295;
+    $this->SetLineStyle(['width' => 0.18, 'color' => [174, 198, 219]]);
 
-    // Top and bottom wavy edges.
-    for ($x = $borderLeft + $cornerRadius; $x < $borderRight - $cornerRadius; $x += $step) {
-        $nextX = min($x + $step, $borderRight - $cornerRadius);
-        $y1 = $borderTop + $waveAmplitude * sin((($x - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $y2 = $borderTop + $waveAmplitude * sin((($nextX - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $this->Line($x, $y1, $nextX, $y2);
+    // Layer fine sine waves along the top and bottom edges.
+    $waveCount = 8;
+    $waveStep = 0.65;
+    $waveAmplitude = 2.15;
+    $waveLength = 22;
+    $segment = 1.0;
 
-        $bottomY1 = $borderBottom + $waveAmplitude * sin((($x - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $bottomY2 = $borderBottom + $waveAmplitude * sin((($nextX - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $this->Line($x, $bottomY1, $nextX, $bottomY2);
+    for ($i = 0; $i < $waveCount; $i++) {
+        $offset = $i * $waveStep;
+        $phase = $i * 0.42;
+
+        for ($x = $borderLeft; $x < $borderRight; $x += $segment) {
+            $nextX = min($x + $segment, $borderRight);
+            $angle1 = (($x - $borderLeft) / $waveLength) * 2 * M_PI + $phase;
+            $angle2 = (($nextX - $borderLeft) / $waveLength) * 2 * M_PI + $phase;
+
+            $topY1 = $borderTop + $offset + $waveAmplitude * sin($angle1);
+            $topY2 = $borderTop + $offset + $waveAmplitude * sin($angle2);
+            $bottomY1 = $borderBottom - $offset + $waveAmplitude * sin($angle1);
+            $bottomY2 = $borderBottom - $offset + $waveAmplitude * sin($angle2);
+
+            $this->Line($x, $topY1, $nextX, $topY2);
+            $this->Line($x, $bottomY1, $nextX, $bottomY2);
+        }
     }
 
-    // Left and right wavy edges.
-    for ($y = $borderTop + $cornerRadius; $y < $borderBottom - $cornerRadius; $y += $step) {
-        $nextY = min($y + $step, $borderBottom - $cornerRadius);
-        $x1 = $borderLeft + $waveAmplitude * sin((($y - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $x2 = $borderLeft + $waveAmplitude * sin((($nextY - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $this->Line($x1, $y, $x2, $nextY);
+    // Continue the same layered wave motif down both vertical edges.
+    for ($i = 0; $i < $waveCount; $i++) {
+        $offset = $i * $waveStep;
+        $phase = $i * 0.42;
 
-        $rightX1 = $borderRight + $waveAmplitude * sin((($y - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $rightX2 = $borderRight + $waveAmplitude * sin((($nextY - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
-        $this->Line($rightX1, $y, $rightX2, $nextY);
+        for ($y = $borderTop; $y < $borderBottom; $y += $segment) {
+            $nextY = min($y + $segment, $borderBottom);
+            $angle1 = (($y - $borderTop) / $waveLength) * 2 * M_PI + $phase;
+            $angle2 = (($nextY - $borderTop) / $waveLength) * 2 * M_PI + $phase;
+
+            $leftX1 = $borderLeft + $offset + $waveAmplitude * sin($angle1);
+            $leftX2 = $borderLeft + $offset + $waveAmplitude * sin($angle2);
+            $rightX1 = $borderRight - $offset + $waveAmplitude * sin($angle1);
+            $rightX2 = $borderRight - $offset + $waveAmplitude * sin($angle2);
+
+            $this->Line($leftX1, $y, $leftX2, $nextY);
+            $this->Line($rightX1, $y, $rightX2, $nextY);
+        }
     }
 
-    // Explicit circles at all four corners.
-    $this->Circle($borderLeft + $cornerRadius, $borderTop + $cornerRadius, $cornerRadius, 0, 360, 'D');
-    $this->Circle($borderRight - $cornerRadius, $borderTop + $cornerRadius, $cornerRadius, 0, 360, 'D');
-    $this->Circle($borderRight - $cornerRadius, $borderBottom - $cornerRadius, $cornerRadius, 0, 360, 'D');
-    $this->Circle($borderLeft + $cornerRadius, $borderBottom - $cornerRadius, $cornerRadius, 0, 360, 'D');
-
+    // Corner medallions from the reference report.
+    $this->SetLineStyle(['width' => 0.35, 'color' => [190, 211, 232]]);
+    $cornerPoints = [
+        [18, 18], [192, 18], [18, 279], [192, 279]
+    ];
+    foreach ($cornerPoints as $point) {
+        $this->Circle($point[0], $point[1], 7, 0, 360, 'D');
+        $this->Circle($point[0], $point[1], 10.5, 0, 360, 'D');
+        $this->SetFillColor(218, 231, 247);
+        $this->Circle($point[0], $point[1], 1.6, 0, 360, 'F');
+    }
 
     global $conn,$QRcode,$includeCompanyWatermark;
     $sql = "SELECT * FROM company_master ORDER BY company_id DESC LIMIT 1";
