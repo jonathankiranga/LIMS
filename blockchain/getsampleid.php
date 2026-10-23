@@ -90,8 +90,10 @@ class CustomPDF extends TCPDF {
 
             $topY1 = $borderTop + $offset + $waveAmplitude * sin($angle1);
             $topY2 = $borderTop + $offset + $waveAmplitude * sin($angle2);
-            $bottomY1 = $borderBottom - $offset + $waveAmplitude * sin($angle1);
-            $bottomY2 = $borderBottom - $offset + $waveAmplitude * sin($angle2);
+            // Keep the bottom wave inside the printable page area.
+            $bottomWaveAmplitude = 1.0;
+            $bottomY1 = $borderBottom - $offset + $bottomWaveAmplitude * sin($angle1);
+            $bottomY2 = $borderBottom - $offset + $bottomWaveAmplitude * sin($angle2);
 
             $this->Line($x, $topY1, $nextX, $topY2);
             $this->Line($x, $bottomY1, $nextX, $bottomY2);
