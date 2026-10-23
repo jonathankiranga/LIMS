@@ -456,6 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
     $pdf->SetMargins(10,110,10); // Adjust top margin to avoid overlap with header
+    $pdf->SetAutoPageBreak(true, 80); // Reserve 80 mm for the existing report footer
     $pdf->AddPage();
 
     // Start creating HTML content
