@@ -524,7 +524,7 @@ $html .=   '</div>';
 
 $SamplePicture = TSamplePicture($sampleID);
 
-$reportFooterHtml = buildFooterHtml(getsignature());
+$reportFooterHtml = buildFooterHtml(getsignature(), $record);
 
     // Write the HTML content to the PDF
     $pdf->writeHTML($html, true, false, true, false, '');
@@ -996,7 +996,7 @@ function getsignature(){
     );
 }
 
-function buildFooterHtml($wazito){
+function buildFooterHtml($wazito, $companyDetails = []){
     $kenhasLogo = str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
     $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
     $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
@@ -1044,8 +1044,15 @@ function buildFooterHtml($wazito){
           </td>
         </tr>
         <tr>
-          <td colspan="3" style="border:1px solid #1f5a75; background-color:#1f5a75; color:#ffffff; font-size:6px; text-align:center; vertical-align:middle; padding:4px;">
-            This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd
+          <td colspan="3" style="border-top:1px solid #9eacb5; font-size:6px; text-align:center; vertical-align:middle; padding:3px; color:#2f2f2f;">
+            ' . htmlspecialchars(implode(' · ', array_filter([
+                trim((string)($companyDetails['address1'] ?? '')),
+                trim((string)($companyDetails['address2'] ?? '')),
+                trim((string)($companyDetails['address3'] ?? '')),
+                trim((string)($companyDetails['telephone'] ?? '')),
+                trim((string)($companyDetails['website'] ?? '')),
+                trim((string)($companyDetails['email'] ?? ''))
+            ], function($value) { return $value !== ''; })), ENT_QUOTES, 'UTF-8') . '
           </td>
         </tr>
       </table></div>';
