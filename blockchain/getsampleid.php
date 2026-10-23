@@ -214,18 +214,18 @@ class CustomPDF extends TCPDF {
         }
 
         $customerCode = trim((string)($record['CustomerID'] ?? ''));
-        $customerDetails = $this->fetchErpCustomerDetails($customerCode);
-        $record = array_merge($record, $customerDetails);
+        // Keep ERP customer values separate from the sample/report query array.
+        $customerData = $this->fetchErpCustomerDetails($customerCode);
     }
     
     // Customer labels are required in the generated sample report.
     $customerLabelRows = [
-        ['Customer: ', $record['customer'] ?? ''],
-        ['Company: ', $record['company'] ?? ''],
-        ['Postal Code: ', $record['postcode'] ?? ''],
-        ['City: ', $record['city'] ?? ''],
-        ['Telephone: ', $record['phone'] ?? ''],
-        ['Email: ', $record['email'] ?? '']
+        ['Customer: ', $customerData['customer'] ?? ''],
+        ['Company: ', $customerData['company'] ?? ''],
+        ['Postal Code: ', $customerData['postcode'] ?? ''],
+        ['City: ', $customerData['city'] ?? ''],
+        ['Telephone: ', $customerData['phone'] ?? ''],
+        ['Email: ', $customerData['email'] ?? '']
     ];
 
     $this->SetXY(105, 12);
