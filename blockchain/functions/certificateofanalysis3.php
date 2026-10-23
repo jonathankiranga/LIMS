@@ -49,9 +49,46 @@ $includeCompanyWatermark =& $GLOBALS['includeCompanyWatermark'];
 class CustomPDF extends TCPDF {
     
     public function Header() {
-    // Single light blue-grey page border matching the supplied reference.
-    $this->SetLineStyle(['width'=>0.3, 'color'=>[180,200,220]]);
-    $this->Rect(3,3,204,291);
+    // Single wavy page border with four circular corner details.
+    $this->SetLineStyle(['width' => 0.3, 'color' => [180, 200, 220]]);
+    $borderLeft = 3;
+    $borderTop = 3;
+    $borderRight = 207;
+    $borderBottom = 294;
+    $cornerRadius = 2;
+    $waveAmplitude = 0.55;
+    $waveLength = 4.5;
+    $step = 0.5;
+
+    // Top and bottom wavy edges.
+    for ($x = $borderLeft + $cornerRadius; $x < $borderRight - $cornerRadius; $x += $step) {
+        $nextX = min($x + $step, $borderRight - $cornerRadius);
+        $y1 = $borderTop + $waveAmplitude * sin((($x - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $y2 = $borderTop + $waveAmplitude * sin((($nextX - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $this->Line($x, $y1, $nextX, $y2);
+
+        $bottomY1 = $borderBottom + $waveAmplitude * sin((($x - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $bottomY2 = $borderBottom + $waveAmplitude * sin((($nextX - ($borderLeft + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $this->Line($x, $bottomY1, $nextX, $bottomY2);
+    }
+
+    // Left and right wavy edges.
+    for ($y = $borderTop + $cornerRadius; $y < $borderBottom - $cornerRadius; $y += $step) {
+        $nextY = min($y + $step, $borderBottom - $cornerRadius);
+        $x1 = $borderLeft + $waveAmplitude * sin((($y - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $x2 = $borderLeft + $waveAmplitude * sin((($nextY - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $this->Line($x1, $y, $x2, $nextY);
+
+        $rightX1 = $borderRight + $waveAmplitude * sin((($y - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $rightX2 = $borderRight + $waveAmplitude * sin((($nextY - ($borderTop + $cornerRadius)) / $waveLength) * 2 * M_PI);
+        $this->Line($rightX1, $y, $rightX2, $nextY);
+    }
+
+    // Explicit circles at all four corners.
+    $this->Circle($borderLeft + $cornerRadius, $borderTop + $cornerRadius, $cornerRadius, 0, 360, 'D');
+    $this->Circle($borderRight - $cornerRadius, $borderTop + $cornerRadius, $cornerRadius, 0, 360, 'D');
+    $this->Circle($borderRight - $cornerRadius, $borderBottom - $cornerRadius, $cornerRadius, 0, 360, 'D');
+    $this->Circle($borderLeft + $cornerRadius, $borderBottom - $cornerRadius, $cornerRadius, 0, 360, 'D');
 
 
     global $conn,$QRcode,$includeCompanyWatermark;
