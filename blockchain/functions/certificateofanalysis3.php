@@ -245,10 +245,6 @@ class CustomPDF extends TCPDF {
         $this->SetXY(105, $this->GetY());
     }
 
-    $this->SetXY(106, 53);
-    $this->SetFont('montserrat', 'B', 8);
-    $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-    $this->Cell(0, 10, $pageNumber, 0, 0, 'L');
 
     // Draw a line under the top sections--------------------------------------------------------------------------------
     $this->Line(10, 60, 200, 60);
