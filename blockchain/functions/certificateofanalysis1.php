@@ -49,14 +49,9 @@ $includeCompanyWatermark =& $GLOBALS['includeCompanyWatermark'];
 class CustomPDF extends TCPDF {
     
 public function Header() {
-    // Certificate-style double-line inset border on every page.
-    // Keep this separate from the existing header boxes and report content.
-    $this->SetDrawColor(85, 95, 105);
-    $this->SetLineWidth(0.35);
-    $this->Rect(5, 5, 200, 287, 'D');
-    $this->SetLineWidth(0.15);
-    $this->Rect(7, 7, 196, 283, 'D');
-    $this->SetLineWidth(0.2);
+    // Single light blue-grey page border matching the supplied reference.
+    $this->SetLineStyle(['width'=>0.3, 'color'=>[180,200,220]]);
+    $this->Rect(3,3,204,291);
 
 
     global $conn,$QRcode,$includeCompanyWatermark;
