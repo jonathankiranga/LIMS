@@ -136,7 +136,7 @@ public function Header() {
     }
 
     // Microtext strip (unconditional; mirrors the HTML preview)
-    $this->SetFont('helvetica', 'I', 4.5);
+    $this->SetFont('montserrat', 'I', 4.5);
     $this->SetTextColor(169, 178, 191);
     $microPart = 'LAB WORKS EAST AFRICA • ISO/IEC 17025:2017 • CERTIFIED TESTING LABORATORY • ';
     $micro = '';
@@ -150,11 +150,11 @@ public function Header() {
   
 	    $this->SetXY(70,5);
 	    // Set fixed height for the header and Y position
-	    $this->SetFont('helvetica', 'B', 10);
+	    $this->SetFont('montserrat', 'B', 10);
 	    $this->MultiCell(80, 5,"CERTIFICATE OF ANALYSIS (COA)", 0, 'L', 0, 1, '', '', true); // Limit characters
 	    $DefaultFont=8;
     $this->SetY(10);
-    $this->SetFont('helvetica','B',$DefaultFont);
+    $this->SetFont('montserrat','B',$DefaultFont);
     
     $this->Image($_SESSION['LogoFile'],12,12,40,10);
     $this->Image($_SESSION['LABCODE'],88,10,17,5);
@@ -245,14 +245,14 @@ public function Header() {
     }
 
     $this->SetXY(106, 53);
-    $this->SetFont('helvetica', 'B', 8);
+    $this->SetFont('montserrat', 'B', 8);
     $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
     $this->Cell(0, 10, $pageNumber, 0, 0, 'L');
 
     // Draw a line under the top sections--------------------------------------------------------------------------------
     $this->Line(10, 60, 200, 60);
     $this->Line(105, 10, 105, 60);
-    $this->SetFont('helvetica','',$DefaultFont);
+    $this->SetFont('montserrat','',$DefaultFont);
 
     $testreceived = getdatesamplereceived($sampleID);
     $testended = getdatesamplecompleteed($sampleID);
@@ -381,10 +381,10 @@ private function drawCompanyWatermark($watermarkText) {
     $centerY = $this->getPageHeight() / 2;
     $fontSize = 30;
 
-    $this->SetFont('helvetica', 'B', $fontSize);
+    $this->SetFont('montserrat', 'B', $fontSize);
     while ($this->GetStringWidth($watermarkText) > 150 && $fontSize > 18) {
         $fontSize--;
-        $this->SetFont('helvetica', 'B', $fontSize);
+        $this->SetFont('montserrat', 'B', $fontSize);
     }
 
     $textWidth = $this->GetStringWidth($watermarkText);
@@ -426,7 +426,7 @@ public function Footer() {
       $this->writeHTMLCell(190, 68, 10, '', $reportFooterHtml, 0, 1, 0, true, 'L', true);
   }
   $this->SetY(-8);
-  $this->SetFont('helvetica', 'I', 8);
+  $this->SetFont('montserrat', 'I', 8);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
   $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
 }
@@ -534,7 +534,7 @@ $pdf->AddPage();
 //$html = str_replace('X2', '-', $html);
     $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->SetXY(70,120);
-$pdf->SetFont('helvetica', '',20);
+$pdf->SetFont('montserrat', '',20);
 $pdf->MultiCell(95,14,'Sample Picture', 0, 'C', 0, 1, '', '', true); // Limit characters
 
 // Get the page width and height
