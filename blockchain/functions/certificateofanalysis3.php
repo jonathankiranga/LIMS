@@ -228,7 +228,7 @@ class CustomPDF extends TCPDF {
     $this->Image($qrcodelink,143,9,18,18);
 
     $customerLabelRows = [
-        ['Customer: ', $record['customer'] ?? ''],
+        ['Customer: ', (($record['customer'] ?? '') !== '' ? $record['customer'] : ($customerCode ?? ''))],
         ['Company: ', $record['company'] ?? ''],
         ['Postal Code: ', $record['postcode'] ?? ''],
         ['City: ', $record['city'] ?? ''],
