@@ -488,7 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     }
 
     $html .= '</tbody></table>'; // Close the table
-    $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
+    $html .= '<div style="text-align: center; margin-top: 10px;">~.~.~.~.~~.~.~.~.~.~.~.~.~.~ END OF RESULTS ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~</div>';
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Accredited &nbsp;&nbsp; † Not Accredited &nbsp;&nbsp; ‡ Contracted</div>';
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
     
