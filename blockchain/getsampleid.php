@@ -152,38 +152,38 @@ class CustomPDF extends TCPDF {
     $this->SetXY(10, 25); 
    
     $fitFontSize = $this->fitText($record['company_name'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['company_name'] ?? '', 50), 0, 'L', 0, 1, '', '', true); // Limit characters
    
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($record['address'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['address'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($record['address1'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['address1'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($record['address2'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['address2'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($record['address3'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['address3'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
     
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($record['email'] ?? '', 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($record['email'] ?? '', 50), 0, 'L', 0, 1, '', '', true);
     
     $companyPhone = $record['telephone'] ?? ($record['telephne'] ?? '');
     $this->SetXY(10, $this->GetY());
     $fitFontSize = $this->fitText($companyPhone, 95,$DefaultFont);
-    $this->SetFont('helvetica', 'B', $fitFontSize);
+    $this->SetFont('montserrat', '', $fitFontSize);
     $this->MultiCell(95, 5, $this->truncateText($companyPhone, 50), 0, 'L', 0, 1, '', '', true);
 
     // Right Top Section-------------------------------------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ class CustomPDF extends TCPDF {
     foreach ($customerLabelRows as $customerRow) {
         $label = $customerRow[0];
         $value = $this->truncateText((string)$customerRow[1], 50);
-        $this->SetFont('helvetica', 'B', $DefaultFont);
+        $this->SetFont('montserrat', '', $DefaultFont);
         $this->MultiCell(95, 5, $label . $value, 0, 'L', 0, 1, '', '', true);
         $this->SetXY(105, $this->GetY());
     }
@@ -369,11 +369,11 @@ class CustomPDF extends TCPDF {
 
     function fitText($text, $width, $maxFontSize, $minFontSize = 8) {
         $currentFontSize = $maxFontSize;
-        $this->SetFont('helvetica', '', $currentFontSize);
+        $this->SetFont('montserrat', '', $currentFontSize);
 
         while ($this->GetStringWidth($text) > $width && $currentFontSize > $minFontSize) {
             $currentFontSize--;
-            $this->SetFont('helvetica', '', $currentFontSize);
+            $this->SetFont('montserrat', '', $currentFontSize);
         }
 
         return $currentFontSize; // Final font size that fits
