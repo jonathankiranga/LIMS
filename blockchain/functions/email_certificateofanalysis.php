@@ -13,12 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$sampleID = isset($_POST['sampleID']) ? (int)$_POST['sampleID'] : 0;
+$sampleID = isset($_POST['sampleID']) ? trim((string)$_POST['sampleID']) : '';
 $reportOption = isset($_POST['reportoption']) ? (int)$_POST['reportoption'] : 0;
 $allowedOptions = [1, 2, 3];
 $sentBy = $_SESSION['UserID'] ?? $_SESSION['User_name'] ?? $_SESSION['username'] ?? '';
 
-if ($sampleID <= 0 || !in_array($reportOption, $allowedOptions, true)) {
+if ($sampleID === '' || !in_array($reportOption, $allowedOptions, true)) {
     echo json_encode([
         'success' => false,
         'queued' => false,
@@ -27,7 +27,7 @@ if ($sampleID <= 0 || !in_array($reportOption, $allowedOptions, true)) {
         'send_count' => 0,
         'recipient_email' => '',
         'status' => 'failure',
-        'test_id' => $sampleID,
+        'test_id' => 0,
         'report_option' => $reportOption,
         'dispatch_mode' => 'live',
     ]);
@@ -46,8 +46,12 @@ try {
     }
 
     if ($dispatch['effective_mode'] === 'queue') {
-        $jobId = enqueue_certificate_email_job($conn, $sampleID, $reportOption, (string)$sentBy);
-        $recentLogs = get_recent_certificate_email_logs($conn, $sampleID, 5, $reportOption);
+        $testId = (int)($context['TestID'] ?? 0);
+        if ($testId <= 0) {
+            throw new RuntimeException('No approved test ID was found for the selected sample.');
+        }
+        $jobId = enqueue_certificate_email_job($conn, $testId, $reportOption, (string)$sentBy);
+        $recentLogs = get_recent_certificate_email_logs($conn, $testId, 5, $reportOption);
 
         echo json_encode([
             'success' => true,
@@ -57,10 +61,10 @@ try {
                 'Background worker is healthy; this email has been queued for processing.',
                 'Queue job #' . $jobId . ' created for report option ' . $reportOption . '.',
             ],
-            'send_count' => $sampleID > 0 ? get_certificate_email_send_count($conn, $sampleID) : 0,
+            'send_count' => $testId > 0 ? get_certificate_email_send_count($conn, $testId) : 0,
             'recipient_email' => $context['email'] ?? '',
             'status' => 'queued',
-            'test_id' => $sampleID,
+            'test_id' => $testId,
             'report_option' => $reportOption,
             'document_no' => $context['DocumentNo'] ?? '',
             'recent_logs' => $recentLogs,
@@ -94,7 +98,7 @@ try {
         'queued' => false,
         'message' => $throwable->getMessage(),
         'mail_log' => [$throwable->getMessage()],
-        'send_count' => $sampleID > 0 ? get_certificate_email_send_count($conn, $sampleID) : 0,
+        'send_count' => 0,
         'recipient_email' => '',
         'status' => 'failure',
         'test_id' => $sampleID,

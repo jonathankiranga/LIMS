@@ -640,12 +640,12 @@ function send_certificate_email(mysqli $conn, array $context, $pdfContent, $file
 
 function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOption, $sentBy = '')
 {
-    $sampleID = (int)$sampleID;
+    $sampleID = trim((string)$sampleID);
     $reportOption = (int)$reportOption;
     $allowedOptions = [1, 2, 3];
     $logLines = [];
 
-    if ($sampleID <= 0 || !in_array($reportOption, $allowedOptions, true)) {
+    if ($sampleID === '' || !in_array($reportOption, $allowedOptions, true)) {
         return [
             'success' => false,
             'message' => 'A valid sample and report option are required.',
@@ -653,7 +653,7 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
             'send_count' => 0,
             'recipient_email' => '',
             'status' => 'failure',
-            'test_id' => $sampleID,
+            'test_id' => isset($testId) ? $testId : 0,
             'report_option' => $reportOption,
             'document_no' => '',
             'recent_logs' => [],
@@ -667,6 +667,11 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
 
         if (empty($context)) {
             throw new RuntimeException('No approved sample record was found for the selected report.');
+        }
+
+        $testId = (int)($context['TestID'] ?? 0);
+        if ($testId <= 0) {
+            throw new RuntimeException('No approved test ID was found for the selected sample.');
         }
 
         $logLines[] = 'Preparing Certificate of Analysis PDF for batch ' . ($context['DocumentNo'] ?? 'N/A') . '.';
@@ -704,7 +709,7 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
 
         $sendCount = update_certificate_email_tracking(
             $conn,
-            $sampleID,
+            $testId,
             $reportOption,
             (string)($mailResult['recipient_email'] ?? ''),
             (string)($mailResult['subject'] ?? ''),
@@ -713,7 +718,7 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
             (string)$sentBy
         );
 
-        $recentLogs = get_recent_certificate_email_logs($conn, $sampleID, 5, $reportOption);
+        $recentLogs = get_recent_certificate_email_logs($conn, $testId, 5, $reportOption);
 
         return [
             'success' => (bool)$mailResult['success'],
@@ -722,7 +727,7 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
             'send_count' => $sendCount,
             'recipient_email' => $mailResult['recipient_email'] ?? '',
             'status' => $mailResult['status'] ?? 'failure',
-            'test_id' => $sampleID,
+            'test_id' => isset($testId) ? $testId : 0,
             'report_option' => $reportOption,
             'document_no' => $context['DocumentNo'] ?? '',
             'recent_logs' => $recentLogs,
@@ -733,10 +738,10 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
         try {
             $context = isset($context) && is_array($context) ? $context : [];
             $safeRecipient = (string)($context['email'] ?? '');
-            if ($sampleID > 0) {
+            if (isset($testId) && $testId > 0) {
                 update_certificate_email_tracking(
                     $conn,
-                    $sampleID,
+                    $testId,
                     $reportOption > 0 ? $reportOption : 1,
                     $safeRecipient,
                     '',
@@ -755,10 +760,10 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
             'success' => false,
             'message' => $throwable->getMessage(),
             'mail_log' => $logLines,
-            'send_count' => $sampleID > 0 ? get_certificate_email_send_count($conn, $sampleID) : 0,
+            'send_count' => isset($testId) && $testId > 0 ? get_certificate_email_send_count($conn, $testId) : 0,
             'recipient_email' => $safeRecipient,
             'status' => 'failure',
-            'test_id' => $sampleID,
+            'test_id' => isset($testId) ? $testId : 0,
             'report_option' => $reportOption,
             'document_no' => '',
             'recent_logs' => [],
@@ -816,12 +821,25 @@ function process_certificate_email_queue_batch(mysqli $conn, $limit = 5, $worker
             throw $throwable;
         }
 
-        $deliveryResponse = process_certificate_email_delivery(
-            $conn,
-            (int)$job['TestID'],
-            (int)$job['report_option'],
-            (string)($job['requested_by'] ?? '')
-        );
+        $testId = (int)$job['TestID'];
+        $sampleStmt = $conn->prepare("SELECT SampleID FROM test_results WHERE TestID = ? AND StatusID = 4 ORDER BY resultsID ASC LIMIT 1");
+        $sampleID = '';
+        if ($sampleStmt) {
+            $sampleStmt->bind_param('i', $testId);
+            $sampleStmt->execute();
+            $sampleResult = $sampleStmt->get_result();
+            $sampleRow = $sampleResult ? ($sampleResult->fetch_assoc() ?: []) : [];
+            $sampleID = trim((string)($sampleRow['SampleID'] ?? ''));
+            $sampleStmt->close();
+        }
+        $deliveryResponse = $sampleID === ''
+            ? ['success' => false, 'message' => 'No approved sample was found for queued TestID ' . $testId . '.', 'recipient_email' => '', 'subject' => '', 'mail_log' => []]
+            : process_certificate_email_delivery(
+                $conn,
+                $sampleID,
+                (int)$job['report_option'],
+                (string)($job['requested_by'] ?? '')
+            );
 
         $finalStatus = !empty($deliveryResponse['success']) ? 'success' : 'failure';
         $recipientEmail = (string)($deliveryResponse['recipient_email'] ?? '');
