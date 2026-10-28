@@ -58,7 +58,12 @@ class CustomPDF extends TCPDF {
     
     public function StopTransform() {
         parent::StopTransform();
-        $this->angle = 0;
+        if ($this->angle != 0) {
+            // Rotate() opens a second graphics-state level in addition to StartTransform().
+            // Close that outer level too so footer images inherit the normal page orientation.
+            $this->_out('Q');
+            $this->angle = 0;
+        }
     }
 
     function _endpage() {
