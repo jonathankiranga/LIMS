@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
 require_once('vendor/autoload.php'); // Adjust the path as necessary
 require_once 'functions/functions.php';
 $config      = include('include/config.php'); // Load the config file
