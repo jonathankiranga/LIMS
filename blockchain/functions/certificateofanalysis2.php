@@ -408,10 +408,12 @@ private function truncateText($text, $maxLength) {
    
 public function Footer() {
   global $reportFooterHtml;
+  $this->SetAutoPageBreak(false, 0);
   $this->SetY(-78);
   if (!empty($reportFooterHtml)) {
       $this->writeHTMLCell(190, 66, 10, $this->getPageHeight() - 78, $reportFooterHtml, 0, 0, 0, true, 'L', true);
   }
+  $this->SetAutoPageBreak(true, 80);
   $this->SetY(-8);
   $this->SetFont('montserrat', 'I', 8);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
