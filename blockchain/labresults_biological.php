@@ -187,8 +187,8 @@ function showRowEditor($tr, type) {
         $input = $('<input>', { type: 'text', class: 'result-value form-control', placeholder: 'e.g. <2 or 1-5' });
     }
     
-    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
     $tdInput.append($input);
+    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
 }
 
 // Prepare data for saving
