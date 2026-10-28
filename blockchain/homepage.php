@@ -149,6 +149,10 @@
 
             const userRoleId = localStorage.getItem('role');
             const user_id = localStorage.getItem('user_id');
+            // Make the same logged-in user ID available to server-generated PDFs.
+            if (user_id) {
+                document.cookie = 'printedByUserId=' + encodeURIComponent(user_id) + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+            }
             // Fetch and generate the menu on page load
              fetchAndGenerateMenu(userRoleId);
              fillEditForm(user_id);
