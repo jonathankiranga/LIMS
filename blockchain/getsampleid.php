@@ -362,26 +362,39 @@ class CustomPDF extends TCPDF {
         return $currentFontSize; // Final font size that fits
     }
 
-   public function Footer() {
-    $iconrow = $this->getPageHeight() - 35;
-    $this->SetY($iconrow);
-    $this->SetFont('montserrat', 'I', 5);
-    $this->Image($_SESSION['KenhasFile'], 15, $iconrow, 0, 10);
-    $this->Image($_SESSION['ILAC'], 100, $iconrow, 0, 10);
-    $this->Image($_SESSION['NeemaFile'], 180, $iconrow, 0, 10);
+    private function drawFooterLogo($path, $x, $y, $maxWidth = 15, $maxHeight = 10) {
+        if (empty($path) || !is_file($path) || !is_readable($path)) {
+            return;
+        }
+        $dimensions = @getimagesize($path);
+        if (!$dimensions || empty($dimensions[0]) || empty($dimensions[1])) {
+            return;
+        }
+        $scale = min($maxWidth / $dimensions[0], $maxHeight / $dimensions[1]);
+        $width = $dimensions[0] * $scale;
+        $height = $dimensions[1] * $scale;
+        $this->Image($path, $x, $y + (($maxHeight - $height) / 2), $width, $height);
+    }
 
-    $this->SetXY(10, -22);
-    $this->MultiCell(105, 4, 'Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)', 0, 'L', 0, 1, '', '', true);
-    $this->SetXY(125, -22);
-    $this->MultiCell(75, 4, 'Lab Works East Africa Ltd is NEMA gazetted no 47', 0, 'R', 0, 1, '', '', true);
-    $this->SetXY(25, -14);
-    $this->MultiCell(160, 4, 'This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd', 0, 'C', 0, 1, '', '', true);
+    public function Footer() {
+        $iconrow = $this->getPageHeight() - 35;
+        $this->SetFont('montserrat', 'I', 5);
+        $this->drawFooterLogo($_SESSION['KenhasFile'] ?? '', 15, $iconrow, 15, 10);
+        $this->drawFooterLogo($_SESSION['ILAC'] ?? '', 100, $iconrow, 15, 10);
+        $this->drawFooterLogo($_SESSION['NeemaFile'] ?? '', 180, $iconrow, 15, 10);
 
-    $this->SetY(-8);
-    $this->SetFont('montserrat', 'I', 8);
-    $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-    $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
-}
+        $this->SetXY(10, -22);
+        $this->MultiCell(105, 4, 'Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)', 0, 'L', 0, 1, '', '', true);
+        $this->SetXY(125, -22);
+        $this->MultiCell(75, 4, 'Lab Works East Africa Ltd is NEMA gazetted no 47', 0, 'R', 0, 1, '', '', true);
+        $this->SetXY(25, -14);
+        $this->MultiCell(160, 4, 'This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd', 0, 'C', 0, 1, '', '', true);
+
+        $this->SetY(-8);
+        $this->SetFont('montserrat', 'I', 8);
+        $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
+        $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+    }
 }
 }
 
