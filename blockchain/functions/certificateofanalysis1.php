@@ -508,7 +508,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
         
    }
  $html .='</div>';
- $reportFooterHtml = buildFooterHtml(getsignature());
+ $reportFooterHtml = buildFooterHtml(getsignature($sampleID));
     $pdf->writeHTML($html, true, false, true, false, '');
 
 if($pdf->getPage()>$initialPage){
@@ -886,81 +886,53 @@ function statementofconformity(){
    return  $record['confvalue'];
 }
 
-function getsignature(){
+function getsignature($sampleID){
     global $conn;
-
+    $sampleID = trim((string)$sampleID);
     $defaultSignaturePath = realpath(__DIR__ . '/../images/icons8-no-image-100.png') ?: (__DIR__ . '/../images/icons8-no-image-100.png');
-
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
-        $rawPath = trim((string)$rawPath);
-        $normalizedPath = str_replace(chr(92), '/', $rawPath);
-        $candidates = [];
-
+        $rawPath = trim((string)$rawPath); $normalizedPath = str_replace(chr(92), '/', $rawPath); $candidates = [];
         if ($rawPath !== '') {
-            // Try the exact stored path first.
-            if (preg_match('/^[A-Za-z]:\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) {
-                $candidates[] = $rawPath;
-            } else {
-                $candidates[] = __DIR__ . '/../' . ltrim($normalizedPath, '/');
-                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
-            }
-
-            // Signatures uploaded by update_signature.php are saved in blockchain/images/.
-            // The database commonly stores only the filename; try that location even if
-            // the database contains a stale absolute path from another server.
-            $pathPart = parse_url($normalizedPath, PHP_URL_PATH);
-            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
-            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
-                $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
-            }
-
-            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) {
-                $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
-            }
+            if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) $candidates[] = $rawPath;
+            else { $candidates[] = __DIR__ . '/../' . ltrim($normalizedPath, '/'); $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); }
+            $pathPart = parse_url($normalizedPath, PHP_URL_PATH); $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
+            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
+            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
         }
-
         $candidates[] = $defaultSignaturePath;
-
-        foreach ($candidates as $candidate) {
-            if ($candidate && is_file($candidate) && is_readable($candidate)) {
-                $resolvedPath = realpath($candidate);
-                return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate);
-            }
-        }
-
+        foreach ($candidates as $candidate) if ($candidate && is_file($candidate) && is_readable($candidate)) { $resolvedPath = realpath($candidate); return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate); }
         return str_replace(chr(92), '/', $defaultSignaturePath);
     };
-
-    $companyRow = [];
-    $companyResult = $conn->query("SELECT authorisation, technician, technician2 FROM company_master ORDER BY company_id DESC LIMIT 1");
-    if ($companyResult) {
-        $companyRow = $companyResult->fetch_assoc() ?: [];
-    }
-
-    $fetchUser = function ($userId) use ($conn, $resolveSignaturePath) {
-        $defaultName = 'Not Assigned';
-        $stmt = $conn->prepare("SELECT full_name, signature_path FROM users WHERE user_id = ? LIMIT 1");
-        if (!$stmt) {
-            return ['full_name' => $defaultName, 'signature_path' => $resolveSignaturePath('')];
+    $approverID = ''; $reviewers = [];
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("SELECT resultsID, reviewedby, approvedby FROM test_results WHERE SampleID = ? ORDER BY resultsID DESC");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            if ($stmt->execute()) {
+                $res = $stmt->get_result();
+                if ($res) while ($row = $res->fetch_assoc()) {
+                    $reviewID = trim((string)($row['reviewedby'] ?? '')); $approveID = trim((string)($row['approvedby'] ?? ''));
+                    if ($approverID === '' && $approveID !== '' && $approveID !== '0') $approverID = $approveID;
+                    if ($reviewID !== '' && $reviewID !== '0' && !isset($reviewers[$reviewID])) $reviewers[$reviewID] = true;
+                }
+            }
+            $stmt->close();
         }
-
-        $stmt->bind_param("s", $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $userRow = $res ? ($res->fetch_assoc() ?: []) : [];
-        $stmt->close();
-
-        return [
-            'full_name' => !empty($userRow['full_name']) ? $userRow['full_name'] : $defaultName,
-            'signature_path' => $resolveSignaturePath($userRow['signature_path'] ?? '')
-        ];
-    };
-
-    return array(
-        'authorisation' => $fetchUser($companyRow['authorisation'] ?? ''),
-        'technician' => $fetchUser($companyRow['technician'] ?? ''),
-        'technician2' => $fetchUser($companyRow['technician2'] ?? '')
-    );
+    }
+    $signatoryIDs = [];
+    foreach (array_keys($reviewers) as $reviewID) { if (count($signatoryIDs) >= 2) break; if ($reviewID !== $approverID) $signatoryIDs[] = ['user_id'=>$reviewID,'approval_role'=>'Reviewed by']; }
+    if ($approverID !== '') $signatoryIDs[] = ['user_id'=>$approverID,'approval_role'=>'Approved by'];
+    $signatories = []; $seen = [];
+    foreach ($signatoryIDs as $entry) {
+        $userID = trim((string)$entry['user_id']); if ($userID === '' || isset($seen[$userID])) continue; $seen[$userID] = true;
+        $userStmt = $conn->prepare("SELECT user_id, full_name, department, signature_path FROM users WHERE user_id = ? LIMIT 1");
+        if (!$userStmt) continue;
+        $userStmt->bind_param("s", $userID); $userStmt->execute(); $userRes = $userStmt->get_result(); $user = $userRes ? ($userRes->fetch_assoc() ?: []) : []; $userStmt->close();
+        if (!$user) continue;
+        $department = trim((string)($user['department'] ?? ''));
+        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'department'=>$department !== '' ? ucwords(str_replace(['_','-'],' ',$department)) : $entry['approval_role'],'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
+    }
+    return ['signatories'=>$signatories];
 }
 
 function buildFooterHtml($wazito){
@@ -983,38 +955,22 @@ function buildFooterHtml($wazito){
         $safePath = htmlspecialchars(str_replace('\\', '/', $path), ENT_QUOTES, 'UTF-8');
         return '<img src="' . $safePath . '" width="' . $width . '" height="' . $height . '">';
     };
-
-    $authorisationImage = $footerImageTag($wazito['authorisation']['signature_path'] ?? '', 28, 18);
-    $technicianImage = $footerImageTag($wazito['technician']['signature_path'] ?? '', 28, 18);
-    $technician2Image = $footerImageTag($wazito['technician2']['signature_path'] ?? '', 28, 18);
-    $kenhasImage = $footerImageTag($kenhasLogo, 38, 10);
-    $ilacImage = $footerImageTag($ilacLogo, 38, 10);
-    $neemaImage = $footerImageTag($neemaLogo, 38, 10);
-
-    $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
-    $authorisationPath = htmlspecialchars(str_replace('\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technicianPath = htmlspecialchars(str_replace('\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technician2Path = htmlspecialchars(str_replace('\\', '/', $wazito['technician2']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $signatoryCells = '';
+    $signatoryCount = count($wazito['signatories'] ?? []);
+    $cellWidth = $signatoryCount > 0 ? (100 / $signatoryCount) : 100;
+    foreach (($wazito['signatories'] ?? []) as $signatory) {
+        $signatureImage = $footerImageTag($signatory['signature_path'] ?? '', 28, 18);
+        $signatoryCells .= '<td style="width:' . $cellWidth . '%; text-align:center; vertical-align:middle;">'
+            . $signatureImage . '<br><span style="font-size:9px; font-weight:bold;">'
+            . htmlspecialchars($signatory['full_name'] ?? '', ENT_QUOTES, 'UTF-8')
+            . '</span><br><span style="font-size:7px; color:#4a4a4a;">'
+            . htmlspecialchars($signatory['department'] ?? '', ENT_QUOTES, 'UTF-8')
+            . '</span></td>';
+    }
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
-        <tr>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            ' . $authorisationImage . '<br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['authorisation']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Authorization</span>
-          </td>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            ' . $technicianImage . '<br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
-          </td>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            ' . $technician2Image . '<br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician2']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
-          </td>
-        </tr>
+        <tr>' . $signatoryCells . '</tr>
         <tr>
           <td colspan="3" style="border:1px solid #9eacb5; font-size:6px; text-align:center; vertical-align:middle;">
             <span style="font-size:7px; font-weight:bold;">Statement of Conformity</span><br>' . $statement . '
