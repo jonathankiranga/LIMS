@@ -56,6 +56,11 @@ class CustomPDF extends TCPDF {
         }
     }
     
+    public function StopTransform() {
+        parent::StopTransform();
+        $this->angle = 0;
+    }
+
     function _endpage() {
         if ($this->angle != 0) {
             $this->angle = 0;
@@ -218,42 +223,56 @@ class CustomPDF extends TCPDF {
     $testended = getdatesamplecompleteed($sampleID);
     $realsampleid = getdatesampleid($sampleID);
 
-    // Frame 3: first group of SAMPLE HEADER fields.
-    $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(12, 55.5);
-    
-    $sampleRowsLeft = [['Sample Batch No: ', $record['DocumentNo'] ?? ''], ['Sample ID: ', $realsampleid ?? ''], ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')], ['Sampled By: ', $record['SampledBy'] ?? ''], ['Sampling Method: ', $record['SamplingMethod'] ?? ''], ['Sample Source: ', $record['ExternalSample'] ?? ''], ['Sample Name: ', $record['sample_name'] ?? '']];
-$leftRowsCount = count(array_filter($sampleRowsLeft, function ($row) { return trim((string)$row[1]) !== ''; }));
-    $leftFrameHeight = max(8, 5 + ($leftRowsCount * 3.0));
-    $this->Rect(10, 55, 95, $leftFrameHeight, 'D');
+    // Build both sample metadata groups first, then size both frames to the visible rows.
+    $testreceived = getdatesamplereceived($sampleID);
+    $testended = getdatesamplecompleteed($sampleID);
+    $realsampleid = getdatesampleid($sampleID);
+
+    $sampleRowsLeft = [
+        ['Sample Batch No: ', $record['DocumentNo'] ?? ''],
+        ['Sample ID: ', $realsampleid ?? ''],
+        ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')],
+        ['Sampled By: ', $record['SampledBy'] ?? ''],
+        ['Sampling Method: ', $record['SamplingMethod'] ?? ''],
+        ['Sample Source: ', $record['ExternalSample'] ?? ''],
+        ['Sample Name: ', $record['sample_name'] ?? '']
+    ];
+    $sampleRowsRight = [
+        ['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')],
+        ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')],
+        ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')],
+        ['Sample Method: ', $record['sample_method'] ?? ''],
+        ['B/No: ', $record['BatchNo'] ?? ''],
+        ['B/size: ', $record['BatchSize'] ?? ''],
+        ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')],
+        ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')],
+        ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['SKU: ', $record['SKU'] ?? ''],
+        ['Condition: ', $record['condition_of_sample'] ?? '']
+    ];
+    $sampleRowsLeft = array_values(array_filter($sampleRowsLeft, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleRowsRight = array_values(array_filter($sampleRowsRight, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleFrameHeight = max(count($sampleRowsLeft), count($sampleRowsRight)) * 3.0 + 5.0;
+
+    // Frames 3 and 4 share a height based on the visible metadata rows.
+    $this->Rect(10, 55, 95, $sampleFrameHeight, 'D');
+    $this->Rect(105, 55, 95, $sampleFrameHeight, 'D');
+
     $this->SetFont('montserrat', '', 7);
     $cy = 57.5;
     foreach ($sampleRowsLeft as $sampleRow) {
-        $sampleValue = trim((string)$sampleRow[1]);
-        if ($sampleValue !== '') {
-            $this->SetXY(12, $cy);
-            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
-            $cy += 3.0;
-        }
+        $this->SetXY(12, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
     }
 
-    // Frame 4: remaining SAMPLE HEADER fields.
-    $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(107, 55.5);
-    
-    $sampleRowsRight = [['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')], ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')], ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')], ['Sample Method: ', $record['sample_method'] ?? ''], ['B/No: ', $record['BatchNo'] ?? ''], ['B/size: ', $record['BatchSize'] ?? ''], ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')], ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')], ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')], ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')], ['SKU: ', $record['SKU'] ?? ''], ['Condition: ', $record['condition_of_sample'] ?? '']];
-$rightRowsCount = count(array_filter($sampleRowsRight, function ($row) { return trim((string)$row[1]) !== ''; }));
-    $rightFrameHeight = max(8, 5 + ($rightRowsCount * 3.0));
-    $this->Rect(105, 55, 95, $rightFrameHeight, 'D');
     $this->SetFont('montserrat', '', 6.4);
     $cy = 57.5;
     foreach ($sampleRowsRight as $sampleRow) {
-        $sampleValue = trim((string)$sampleRow[1]);
-        if ($sampleValue !== '') {
-            $this->SetXY(107, $cy);
-            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
-            $cy += 3.0;
-        }
+        $this->SetXY(107, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
     }
     $this->SetTextColor(0, 0, 0);
 }
@@ -343,34 +362,25 @@ $rightRowsCount = count(array_filter($sampleRowsRight, function ($row) { return 
     }
 
    public function Footer() {
-  // Define the initial footer row position
-    $this->SetFooterMargin(30);
-	    $this->SetY(-35);
-	    $iconrow = $this->GetY();
-    $this->SetFont('montserrat', 'I',5);
-    $this->Image($_SESSION['KenhasFile'],15,$iconrow,0,10);
-    $this->Image($_SESSION['ILAC'],105,$iconrow,0,10);
-    $this->Image($_SESSION['NeemaFile'],180,$iconrow,0,10);
-    //$this->Cell($w, $h, $txt, $border, $ln, $align, $fill, $link);
+    $this->SetY(-35);
+    $iconrow = $this->GetY();
+    $this->SetFont('montserrat', 'I', 5);
+    $this->Image($_SESSION['KenhasFile'], 15, $iconrow, 10, 10);
+    $this->Image($_SESSION['ILAC'], 100, $iconrow, 10, 10);
+    $this->Image($_SESSION['NeemaFile'], 185, $iconrow, 10, 10);
 
-    $this->SetY(-22);
-    $labfooter="Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)"      ;
-    $this->MultiCell(95, 5,$labfooter, 0, 'L', 0, 1, '', '', true); // Limit characters
-   
-    $this->SetXY(115,-22);
-    $labfooter="Lab Works East Africa Ltd is NEMA gazetted no 47"      ;
-    $this->MultiCell(95, 5,$labfooter, 0, 'L', 0, 1, '', '', true); // Limit characters
+    $this->SetXY(10, -22);
+    $this->MultiCell(105, 4, 'Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)', 0, 'L', 0, 1, '', '', true);
+    $this->SetXY(125, -22);
+    $this->MultiCell(75, 4, 'Lab Works East Africa Ltd is NEMA gazetted no 47', 0, 'R', 0, 1, '', '', true);
+    $this->SetXY(25, -14);
+    $this->MultiCell(160, 4, 'This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd', 0, 'C', 0, 1, '', '', true);
 
-    $this->SetXY(10,-14);
-    $labfooter="This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd"      ;
-    $this->MultiCell(95, 5,$labfooter, 0, 'L', 0, 1, '', '', true); // Limit characters
-
- 
-  // Footer page number
-  $this->SetY(-8); // Adjust the Y-position for footer
-  $this->SetFont('montserrat', 'I', 8);
-  $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-  $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+    $this->SetY(-8);
+    $this->SetFont('montserrat', 'I', 8);
+    $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
+    $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+}
 }
 }
 
