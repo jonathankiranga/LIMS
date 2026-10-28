@@ -902,12 +902,12 @@ function statementofconformity(){
 function getsignature($sampleID){
     global $conn;
     $sampleID = trim((string)$sampleID);
-    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png') ?: (__DIR__ . '/../images/icons8-no-image-100.png');
+    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png') ?: (__DIR__ . '/images/icons8-no-image-100.png');
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
         $rawPath = trim((string)$rawPath); $normalizedPath = str_replace(chr(92), '/', $rawPath); $candidates = [];
         if ($rawPath !== '') {
             if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) $candidates[] = $rawPath;
-            else { $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); }
+            else { $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); $candidates[] = __DIR__ . '/images/' . ltrim($normalizedPath, '/'); }
             $pathPart = parse_url($normalizedPath, PHP_URL_PATH); $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
             if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
             if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
