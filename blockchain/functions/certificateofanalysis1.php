@@ -449,14 +449,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 38%;">PARAMETER</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 38%;">Parameter</th>
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 10%;">UNITS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">RESULTS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 10%;">Units</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">Results</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">Low</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">Opt</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">High</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 16%;">LIMITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 16%;">Limits</th>
     </tr>
 </thead><tbody>';
      // Generate table rows dynamically
