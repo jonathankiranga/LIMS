@@ -18,9 +18,18 @@ if ($search !== '') {
     for ($i = 0; $i < 10; $i++) { $params[] = $like; $types .= 's'; }
 }
 $whereSql = count($where) ? ' WHERE ' . implode(' AND ', $where) : '';
+
+function resultAuditBindParams($stmt, $types, &$values) {
+    $bind = array();
+    $bind[] = $types;
+    foreach ($values as $key => &$value) {
+        $bind[] = &$value;
+    }
+    return call_user_func_array(array($stmt, 'bind_param'), $bind);
+}
 $countStmt = $conn->prepare('SELECT COUNT(*) AS total FROM test_result_audit_trail' . $whereSql);
 if (!$countStmt) { http_response_code(500); echo json_encode(array('success'=>false,'message'=>'Could not prepare audit count query.')); exit; }
-if ($types !== '') $countStmt->bind_param($types, ...$params);
+if ($types !== '') resultAuditBindParams($countStmt, $types, $params);
 $countStmt->execute();
 $countResult = $countStmt->get_result()->fetch_assoc();
 $total = (int) ($countResult['total'] ?? 0);
@@ -30,7 +39,7 @@ $stmt = $conn->prepare($sql);
 if (!$stmt) { http_response_code(500); echo json_encode(array('success'=>false,'message'=>'Could not prepare result audit query.')); exit; }
 if ($types !== '') {
     $allParams = $params; $allParams[] = $perPage; $allParams[] = $offset;
-    $allTypes = $types . 'ii'; $stmt->bind_param($allTypes, ...$allParams);
+    $allTypes = $types . 'ii'; resultAuditBindParams($stmt, $allTypes, $allParams);
 } else { $stmt->bind_param('ii', $perPage, $offset); }
 if (!$stmt->execute()) { http_response_code(500); echo json_encode(array('success'=>false,'message'=>'Could not read result audit records.')); exit; }
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
