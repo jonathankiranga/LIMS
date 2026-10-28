@@ -12,7 +12,7 @@ if (!$data) {
 }
 
 // Extract variables - removed integer casting to support alpha-numeric IDs
-$username      = $data['username'] ?? 'System';
+$username      = $data['username'] ?? ($data['user_name'] ?? (isset($data['user_id']) ? 'User ID ' . $data['user_id'] : 'System'));
 $user_id       = $data['user_id'] ?? '';
 $resultsID     = $data['resultsid'] ?? ''; 
 $sampleID      = $data['sampleID'] ?? '';
