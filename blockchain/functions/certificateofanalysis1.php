@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
 require_once(dirname(__FILE__) . '/../vendor/autoload.php'); // Adjust the path as necessary
 require_once 'BarCodeClass.inc';
 require_once 'functions.php';
