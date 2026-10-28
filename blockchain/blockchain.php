@@ -78,6 +78,7 @@
     <div class="audit-toolbar">
       <div class="audit-search-wrap"><i class="fas fa-search audit-search-icon"></i><input id="auditSearch" class="audit-search" type="search" placeholder="Search this page by block, user, payload or hash…" autocomplete="off" aria-label="Search visible ledger records"></div>
       <button type="button" class="audit-btn" id="auditRefresh"><i class="fas fa-sync-alt"></i> Refresh ledger</button>
+      <button type="button" class="audit-btn" id="auditResultView"><i class="fas fa-clipboard-list"></i> Result Entry Audit</button>
       <div class="audit-count" id="auditCountLabel">Loading ledger…</div>
     </div>
     <div class="audit-table-wrap">
@@ -301,6 +302,7 @@
     });
   }
 
+  $('#auditResultView').addEventListener('click', () => { window.location.href = 'result_entry_audit.php'; });
   $('#auditSearch').addEventListener('input', renderRows);
   $('#auditRefresh').addEventListener('click', () => loadPage(state.page));
   loadPage(1);
