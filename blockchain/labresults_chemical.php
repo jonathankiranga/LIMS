@@ -28,6 +28,7 @@
             <th>Sample ID</th>
             <th>Parameter</th>
             <th>Result Type</th>
+            <th>Units</th>
             <th>Result Input</th>
             <th>
                 Action 
@@ -108,7 +109,7 @@ function loadGrid(page = 1) {
         const $tbody = $('#resultsGrid tbody').empty();
 
         if (!payload.data || payload.data.length === 0) {
-            $tbody.html('<tr><td colspan="5">No pending results</td></tr>');
+            $tbody.html('<tr><td colspan="6">No pending results</td></tr>');
             renderPagination(0, 1);
             return;
         }
@@ -123,12 +124,16 @@ function renderRow(row) {
         'data-resultsid': row.resultsID,
         'data-sampleid': row.SampleID,
         'data-parametername': row.ParameterName,
-        'data-resulttype': row.ResultType || ''
+        'data-resulttype': row.ResultType || '',
+        'data-limits': row.Limits || '',
+        'data-unit': row.UnitOfMeasure || '',
+        'data-has-audit': row.HasAuditTrail ? '1' : '0'
     });
 
     const $tdSample = $('<td>').text(row.SampleID);
     const $tdParam  = $('<td>').text(row.ParameterName);
     const $tdType   = $('<td>');
+    const $tdUnits  = $('<td>').text(row.UnitOfMeasure || '');
     const $tdInput  = $('<td>');
     const $tdAction = $('<td>');
 
@@ -141,16 +146,12 @@ function renderRow(row) {
         showRowEditor($tr, $(this).val());
     });
 
-    const $btnSave = $('<button>', {
-        class: 'btn-save-row',
-        title: 'Save entry'
-    }).html('<i class="fas fa-save"></i> Save').on('click', function() {
-        triggerRowSave($tr);
-    });
+    const $continueBtn = $('<button>', { class: 'btn-save-row btn-save-continue', title: 'Record in audit trail and keep pending' }).html('<i class="fas fa-save"></i> Save and Continue').on('click', function() { triggerRowSave($tr, 'continue'); });
+    const $reviewBtn = $('<button>', { class: 'btn-save-row btn-save-review', title: 'Save and send for review' }).html('<i class="fas fa-check"></i> Save and Review').on('click', function() { triggerRowSave($tr, 'review'); });
 
     $tdType.append($sel);
-    $tdAction.append($btnSave);
-    $tr.append($tdSample, $tdParam, $tdType, $tdInput, $tdAction);
+    $tdAction.append($continueBtn, $('<br>'), $reviewBtn);
+    $tr.append($tdSample, $tdParam, $tdType, $tdUnits, $tdInput, $tdAction);
 
     if (row.ResultType) {
         $sel.val(row.ResultType);
@@ -161,7 +162,7 @@ function renderRow(row) {
 }
 
 function showRowEditor($tr, type) {
-    const $tdInput = $tr.children().eq(3).empty();
+    const $tdInput = $tr.children().eq(4).empty();
     let $input;
 
     if (type === 'quantitativeField') {
@@ -182,10 +183,11 @@ function showRowEditor($tr, type) {
         $input = $('<input>', { type: 'text', class: 'result-value', placeholder: 'e.g. <2' });
     }
 
+    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
     $tdInput.append($input);
 }
 
-function triggerRowSave($tr) {
+function triggerRowSave($tr, saveAction) {
     const resultsid = $tr.attr('data-resultsid');
     const sampleID = $tr.attr('data-sampleid');
     const parameterName = $tr.attr('data-parametername');
@@ -203,7 +205,8 @@ function triggerRowSave($tr) {
         sampleID,
         parameterName,
         resultType,
-        resultValue
+        resultValue,
+        saveAction: saveAction || 'review'
     });
 }
 
@@ -226,10 +229,11 @@ function saveResult(row) {
         success: function(res) {
             $('#saveSpinner').hide();
             if (res.success) {
-                const $row = $(`tr[data-resultsid="${row.resultsid}"]`);
-                $row.addClass('saved').fadeOut(1000, function() {
-                    $(this).remove(); // Remove from pending view after success
-                });
+                const $row = $trForResult(row.resultsid);
+                $row.addClass('saved').attr('data-has-audit', '1');
+                applyLimitTooltip($row);
+                if (row.saveAction === 'review') $row.fadeOut(500, function() { $(this).remove(); });
+                else { $row.css('background-color', '#d4edda'); setTimeout(() => $row.css('background-color', ''), 2000); }
             } else {
                 alert("Save failed: " + res.message);
             }
