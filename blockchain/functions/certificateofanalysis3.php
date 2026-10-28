@@ -432,11 +432,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">PARAMETER</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">Parameter</th>
         <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">UNITS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">RESULTS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">LIMITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">Units</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Results</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Limits</th>
     </tr>
 </thead><tbody>';
  
