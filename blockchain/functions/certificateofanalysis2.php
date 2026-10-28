@@ -404,17 +404,38 @@ private function truncateText($text, $maxLength) {
 
    
 public function Footer() {
-  global $reportFooterHtml;
+  global $reportFooterHtml, $conn;
+  static $printedBy = null;
+  if ($printedBy === null) {
+      $printedBy = 'Not available';
+      $printedByID = $_SESSION['UserID'] ?? '';
+      if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
+          $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
+          if ($printedByStmt) {
+              $printedByStmt->bind_param("s", $printedByID);
+              if ($printedByStmt->execute()) {
+                  $printedByResult = $printedByStmt->get_result();
+                  if ($printedByResult && ($printedByRow = $printedByResult->fetch_assoc()) && trim((string)$printedByRow['full_name']) !== '') {
+                      $printedBy = trim((string)$printedByRow['full_name']);
+                  }
+              }
+              $printedByStmt->close();
+          }
+      }
+  }
   $this->SetAutoPageBreak(false, 0);
   $this->SetY(-78);
   if (!empty($reportFooterHtml)) {
       $this->writeHTMLCell(190, 66, 10, $this->getPageHeight() - 78, $reportFooterHtml, 0, 0, 0, true, 'L', true);
   }
   $this->SetAutoPageBreak(true, 80);
-  $this->SetY(-8);
+  $this->SetXY(10, -8);
+  $this->SetFont('montserrat', '', 7);
+  $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+  $this->SetXY(80, -8);
   $this->SetFont('montserrat', 'I', 8);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-  $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+  $this->Cell(120, 4, $pageNumber, 0, 0, 'C');
 }
 }
 
