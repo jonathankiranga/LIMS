@@ -396,7 +396,6 @@ class CustomPDF extends TCPDF {
         $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
     }
 }
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !== '') {
  
