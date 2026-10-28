@@ -923,6 +923,29 @@ function buildFooterHtml($wazito){
     $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
     $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
 
+    $footerImageTag = function ($path, $maxWidth, $maxHeight) {
+        $path = (string)$path;
+        if ($path === '' || !is_file($path) || !is_readable($path)) {
+            return '';
+        }
+        $dimensions = @getimagesize($path);
+        if (!$dimensions || empty($dimensions[0]) || empty($dimensions[1])) {
+            return '';
+        }
+        $scale = min($maxWidth / $dimensions[0], $maxHeight / $dimensions[1]);
+        $width = round($dimensions[0] * $scale, 2);
+        $height = round($dimensions[1] * $scale, 2);
+        $safePath = htmlspecialchars(str_replace('\\', '/', $path), ENT_QUOTES, 'UTF-8');
+        return '<img src="' . $safePath . '" width="' . $width . '" height="' . $height . '">';
+    };
+
+    $authorisationImage = $footerImageTag($wazito['authorisation']['signature_path'] ?? '', 28, 18);
+    $technicianImage = $footerImageTag($wazito['technician']['signature_path'] ?? '', 28, 18);
+    $technician2Image = $footerImageTag($wazito['technician2']['signature_path'] ?? '', 28, 18);
+    $kenhasImage = $footerImageTag($kenhasLogo, 38, 10);
+    $ilacImage = $footerImageTag($ilacLogo, 38, 10);
+    $neemaImage = $footerImageTag($neemaLogo, 38, 10);
+
     $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
     $authorisationPath = htmlspecialchars(str_replace('\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
     $technicianPath = htmlspecialchars(str_replace('\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
@@ -932,17 +955,17 @@ function buildFooterHtml($wazito){
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
         <tr>
           <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $authorisationPath . '" height="20"><br>
+            ' . $authorisationImage . '<br>
             <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['authorisation']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
             <span style="font-size:7px; color:#4a4a4a;">Authorization</span>
           </td>
           <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $technicianPath . '" height="20"><br>
+            ' . $technicianImage . '<br>
             <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
             <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
           </td>
           <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $technician2Path . '" height="20"><br>
+            ' . $technician2Image . '<br>
             <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician2']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
             <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
           </td>
@@ -953,9 +976,9 @@ function buildFooterHtml($wazito){
           </td>
         </tr>
         <tr>
-          <td style="width:33.33%; border-left:1px solid #9eacb5; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($kenhasLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($ilacLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($neemaLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
+          <td style="width:33.33%; border-left:1px solid #9eacb5; border-right:1px solid #9eacb5; text-align:center;">' . $kenhasImage . '</td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;">' . $ilacImage . '</td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;">' . $neemaImage . '</td>
         </tr>
         <tr>
           <td colspan="2" style="border-left:1px solid #9eacb5; border-bottom:1px solid #9eacb5; font-size:6px; text-align:left; color:#2f2f2f;">
