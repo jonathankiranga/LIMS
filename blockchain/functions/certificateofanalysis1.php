@@ -972,12 +972,12 @@ function getsignature($sampleID){
     $signatories = []; $seen = [];
     foreach ($signatoryIDs as $entry) {
         $userID = trim((string)$entry['user_id']); if ($userID === '' || isset($seen[$userID])) continue; $seen[$userID] = true;
-        $userStmt = $conn->prepare("SELECT user_id, full_name, department, signature_path FROM users WHERE user_id = ? LIMIT 1");
+        $userStmt = $conn->prepare("SELECT user_id, full_name, user_description, signature_path FROM users WHERE user_id = ? LIMIT 1");
         if (!$userStmt) continue;
         $userStmt->bind_param("s", $userID); $userStmt->execute(); $userRes = $userStmt->get_result(); $user = $userRes ? ($userRes->fetch_assoc() ?: []) : []; $userStmt->close();
         if (!$user) continue;
-        $department = trim((string)($user['department'] ?? ''));
-        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'department'=>$department !== '' ? ucwords(str_replace(['_','-'],' ',$department)) : $entry['approval_role'],'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
+        $userDescription = trim((string)($user['user_description'] ?? ''));
+        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'user_description'=>$userDescription,'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
     }
     return ['signatories'=>$signatories];
 }
@@ -1007,11 +1007,13 @@ function buildFooterHtml($wazito){
     $cellWidth = $signatoryCount > 0 ? (100 / $signatoryCount) : 100;
     foreach (($wazito['signatories'] ?? []) as $signatory) {
         $signatureImage = $footerImageTag($signatory['signature_path'] ?? '', 28, 18);
+        $roleLabel = (($signatory['approval_role'] ?? '') === 'Reviewed by') ? 'Verified by' : 'Approved by';
         $signatoryCells .= '<td style="width:' . $cellWidth . '%; text-align:center; vertical-align:middle;">'
+            . '<span style="font-size:8px; font-weight:bold;">' . $roleLabel . '</span><br>'
             . $signatureImage . '<br><span style="font-size:9px; font-weight:bold;">'
             . htmlspecialchars($signatory['full_name'] ?? '', ENT_QUOTES, 'UTF-8')
             . '</span><br><span style="font-size:7px; color:#4a4a4a;">'
-            . htmlspecialchars($signatory['department'] ?? '', ENT_QUOTES, 'UTF-8')
+            . htmlspecialchars($signatory['user_description'] ?? '', ENT_QUOTES, 'UTF-8')
             . '</span></td>';
     }
 
