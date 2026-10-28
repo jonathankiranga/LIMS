@@ -544,17 +544,23 @@ $pageWidth = $pdf->getPageWidth() - $pageMargins['left'] - $pageMargins['right']
 $cellWidth = $signatoryCount > 0 ? $pageWidth / $signatoryCount : $pageWidth;
 foreach ($signatories as $index => $signatory) {
     $x = $pageMargins['left'] + ($index * $cellWidth);
+    $roleLabel = (($signatory['approval_role'] ?? '') === 'Reviewed by') ? 'Verified by' : 'Approved by';
     $pdf->SetXY($x, $wazitorow);
+    $pdf->SetFont('montserrat', 'B', 7);
+    $pdf->MultiCell($cellWidth - 3, 3, $roleLabel, 0, 'L', 0, 1, '', '', true);
+    $signatureY = $wazitorow + 4;
     $signaturePath = $signatory['signature_path'] ?? '';
     if ($signaturePath !== '' && is_file($signaturePath) && is_readable($signaturePath)) {
-        $pdf->Image($signaturePath, $x + 2, $wazitorow, 12, 9);
+        $pdf->Image($signaturePath, $x + 2, $signatureY, 12, 9);
     }
-    $pdf->SetXY($x, $wazitorow + 10);
+    $pdf->SetFont('montserrat', 'B', 8);
+    $pdf->SetXY($x, $signatureY + 9);
     $pdf->MultiCell($cellWidth - 3, 4, $signatory['full_name'] ?? '', 0, 'L', 0, 1, '', '', true);
-    $pdf->SetXY($x, $wazitorow + 14);
-    $pdf->MultiCell($cellWidth - 3, 4, $signatory['department'] ?? '', 0, 'L', 0, 1, '', '', true);
+    $pdf->SetFont('montserrat', '', 7);
+    $pdf->SetXY($x, $signatureY + 13);
+    $pdf->MultiCell($cellWidth - 3, 4, $signatory['user_description'] ?? '', 0, 'L', 0, 1, '', '', true);
 }
-$pdf->SetY($wazitorow + ($signatoryCount > 0 ? 19 : 2));
+$pdf->SetY($wazitorow + ($signatoryCount > 0 ? 24 : 2));
 $samerow = $pdf->GetY();
 $pdf->SetXY(10,$samerow+5);
 $html = '<div style="text-align: center; font-family: Helvetica, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: blue;">Statement of Conformity</div>'; // Add footer
@@ -986,12 +992,12 @@ function getsignature($sampleID){
     $signatories = []; $seen = [];
     foreach ($signatoryIDs as $entry) {
         $userID = trim((string)$entry['user_id']); if ($userID === '' || isset($seen[$userID])) continue; $seen[$userID] = true;
-        $userStmt = $conn->prepare("SELECT user_id, full_name, department, signature_path FROM users WHERE user_id = ? LIMIT 1");
+        $userStmt = $conn->prepare("SELECT user_id, full_name, user_description, signature_path FROM users WHERE user_id = ? LIMIT 1");
         if (!$userStmt) continue;
         $userStmt->bind_param("s", $userID); $userStmt->execute(); $userRes = $userStmt->get_result(); $user = $userRes ? ($userRes->fetch_assoc() ?: []) : []; $userStmt->close();
         if (!$user) continue;
-        $department = trim((string)($user['department'] ?? ''));
-        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'department'=>$department !== '' ? ucwords(str_replace(['_','-'],' ',$department)) : $entry['approval_role'],'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
+        $userDescription = trim((string)($user['user_description'] ?? ''));
+        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'user_description'=>$userDescription,'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
     }
     return ['signatories'=>$signatories];
 }
