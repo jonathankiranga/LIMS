@@ -7,7 +7,7 @@ if (isset($_GET['id'])) {
     
     // Fetch user details from the database
     $query = "SELECT user_id ,username ,telephone , password_hash, email,"
-            . " role, status, full_name, created_at, department,signature_path FROM users WHERE user_id = ?";
+            . " role, status, full_name, created_at, department, user_description, signature_path FROM users WHERE user_id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('i', $userId);
     $stmt->execute();
