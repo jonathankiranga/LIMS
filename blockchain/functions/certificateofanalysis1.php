@@ -201,7 +201,7 @@ public function Header() {
         $companyRecord['email'] ?? '',
         $companyPhone
     ];
-    $this->SetFont('montserrat', 'B', 6.4);
+    $this->SetFont('montserrat', 'B', 9);
     $cy = 26.5;
     foreach ($companyRows as $companyLine) {
         if (trim((string)$companyLine) !== '') {
