@@ -61,6 +61,10 @@
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
                         <div class="col-md-6">
+                            <label for="user_description" class="form-label">User Description (Signature Designation)</label>
+                            <input type="text" class="form-control" id="user_description" name="user_description" maxlength="255" placeholder="e.g. Quality Manager">
+                        </div>
+                        <div class="col-md-6">
                             <label for="role" class="form-label">Role</label>
                             <select class="form-select" id="role" name="role" required>
                                <option value="1">Administrator |Full access to all features and settings</option>
@@ -118,6 +122,7 @@
                     document.getElementById('full_name').value = user.full_name;
                     document.getElementById('telephone').value = user.telephone;
                     document.getElementById('email').value = user.email;
+                    document.getElementById('user_description').value = user.user_description || '';
                     document.getElementById('role').value = user.role;
                     document.getElementById('status').value = user.status;
                     document.getElementById('assignedDepartment').value = user.department;
@@ -182,6 +187,7 @@
                 full_name: formData.get('full_name'),
                 telephone: formData.get('telephone'),
                 email: formData.get('email'),
+                user_description: formData.get('user_description'),
                 role: formData.get('role'),
                 status: formData.get('status'),
                 assignedDepartment: formData.get('assignedDepartment')

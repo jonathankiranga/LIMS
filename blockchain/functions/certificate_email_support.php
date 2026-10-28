@@ -681,8 +681,30 @@ function process_certificate_email_delivery(mysqli $conn, $sampleID, $reportOpti
             throw new RuntimeException('The selected report template could not be found.');
         }
 
+        if (session_status() === PHP_SESSION_NONE) {
+            session_name('BlockchainLIMS');
+            session_start();
+        }
         if (!isset($_SESSION) || !is_array($_SESSION)) {
             $_SESSION = [];
+        }
+
+        // Email queue workers have no browser session. Restore the requesting
+        // user's identity from the queued sender ID so the PDF footer is accurate.
+        $requestingUserId = trim((string)$sentBy);
+        if ($requestingUserId !== '' && ctype_digit($requestingUserId)) {
+            $requestingUserStmt = $conn->prepare("SELECT user_id, full_name FROM users WHERE user_id = ? LIMIT 1");
+            if ($requestingUserStmt) {
+                $requestingUserStmt->bind_param('i', $requestingUserId);
+                if ($requestingUserStmt->execute()) {
+                    $requestingUserResult = $requestingUserStmt->get_result();
+                    if ($requestingUserResult && ($requestingUser = $requestingUserResult->fetch_assoc())) {
+                        $_SESSION['UserID'] = $requestingUser['user_id'];
+                        $_SESSION['full_name'] = $requestingUser['full_name'];
+                    }
+                }
+                $requestingUserStmt->close();
+            }
         }
 
         $_POST['sampleID'] = (string)$sampleID;

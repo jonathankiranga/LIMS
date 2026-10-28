@@ -1,3 +1,9 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,7 +155,7 @@
 
             const userRoleId = localStorage.getItem('role');
             const user_id = localStorage.getItem('user_id');
-            // Fetch and generate the menu on page load
+// Fetch and generate the menu on page load
              fetchAndGenerateMenu(userRoleId);
              fillEditForm(user_id);
 

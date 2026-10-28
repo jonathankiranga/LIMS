@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
 require_once(dirname(__FILE__) . '/../vendor/autoload.php'); // Adjust the path as necessary
 require_once 'BarCodeClass.inc';
 require_once 'functions.php';
@@ -135,170 +139,136 @@ class CustomPDF extends TCPDF {
         $this->drawCompanyWatermark($watermarkText);
     }
 
-    // Microtext strip (unconditional; mirrors the HTML preview)
-    $this->SetFont('montserrat', 'I', 4.5);
-    $this->SetTextColor(169, 178, 191);
-    $microPart = 'LAB WORKS EAST AFRICA • ISO/IEC 17025:2017 • CERTIFIED TESTING LABORATORY • ';
-    $micro = '';
-    while ($micro !== $microPart && $this->GetStringWidth($micro . $microPart) <= 190) {
-        $micro .= $microPart;
-    }
-    $this->SetXY(10, 2);
-    $this->Cell(0, 3, $micro, 0, 0, 'L');
-    $this->SetTextColor(0, 0, 0);
-    $this->SetDrawColor(221, 221, 221); 
-  
-	    $this->SetXY(70,5);
-	    // Set fixed height for the header and Y position
-	    $this->SetFont('montserrat', 'B', 10);
-	    $this->MultiCell(80, 5,"CERTIFICATE OF ANALYSIS (COA)", 0, 'L', 0, 1, '', '', true); // Limit characters
-	    $DefaultFont=8;
-    $this->SetY(10);
-    $this->SetFont('montserrat','B',$DefaultFont);
     
-    $this->Image($_SESSION['LogoFile'],12,12,40,10);
-    $this->Image($_SESSION['LABCODE'],88,10,17,5);
-
-    // Draw the outer border
-    $this->Rect(10, 10, 190, 50, 'D'); // Rectangle for header
-    $this->Rect(10, 60, 190, 50, 'D'); // Second rectangle
-    // Left Top Section with text containment
-    $this->SetXY(10, 25); 
-   
-    $fitFontSize = $this->fitText($record['company_name'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['company_name'], 50), 0, 'L', 0, 1, '', '', true); // Limit characters
-   
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address1'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address1'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address2'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address2'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address3'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address3'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['email'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['email'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['telephone'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['telephone'], 50), 0, 'L', 0, 1, '', '', true);
-
-    // Right Top Section-------------------------------------------------------------------------------------------------------------
-    $sampleID = $_POST['sampleID'];
-    $qrcodelink = $QRcode->getQr($sampleID);
-
-    $stmt = $conn->prepare("
-    SELECT
-        sh.*,
-        st.*,
-        tr.SampleID AS ResultSampleID,
-        tr.TestID AS ResultTestID,
-        tr.StandardID AS ResultStandardID
-    FROM sample_header sh
-    JOIN test_results tr ON sh.HeaderID = tr.HeaderID
-    LEFT JOIN sample_tests st ON st.TestID = tr.TestID
-    WHERE tr.SampleID = ? ");
-   
-    $stmt->bind_param("s",$sampleID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $record = $result->fetch_assoc();
-    $customerCode = trim((string)($record['CustomerID'] ?? ''));
-    // Keep ERP customer values separate from the sample/report query array.
-    $customerData = $this->fetchErpCustomerDetails($customerCode);
-    
-   
-            // Shared recipient section: QR code at the top, labeled customer details below.
-    $this->Image($qrcodelink,143,9,18,18);
-
-    $customerLabelRows = [
-        ['Customer: ', $customerData['customer'] ?? ''],
-        ['Company: ', $customerData['company'] ?? ''],
-        ['Postal Code: ', $customerData['postcode'] ?? ''],
-        ['City: ', $customerData['city'] ?? ''],
-        ['Telephone: ', $customerData['phone'] ?? ''],
-        ['Email: ', $customerData['email'] ?? '']
-    ];
-
-    $this->SetXY(105, 30);
-    foreach ($customerLabelRows as $customerRow) {
-        $label = $customerRow[0];
-        $value = $this->truncateText((string)$customerRow[1], 50);
-        $this->SetFont('montserrat', '', $DefaultFont);
-        $this->MultiCell(95, 4, $label . $value, 0, 'L', 0, 1, '', '', true);
-        $this->SetXY(105, $this->GetY());
+    // Keep the existing company query, ERP customer lookup and sample fields.
+    $companyRecord = $record;
+    $DefaultFont = 7;
+    $sampleID = trim((string)($_POST['sampleID'] ?? ''));
+    $record = [];
+    $customerData = [];
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("
+            SELECT sh.*, st.*, tr.SampleID AS ResultSampleID,
+                   tr.TestID AS ResultTestID, tr.StandardID AS ResultStandardID
+            FROM sample_header sh
+            JOIN test_results tr ON sh.HeaderID = tr.HeaderID
+            LEFT JOIN sample_tests st ON st.TestID = tr.TestID
+            WHERE tr.SampleID = ?
+        ");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $record = $result ? ($result->fetch_assoc() ?: []) : [];
+            $stmt->close();
+        }
+        $customerCode = trim((string)($record['CustomerID'] ?? ''));
+        $customerData = $this->fetchErpCustomerDetails($customerCode);
     }
 
+    global $QRcode;
+    $qrcodelink = ($sampleID !== '' && isset($QRcode)) ? $QRcode->getQr($sampleID) : '';
 
-    // Draw a line under the top sections--------------------------------------------------------------------------------
-    $this->Line(10, 60, 200, 60);
-    $this->Line(105, 10, 105, 60);
-    $this->SetFont('montserrat','',$DefaultFont);
+    // Letterhead: logo at left, title centred, QR at far right; no lab contact text here.
+    if (!empty($_SESSION['LogoFile'])) $this->Image($_SESSION['LogoFile'], 10, 9, 32, 12);
+    $this->SetFont('montserrat', 'B', 10);
+    $this->SetXY(55, 12);
+    $this->Cell(100, 5, 'CERTIFICATE OF ANALYSIS (COA)', 0, 0, 'C');
+    if ($qrcodelink !== '') $this->Image($qrcodelink, 185, 9, 15, 15);
 
+    $this->SetLineStyle(['width' => 0.25, 'color' => [190, 211, 232]]);
+    $this->SetDrawColor(190, 211, 232);
+    $this->SetTextColor(35, 45, 55);
+
+    // Frame 1: Company Details.
+    $this->Rect(10, 25, 95, 24, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(12, 25.5);
+    // Company details shown without a heading.
+    $companyPhone = $companyRecord['telephone'] ?? ($companyRecord['telephne'] ?? '');
+    $companyRows = [$companyRecord['company_name'] ?? '', $companyRecord['address'] ?? '', $companyRecord['address1'] ?? '', $companyRecord['address2'] ?? '', $companyRecord['address3'] ?? '', $companyRecord['email'] ?? '', $companyPhone];
+    $this->SetFont('montserrat', 'B', 9);
+    $cy = 26.5;
+    foreach ($companyRows as $companyLine) {
+        if (trim((string)$companyLine) !== '') {
+            $this->SetXY(12, $cy);
+            $this->Cell(91, 3.0, $this->truncateText((string)$companyLine, 80), 0, 0, 'L');
+        }
+        $cy += 3.0;
+    }
+
+    // Frame 2: Customer Details from the existing ERP master lookup.
+    $this->Rect(105, 25, 95, 24, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(107, 25.5);
+    // Customer details shown without a heading.
+    $customerRows = [['Customer: ', $customerData['customer'] ?? ''], ['Company: ', $customerData['company'] ?? ''], ['Postal Code: ', $customerData['postcode'] ?? ''], ['City: ', $customerData['city'] ?? ''], ['Telephone: ', $customerData['phone'] ?? ''], ['Email: ', $customerData['email'] ?? '']];
+    $this->SetFont('montserrat', '', 6.4);
+    $cy = 26.5;
+    foreach ($customerRows as $customerRow) {
+        $customerValue = trim((string)$customerRow[1]);
+        if ($customerValue !== '') {
+            $this->SetXY(107, $cy);
+            $this->Cell(91, 3.0, $this->truncateText($customerValue, 80), 0, 0, 'L');
+            $cy += 3.0;
+        }
+    }
+
+    // Build both sample metadata groups first, then size both frames to the visible rows.
     $testreceived = getdatesamplereceived($sampleID);
     $testended = getdatesamplecompleteed($sampleID);
     $realsampleid = getdatesampleid($sampleID);
- 
 
-    // Bottom Section
-    $this->SetXY(10, 62);
-    $this->MultiCell(95, 5,'Sample Batch No:'.$record['DocumentNo'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Received:'.formatDate($record['Date'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Date:'.formatDate($record['SamplingDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Started:'.formatDate($testreceived,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Ended:'.formatDate($testended,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampled By:'. $record['SampledBy'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Method:'. $record['SamplingMethod'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Source:'. $record['ExternalSample'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Name:'. $record['sample_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Method:'. $record['sample_method'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    
-     $this->SetXY(105, 62);
-    $this->MultiCell(95, 5,'Sample ID:'.$realsampleid, 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/No:'.$record['BatchNo'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/size:'.$record['BatchSize'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Man:'.formatDate($record['ManufactureDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Exp:'.formatDate($record['ExpDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Chilled Exp:'.formatDate($record['chilled_date_of_expiry'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Frozen Exp:'.formatDate($record['frozen_date_of_expiry'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'SKU:'.$record['SKU'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Condition:'. $record['condition_of_sample'], 0, 'L', 0, 1, '', '', true); // Limit characters
- 
-   
-	}
+    $sampleRowsLeft = [
+        ['Sample Batch No: ', $record['DocumentNo'] ?? ''],
+        ['Sample ID: ', $realsampleid ?? ''],
+        ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')],
+        ['Sampled By: ', $record['SampledBy'] ?? ''],
+        ['Sampling Method: ', $record['SamplingMethod'] ?? ''],
+        ['Sample Source: ', $record['ExternalSample'] ?? ''],
+        ['Sample Name: ', $record['sample_name'] ?? '']
+    ];
+    $sampleRowsRight = [
+        ['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')],
+        ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')],
+        ['Date Test Completed: ', formatDate($testended, 'dd-mm-yy')],
+        ['Report Issued Date: ', formatDate(getReportIssuedDate($sampleID), 'dd-mm-yy')],
+        ['Sample Method: ', $record['sample_method'] ?? ''],
+        ['B/No: ', $record['BatchNo'] ?? ''],
+        ['B/size: ', $record['BatchSize'] ?? ''],
+        ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')],
+        ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')],
+        ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['SKU: ', $record['SKU'] ?? ''],
+        ['Condition: ', $record['condition_of_sample'] ?? '']
+    ];
+    $sampleRowsLeft = array_values(array_filter($sampleRowsLeft, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleRowsRight = array_values(array_filter($sampleRowsRight, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleFrameHeight = max(count($sampleRowsLeft), count($sampleRowsRight)) * 3.0 + 5.0;
+
+    // Frames 3 and 4 share a height based on the visible metadata rows.
+    $this->Rect(10, 51, 95, $sampleFrameHeight, 'D');
+    $this->Rect(105, 51, 95, $sampleFrameHeight, 'D');
+
+    $this->SetFont('montserrat', '', 7);
+    $cy = 53.5;
+    foreach ($sampleRowsLeft as $sampleRow) {
+        $this->SetXY(12, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
+    }
+
+    $this->SetFont('montserrat', '', 6.4);
+    $cy = 53.5;
+    foreach ($sampleRowsRight as $sampleRow) {
+        $this->SetXY(107, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
+    }
+    $this->SetTextColor(0, 0, 0);
+}
+
 
     
 private function fetchErpCustomerDetails($customerCode) {
@@ -422,15 +392,42 @@ $textWidth = $this->GetStringWidth($watermarkText);
     // Custom footer
     
 public function Footer() {
-  global $reportFooterHtml;
+  global $reportFooterHtml, $conn;
+  static $printedBy = null;
+  if ($printedBy === null) {
+      $printedBy = trim((string)($_SESSION['full_name'] ?? ''));
+      if ($printedBy === '') {
+      }
+      $printedByID = $_SESSION['UserID'] ?? '';
+      if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
+          $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
+          if ($printedByStmt) {
+              $printedByStmt->bind_param("s", $printedByID);
+              if ($printedByStmt->execute()) {
+                  $printedByResult = $printedByStmt->get_result();
+                  if ($printedByResult && ($printedByRow = $printedByResult->fetch_assoc()) && trim((string)$printedByRow['full_name']) !== '') {
+                      $printedBy = trim((string)$printedByRow['full_name']);
+                  }
+              }
+              $printedByStmt->close();
+          }
+      }
+  }
+  $this->SetAutoPageBreak(false, 0);
   $this->SetY(-78);
   if (!empty($reportFooterHtml)) {
-      $this->writeHTMLCell(190, 66, 10, '', $reportFooterHtml, 0, 1, 0, true, 'L', true);
+      $this->writeHTMLCell(190, 66, 10, $this->getPageHeight() - 78, $reportFooterHtml, 0, 0, 0, true, 'L', true);
   }
-  $this->SetY(-8);
+  $this->SetAutoPageBreak(true, 80);
+  $this->SetXY(10, -8);
+  $this->SetFont('montserrat', '', 7);
+  if ($printedBy !== '') {
+      $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+  }
+  $this->SetXY(80, -8);
   $this->SetFont('montserrat', 'I', 8);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-  $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+  $this->Cell(120, 4, $pageNumber, 0, 0, 'C');
 }
 }
 
@@ -456,18 +453,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->SetAutoPageBreak(true, 80); // Reserve 80 mm for the existing report footer
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
-    $pdf->SetMargins(10,110,10); // Adjust top margin to avoid overlap with header
+    $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
     $pdf->AddPage();
 
     // Start creating HTML content
     $html = '<div style="width: 100%; font-family: Helvetica, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
+    $html .= '<div style="font-family: montserrat, Helvetica, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 55%;">PARAMETER</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">RESULTS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">LIMITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">Parameter</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">Units</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Results</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Limits</th>
     </tr>
 </thead><tbody>';
  
@@ -480,16 +479,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
  
       $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $standard . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: 40%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $resutlts . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $standard . '</td>
           </tr>';
    }
 
     $html .= '</tbody></table>'; // Close the table
     $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
-    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Accredited &nbsp;&nbsp; † Not Accredited &nbsp;&nbsp; ‡ Contracted</div>'; // Add footer
+    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
     
     $lines = explode("\n", $SampletypeNotes);
@@ -510,7 +510,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
         
    }
      $html .='</div>';
- $reportFooterHtml = buildFooterHtml(getsignature());
+ $reportFooterHtml = buildFooterHtml(getsignature($sampleID));
 
     // Write the HTML content to the PDF
     $pdf->writeHTML($html, true, false, true, false, '');
@@ -709,6 +709,23 @@ function findLABCODEFile($PathPrefix) {
     }
 
 
+function getReportIssuedDate($sampleID){
+    global $conn;
+    $stmt = $conn->prepare("SELECT MAX(updated_at) AS approval_date FROM test_results WHERE SampleID = ? AND StatusID = 4 AND approvedby IS NOT NULL AND approvedby <> 0");
+    if (!$stmt) {
+        return null;
+    }
+    $stmt->bind_param("s", $sampleID);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return null;
+    }
+    $result = $stmt->get_result();
+    $record = $result ? ($result->fetch_assoc() ?: []) : [];
+    $stmt->close();
+    return $record['approval_date'] ?? null;
+}
+
 function getdatesamplereceived($sampleID){
     global $conn;
     $stmt = $conn->prepare("SELECT  MIN(created_at) as last_created, 
@@ -806,11 +823,16 @@ function formatResultNumber($row, $value){
 }
 
 function accreditationSymbol($status){
-    switch (strtolower(trim((string)$status))) {
-        case 'accredited': return '*';
-        case 'contracted': return '‡';
+    $normalizedStatus = strtolower(trim((string)$status));
+    $normalizedStatus = str_replace(array(' ', '-'), '_', $normalizedStatus);
+
+    switch ($normalizedStatus) {
+        case 'accredited': return '';
+        case 'contracted':
+        case 'sub_contracted':
+        case 'subcontracted': return '~';
         case 'not_accredited':
-        default: return '†';
+        default: return '*';
     }
 }
 
@@ -883,81 +905,53 @@ function statementofconformity(){
 }
 
 
-function getsignature(){
+function getsignature($sampleID){
     global $conn;
-
+    $sampleID = trim((string)$sampleID);
     $defaultSignaturePath = realpath(__DIR__ . '/../images/icons8-no-image-100.png') ?: (__DIR__ . '/../images/icons8-no-image-100.png');
-
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
-        $rawPath = trim((string)$rawPath);
-        $normalizedPath = str_replace(chr(92), '/', $rawPath);
-        $candidates = [];
-
+        $rawPath = trim((string)$rawPath); $normalizedPath = str_replace(chr(92), '/', $rawPath); $candidates = [];
         if ($rawPath !== '') {
-            // Try the exact stored path first.
-            if (preg_match('/^[A-Za-z]:\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) {
-                $candidates[] = $rawPath;
-            } else {
-                $candidates[] = __DIR__ . '/../' . ltrim($normalizedPath, '/');
-                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
-            }
-
-            // Signatures uploaded by update_signature.php are saved in blockchain/images/.
-            // The database commonly stores only the filename; try that location even if
-            // the database contains a stale absolute path from another server.
-            $pathPart = parse_url($normalizedPath, PHP_URL_PATH);
-            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
-            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
-                $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
-            }
-
-            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) {
-                $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
-            }
+            if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) $candidates[] = $rawPath;
+            else { $candidates[] = __DIR__ . '/../' . ltrim($normalizedPath, '/'); $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); }
+            $pathPart = parse_url($normalizedPath, PHP_URL_PATH); $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
+            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
+            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
         }
-
         $candidates[] = $defaultSignaturePath;
-
-        foreach ($candidates as $candidate) {
-            if ($candidate && is_file($candidate) && is_readable($candidate)) {
-                $resolvedPath = realpath($candidate);
-                return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate);
-            }
-        }
-
+        foreach ($candidates as $candidate) if ($candidate && is_file($candidate) && is_readable($candidate)) { $resolvedPath = realpath($candidate); return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate); }
         return str_replace(chr(92), '/', $defaultSignaturePath);
     };
-
-    $companyRow = [];
-    $companyResult = $conn->query("SELECT authorisation, technician, technician2 FROM company_master ORDER BY company_id DESC LIMIT 1");
-    if ($companyResult) {
-        $companyRow = $companyResult->fetch_assoc() ?: [];
-    }
-
-    $fetchUser = function ($userId) use ($conn, $resolveSignaturePath) {
-        $defaultName = 'Not Assigned';
-        $stmt = $conn->prepare("SELECT full_name, signature_path FROM users WHERE user_id = ? LIMIT 1");
-        if (!$stmt) {
-            return ['full_name' => $defaultName, 'signature_path' => $resolveSignaturePath('')];
+    $approverID = ''; $reviewers = [];
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("SELECT resultsID, reviewedby, approvedby FROM test_results WHERE SampleID = ? ORDER BY resultsID DESC");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            if ($stmt->execute()) {
+                $res = $stmt->get_result();
+                if ($res) while ($row = $res->fetch_assoc()) {
+                    $reviewID = trim((string)($row['reviewedby'] ?? '')); $approveID = trim((string)($row['approvedby'] ?? ''));
+                    if ($approverID === '' && $approveID !== '' && $approveID !== '0') $approverID = $approveID;
+                    if ($reviewID !== '' && $reviewID !== '0' && !isset($reviewers[$reviewID])) $reviewers[$reviewID] = true;
+                }
+            }
+            $stmt->close();
         }
-
-        $stmt->bind_param("s", $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $userRow = $res ? ($res->fetch_assoc() ?: []) : [];
-        $stmt->close();
-
-        return [
-            'full_name' => !empty($userRow['full_name']) ? $userRow['full_name'] : $defaultName,
-            'signature_path' => $resolveSignaturePath($userRow['signature_path'] ?? '')
-        ];
-    };
-
-    return array(
-        'authorisation' => $fetchUser($companyRow['authorisation'] ?? ''),
-        'technician' => $fetchUser($companyRow['technician'] ?? ''),
-        'technician2' => $fetchUser($companyRow['technician2'] ?? '')
-    );
+    }
+    $signatoryIDs = [];
+    foreach (array_keys($reviewers) as $reviewID) { if (count($signatoryIDs) >= 2) break; if ($reviewID !== $approverID) $signatoryIDs[] = ['user_id'=>$reviewID,'approval_role'=>'Reviewed by']; }
+    if ($approverID !== '') $signatoryIDs[] = ['user_id'=>$approverID,'approval_role'=>'Approved by'];
+    $signatories = []; $seen = [];
+    foreach ($signatoryIDs as $entry) {
+        $userID = trim((string)$entry['user_id']); if ($userID === '' || isset($seen[$userID])) continue; $seen[$userID] = true;
+        $userStmt = $conn->prepare("SELECT user_id, full_name, user_description, signature_path FROM users WHERE user_id = ? LIMIT 1");
+        if (!$userStmt) continue;
+        $userStmt->bind_param("s", $userID); $userStmt->execute(); $userRes = $userStmt->get_result(); $user = $userRes ? ($userRes->fetch_assoc() ?: []) : []; $userStmt->close();
+        if (!$user) continue;
+        $userDescription = trim((string)($user['user_description'] ?? ''));
+        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'user_description'=>$userDescription,'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
+    }
+    return ['signatories'=>$signatories];
 }
 
 function buildFooterHtml($wazito){
@@ -965,39 +959,53 @@ function buildFooterHtml($wazito){
     $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
     $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
 
+    $footerImageTag = function ($path, $maxWidth, $maxHeight) {
+        $path = (string)$path;
+        if ($path === '' || !is_file($path) || !is_readable($path)) {
+            return '';
+        }
+        $dimensions = @getimagesize($path);
+        if (!$dimensions || empty($dimensions[0]) || empty($dimensions[1])) {
+            return '';
+        }
+        $scale = min($maxWidth / $dimensions[0], $maxHeight / $dimensions[1]);
+        $width = round($dimensions[0] * $scale, 2);
+        $height = round($dimensions[1] * $scale, 2);
+        $safePath = htmlspecialchars(str_replace('\\', '/', $path), ENT_QUOTES, 'UTF-8');
+        return '<img src="' . $safePath . '" width="' . $width . '" height="' . $height . '">';
+    };
+    $signatoryCells = '';
+    $signatoryCount = count($wazito['signatories'] ?? []);
+    $cellWidth = $signatoryCount > 0 ? (100 / $signatoryCount) : 100;
+    foreach (($wazito['signatories'] ?? []) as $signatory) {
+        $signatureImage = $footerImageTag($signatory['signature_path'] ?? '', 28, 18);
+        $roleLabel = (($signatory['approval_role'] ?? '') === 'Reviewed by') ? 'Verified by' : 'Approved by';
+        $signatoryCells .= '<td style="width:' . $cellWidth . '%; text-align:center; vertical-align:middle;">'
+            . '<span style="font-size:8px; font-weight:bold;">' . $roleLabel . '</span><br>'
+            . $signatureImage . '<br><span style="font-size:9px; font-weight:bold;">'
+            . htmlspecialchars($signatory['full_name'] ?? '', ENT_QUOTES, 'UTF-8')
+            . '</span><br><span style="font-size:7px; color:#4a4a4a;">'
+            . htmlspecialchars($signatory['user_description'] ?? '', ENT_QUOTES, 'UTF-8')
+            . '</span></td>';
+    }
+
+    $kenhasImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']), 38, 10);
+    $ilacImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']), 38, 10);
+    $neemaImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']), 38, 10);
     $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
-    $authorisationPath = htmlspecialchars(str_replace('\\', '/', $wazito['authorisation']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technicianPath = htmlspecialchars(str_replace('\\', '/', $wazito['technician']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $technician2Path = htmlspecialchars(str_replace('\\', '/', $wazito['technician2']['signature_path'] ?? ''), ENT_QUOTES, 'UTF-8');
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
-        <tr>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $authorisationPath . '" height="20"><br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['authorisation']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Authorization</span>
-          </td>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $technicianPath . '" height="20"><br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
-          </td>
-          <td style="width:33.33%; border:1px solid #9eacb5; text-align:center; vertical-align:middle;">
-            <img src="' . $technician2Path . '" height="20"><br>
-            <span style="font-size:9px; font-weight:bold;">' . htmlspecialchars($wazito['technician2']['full_name'] ?? '', ENT_QUOTES, 'UTF-8') . '</span><br>
-            <span style="font-size:7px; color:#4a4a4a;">Laboratory Technician</span>
-          </td>
-        </tr>
+        <tr>' . $signatoryCells . '</tr>
         <tr>
           <td colspan="3" style="border:1px solid #9eacb5; font-size:6px; text-align:center; vertical-align:middle;">
             <span style="font-size:7px; font-weight:bold;">Statement of Conformity</span><br>' . $statement . '
           </td>
         </tr>
         <tr>
-          <td style="width:33.33%; border-left:1px solid #9eacb5; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($kenhasLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($ilacLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
-          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;"><img src="' . htmlspecialchars($neemaLogo, ENT_QUOTES, 'UTF-8') . '" height="10"></td>
+          <td style="width:33.33%; border-left:1px solid #9eacb5; border-right:1px solid #9eacb5; text-align:center;">' . $kenhasImage . '</td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;">' . $ilacImage . '</td>
+          <td style="width:33.33%; border-right:1px solid #9eacb5; text-align:center;">' . $neemaImage . '</td>
         </tr>
         <tr>
           <td colspan="2" style="border-left:1px solid #9eacb5; border-bottom:1px solid #9eacb5; font-size:6px; text-align:left; color:#2f2f2f;">

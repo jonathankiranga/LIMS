@@ -9,16 +9,18 @@ if (!isset($data['email']) || !isset($data['role']) || !isset($data['status'])) 
     exit;
 }
 // Prepare the update query
-$query = "UPDATE users SET  full_name = ?, telephone = ?, email = ?, "
-        . " role = ?, status = ?, department=?  WHERE user_id = ?";
+$query = "UPDATE users SET full_name = ?, telephone = ?, email = ?, "
+        . " role = ?, status = ?, department = ?, user_description = ? WHERE user_id = ?";
 // Prepare the statement
 $stmt = $conn->prepare($query);
-$stmt->bind_param('sssissi', $data['full_name'], 
+$userDescription = trim((string)($data['user_description'] ?? ''));
+$stmt->bind_param('sssisssi', $data['full_name'], 
                   $data['telephone'], 
                   $data['email'], 
                   $data['role'], 
                   $data['status'], 
                   $data['assignedDepartment'], 
+                  $userDescription, 
                   $data['user_id']);  // Assuming you are passing the user_id
 // Execute the statement
 header('Content-Type: application/json');

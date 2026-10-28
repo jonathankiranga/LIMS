@@ -1,4 +1,9 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
+
   // Get the request payload (username and password)
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -62,6 +67,12 @@ try {
      
      $tablehashpassword = $user['password_hash'];
      if(password_verify($password,$tablehashpassword)) { // Use !== for strict comparison
+                session_regenerate_id(true);
+                $_SESSION['UserID'] = $user['user_id'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['username'] = $username;
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['department'] = $user['department'];
                 echo json_encode([
                 'success'    => true,
                 'message'    => 'welcome '. $user['full_name'],
