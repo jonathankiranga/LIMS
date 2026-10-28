@@ -183,10 +183,10 @@ public function Header() {
     $this->SetTextColor(35, 45, 55);
 
     // Frame 1: Company Details.
-    $this->Rect(10, 25, 95, 28, 'D');
+    $this->Rect(10, 25, 95, 24, 'D');
     $this->SetFont('montserrat', 'B', 7);
     $this->SetXY(12, 25.5);
-    $this->Cell(91, 3.5, 'COMPANY DETAILS', 0, 1, 'L');
+    // Company details shown without a heading.
     $companyPhone = $companyRecord['telephone'] ?? ($companyRecord['telephne'] ?? '');
     $companyRows = [
         $companyRecord['company_name'] ?? '',
@@ -198,7 +198,7 @@ public function Header() {
         $companyPhone
     ];
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 29.0;
+    $cy = 26.5;
     foreach ($companyRows as $companyLine) {
         if (trim((string)$companyLine) !== '') {
             $this->SetXY(12, $cy);
@@ -208,10 +208,10 @@ public function Header() {
     }
 
     // Frame 2: Customer Details, using the existing ERP master lookup.
-    $this->Rect(105, 25, 95, 28, 'D');
+    $this->Rect(105, 25, 95, 24, 'D');
     $this->SetFont('montserrat', 'B', 7);
     $this->SetXY(107, 25.5);
-    $this->Cell(91, 3.5, 'CUSTOMER DETAILS', 0, 1, 'L');
+    // Customer details shown without a heading.
     $customerRows = [
         ['Customer: ', $customerData['customer'] ?? ''],
         ['Company: ', $customerData['company'] ?? ''],
@@ -221,7 +221,7 @@ public function Header() {
         ['Email: ', $customerData['email'] ?? '']
     ];
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 29.0;
+    $cy = 26.5;
     foreach ($customerRows as $customerRow) {
         $customerValue = trim((string)$customerRow[1]);
         if ($customerValue !== '') {
@@ -264,11 +264,11 @@ public function Header() {
     $sampleFrameHeight = max(count($sampleRowsLeft), count($sampleRowsRight)) * 3.0 + 5.0;
 
     // Frames 3 and 4 share a height based on the visible metadata rows.
-    $this->Rect(10, 55, 95, $sampleFrameHeight, 'D');
-    $this->Rect(105, 55, 95, $sampleFrameHeight, 'D');
+    $this->Rect(10, 51, 95, $sampleFrameHeight, 'D');
+    $this->Rect(105, 51, 95, $sampleFrameHeight, 'D');
 
     $this->SetFont('montserrat', '', 7);
-    $cy = 57.5;
+    $cy = 53.5;
     foreach ($sampleRowsLeft as $sampleRow) {
         $this->SetXY(12, $cy);
         $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
@@ -276,7 +276,7 @@ public function Header() {
     }
 
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 57.5;
+    $cy = 53.5;
     foreach ($sampleRowsRight as $sampleRow) {
         $this->SetXY(107, $cy);
         $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
@@ -440,7 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
-    $pdf->SetMargins(10,115,10); // Adjust top margin to avoid overlap with header
+    $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
     $pdf->SetAutoPageBreak(true, 80); // Reserve 80 mm for the existing report footer
     $pdf->AddPage();
 
