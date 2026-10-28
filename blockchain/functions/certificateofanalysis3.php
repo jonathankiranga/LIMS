@@ -215,11 +215,13 @@ class CustomPDF extends TCPDF {
     $realsampleid = getdatesampleid($sampleID);
 
     // Frame 3: first group of SAMPLE HEADER fields.
-    $this->Rect(10, 55, 95, 60, 'D');
     $this->SetFont('montserrat', 'B', 7);
     $this->SetXY(12, 55.5);
     
     $sampleRowsLeft = [['Sample Batch No: ', $record['DocumentNo'] ?? ''], ['Sample ID: ', $realsampleid ?? ''], ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')], ['Sampled By: ', $record['SampledBy'] ?? ''], ['Sampling Method: ', $record['SamplingMethod'] ?? ''], ['Sample Source: ', $record['ExternalSample'] ?? ''], ['Sample Name: ', $record['sample_name'] ?? '']];
+$leftRowsCount = count(array_filter($sampleRowsLeft, function ($row) { return trim((string)$row[1]) !== ''; }));
+    $leftFrameHeight = max(8, 5 + ($leftRowsCount * 3.0));
+    $this->Rect(10, 55, 95, $leftFrameHeight, 'D');
     $this->SetFont('montserrat', '', 7);
     $cy = 57.5;
     foreach ($sampleRowsLeft as $sampleRow) {
@@ -232,11 +234,13 @@ class CustomPDF extends TCPDF {
     }
 
     // Frame 4: remaining SAMPLE HEADER fields.
-    $this->Rect(105, 55, 95, 60, 'D');
     $this->SetFont('montserrat', 'B', 7);
     $this->SetXY(107, 55.5);
     
     $sampleRowsRight = [['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')], ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')], ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')], ['Sample Method: ', $record['sample_method'] ?? ''], ['B/No: ', $record['BatchNo'] ?? ''], ['B/size: ', $record['BatchSize'] ?? ''], ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')], ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')], ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')], ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')], ['SKU: ', $record['SKU'] ?? ''], ['Condition: ', $record['condition_of_sample'] ?? '']];
+$rightRowsCount = count(array_filter($sampleRowsRight, function ($row) { return trim((string)$row[1]) !== ''; }));
+    $rightFrameHeight = max(8, 5 + ($rightRowsCount * 3.0));
+    $this->Rect(105, 55, 95, $rightFrameHeight, 'D');
     $this->SetFont('montserrat', '', 6.4);
     $cy = 57.5;
     foreach ($sampleRowsRight as $sampleRow) {
@@ -376,7 +380,7 @@ public function Footer() {
   global $reportFooterHtml;
   $this->SetY(-78);
   if (!empty($reportFooterHtml)) {
-      $this->writeHTMLCell(190, 66, 10, '', $reportFooterHtml, 0, 1, 0, true, 'L', true);
+      $this->writeHTMLCell(190, 66, 10, $this->getPageHeight() - 78, $reportFooterHtml, 0, 0, 0, true, 'L', true);
   }
   $this->SetY(-8);
   $this->SetFont('montserrat', 'I', 8);
