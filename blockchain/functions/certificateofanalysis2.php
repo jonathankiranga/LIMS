@@ -412,7 +412,7 @@ public function Footer() {
   static $printedBy = null;
   if ($printedBy === null) {
       $printedBy = 'Not available';
-      $printedByID = $_SESSION['UserID'] ?? '';
+      $printedByID = $_COOKIE['printedByUserId'] ?? ($_SESSION['UserID'] ?? '');
       if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
           $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
           if ($printedByStmt) {
