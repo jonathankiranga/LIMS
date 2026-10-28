@@ -166,45 +166,48 @@ class CustomPDF extends TCPDF {
     $qrcodelink = ($sampleID !== '' && isset($QRcode)) ? $QRcode->getQr($sampleID) : '';
 
     // Letterhead: logo at left, title centred, QR at far right; no lab contact text here.
-    if (!empty($_SESSION['LogoFile'])) $this->Image($_SESSION['LogoFile'], 10, 4, 32, 12);
+    if (!empty($_SESSION['LogoFile'])) $this->Image($_SESSION['LogoFile'], 10, 9, 32, 12);
     $this->SetFont('montserrat', 'B', 10);
-    $this->SetXY(55, 7);
+    $this->SetXY(55, 12);
     $this->Cell(100, 5, 'CERTIFICATE OF ANALYSIS (COA)', 0, 0, 'C');
-    if ($qrcodelink !== '') $this->Image($qrcodelink, 185, 4, 15, 15);
+    if ($qrcodelink !== '') $this->Image($qrcodelink, 185, 9, 15, 15);
 
     $this->SetLineStyle(['width' => 0.25, 'color' => [190, 211, 232]]);
     $this->SetDrawColor(190, 211, 232);
     $this->SetTextColor(35, 45, 55);
 
     // Frame 1: Company Details.
-    $this->Rect(10, 20, 95, 28, 'D');
+    $this->Rect(10, 25, 95, 28, 'D');
     $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(12, 20.5);
+    $this->SetXY(12, 25.5);
     $this->Cell(91, 3.5, 'COMPANY DETAILS', 0, 1, 'L');
     $companyPhone = $companyRecord['telephone'] ?? ($companyRecord['telephne'] ?? '');
     $companyRows = [$companyRecord['company_name'] ?? '', $companyRecord['address'] ?? '', $companyRecord['address1'] ?? '', $companyRecord['address2'] ?? '', $companyRecord['address3'] ?? '', $companyRecord['email'] ?? '', $companyPhone];
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 24.2;
+    $cy = 29.0;
     foreach ($companyRows as $companyLine) {
         if (trim((string)$companyLine) !== '') {
             $this->SetXY(12, $cy);
-            $this->Cell(91, 3.15, $this->truncateText((string)$companyLine, 80), 0, 0, 'L');
+            $this->Cell(91, 3.0, $this->truncateText((string)$companyLine, 80), 0, 0, 'L');
         }
-        $cy += 3.15;
+        $cy += 3.0;
     }
 
     // Frame 2: Customer Details from the existing ERP master lookup.
-    $this->Rect(105, 20, 95, 28, 'D');
+    $this->Rect(105, 25, 95, 28, 'D');
     $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(107, 20.5);
+    $this->SetXY(107, 25.5);
     $this->Cell(91, 3.5, 'CUSTOMER DETAILS', 0, 1, 'L');
     $customerRows = [['Customer: ', $customerData['customer'] ?? ''], ['Company: ', $customerData['company'] ?? ''], ['Postal Code: ', $customerData['postcode'] ?? ''], ['City: ', $customerData['city'] ?? ''], ['Telephone: ', $customerData['phone'] ?? ''], ['Email: ', $customerData['email'] ?? '']];
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 24.2;
+    $cy = 29.0;
     foreach ($customerRows as $customerRow) {
-        $this->SetXY(107, $cy);
-        $this->Cell(91, 3.55, $this->truncateText($customerRow[0] . (string)$customerRow[1], 80), 0, 0, 'L');
-        $cy += 3.55;
+        $customerValue = trim((string)$customerRow[1]);
+        if ($customerValue !== '') {
+            $this->SetXY(107, $cy);
+            $this->Cell(91, 3.0, $this->truncateText($customerValue, 80), 0, 0, 'L');
+            $cy += 3.0;
+        }
     }
 
     $testreceived = getdatesamplereceived($sampleID);
@@ -212,31 +215,37 @@ class CustomPDF extends TCPDF {
     $realsampleid = getdatesampleid($sampleID);
 
     // Frame 3: first group of SAMPLE HEADER fields.
-    $this->Rect(10, 50, 95, 60, 'D');
+    $this->Rect(10, 55, 95, 60, 'D');
     $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(12, 50.5);
-    $this->Cell(91, 3.8, 'SAMPLE HEADER', 0, 1, 'L');
+    $this->SetXY(12, 55.5);
+    
     $sampleRowsLeft = [['Sample Batch No: ', $record['DocumentNo'] ?? ''], ['Sample ID: ', $realsampleid ?? ''], ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')], ['Sampled By: ', $record['SampledBy'] ?? ''], ['Sampling Method: ', $record['SamplingMethod'] ?? ''], ['Sample Source: ', $record['ExternalSample'] ?? ''], ['Sample Name: ', $record['sample_name'] ?? '']];
     $this->SetFont('montserrat', '', 7);
-    $cy = 55;
+    $cy = 57.5;
     foreach ($sampleRowsLeft as $sampleRow) {
-        $this->SetXY(12, $cy);
-        $this->Cell(91, 7.1, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
-        $cy += 7.1;
+        $sampleValue = trim((string)$sampleRow[1]);
+        if ($sampleValue !== '') {
+            $this->SetXY(12, $cy);
+            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
+            $cy += 3.0;
+        }
     }
 
     // Frame 4: remaining SAMPLE HEADER fields.
-    $this->Rect(105, 50, 95, 60, 'D');
+    $this->Rect(105, 55, 95, 60, 'D');
     $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(107, 50.5);
-    $this->Cell(91, 3.8, 'SAMPLE HEADER', 0, 1, 'L');
+    $this->SetXY(107, 55.5);
+    
     $sampleRowsRight = [['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')], ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')], ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')], ['Sample Method: ', $record['sample_method'] ?? ''], ['B/No: ', $record['BatchNo'] ?? ''], ['B/size: ', $record['BatchSize'] ?? ''], ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')], ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')], ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')], ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')], ['SKU: ', $record['SKU'] ?? ''], ['Condition: ', $record['condition_of_sample'] ?? '']];
     $this->SetFont('montserrat', '', 6.4);
-    $cy = 54.5;
+    $cy = 57.5;
     foreach ($sampleRowsRight as $sampleRow) {
-        $this->SetXY(107, $cy);
-        $this->Cell(91, 4.45, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
-        $cy += 4.45;
+        $sampleValue = trim((string)$sampleRow[1]);
+        if ($sampleValue !== '') {
+            $this->SetXY(107, $cy);
+            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
+            $cy += 3.0;
+        }
     }
     $this->SetTextColor(0, 0, 0);
 }
@@ -398,18 +407,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->SetAutoPageBreak(true, 80); // Reserve 80 mm for the existing report footer
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
-    $pdf->SetMargins(10,110,10); // Adjust top margin to avoid overlap with header
+    $pdf->SetMargins(10,115,10); // Adjust top margin to avoid overlap with header
     $pdf->AddPage();
 
     // Start creating HTML content
     $html = '<div style="width: 100%; font-family: Helvetica, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
+    $html .= '<div style="font-family: montserrat, Helvetica, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 55%;">PARAMETER</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">RESULTS</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">LIMITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">PARAMETER</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">UNITS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">RESULTS</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">LIMITS</th>
     </tr>
 </thead><tbody>';
  
@@ -422,10 +433,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
  
       $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 55%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $standard . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: 40%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $resutlts . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $standard . '</td>
           </tr>';
    }
 
