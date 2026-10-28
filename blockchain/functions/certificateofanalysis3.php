@@ -210,10 +210,6 @@ class CustomPDF extends TCPDF {
         }
     }
 
-    $testreceived = getdatesamplereceived($sampleID);
-    $testended = getdatesamplecompleteed($sampleID);
-    $realsampleid = getdatesampleid($sampleID);
-
     // Build both sample metadata groups first, then size both frames to the visible rows.
     $testreceived = getdatesamplereceived($sampleID);
     $testended = getdatesamplecompleteed($sampleID);
