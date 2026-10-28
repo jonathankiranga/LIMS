@@ -40,6 +40,9 @@ if ($category === 'subcontracted') {
                 tp.ParameterID,
                 tp.ParameterName,
                 COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
+                tp.UnitOfMeasure,
+                tp.Limits,
+                EXISTS (SELECT 1 FROM test_result_audit_trail at WHERE at.resultsID = TR.resultsID) AS HasAuditTrail,
                 TR.StatusID
             FROM test_results TR
             JOIN sample_tests ST
@@ -71,6 +74,9 @@ if ($category === 'subcontracted') {
                 tp.ParameterID,
                 tp.ParameterName,
                 COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
+                tp.UnitOfMeasure,
+                tp.Limits,
+                EXISTS (SELECT 1 FROM test_result_audit_trail at WHERE at.resultsID = TR.resultsID) AS HasAuditTrail,
                 TR.StatusID
             FROM test_results TR
             JOIN TestParameters tp
@@ -151,7 +157,10 @@ while ($row = $result->fetch_assoc()) {
         'ParameterID' => $row['ParameterID'],
         'StandardID' => $row['StandardID'],
         'resultsID' => $row['resultsID'],
-        'ResultType' => $row['ResultType']
+        'ResultType' => $row['ResultType'],
+        'UnitOfMeasure' => $row['UnitOfMeasure'],
+        'Limits' => $row['Limits'],
+        'HasAuditTrail' => (bool)$row['HasAuditTrail']
     );
 }
 $stmt->close();
