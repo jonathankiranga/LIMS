@@ -385,7 +385,10 @@ class CustomPDF extends TCPDF {
         global $conn;
         static $printedBy = null;
         if ($printedBy === null) {
-            $printedBy = 'Not available';
+            $printedBy = trim((string)($_SESSION['full_name'] ?? ''));
+            if ($printedBy === '') {
+                $printedBy = 'Not available';
+            }
             $printedByID = $_SESSION['UserID'] ?? '';
             if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
                 $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
