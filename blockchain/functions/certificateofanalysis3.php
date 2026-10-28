@@ -214,42 +214,56 @@ class CustomPDF extends TCPDF {
     $testended = getdatesamplecompleteed($sampleID);
     $realsampleid = getdatesampleid($sampleID);
 
-    // Frame 3: first group of SAMPLE HEADER fields.
-    $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(12, 55.5);
-    
-    $sampleRowsLeft = [['Sample Batch No: ', $record['DocumentNo'] ?? ''], ['Sample ID: ', $realsampleid ?? ''], ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')], ['Sampled By: ', $record['SampledBy'] ?? ''], ['Sampling Method: ', $record['SamplingMethod'] ?? ''], ['Sample Source: ', $record['ExternalSample'] ?? ''], ['Sample Name: ', $record['sample_name'] ?? '']];
-$leftRowsCount = count(array_filter($sampleRowsLeft, function ($row) { return trim((string)$row[1]) !== ''; }));
-    $leftFrameHeight = max(8, 5 + ($leftRowsCount * 3.0));
-    $this->Rect(10, 55, 95, $leftFrameHeight, 'D');
+    // Build both sample metadata groups first, then size both frames to the visible rows.
+    $testreceived = getdatesamplereceived($sampleID);
+    $testended = getdatesamplecompleteed($sampleID);
+    $realsampleid = getdatesampleid($sampleID);
+
+    $sampleRowsLeft = [
+        ['Sample Batch No: ', $record['DocumentNo'] ?? ''],
+        ['Sample ID: ', $realsampleid ?? ''],
+        ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')],
+        ['Sampled By: ', $record['SampledBy'] ?? ''],
+        ['Sampling Method: ', $record['SamplingMethod'] ?? ''],
+        ['Sample Source: ', $record['ExternalSample'] ?? ''],
+        ['Sample Name: ', $record['sample_name'] ?? '']
+    ];
+    $sampleRowsRight = [
+        ['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')],
+        ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')],
+        ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')],
+        ['Sample Method: ', $record['sample_method'] ?? ''],
+        ['B/No: ', $record['BatchNo'] ?? ''],
+        ['B/size: ', $record['BatchSize'] ?? ''],
+        ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')],
+        ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')],
+        ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')],
+        ['SKU: ', $record['SKU'] ?? ''],
+        ['Condition: ', $record['condition_of_sample'] ?? '']
+    ];
+    $sampleRowsLeft = array_values(array_filter($sampleRowsLeft, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleRowsRight = array_values(array_filter($sampleRowsRight, function ($sampleRow) { return trim((string)$sampleRow[1]) !== ''; }));
+    $sampleFrameHeight = max(count($sampleRowsLeft), count($sampleRowsRight)) * 3.0 + 5.0;
+
+    // Frames 3 and 4 share a height based on the visible metadata rows.
+    $this->Rect(10, 55, 95, $sampleFrameHeight, 'D');
+    $this->Rect(105, 55, 95, $sampleFrameHeight, 'D');
+
     $this->SetFont('montserrat', '', 7);
     $cy = 57.5;
     foreach ($sampleRowsLeft as $sampleRow) {
-        $sampleValue = trim((string)$sampleRow[1]);
-        if ($sampleValue !== '') {
-            $this->SetXY(12, $cy);
-            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
-            $cy += 3.0;
-        }
+        $this->SetXY(12, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
     }
 
-    // Frame 4: remaining SAMPLE HEADER fields.
-    $this->SetFont('montserrat', 'B', 7);
-    $this->SetXY(107, 55.5);
-    
-    $sampleRowsRight = [['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')], ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')], ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')], ['Sample Method: ', $record['sample_method'] ?? ''], ['B/No: ', $record['BatchNo'] ?? ''], ['B/size: ', $record['BatchSize'] ?? ''], ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')], ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')], ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')], ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')], ['SKU: ', $record['SKU'] ?? ''], ['Condition: ', $record['condition_of_sample'] ?? '']];
-$rightRowsCount = count(array_filter($sampleRowsRight, function ($row) { return trim((string)$row[1]) !== ''; }));
-    $rightFrameHeight = max(8, 5 + ($rightRowsCount * 3.0));
-    $this->Rect(105, 55, 95, $rightFrameHeight, 'D');
     $this->SetFont('montserrat', '', 6.4);
     $cy = 57.5;
     foreach ($sampleRowsRight as $sampleRow) {
-        $sampleValue = trim((string)$sampleRow[1]);
-        if ($sampleValue !== '') {
-            $this->SetXY(107, $cy);
-            $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . $sampleValue, 85), 0, 0, 'L');
-            $cy += 3.0;
-        }
+        $this->SetXY(107, $cy);
+        $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 3.0;
     }
     $this->SetTextColor(0, 0, 0);
 }
