@@ -28,6 +28,7 @@
             <th>Sample ID</th>
             <th>Parameter</th>
             <th>Result Type</th>
+            <th>Units</th>
             <th>Result Input</th>
             <th>
                 Action 
@@ -110,7 +111,7 @@ function loadGrid(page = 1) {
         const $tbody = $('#resultsGrid tbody').empty();
 
         if (!payload.data || payload.data.length === 0) {
-            $tbody.html('<tr><td colspan="5">No pending results</td></tr>');
+            $tbody.html('<tr><td colspan="6">No pending results</td></tr>');
             renderPagination(0, 1);
             return;
         }
@@ -126,12 +127,16 @@ function renderRow(row) {
         'data-resultsid': row.resultsID,
         'data-sampleid': row.SampleID,
         'data-parametername': row.ParameterName,
-        'data-resulttype': row.ResultType || ''
+        'data-resulttype': row.ResultType || '',
+        'data-limits': row.Limits || '',
+        'data-unit': row.UnitOfMeasure || '',
+        'data-has-audit': row.HasAuditTrail ? '1' : '0'
     });
 
     const $tdSample = $('<td>').text(row.SampleID);
     const $tdParam  = $('<td>').text(row.ParameterName);
     const $tdType   = $('<td>');
+    const $tdUnits  = $('<td>').text(row.UnitOfMeasure || '');
     const $tdInput  = $('<td>');
     const $tdAction = $('<td>');
 
@@ -144,16 +149,12 @@ function renderRow(row) {
         showRowEditor($tr, $(this).val());
     });
 
-    const $saveBtn = $('<button>', { 
-        class: 'btn-save-row',
-        title: 'Save this result' 
-    }).html('<i class="fas fa-save"></i> Save').on('click', function() {
-        prepareSave($tr);
-    });
+    const $continueBtn = $('<button>', { class: 'btn-save-row btn-save-continue', title: 'Record in audit trail and keep pending' }).html('<i class="fas fa-save"></i> Save and Continue').on('click', function() { prepareSave($tr, 'continue'); });
+    const $reviewBtn = $('<button>', { class: 'btn-save-row btn-save-review', title: 'Save and send for review' }).html('<i class="fas fa-check"></i> Save and Review').on('click', function() { prepareSave($tr, 'review'); });
 
     $tdType.append($sel);
-    $tdAction.append($saveBtn);
-    $tr.append($tdSample, $tdParam, $tdType, $tdInput, $tdAction);
+    $tdAction.append($continueBtn, $('<br>'), $reviewBtn);
+    $tr.append($tdSample, $tdParam, $tdType, $tdUnits, $tdInput, $tdAction);
 
     if (row.ResultType) {
         $sel.val(row.ResultType);
@@ -165,7 +166,7 @@ function renderRow(row) {
 
 // Show row editor
 function showRowEditor($tr, type) {
-    const $tdInput = $tr.children().eq(3).empty();
+    const $tdInput = $tr.children().eq(4).empty();
     let $input;
 //// 'ND','Absent','Detected','Below Limit','Detected Range','Trace','Above Limit','Inconclusive','Error','Invalid'
     if (type === 'quantitativeField') {
@@ -186,11 +187,12 @@ function showRowEditor($tr, type) {
         $input = $('<input>', { type: 'text', class: 'result-value form-control', placeholder: 'e.g. <2 or 1-5' });
     }
     
+    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
     $tdInput.append($input);
 }
 
 // Prepare data for saving
-function prepareSave($tr) {
+function prepareSave($tr, saveAction) {
     const resultsid     = $tr.attr('data-resultsid');
     const sampleID      = $tr.attr('data-sampleid');
     const parameterName = $tr.attr('data-parametername');
@@ -207,8 +209,16 @@ function prepareSave($tr) {
         sampleID,
         parameterName,
         resultType,
-        resultValue
+        resultValue,
+        saveAction: saveAction || 'review'
     });
+}
+
+function $trForResult(id) { return $('#resultsGrid tbody tr').filter(function() { return String($(this).attr('data-resultsid')) === String(id); }); }
+function applyLimitTooltip($row) {
+    const limit = $row.attr('data-limits') || 'Not configured';
+    const unit = $row.attr('data-unit') || '';
+    $row.find('.result-value').attr('title', 'Standard limit: ' + limit + (unit ? ' ' + unit : ''));
 }
 
 // Save result via AJAX
@@ -231,9 +241,11 @@ function saveResult(dataObj) {
         success: function(res) {
             $('#saveSpinner').hide();
             if (res.success) {
-                const $row = $(`tr[data-resultsid="${dataObj.resultsid}"]`);
-                $row.css('background-color', '#d4edda').addClass('saved-row');
+                const $row = $trForResult(dataObj.resultsid);
+                $row.css('background-color', '#d4edda').addClass('saved-row').attr('data-has-audit', '1');
+                applyLimitTooltip($row);
                 setTimeout(() => $row.css('background-color', ''), 2000);
+                if (dataObj.saveAction === 'review') $row.fadeOut(500, function() { $(this).remove(); });
             } else {
                 alert('Error: ' + (res.message || 'Unknown error'));
             }
