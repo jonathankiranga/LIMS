@@ -242,7 +242,7 @@ class CustomPDF extends TCPDF {
         ['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')],
         ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')],
         ['Date Test Completed: ', formatDate($testended, 'dd-mm-yy')],
-        ['Report Issued Date: ', date('d-m-y')],
+        ['Report Issued Date: ', formatDate(getReportIssuedDate($sampleID), 'dd-mm-yy')],
         ['Sample Method: ', $record['sample_method'] ?? ''],
         ['B/No: ', $record['BatchNo'] ?? ''],
         ['B/size: ', $record['BatchSize'] ?? ''],
@@ -723,6 +723,23 @@ function findLABCODEFile($PathPrefix) {
             } //end listing of files under company directory is not empty
     }
 
+
+function getReportIssuedDate($sampleID){
+    global $conn;
+    $stmt = $conn->prepare("SELECT MAX(updated_at) AS approval_date FROM test_results WHERE SampleID = ? AND StatusID = 4 AND approvedby IS NOT NULL AND approvedby <> 0");
+    if (!$stmt) {
+        return null;
+    }
+    $stmt->bind_param("s", $sampleID);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return null;
+    }
+    $result = $stmt->get_result();
+    $record = $result ? ($result->fetch_assoc() ?: []) : [];
+    $stmt->close();
+    return $record['approval_date'] ?? null;
+}
 
 function getdatesamplereceived($sampleID){
     global $conn;
