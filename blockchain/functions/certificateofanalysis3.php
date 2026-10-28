@@ -395,8 +395,11 @@ public function Footer() {
   global $reportFooterHtml, $conn;
   static $printedBy = null;
   if ($printedBy === null) {
-      $printedBy = 'Not available';
-      $printedByID = $_COOKIE['printedByUserId'] ?? ($_SESSION['UserID'] ?? '');
+      $printedBy = trim((string)($_SESSION['full_name'] ?? ''));
+      if ($printedBy === '') {
+          $printedBy = 'Not available';
+      }
+      $printedByID = $_SESSION['UserID'] ?? '';
       if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
           $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
           if ($printedByStmt) {
