@@ -199,7 +199,7 @@ function prepareSave($tr, saveAction) {
     const resultType    = $tr.find('.result-type').val();
     const resultValue   = $tr.find('.result-value').val();
 
-    if (!resultType || !resultValue) {
+    if (!resultType || resultValue === '' || resultValue === null) {
         alert('Please select a result type and enter a value.');
         return;
     }
