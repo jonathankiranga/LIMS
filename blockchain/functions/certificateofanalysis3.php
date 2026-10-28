@@ -227,7 +227,8 @@ class CustomPDF extends TCPDF {
     $sampleRowsRight = [
         ['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')],
         ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')],
-        ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')],
+        ['Date Test Completed: ', formatDate($testended, 'dd-mm-yy')],
+        ['Report Issued Date: ', date('d-m-y')],
         ['Sample Method: ', $record['sample_method'] ?? ''],
         ['B/No: ', $record['BatchNo'] ?? ''],
         ['B/size: ', $record['BatchSize'] ?? ''],
