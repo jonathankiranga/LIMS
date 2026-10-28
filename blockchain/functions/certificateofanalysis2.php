@@ -488,7 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
 
     $html .= '</tbody></table>'; // Close the table
     $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
-    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Accredited &nbsp;&nbsp; † Not Accredited &nbsp;&nbsp; ‡ Contracted</div>'; // Add footer
+    $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
     
     $lines = explode("\n", $SampletypeNotes);
@@ -830,11 +830,16 @@ function formatResultNumber($row, $value){
 }
 
 function accreditationSymbol($status){
-    switch (strtolower(trim((string)$status))) {
-        case 'accredited': return '*';
-        case 'contracted': return '‡';
+    $normalizedStatus = strtolower(trim((string)$status));
+    $normalizedStatus = str_replace(array(' ', '-'), '_', $normalizedStatus);
+
+    switch ($normalizedStatus) {
+        case 'accredited': return '';
+        case 'contracted':
+        case 'sub_contracted':
+        case 'subcontracted': return '~';
         case 'not_accredited':
-        default: return '†';
+        default: return '*';
     }
 }
 
