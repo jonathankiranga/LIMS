@@ -503,30 +503,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
 $pdf->writeHTML($html, true, false, true, false, '');
 $wazitorow = $pdf->GetY();
 //signature
-$wazito = getsignature();
-$pdf->SetFont('montserrat','',10);
+$wazito = getsignature($sampleID);
+$pdf->SetFont('montserrat','',8);
 $pdf->SetTextColor(0, 0, 0);
-$pdf->SetXY(10,$wazitorow);
-$iconrow = $wazitorow;
-$pdf->Image($wazito['authorisation']['signature_path'],15,$iconrow,10,10);
-$pdf->SetXY(10,$wazitorow+12);
-$pdf->MultiCell(95, 5,$wazito['authorisation']['full_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
-
-$pdf->SetXY(10,$wazitorow+17);
-$pdf->MultiCell(95, 5,'Authorization', 0, 'L', 0, 1, '', '', true); // Limit characters
-$pdf->SetXY(80,$wazitorow);
-$pdf->Image($wazito['technician']['signature_path'],85,$iconrow,10,10);
-$pdf->SetXY(80,$wazitorow+12);
-$pdf->MultiCell(95, 5,$wazito['technician']['full_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
-$pdf->SetXY(80,$wazitorow+17);
-$pdf->MultiCell(95, 5,'Laboratory Technician', 0, 'L', 0, 1, '', '', true); // Limit characters
-$pdf->SetXY(155,$wazitorow);
-$pdf->Image($wazito['technician2']['signature_path'],160,$iconrow,10,10);
-$pdf->SetXY(155,$wazitorow+12);
-$pdf->MultiCell(95, 5,$wazito['technician2']['full_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
-$pdf->SetXY(155,$wazitorow+17);
-$pdf->MultiCell(95, 5,'Laboratory Technician', 0, 'L', 0, 1, '', '', true); // Limit characters
-
+$signatories = $wazito['signatories'] ?? [];
+$signatoryCount = count($signatories);
+$pageMargins = $pdf->getMargins();
+$pageWidth = $pdf->getPageWidth() - $pageMargins['left'] - $pageMargins['right'];
+$cellWidth = $signatoryCount > 0 ? $pageWidth / $signatoryCount : $pageWidth;
+foreach ($signatories as $index => $signatory) {
+    $x = $pageMargins['left'] + ($index * $cellWidth);
+    $pdf->SetXY($x, $wazitorow);
+    $signaturePath = $signatory['signature_path'] ?? '';
+    if ($signaturePath !== '' && is_file($signaturePath) && is_readable($signaturePath)) {
+        $pdf->Image($signaturePath, $x + 2, $wazitorow, 12, 9);
+    }
+    $pdf->SetXY($x, $wazitorow + 10);
+    $pdf->MultiCell($cellWidth - 3, 4, $signatory['full_name'] ?? '', 0, 'L', 0, 1, '', '', true);
+    $pdf->SetXY($x, $wazitorow + 14);
+    $pdf->MultiCell($cellWidth - 3, 4, $signatory['department'] ?? '', 0, 'L', 0, 1, '', '', true);
+}
+$pdf->SetY($wazitorow + ($signatoryCount > 0 ? 19 : 2));
 $samerow = $pdf->GetY();
 $pdf->SetXY(10,$samerow+5);
 $html = '<div style="text-align: center; font-family: Helvetica, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: blue;">Statement of Conformity</div>'; // Add footer
@@ -902,84 +899,53 @@ function statementofconformity(){
    return  $record['confvalue'];
 }
 
-function getsignature(){
+function getsignature($sampleID){
     global $conn;
-
-    // getsampleid.php is in blockchain/, and signature uploads are stored in blockchain/images/.
-    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png')
-        ?: (__DIR__ . '/images/icons8-no-image-100.png');
-
+    $sampleID = trim((string)$sampleID);
+    $defaultSignaturePath = realpath(__DIR__ . '/images/icons8-no-image-100.png') ?: (__DIR__ . '/../images/icons8-no-image-100.png');
     $resolveSignaturePath = function ($rawPath) use ($defaultSignaturePath) {
-        $rawPath = trim((string)$rawPath);
-        $normalizedPath = str_replace(chr(92), '/', $rawPath);
-        $candidates = [];
-
+        $rawPath = trim((string)$rawPath); $normalizedPath = str_replace(chr(92), '/', $rawPath); $candidates = [];
         if ($rawPath !== '') {
-            // Keep a valid absolute path as the first choice.
-            if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) {
-                $candidates[] = $rawPath;
-            } else {
-                // Stored relative paths may be "filename.png" or "images/filename.png".
-                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
-                $candidates[] = __DIR__ . '/images/' . ltrim($normalizedPath, '/');
-            }
-
-            // Uploads are saved under blockchain/images/. The database commonly stores
-            // only the filename, or an old path from another server.
-            $pathPart = parse_url($normalizedPath, PHP_URL_PATH);
-            $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
-            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') {
-                $candidates[] = __DIR__ . '/images/' . $fileName;
-            }
-
-            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) {
-                $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/');
-            }
+            if (preg_match('/^[A-Za-z]:\\//', $normalizedPath) || strpos($normalizedPath, '/') === 0) $candidates[] = $rawPath;
+            else { $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); $candidates[] = __DIR__ . '/' . ltrim($normalizedPath, '/'); }
+            $pathPart = parse_url($normalizedPath, PHP_URL_PATH); $fileName = basename((string)($pathPart !== false && $pathPart !== null ? $pathPart : $normalizedPath));
+            if ($fileName !== '' && $fileName !== '.' && $fileName !== '..') $candidates[] = dirname(__DIR__) . '/images/' . $fileName;
+            if (strpos(ltrim($normalizedPath, '/'), 'images/') === 0) $candidates[] = dirname(__DIR__) . '/' . ltrim($normalizedPath, '/');
         }
-
         $candidates[] = $defaultSignaturePath;
-
-        foreach ($candidates as $candidate) {
-            if ($candidate && is_file($candidate) && is_readable($candidate)) {
-                $resolvedPath = realpath($candidate);
-                return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate);
-            }
-        }
-
+        foreach ($candidates as $candidate) if ($candidate && is_file($candidate) && is_readable($candidate)) { $resolvedPath = realpath($candidate); return str_replace(chr(92), '/', $resolvedPath !== false ? $resolvedPath : $candidate); }
         return str_replace(chr(92), '/', $defaultSignaturePath);
     };
-
-    $companyRow = [];
-    $companyResult = $conn->query("SELECT authorisation, technician, technician2 FROM company_master ORDER BY company_id DESC LIMIT 1");
-    if ($companyResult) {
-        $companyRow = $companyResult->fetch_assoc() ?: [];
-    }
-
-    $fetchUser = function ($userId) use ($conn, $resolveSignaturePath) {
-        $defaultName = 'Not Assigned';
-        $userId = trim((string)$userId);
-        $stmt = $conn->prepare("SELECT full_name, signature_path FROM users WHERE user_id = ? LIMIT 1");
-        if (!$stmt) {
-            return ['full_name' => $defaultName, 'signature_path' => $resolveSignaturePath('')];
+    $approverID = ''; $reviewers = [];
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("SELECT resultsID, reviewedby, approvedby FROM test_results WHERE SampleID = ? ORDER BY resultsID DESC");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            if ($stmt->execute()) {
+                $res = $stmt->get_result();
+                if ($res) while ($row = $res->fetch_assoc()) {
+                    $reviewID = trim((string)($row['reviewedby'] ?? '')); $approveID = trim((string)($row['approvedby'] ?? ''));
+                    if ($approverID === '' && $approveID !== '' && $approveID !== '0') $approverID = $approveID;
+                    if ($reviewID !== '' && $reviewID !== '0' && !isset($reviewers[$reviewID])) $reviewers[$reviewID] = true;
+                }
+            }
+            $stmt->close();
         }
-
-        $stmt->bind_param("s", $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $userRow = $res ? ($res->fetch_assoc() ?: []) : [];
-        $stmt->close();
-
-        return [
-            'full_name' => !empty($userRow['full_name']) ? $userRow['full_name'] : $defaultName,
-            'signature_path' => $resolveSignaturePath($userRow['signature_path'] ?? '')
-        ];
-    };
-
-    return [
-        'authorisation' => $fetchUser($companyRow['authorisation'] ?? ''),
-        'technician' => $fetchUser($companyRow['technician'] ?? ''),
-        'technician2' => $fetchUser($companyRow['technician2'] ?? '')
-    ];
+    }
+    $signatoryIDs = [];
+    foreach (array_keys($reviewers) as $reviewID) { if (count($signatoryIDs) >= 2) break; if ($reviewID !== $approverID) $signatoryIDs[] = ['user_id'=>$reviewID,'approval_role'=>'Reviewed by']; }
+    if ($approverID !== '') $signatoryIDs[] = ['user_id'=>$approverID,'approval_role'=>'Approved by'];
+    $signatories = []; $seen = [];
+    foreach ($signatoryIDs as $entry) {
+        $userID = trim((string)$entry['user_id']); if ($userID === '' || isset($seen[$userID])) continue; $seen[$userID] = true;
+        $userStmt = $conn->prepare("SELECT user_id, full_name, department, signature_path FROM users WHERE user_id = ? LIMIT 1");
+        if (!$userStmt) continue;
+        $userStmt->bind_param("s", $userID); $userStmt->execute(); $userRes = $userStmt->get_result(); $user = $userRes ? ($userRes->fetch_assoc() ?: []) : []; $userStmt->close();
+        if (!$user) continue;
+        $department = trim((string)($user['department'] ?? ''));
+        $signatories[] = ['user_id'=>$userID,'full_name'=>trim((string)($user['full_name'] ?? '')),'department'=>$department !== '' ? ucwords(str_replace(['_','-'],' ',$department)) : $entry['approval_role'],'approval_role'=>$entry['approval_role'],'signature_path'=>$resolveSignaturePath($user['signature_path'] ?? '')];
+    }
+    return ['signatories'=>$signatories];
 }
 ?>
 <canvas id="pdf-canvas"></canvas>
