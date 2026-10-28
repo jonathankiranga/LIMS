@@ -85,29 +85,37 @@ try {
     $blockId = $conn->insert_id;
     $stmtLedger->close();
     
-    // 2. Update test_results with flexible types
-    // Using 'sss' (String, String, String) to accommodate alpha-numeric IDs and mixed-type values
-    $updateQuery = "UPDATE test_results SET MRL_Result = NULL, ResultStatus = NULL, RangeResult = NULL, $resultColumn = ?, User_name = ?, StatusID = 2 WHERE resultsID = ?";
-    $stmtUpdate = $conn->prepare($updateQuery);
-    
-    if (!$stmtUpdate) {
-        throw new Exception("Prepare failed: " . $conn->error);
+    // 2. Store an immutable history row for every result-entry action.
+    $saveAction = isset($data['saveAction']) ? $data['saveAction'] : 'review';
+    if (!in_array($saveAction, array('continue', 'review'), true)) {
+        throw new Exception('Invalid save action.');
     }
 
-    // Treated as sss to support UUIDs or string-based primary keys
-    $stmtUpdate->bind_param('sss', $resultValue, $username, $resultsID);
-    
-    if (!$stmtUpdate->execute()) {
-        throw new Exception("Execute failed: " . $stmtUpdate->error);
+    $stmtAudit = $conn->prepare("INSERT INTO test_result_audit_trail
+        (resultsID, SampleID, ParameterName, ResultType, ResultValue, ActionType, UserID, UserName, CreatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
+    if (!$stmtAudit) throw new Exception("Audit trail prepare failed: " . $conn->error);
+    $stmtAudit->bind_param('ssssssss', $resultsID, $sampleID, $parameterName, $resultType, $resultValue, $saveAction, $user_id, $username);
+    if (!$stmtAudit->execute()) throw new Exception("Audit trail insert failed: " . $stmtAudit->error);
+    $stmtAudit->close();
+
+    // Save and Continue must leave the result record and pending status unchanged.
+    // Save and Review commits the value and moves it to the existing review-queue state.
+    if ($saveAction === 'review') {
+        $updateQuery = "UPDATE test_results SET MRL_Result = NULL, ResultStatus = NULL, RangeResult = NULL, $resultColumn = ?, User_name = ?, StatusID = 2 WHERE resultsID = ?";
+        $stmtUpdate = $conn->prepare($updateQuery);
+        if (!$stmtUpdate) throw new Exception("Prepare failed: " . $conn->error);
+        $stmtUpdate->bind_param('sss', $resultValue, $username, $resultsID);
+        if (!$stmtUpdate->execute()) throw new Exception("Execute failed: " . $stmtUpdate->error);
+        $stmtUpdate->close();
     }
-    $stmtUpdate->close();
 
     // 3. Metadata and Actions
-    log_transaction_metadata($conn, $blockId, $resultsID, 'test_results');
-    logAction($conn, 'UPDATE', $sampleID, $current_hash, $user_id, 'SUCCESS');
+    log_transaction_metadata($conn, $blockId, $resultsID, 'test_result_audit_trail');
+    logAction($conn, 'RESULT_SAVE_' . strtoupper($saveAction), $sampleID, $current_hash, $user_id, 'SUCCESS');
 
     $conn->commit();
-    echo json_encode(['success' => true, 'message' => 'Results saved to ledger.']);
+    echo json_encode(['success' => true, 'saveAction' => $saveAction, 'message' => ($saveAction === 'continue' ? 'Entry recorded in the audit trail. Result remains pending.' : 'Result saved and sent for review.')]);
 
 } catch (Exception $e) {
     $conn->rollback();
