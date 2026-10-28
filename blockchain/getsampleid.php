@@ -378,6 +378,25 @@ class CustomPDF extends TCPDF {
     }
 
     public function Footer() {
+        global $conn;
+        static $printedBy = null;
+        if ($printedBy === null) {
+            $printedBy = 'Not available';
+            $printedByID = $_SESSION['UserID'] ?? '';
+            if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
+                $printedByStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
+                if ($printedByStmt) {
+                    $printedByStmt->bind_param("s", $printedByID);
+                    if ($printedByStmt->execute()) {
+                        $printedByResult = $printedByStmt->get_result();
+                        if ($printedByResult && ($printedByRow = $printedByResult->fetch_assoc()) && trim((string)$printedByRow['full_name']) !== '') {
+                            $printedBy = trim((string)$printedByRow['full_name']);
+                        }
+                    }
+                    $printedByStmt->close();
+                }
+            }
+        }
         $iconrow = $this->getPageHeight() - 35;
         $this->SetFont('montserrat', 'I', 5);
         $this->drawFooterLogo($_SESSION['KenhasFile'] ?? '', 15, $iconrow, 15, 10);
@@ -391,10 +410,13 @@ class CustomPDF extends TCPDF {
         $this->SetXY(25, -14);
         $this->MultiCell(160, 4, 'This Laboratory report shall not be reproduced except in full, without a written consent of Lab Works East Africa Ltd', 0, 'C', 0, 1, '', '', true);
 
-        $this->SetY(-8);
+        $this->SetXY(10, -8);
+        $this->SetFont('montserrat', '', 7);
+        $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+        $this->SetXY(80, -8);
         $this->SetFont('montserrat', 'I', 8);
         $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-        $this->Cell(0, 10, $pageNumber, 0, 0, 'C');
+        $this->Cell(120, 4, $pageNumber, 0, 0, 'C');
     }
 }
 
