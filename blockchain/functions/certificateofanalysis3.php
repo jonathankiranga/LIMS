@@ -135,170 +135,112 @@ class CustomPDF extends TCPDF {
         $this->drawCompanyWatermark($watermarkText);
     }
 
-    // Microtext strip (unconditional; mirrors the HTML preview)
-    $this->SetFont('montserrat', 'I', 4.5);
-    $this->SetTextColor(169, 178, 191);
-    $microPart = 'LAB WORKS EAST AFRICA • ISO/IEC 17025:2017 • CERTIFIED TESTING LABORATORY • ';
-    $micro = '';
-    while ($micro !== $microPart && $this->GetStringWidth($micro . $microPart) <= 190) {
-        $micro .= $microPart;
-    }
-    $this->SetXY(10, 2);
-    $this->Cell(0, 3, $micro, 0, 0, 'L');
-    $this->SetTextColor(0, 0, 0);
-    $this->SetDrawColor(221, 221, 221); 
-  
-	    $this->SetXY(70,5);
-	    // Set fixed height for the header and Y position
-	    $this->SetFont('montserrat', 'B', 10);
-	    $this->MultiCell(80, 5,"CERTIFICATE OF ANALYSIS (COA)", 0, 'L', 0, 1, '', '', true); // Limit characters
-	    $DefaultFont=8;
-    $this->SetY(10);
-    $this->SetFont('montserrat','B',$DefaultFont);
     
-    $this->Image($_SESSION['LogoFile'],12,12,40,10);
-    $this->Image($_SESSION['LABCODE'],88,10,17,5);
-
-    // Draw the outer border
-    $this->Rect(10, 10, 190, 50, 'D'); // Rectangle for header
-    $this->Rect(10, 60, 190, 50, 'D'); // Second rectangle
-    // Left Top Section with text containment
-    $this->SetXY(10, 25); 
-   
-    $fitFontSize = $this->fitText($record['company_name'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['company_name'], 50), 0, 'L', 0, 1, '', '', true); // Limit characters
-   
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address1'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address1'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address2'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address2'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['address3'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['address3'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['email'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['email'], 50), 0, 'L', 0, 1, '', '', true);
-    
-    $this->SetXY(10, $this->GetY());
-    $fitFontSize = $this->fitText($record['telephone'], 95,$DefaultFont);
-    $this->SetFont('montserrat', '', $fitFontSize);
-    $this->MultiCell(95, 5, $this->truncateText($record['telephone'], 50), 0, 'L', 0, 1, '', '', true);
-
-    // Right Top Section-------------------------------------------------------------------------------------------------------------
-    $sampleID = $_POST['sampleID'];
-    $qrcodelink = $QRcode->getQr($sampleID);
-
-    $stmt = $conn->prepare("
-    SELECT
-        sh.*,
-        st.*,
-        tr.SampleID AS ResultSampleID,
-        tr.TestID AS ResultTestID,
-        tr.StandardID AS ResultStandardID
-    FROM sample_header sh
-    JOIN test_results tr ON sh.HeaderID = tr.HeaderID
-    LEFT JOIN sample_tests st ON st.TestID = tr.TestID
-    WHERE tr.SampleID = ? ");
-   
-    $stmt->bind_param("s",$sampleID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $record = $result->fetch_assoc();
-    $customerCode = trim((string)($record['CustomerID'] ?? ''));
-    // Keep ERP customer values separate from the sample/report query array.
-    $customerData = $this->fetchErpCustomerDetails($customerCode);
-    
-   
-            // Shared recipient section: QR code at the top, labeled customer details below.
-    $this->Image($qrcodelink,143,9,18,18);
-
-    $customerLabelRows = [
-        ['Customer: ', $customerData['customer'] ?? ''],
-        ['Company: ', $customerData['company'] ?? ''],
-        ['Postal Code: ', $customerData['postcode'] ?? ''],
-        ['City: ', $customerData['city'] ?? ''],
-        ['Telephone: ', $customerData['phone'] ?? ''],
-        ['Email: ', $customerData['email'] ?? '']
-    ];
-
-    $this->SetXY(105, 30);
-    foreach ($customerLabelRows as $customerRow) {
-        $label = $customerRow[0];
-        $value = $this->truncateText((string)$customerRow[1], 50);
-        $this->SetFont('montserrat', '', $DefaultFont);
-        $this->MultiCell(95, 4, $label . $value, 0, 'L', 0, 1, '', '', true);
-        $this->SetXY(105, $this->GetY());
+    // Keep the existing company query, ERP customer lookup and sample fields.
+    $companyRecord = $record;
+    $DefaultFont = 7;
+    $sampleID = trim((string)($_POST['sampleID'] ?? ''));
+    $record = [];
+    $customerData = [];
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("
+            SELECT sh.*, st.*, tr.SampleID AS ResultSampleID,
+                   tr.TestID AS ResultTestID, tr.StandardID AS ResultStandardID
+            FROM sample_header sh
+            JOIN test_results tr ON sh.HeaderID = tr.HeaderID
+            LEFT JOIN sample_tests st ON st.TestID = tr.TestID
+            WHERE tr.SampleID = ?
+        ");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $record = $result ? ($result->fetch_assoc() ?: []) : [];
+            $stmt->close();
+        }
+        $customerCode = trim((string)($record['CustomerID'] ?? ''));
+        $customerData = $this->fetchErpCustomerDetails($customerCode);
     }
 
+    global $QRcode;
+    $qrcodelink = ($sampleID !== '' && isset($QRcode)) ? $QRcode->getQr($sampleID) : '';
 
-    // Draw a line under the top sections--------------------------------------------------------------------------------
-    $this->Line(10, 60, 200, 60);
-    $this->Line(105, 10, 105, 60);
-    $this->SetFont('montserrat','',$DefaultFont);
+    // Letterhead: logo at left, title centred, QR at far right; no lab contact text here.
+    if (!empty($_SESSION['LogoFile'])) $this->Image($_SESSION['LogoFile'], 10, 4, 32, 12);
+    $this->SetFont('montserrat', 'B', 10);
+    $this->SetXY(55, 7);
+    $this->Cell(100, 5, 'CERTIFICATE OF ANALYSIS (COA)', 0, 0, 'C');
+    if ($qrcodelink !== '') $this->Image($qrcodelink, 185, 4, 15, 15);
+
+    $this->SetLineStyle(['width' => 0.25, 'color' => [190, 211, 232]]);
+    $this->SetDrawColor(190, 211, 232);
+    $this->SetTextColor(35, 45, 55);
+
+    // Frame 1: Company Details.
+    $this->Rect(10, 20, 95, 28, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(12, 20.5);
+    $this->Cell(91, 3.5, 'COMPANY DETAILS', 0, 1, 'L');
+    $companyPhone = $companyRecord['telephone'] ?? ($companyRecord['telephne'] ?? '');
+    $companyRows = [$companyRecord['company_name'] ?? '', $companyRecord['address'] ?? '', $companyRecord['address1'] ?? '', $companyRecord['address2'] ?? '', $companyRecord['address3'] ?? '', $companyRecord['email'] ?? '', $companyPhone];
+    $this->SetFont('montserrat', '', 6.4);
+    $cy = 24.2;
+    foreach ($companyRows as $companyLine) {
+        if (trim((string)$companyLine) !== '') {
+            $this->SetXY(12, $cy);
+            $this->Cell(91, 3.15, $this->truncateText((string)$companyLine, 80), 0, 0, 'L');
+        }
+        $cy += 3.15;
+    }
+
+    // Frame 2: Customer Details from the existing ERP master lookup.
+    $this->Rect(105, 20, 95, 28, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(107, 20.5);
+    $this->Cell(91, 3.5, 'CUSTOMER DETAILS', 0, 1, 'L');
+    $customerRows = [['Customer: ', $customerData['customer'] ?? ''], ['Company: ', $customerData['company'] ?? ''], ['Postal Code: ', $customerData['postcode'] ?? ''], ['City: ', $customerData['city'] ?? ''], ['Telephone: ', $customerData['phone'] ?? ''], ['Email: ', $customerData['email'] ?? '']];
+    $this->SetFont('montserrat', '', 6.4);
+    $cy = 24.2;
+    foreach ($customerRows as $customerRow) {
+        $this->SetXY(107, $cy);
+        $this->Cell(91, 3.55, $this->truncateText($customerRow[0] . (string)$customerRow[1], 80), 0, 0, 'L');
+        $cy += 3.55;
+    }
 
     $testreceived = getdatesamplereceived($sampleID);
     $testended = getdatesamplecompleteed($sampleID);
     $realsampleid = getdatesampleid($sampleID);
- 
 
-    // Bottom Section
-    $this->SetXY(10, 62);
-    $this->MultiCell(95, 5,'Sample Batch No:'.$record['DocumentNo'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Received:'.formatDate($record['Date'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Date:'.formatDate($record['SamplingDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Started:'.formatDate($testreceived,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Date Test Ended:'.formatDate($testended,'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampled By:'. $record['SampledBy'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sampling Method:'. $record['SamplingMethod'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Source:'. $record['ExternalSample'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Name:'. $record['sample_name'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(10, $this->GetY());
-    $this->MultiCell(95, 5,'Sample Method:'. $record['sample_method'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    
-     $this->SetXY(105, 62);
-    $this->MultiCell(95, 5,'Sample ID:'.$realsampleid, 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/No:'.$record['BatchNo'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'B/size:'.$record['BatchSize'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Man:'.formatDate($record['ManufactureDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Date of Exp:'.formatDate($record['ExpDate'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Chilled Exp:'.formatDate($record['chilled_date_of_expiry'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Frozen Exp:'.formatDate($record['frozen_date_of_expiry'],'dd-mm-yy'), 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'SKU:'.$record['SKU'], 0, 'L', 0, 1, '', '', true); // Limit characters
-    $this->SetXY(105, $this->GetY());
-    $this->MultiCell(95, 5,'Condition:'. $record['condition_of_sample'], 0, 'L', 0, 1, '', '', true); // Limit characters
- 
-   
-	}
+    // Frame 3: first group of SAMPLE HEADER fields.
+    $this->Rect(10, 50, 95, 60, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(12, 50.5);
+    $this->Cell(91, 3.8, 'SAMPLE HEADER', 0, 1, 'L');
+    $sampleRowsLeft = [['Sample Batch No: ', $record['DocumentNo'] ?? ''], ['Sample ID: ', $realsampleid ?? ''], ['Sampling Date: ', formatDate($record['SamplingDate'] ?? null, 'dd-mm-yy')], ['Sampled By: ', $record['SampledBy'] ?? ''], ['Sampling Method: ', $record['SamplingMethod'] ?? ''], ['Sample Source: ', $record['ExternalSample'] ?? ''], ['Sample Name: ', $record['sample_name'] ?? '']];
+    $this->SetFont('montserrat', '', 7);
+    $cy = 55;
+    foreach ($sampleRowsLeft as $sampleRow) {
+        $this->SetXY(12, $cy);
+        $this->Cell(91, 7.1, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 7.1;
+    }
+
+    // Frame 4: remaining SAMPLE HEADER fields.
+    $this->Rect(105, 50, 95, 60, 'D');
+    $this->SetFont('montserrat', 'B', 7);
+    $this->SetXY(107, 50.5);
+    $this->Cell(91, 3.8, 'SAMPLE HEADER', 0, 1, 'L');
+    $sampleRowsRight = [['Date Received: ', formatDate($record['Date'] ?? null, 'dd-mm-yy')], ['Date Test Started: ', formatDate($testreceived, 'dd-mm-yy')], ['Date Test Ended: ', formatDate($testended, 'dd-mm-yy')], ['Sample Method: ', $record['sample_method'] ?? ''], ['B/No: ', $record['BatchNo'] ?? ''], ['B/size: ', $record['BatchSize'] ?? ''], ['Date of Man: ', formatDate($record['ManufactureDate'] ?? null, 'dd-mm-yy')], ['Date of Exp: ', formatDate($record['ExpDate'] ?? null, 'dd-mm-yy')], ['Chilled Exp: ', formatDate($record['chilled_date_of_expiry'] ?? null, 'dd-mm-yy')], ['Frozen Exp: ', formatDate($record['frozen_date_of_expiry'] ?? null, 'dd-mm-yy')], ['SKU: ', $record['SKU'] ?? ''], ['Condition: ', $record['condition_of_sample'] ?? '']];
+    $this->SetFont('montserrat', '', 6.4);
+    $cy = 54.5;
+    foreach ($sampleRowsRight as $sampleRow) {
+        $this->SetXY(107, $cy);
+        $this->Cell(91, 4.45, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
+        $cy += 4.45;
+    }
+    $this->SetTextColor(0, 0, 0);
+}
+
 
     
 private function fetchErpCustomerDetails($customerCode) {
