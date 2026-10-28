@@ -397,7 +397,6 @@ public function Footer() {
   if ($printedBy === null) {
       $printedBy = trim((string)($_SESSION['full_name'] ?? ''));
       if ($printedBy === '') {
-          $printedBy = 'Not available';
       }
       $printedByID = $_SESSION['UserID'] ?? '';
       if ($printedByID !== '' && isset($conn) && $conn instanceof mysqli) {
@@ -422,7 +421,9 @@ public function Footer() {
   $this->SetAutoPageBreak(true, 80);
   $this->SetXY(10, -8);
   $this->SetFont('montserrat', '', 7);
-  $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+  if ($printedBy !== '') {
+      $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+  }
   $this->SetXY(80, -8);
   $this->SetFont('montserrat', 'I', 8);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
