@@ -940,9 +940,9 @@ function buildFooterHtml($wazito){
             . '</span></td>';
     }
 
-    $kenhasImage = $footerImageTag(str_replace('\\\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']), 38, 10);
-    $ilacImage = $footerImageTag(str_replace('\\\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']), 38, 10);
-    $neemaImage = $footerImageTag(str_replace('\\\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']), 38, 10);
+    $kenhasImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']), 38, 10);
+    $ilacImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']), 38, 10);
+    $neemaImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']), 38, 10);
     $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
