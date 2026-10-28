@@ -183,8 +183,8 @@ function showRowEditor($tr, type) {
         $input = $('<input>', { type: 'text', class: 'result-value', placeholder: 'e.g. <2' });
     }
 
-    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
     $tdInput.append($input);
+    if ($tr.attr('data-has-audit') === '1') applyLimitTooltip($tr);
 }
 
 function triggerRowSave($tr, saveAction) {
