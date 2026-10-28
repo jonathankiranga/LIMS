@@ -362,12 +362,12 @@ class CustomPDF extends TCPDF {
     }
 
    public function Footer() {
-    $this->SetY(-35);
-    $iconrow = $this->GetY();
+    $iconrow = $this->getPageHeight() - 35;
+    $this->SetY($iconrow);
     $this->SetFont('montserrat', 'I', 5);
-    $this->Image($_SESSION['KenhasFile'], 15, $iconrow, 10, 10);
-    $this->Image($_SESSION['ILAC'], 100, $iconrow, 10, 10);
-    $this->Image($_SESSION['NeemaFile'], 185, $iconrow, 10, 10);
+    $this->Image($_SESSION['KenhasFile'], 15, $iconrow, 0, 10);
+    $this->Image($_SESSION['ILAC'], 100, $iconrow, 0, 10);
+    $this->Image($_SESSION['NeemaFile'], 180, $iconrow, 0, 10);
 
     $this->SetXY(10, -22);
     $this->MultiCell(105, 4, 'Lab Works East Africa Ltd is an ISO/IEC 17025:2017 Accredited Testing Laboratory (KENAS/TL/57)', 0, 'L', 0, 1, '', '', true);
