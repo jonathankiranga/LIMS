@@ -89,6 +89,19 @@ $approvalDepartmentValid = in_array($approvalDepartment, $validApprovalDepartmen
 
                 <hr>
 
+                <div class="mb-3">
+                    <label for="coaResultsInterpretation" class="form-label fw-bold">Results Interpretation</label>
+                    <textarea id="coaResultsInterpretation" class="form-control" rows="3" placeholder="Results interpretation for the COA"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="coaStatementOfConformity" class="form-label fw-bold">Statement of Conformity</label>
+                    <textarea id="coaStatementOfConformity" class="form-control" rows="2" placeholder="Statement of conformity for the COA"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="coaNotes" class="form-label fw-bold">NOTES</label>
+                    <textarea id="coaNotes" class="form-control" rows="3" placeholder="Notes displayed on the COA"></textarea>
+                </div>
+
                 <div class="row align-items-end">
                     <div class="col-md-5">
                         <label for="approvalStatus" class="form-label fw-bold">Block Decision</label>
@@ -265,6 +278,24 @@ function openApprovalModal(index) {
     document.getElementById('blockTestCount').value = (sample.tests || []).length;
     document.getElementById('approvalStatus').value = '';
 
+    document.getElementById('coaResultsInterpretation').value = '';
+    document.getElementById('coaStatementOfConformity').value = '';
+    document.getElementById('coaNotes').value = '';
+    fetch('ajax/sample_coa_text.php?HeaderID=' + encodeURIComponent(sample.HeaderID || '') +
+          '&SampleID=' + encodeURIComponent(sample.SampleID || ''))
+        .then(function(response){ return response.json(); })
+        .then(function(data) {
+            if (!data.success) {
+                toastr.error(data.message || 'Unable to load COA text.');
+                return;
+            }
+            const texts = data.texts || {};
+            document.getElementById('coaResultsInterpretation').value = texts.ResultsInterpretation || '';
+            document.getElementById('coaStatementOfConformity').value = texts.StatementOfConformity || '';
+            document.getElementById('coaNotes').value = texts.Notes || '';
+        })
+        .catch(function(error){ console.error('Unable to load sample COA text:', error); });
+
     const body = document.getElementById('sampleTestsBody');
     body.innerHTML = '';
 
@@ -313,6 +344,9 @@ function submitApproval() {
     formData.set('department', department);
     formData.set('flag', flag);
     formData.set('approvalStatus', approvalStatus);
+    formData.set('ResultsInterpretation', document.getElementById('coaResultsInterpretation').value);
+    formData.set('StatementOfConformity', document.getElementById('coaStatementOfConformity').value);
+    formData.set('Notes', document.getElementById('coaNotes').value);
 
     if (!formData.get('user_id')) {
         toastr.error('User identity was not found. Please log in again.');
