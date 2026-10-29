@@ -488,17 +488,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     // Start creating HTML content
     $html = '<div style="width: 100%; font-family: montserrat, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
     $html .= '<div style="font-family: montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
+    $hasColorGrade = false;
+    foreach ($samples as $colorCheckSample) {
+        $colorCheck = validateresults($colorCheckSample);
+        if (in_array(($colorCheck['grade'] ?? ''), ['blue', 'green', 'red'], true)) {
+            $hasColorGrade = true;
+            break;
+        }
+    }
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 38%;">Parameter</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 10%;">Units</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">Results</th>
-        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">Low</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: ' . ($hasColorGrade ? '38%' : '44%') . ';">Parameter</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: ' . ($hasColorGrade ? '12%' : '14%') . ';"><strong>Method</strong></th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: ' . ($hasColorGrade ? '10%' : '12%') . ';">Units</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: ' . ($hasColorGrade ? '12%' : '14%') . ';">Results</th>';
+    if ($hasColorGrade) {
+        $html .= '<th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">Low</th>
         <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">Opt</th>
-        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">High</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 16%;">Limits</th>
+        <th style="border: 1px solid #ddd; padding: 5px; text-align: left; width: 4%;">High</th>';
+    }
+    $html .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 16%;">Limits</th>
     </tr>
 </thead><tbody>';
      // Generate table rows dynamically
@@ -510,20 +520,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
  
       $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 38%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 10%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . 
-                ($validatedresults['grade'] == 'blue' ? 'background-color: #000000; color: white;' : '') . '">' . 
-            '</td>
-            <td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . 
-                ($validatedresults['grade'] == 'green' ? 'background-color: green; color: white;' : '') . '">' . 
-            '</td>
-            <td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . 
-                ($validatedresults['grade'] == 'red' ? 'background-color: red; color: white;' : '') . '">' . 
-            '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 16%;">' . $standard . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: ' . ($hasColorGrade ? '38%' : '44%') . ';">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: ' . ($hasColorGrade ? '12%' : '14%') . ';">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: ' . ($hasColorGrade ? '10%' : '12%') . ';">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: ' . ($hasColorGrade ? '12%' : '14%') . ';">' . $resutlts . '</td>';
+      if ($hasColorGrade) {
+          $html .= '<td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . (($validatedresults['grade'] ?? '') === 'blue' ? 'background-color: #000000; color: white;' : '') . '"></td>
+              <td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . (($validatedresults['grade'] ?? '') === 'green' ? 'background-color: green; color: white;' : '') . '"></td>
+              <td style="border: 1px solid #ddd; padding: 5px; width: 4%; ' . (($validatedresults['grade'] ?? '') === 'red' ? 'background-color: red; color: white;' : '') . '"></td>';
+      }
+      $html .= '<td style="border: 1px solid #ddd; padding: 8px; width: 16%;">' . $standard . '</td>
           </tr>';
    }
 
