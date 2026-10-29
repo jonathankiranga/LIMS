@@ -1029,7 +1029,7 @@ function buildFooterHtml($wazito, $sampleID = ''){
     foreach (($wazito['signatories'] ?? []) as $signatory) {
         $signatureImage = $footerImageTag($signatory['signature_path'] ?? '', 28, 18);
         $roleLabel = (($signatory['approval_role'] ?? '') === 'Reviewed by') ? 'Verified by' : 'Approved by';
-        $signatoryCells .= '<td style="width:' . $cellWidth . '%; text-align:center; vertical-align:middle;">'
+        $signatoryCells .= '<td style="width:' . $cellWidth . '%; text-align:left; vertical-align:middle;">'
             . '<span style="font-size:8px; font-weight:bold;">' . $roleLabel . '</span><br>'
             . $signatureImage . '<br><span style="font-size:9px; font-weight:bold;">'
             . htmlspecialchars($signatory['full_name'] ?? '', ENT_QUOTES, 'UTF-8')
