@@ -8,6 +8,10 @@ header('Content-Type: application/json');
 // Permit only basic formatting tags from the review rich-text editors.
 function sanitizeCoaRichText($html) {
     $html = (string)$html;
+    // Remove raw line-feed characters from HTML and eliminate empty lines left by repeated Enter presses.
+    $html = preg_replace('/[\\r\\n]+/', '', $html);
+    $html = preg_replace('/(?:<p>\\s*(?:(?:<br\\s*\\/?\\s*>)|&nbsp;|\\s)*<\\/p>\\s*)+/i', '', $html);
+    $html = preg_replace('/(?:<div>\\s*<br\\s*\\/?\\s*>\\s*<\\/div>\\s*)+/i', '', $html);
     $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
     $html = preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
         $tag = strtolower($m[1]);
