@@ -187,7 +187,7 @@ class CustomPDF extends TCPDF {
     // Company details shown without a heading.
     $companyPhone = $companyRecord['telephone'] ?? ($companyRecord['telephne'] ?? '');
     $companyRows = [$companyRecord['company_name'] ?? '', $companyRecord['address'] ?? '', $companyRecord['address1'] ?? '', $companyRecord['address2'] ?? '', $companyRecord['address3'] ?? '', $companyRecord['email'] ?? '', $companyPhone];
-    $this->SetFont('montserrat', 'B', 9);
+    $this->SetFont('montserrat', '', 6.4);
     $cy = 26.5;
     foreach ($companyRows as $companyLine) {
         if (trim((string)$companyLine) !== '') {
