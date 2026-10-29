@@ -100,20 +100,32 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
 
                 $name = trim((string)($r['ParameterName'] ?? ''));
                 if ($name === '') {
-                    continue;
-                }
-
-                // Do not generate an interpretation or a grade when no result exists.
-                if ($value === '') {
-                    continue;
+                    $parameterID = trim((string)($r['ParameterID'] ?? ''));
+                    $name = ($parameterID !== '') ? 'Parameter ' . $parameterID : 'Test parameter';
                 }
 
                 $hasMin = isset($r['MinLimit']) && trim((string)$r['MinLimit']) !== '';
                 $hasMax = isset($r['MaxLimit']) && trim((string)$r['MaxLimit']) !== '';
                 $hasRangeResult = isset($r['RangeResult']) && $r['RangeResult'] !== '' && $r['RangeResult'] !== null;
 
+                if ($value === '') {
+                    // Always provide useful default text when no measurement has
+                    // been entered. State the available limit accurately; never
+                    // claim the result is above/below a limit without a measurement.
+                    if ($hasMin && $hasMax) {
+                        $parts[] = 'The specified limits for ' . $name . ' are minimum ' . $r['MinLimit'] . ' and maximum ' . $r['MaxLimit'] . '.';
+                    } elseif ($hasMin) {
+                        $parts[] = 'The minimum specified level for ' . $name . ' is ' . $r['MinLimit'] . '.';
+                    } elseif ($hasMax) {
+                        $parts[] = 'The maximum specified level for ' . $name . ' is ' . $r['MaxLimit'] . '.';
+                    } else {
+                        $parts[] = 'The result for ' . $name . ' has not been recorded.';
+                    }
+                    continue;
+                }
+
                 if ($hasRangeResult && $hasMin && !$hasMax) {
-                    $interpretation = ($grade === 'blue')
+                    $interpretation = ((float)$r['RangeResult'] < (float)$r['MinLimit'])
                         ? 'below the minimum specified level'
                         : 'above the minimum specified level';
                 } else {
