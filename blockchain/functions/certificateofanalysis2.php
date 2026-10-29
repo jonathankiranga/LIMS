@@ -573,7 +573,9 @@ $SamplePicture = TSamplePicture($sampleID);
 $reportFooterHtml = '';
     $html .= buildFooterHtml(getsignature($sampleID), $sampleID);
 
-    // Write the HTML content to the PDF
+    // Print the complete COA content before starting the dedicated picture page.
+    $pdf->writeHTML($html, true, false, true, false, '');
+
     // The picture page contains only the standard header, Frames 1 and 2, and the image.
     $pdf->picturePage = true;
     $pdf->AddPage();
