@@ -451,7 +451,21 @@ public function Footer() {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $sampleID = $_REQUEST['sampleID'];
 
-    $SampletypeNotes = TSDescription($sampleID);
+    $savedCoaText = null;
+    $savedCoaStmt = $conn->prepare("SELECT sct.ResultsInterpretation, sct.StatementOfConformity, sct.Notes
+        FROM sample_coa_text sct
+        WHERE sct.SampleID = ?
+        ORDER BY sct.UpdatedAt DESC LIMIT 1");
+    if ($savedCoaStmt) {
+        $savedCoaStmt->bind_param("s", $sampleID);
+        if ($savedCoaStmt->execute()) {
+            $savedCoaText = $savedCoaStmt->get_result()->fetch_assoc() ?: null;
+        }
+        $savedCoaStmt->close();
+    }
+    $SampletypeNotes = ($savedCoaText !== null)
+        ? (string)($savedCoaText['Notes'] ?? '')
+        : TSDescription($sampleID);
     $samples = [];
  
     $stmt = $conn->prepare("SELECT tr.*,tp.*,ts.* FROM test_results tr 
@@ -519,30 +533,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '</tbody></table>'; // Close the table
     $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
-    $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>'; // Add footer
-    
-    $lines = explode("\n", $SampletypeNotes);
-    foreach ($lines as $line) {
-      $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">'.$line.'</div>'; // Add footer
+    $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
+    $notesText = (string)$SampletypeNotes;
+    foreach (explode("\n", $notesText) as $line) {
+        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
     }
-    
-   $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>'; // Add footer
-   $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color:grey;">' ; 
- 
-    foreach ($samples as $sample) {
-        $validatedresults = validateresults($sample);
-        $html .=' Test Results for '. accreditationParameterName($sample) .' are <u>'.
-       ($validatedresults['grade'] == '' ? $validatedresults['results'] : '')  . 
-       ($validatedresults['grade'] == 'blue' ? 'Below the minimum specified level' : '')  . 
-       ($validatedresults['grade'] == 'green' ? 'Optimum' : '')  . 
-       ($validatedresults['grade'] == 'red' ? ' above the maximum specified level' : '')  .' </u> ' ;
-        
-   }
-$html .=   '</div>';
+
+    $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>';
+    $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">';
+    if ($savedCoaText !== null) {
+        $html .= nl2br(htmlspecialchars((string)($savedCoaText['ResultsInterpretation'] ?? ''), ENT_QUOTES, 'UTF-8'));
+    } else {
+        foreach ($samples as $sample) {
+            $validatedresults = validateresults($sample);
+            $parameterName = isset($sample['ParameterName']) ? $sample['ParameterName'] : accreditationParameterName($sample);
+            $interpretation = ($validatedresults['grade'] == '' ? $validatedresults['results'] : '')
+                . ($validatedresults['grade'] == 'blue' ? 'Below the minimum specified level' : '')
+                . ($validatedresults['grade'] == 'green' ? 'Optimum' : '')
+                . ($validatedresults['grade'] == 'red' ? ' above the maximum specified level' : '');
+            $html .= ' Test Results for ' . htmlspecialchars((string)$parameterName, ENT_QUOTES, 'UTF-8') . ' are <u>'
+                . htmlspecialchars((string)$interpretation, ENT_QUOTES, 'UTF-8') . '</u> ';
+        }
+    }
+    $html .= '</div>';
 
 $SamplePicture = TSamplePicture($sampleID);
 
-$reportFooterHtml = buildFooterHtml(getsignature($sampleID));
+$reportFooterHtml = buildFooterHtml(getsignature($sampleID), $sampleID);
 
     // Write the HTML content to the PDF
     $pdf->writeHTML($html, true, false, true, false, '');
@@ -949,16 +966,26 @@ function TSDescription($sampleid){
   return $record['Description'] ?? '';
 }
 
-function statementofconformity(){
-  global $conn;
-  
-  $sql ="SELECT `confvalue` FROM config  where `confname`='Conformity'";
-  $result = $conn->query($sql);
-   $record = $result->fetch_assoc();
-    
-   return  $record['confvalue'];
+function statementofconformity($sampleID = '') {
+    global $conn;
+    $sampleID = trim((string)$sampleID);
+    if ($sampleID !== '') {
+        $stmt = $conn->prepare("SELECT ResultsInterpretation, StatementOfConformity, Notes FROM sample_coa_text WHERE SampleID = ? ORDER BY UpdatedAt DESC LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param("s", $sampleID);
+            if ($stmt->execute()) {
+                $saved = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                if ($saved !== null) return (string)($saved['StatementOfConformity'] ?? '');
+            } else {
+                $stmt->close();
+            }
+        }
+    }
+    $result = $conn->query("SELECT confvalue FROM config WHERE confname='Conformity' LIMIT 1");
+    $record = $result ? $result->fetch_assoc() : null;
+    return (string)($record['confvalue'] ?? '');
 }
-
 function getsignature($sampleID){
     global $conn;
     $sampleID = trim((string)$sampleID);
@@ -1008,7 +1035,7 @@ function getsignature($sampleID){
     return ['signatories'=>$signatories];
 }
 
-function buildFooterHtml($wazito){
+function buildFooterHtml($wazito, $sampleID = ''){
     $kenhasLogo = str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']);
     $ilacLogo = str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']);
     $neemaLogo = str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']);
@@ -1046,7 +1073,7 @@ function buildFooterHtml($wazito){
     $kenhasImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']), 38, 10);
     $ilacImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']), 38, 10);
     $neemaImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']), 38, 10);
-    $statement = nl2br(htmlspecialchars((string)statementofconformity(), ENT_QUOTES, 'UTF-8'));
+    $statement = nl2br(htmlspecialchars((string)statementofconformity($sampleID), ENT_QUOTES, 'UTF-8'));
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
