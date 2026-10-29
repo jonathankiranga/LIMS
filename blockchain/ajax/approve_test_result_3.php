@@ -5,6 +5,20 @@ require_once '../functions/functions.php';
 
 header('Content-Type: application/json');
 
+// Permit only basic formatting tags from the review rich-text editors.
+function sanitizeCoaRichText($html) {
+    $html = (string)$html;
+    $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
+    $html = preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
+        $tag = strtolower($m[1]);
+        $allowed = ['sup','sub','b','strong','i','em','u','br','p','div','ul','ol','li'];
+        if (!in_array($tag, $allowed, true)) return '';
+        return (substr($m[0], 1, 1) === '/') ? '</' . $tag . '>' : '<' . $tag . '>';
+    }, $html);
+    return $html;
+}
+
+
 function getOrCreateSystemPrivateKey() {
     // One server-generated key pair shared by blockchain approval transactions.
     // Keep this directory outside the ajax folder and deny direct HTTP access.
@@ -116,6 +130,26 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         if ($updated !== count($resultIDs)) {
             throw new Exception('Sample review changed during approval. Expected ' . count($resultIDs) . ' result row(s), updated ' . $updated . '. No partial review block was committed.');
         }
+        // Save the rich-text COA wording with this exact sample block.
+        if ($approvalStatus === 1) {
+            $interpretation = sanitizeCoaRichText($_POST['ResultsInterpretation'] ?? '');
+            $conformity = sanitizeCoaRichText($_POST['StatementOfConformity'] ?? '');
+            $notes = sanitizeCoaRichText($_POST['Notes'] ?? '');
+            $stmt = $conn->prepare("INSERT INTO sample_coa_text
+                (HeaderID, SampleID, ResultsInterpretation, StatementOfConformity, Notes, UpdatedBy)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    ResultsInterpretation = VALUES(ResultsInterpretation),
+                    StatementOfConformity = VALUES(StatementOfConformity),
+                    Notes = VALUES(Notes),
+                    UpdatedBy = VALUES(UpdatedBy),
+                    UpdatedAt = CURRENT_TIMESTAMP");
+            if (!$stmt) throw new Exception('Failed to prepare COA text save: ' . $conn->error);
+            $stmt->bind_param('isssss', $headerID, $sampleID, $interpretation, $conformity, $notes, $userID);
+            if (!$stmt->execute()) throw new Exception('Failed to save COA text: ' . $stmt->error);
+            $stmt->close();
+        }
+
         // Blockchain audit is best-effort and must never block approval.
         $blockchainSavepoint = false;
         try {
