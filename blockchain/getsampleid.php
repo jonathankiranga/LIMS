@@ -615,8 +615,10 @@ $pdf->Output($filePath,'F'); // Output the PDF to the specified file path
 function sanitizeCoaRichText($html) {
     $html = (string)$html;
     $html = str_replace(array("\r\n", "\r"), "\n", $html);
-    $html = preg_replace('/(?:<br\s*\/?\s*>\s*){3,}/i', '<br><br>', $html);
-    $html = preg_replace('/(?:<p>\s*(?:<br\s*\/?\s*>)?\s*<\/p>\s*){2,}/i', '<p><br></p>', $html);
+    // Collapse runs of excess line breaks to a single break without removing rich-text formatting.
+    $html = preg_replace('/(?:<br\s*\/?\s*>\s*){2,}/i', '<br>', $html);
+    // Remove empty paragraphs inserted by repeated Enter presses.
+    $html = preg_replace('/(?:<p>\s*(?:<br\s*\/?\s*>)?\s*<\/p>\s*)+/i', '', $html);
     $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
     return preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
         $tag = strtolower($m[1]);
