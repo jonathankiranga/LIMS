@@ -53,7 +53,11 @@ $stmt->close();
 if (!$settings) {
     coaNotesJsonError(503, 'No AI API key is configured. Ask an administrator to open Admin → AI API Settings.');
 }
-$configKey = hash('sha256', (string) $secretKey, true);
+$encryptionSecret = getenv('AI_API_ENCRYPTION_KEY');
+if ($encryptionSecret === false || strlen($encryptionSecret) < 32) {
+    coaNotesJsonError(503, 'Server AI encryption is not configured. Ask the server administrator to set AI_API_ENCRYPTION_KEY.');
+}
+$configKey = hash('sha256', (string) $encryptionSecret, true);
 $ciphertext = base64_decode($settings['encrypted_value'], true);
 $nonce = base64_decode($settings['nonce'], true);
 $tag = base64_decode($settings['auth_tag'], true);
