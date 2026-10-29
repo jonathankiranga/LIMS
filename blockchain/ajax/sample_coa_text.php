@@ -9,16 +9,16 @@ if ($sampleID === '' || $headerID <= 0) {
     exit;
 }
 
-function coaTextDefaults($conn, $sampleID) {
+function coaTextDefaults($conn, $sampleID, $headerID) {
     $defaults = ['ResultsInterpretation' => '', 'StatementOfConformity' => '', 'Notes' => ''];
 
     $stmt = $conn->prepare("SELECT ts.Description
         FROM test_results tr
         JOIN teststandards ts ON ts.StandardID = tr.StandardID
-        WHERE tr.SampleID = ?
+        WHERE tr.SampleID = ? AND tr.HeaderID = ?
         ORDER BY tr.resultsID DESC LIMIT 1");
     if ($stmt) {
-        $stmt->bind_param('s', $sampleID);
+        $stmt->bind_param('si', $sampleID, $headerID);
         if ($stmt->execute()) {
             $row = $stmt->get_result()->fetch_assoc();
             $defaults['Notes'] = (string)($row['Description'] ?? '');
@@ -36,10 +36,10 @@ function coaTextDefaults($conn, $sampleID) {
         FROM test_results tr
         LEFT JOIN testparameters tp
           ON tp.ParameterID = tr.ParameterID AND tp.StandardID = tr.StandardID
-        WHERE tr.SampleID = ? AND tr.StatusID IN (2,3,4)
+        WHERE tr.SampleID = ? AND tr.HeaderID = ? AND tr.StatusID IN (2,3,4)
         ORDER BY tr.resultsID");
     if ($stmt) {
-        $stmt->bind_param('s', $sampleID);
+        $stmt->bind_param('si', $sampleID, $headerID);
         if ($stmt->execute()) {
             $rs = $stmt->get_result();
             $parts = [];
@@ -79,7 +79,7 @@ function coaTextDefaults($conn, $sampleID) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_POST['saveText'])) {
-    $defaults = coaTextDefaults($conn, $sampleID);
+    $defaults = coaTextDefaults($conn, $sampleID, $headerID);
     $stmt = $conn->prepare("SELECT ResultsInterpretation, StatementOfConformity, Notes
         FROM sample_coa_text WHERE HeaderID = ? AND SampleID = ? LIMIT 1");
     if (!$stmt) {
