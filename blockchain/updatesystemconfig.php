@@ -70,8 +70,8 @@
 
         function valueAsEditorHtml(value) {
             var text = String(value == null ? '' : value);
-            if (/<\\/?[a-z][^>]*>/i.test(text)) return text;
-            return escapeHtml(text).replace(/\\r\\n|\\r|\\n/g, '<br>');
+            if (/<\/?[a-z][^>]*>/i.test(text)) return text;
+            return escapeHtml(text).replace(/\r\n|\r|\n/g, '<br>');
         }
 
         function initializeConfigQuill() {
@@ -128,7 +128,7 @@
                         $('#current-file').show().text('Current file: ' + (configData.confvalue || 'Not set'));
                         input = $('<input>', { type:'file', class:'form-control-sm', id:'config-value', name:'configValue', accept:'*/*' });
                         input.on('change', function() {
-                            var fileName = String($(this).val() || '').split('\\\\').pop();
+                            var fileName = String($(this).val() || '').split('\\').pop();
                             $('#result-message').text(fileName ? 'Selected file: ' + fileName : '');
                         });
                     } else {
