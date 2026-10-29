@@ -508,14 +508,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
     $notesText = (string)$SampletypeNotes;
-    foreach (explode("\n", $notesText) as $line) {
-        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+    if ($savedCoaText !== null && trim((string)($savedCoaText['Notes'] ?? '')) !== '') {
+        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: blue;">' . sanitizeCoaRichText($notesText) . '</div>';
+    } else {
+        foreach (explode("\n", $notesText) as $line) {
+            $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+        }
     }
 
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>';
     $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">';
     if ($savedCoaText !== null) {
-        $html .= nl2br(htmlspecialchars((string)($savedCoaText['ResultsInterpretation'] ?? ''), ENT_QUOTES, 'UTF-8'));
+        $html .= sanitizeCoaRichText((string)($savedCoaText['ResultsInterpretation'] ?? ''));
     } else {
         foreach ($samples as $sample) {
             $validatedresults = validateresults($sample);
@@ -914,6 +918,17 @@ function TSDescription($sampleid){
   return $record['Description'] ?? '';
 }
 
+function sanitizeCoaRichText($html) {
+    $html = (string)$html;
+    $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
+    return preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
+        $tag = strtolower($m[1]);
+        $allowed = ['sup','sub','b','strong','i','em','u','br','p','div','ul','ol','li'];
+        if (!in_array($tag, $allowed, true)) return '';
+        return (substr($m[0], 1, 1) === '/') ? '</' . $tag . '>' : '<' . $tag . '>';
+    }, $html);
+}
+
 function statementofconformity($sampleID = '') {
     global $conn;
     $sampleID = trim((string)$sampleID);
@@ -1024,7 +1039,7 @@ function buildFooterHtml($wazito, $sampleID = ''){
     $kenhasImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['KenhasFile']) ?: $_SESSION['KenhasFile']), 38, 10);
     $ilacImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['ILAC']) ?: $_SESSION['ILAC']), 38, 10);
     $neemaImage = $footerImageTag(str_replace('\\', '/', realpath($_SESSION['NeemaFile']) ?: $_SESSION['NeemaFile']), 38, 10);
-    $statement = nl2br(htmlspecialchars((string)statementofconformity($sampleID), ENT_QUOTES, 'UTF-8'));
+    $statement = sanitizeCoaRichText((string)statementofconformity($sampleID));
 
     $html = '<div style="font-family:helvetica,sans-serif; color:#111; font-size:7px;">
       <table style="width:100%; border-collapse:collapse;" cellpadding="2" cellspacing="0">
