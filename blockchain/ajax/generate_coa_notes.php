@@ -1,9 +1,11 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
     session_start();
 }
-if (!isset($_SESSION['role_id']) || (int) $_SESSION['role_id'] !== 1) {
+$isAdministrator = (isset($_SESSION['UserID']) && (int) $_SESSION['UserID'] === 1) || (isset($_SESSION['role']) && strtolower((string) $_SESSION['role']) === 'admin');
+if (!$isAdministrator) {
     http_response_code(403);
     echo json_encode(array('success' => false, 'message' => 'Administrator access is required to generate AI COA notes.'));
     exit;
