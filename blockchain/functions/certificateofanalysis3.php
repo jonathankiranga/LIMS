@@ -392,11 +392,6 @@ $textWidth = $this->GetStringWidth($watermarkText);
     // Custom footer
     
 public function Footer() {
-   // If first-page content enters the reserved footer zone, omit the footer on that page.
-   if ($this->getPage() === 1 && $this->GetY() > ($this->getPageHeight() - 80)) {
-       $this->SetAutoPageBreak(true, 80);
-       return;
-   }
 
   global $reportFooterHtml, $conn;
   static $printedBy = null;
@@ -472,7 +467,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     // Initialize custom PDF
     $pdf = new CustomPDF('P', 'mm', 'A4', true, 'UTF-8', false);
     $pdf->SetCreator(PDF_CREATOR);
-    $pdf->SetAutoPageBreak(true, 10); // First page may use the footer area if the footer is suppressed
+    $pdf->SetAutoPageBreak(true, 80); // Preserve the existing footer and reserve its space
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
     $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
@@ -515,10 +510,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
     $notesText = (string)$SampletypeNotes;
     if ($savedCoaText !== null && trim((string)($savedCoaText['Notes'] ?? '')) !== '') {
-        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: blue;">' . sanitizeCoaRichText($notesText) . '</div>';
+        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: #000000;">' . sanitizeCoaRichText($notesText) . '</div>';
     } else {
         foreach (explode("\n", $notesText) as $line) {
-            $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+            $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: #000000;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
         }
     }
 
