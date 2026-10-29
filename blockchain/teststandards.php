@@ -173,7 +173,8 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                         <input type="text" class="form-control" id="name" name="name" placeholder="Enter standard name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label"><i class="fas fa-info-circle"></i> Report Note</label>
+                        <label for="description" class="form-label"><i class="fas fa-file-alt"></i> Certificate Of Analysis NOTES</label>
+                        <small class="form-text text-muted d-block mb-2">Enter the standard-specific notes or description that should appear in the Certificate of Analysis (COA) for samples using this standard method.</small>
                         <div class="quill-editor" id="description" name="description"></div>
                     </div>
                     <div class="mb-3">
@@ -212,7 +213,8 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                         <input type="text" class="form-control" id="Clonename" name="name" placeholder="Enter standard name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="Clonedescription" class="form-label"><i class="fas fa-info-circle"></i> Report Note</label>
+                        <label for="Clonedescription" class="form-label"><i class="fas fa-file-alt"></i> Certificate Of Analysis NOTES</label>
+                        <small class="form-text text-muted d-block mb-2">Enter the standard-specific notes or description that should appear in the Certificate of Analysis (COA) for samples using this standard method.</small>
                         <div class="quill-editor" id="Clonedescription" name="description"></div>
                     </div>
                     <div class="mb-3">
