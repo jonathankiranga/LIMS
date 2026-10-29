@@ -3,6 +3,16 @@ require '../db_connection.php';
 require_once '../functions/functions.php';
 header('Content-Type: application/json; charset=utf-8');
 
+// The editors receive HTML. Convert legacy/plain text to safe HTML while
+// retaining every newline; already-formatted rich text is left unchanged.
+function coaTextForEditor($value) {
+    $value = (string)$value;
+    if (strpos($value, '<') !== false && preg_match('~</?[a-z][^>]*>~i', $value)) {
+        return $value;
+    }
+    return nl2br(htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), false);
+}
+
 $sampleID = trim((string)($_REQUEST['SampleID'] ?? $_REQUEST['sampleID'] ?? ''));
 $headerID = (int)($_REQUEST['HeaderID'] ?? 0);
 if ($sampleID === '' || $headerID <= 0) {
@@ -48,17 +58,17 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
                 $name = trim((string)($r['ParameterName'] ?? 'Test'));
                 $grade = '';
                 $value = '';
-                if (!empty($r['MRL_Result'])) {
+                if (isset($r['MRL_Result']) && (string)$r['MRL_Result'] !== '') {
                     $value = function_exists('formatResultNumber')
                         ? formatResultNumber($r, $r['MRL_Result']) . ' ' . (string)($r['MRLUnit'] ?? '')
                         : (string)$r['MRL_Result'] . ' ' . (string)($r['MRLUnit'] ?? '');
                     $grade = ((float)($r['MRL'] ?? 0) > (float)$r['MRL_Result']) ? 'green' : 'red';
                 }
-                if (!empty($r['ResultStatus'])) {
+                if (isset($r['ResultStatus']) && trim((string)$r['ResultStatus']) !== '') {
                     $value = (string)$r['ResultStatus'];
                     $grade = '';
                 }
-                if (!empty($r['RangeResult'])) {
+                if (isset($r['RangeResult']) && (string)$r['RangeResult'] !== '') {
                     $value = function_exists('formatResultNumber')
                         ? formatResultNumber($r, $r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '')
                         : (string)$r['RangeResult'] . ' ' . (string)($r['UnitOfMeasure'] ?? '');
@@ -98,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_POST['saveText'])) {
     $texts = [];
     foreach (['ResultsInterpretation', 'StatementOfConformity', 'Notes'] as $field) {
         $savedValue = $saved !== null ? trim((string)($saved[$field] ?? '')) : '';
-        $texts[$field] = $savedValue !== '' ? (string)$saved[$field] : (string)$defaults[$field];
+        $texts[$field] = coaTextForEditor($savedValue !== '' ? (string)$saved[$field] : (string)$defaults[$field]);
     }
     echo json_encode(['success' => true, 'texts' => $texts]);
     exit;
