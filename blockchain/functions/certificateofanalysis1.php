@@ -407,6 +407,12 @@ function fitText($text, $width, $maxFontSize, $minFontSize = 8) {
 }
  
 public function Footer() {
+   // If first-page content enters the reserved footer zone, omit the footer on that page.
+   if ($this->getPage() === 1 && $this->GetY() > ($this->getPageHeight() - 80)) {
+       $this->SetAutoPageBreak(true, 80);
+       return;
+   }
+
   global $reportFooterHtml, $conn;
   static $printedBy = null;
   if ($printedBy === null) {
@@ -485,7 +491,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
     $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
-    $pdf->SetAutoPageBreak(true, 80); // Reserve 80 mm for the existing report footer
+    $pdf->SetAutoPageBreak(true, 10); // First page may use the footer area if the footer is suppressed
     $pdf->AddPage();
     $initialPage = $pdf->getPage();
   
@@ -949,6 +955,9 @@ function TSDescription($sampleid){
 
 function sanitizeCoaRichText($html) {
     $html = (string)$html;
+    $html = str_replace(array("\r\n", "\r"), "\n", $html);
+    $html = preg_replace('/(?:<br\s*\/?\s*>\s*){3,}/i', '<br><br>', $html);
+    $html = preg_replace('/(?:<p>\s*(?:<br\s*\/?\s*>)?\s*<\/p>\s*){2,}/i', '<p><br></p>', $html);
     $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
     return preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
         $tag = strtolower($m[1]);
