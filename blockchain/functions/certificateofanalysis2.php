@@ -51,7 +51,8 @@ $GLOBALS['includeCompanyWatermark'] = isset($_POST['include_watermark']) && $_PO
 $includeCompanyWatermark =& $GLOBALS['includeCompanyWatermark'];
 
 class CustomPDF extends TCPDF {
-    
+    public $picturePage = false;
+
 public function Header() {
     // Decorative multi-line wave border matching the report reference.
     $borderLeft = 2;
@@ -235,6 +236,7 @@ public function Header() {
         }
     }
 
+    if (!$this->picturePage) {
     // Build both sample metadata groups first, then size both frames to the visible rows.
     $testreceived = getdatesamplereceived($sampleID);
     $testended = getdatesamplecompleteed($sampleID);
@@ -286,6 +288,7 @@ public function Header() {
         $this->SetXY(107, $cy);
         $this->Cell(91, 3.0, $this->truncateText($sampleRow[0] . (string)$sampleRow[1], 85), 0, 0, 'L');
         $cy += 3.0;
+    }
     }
     $this->SetTextColor(0, 0, 0);
 }
@@ -565,31 +568,32 @@ $reportFooterHtml = '';
     $html .= buildFooterHtml(getsignature($sampleID), $sampleID);
 
     // Write the HTML content to the PDF
-    $pdf->writeHTML($html, true, false, true, false, '');
-$pdf->AddPage();
-   
-//$html = '<div style="text-align: center; margin-top: 20px;"><h1>Sample Picture</h1></div>'; // Add footer
-//$html = str_replace('X2', '-', $html);
-    $pdf->writeHTML($html, true, false, true, false, '');
-$pdf->SetXY(70,120);
-$pdf->SetFont('montserrat', '',20);
-$pdf->MultiCell(95,14,'Sample Picture', 0, 'C', 0, 1, '', '', true); // Limit characters
+    // The picture page contains only the standard header, Frames 1 and 2, and the image.
+    $pdf->picturePage = true;
+    $pdf->AddPage();
 
-// Get the page width and height
-$pageWidth = $pdf->GetPageWidth();
-$pageHeight = $pdf->GetPageHeight();
-// Get the current Y position
-$currentY = $pdf->GetY();
-// Define the margin and calculate the remaining space
-$marginLeft = 20;  $headerHeight = 140;
-// Adjust the available height by subtracting the header area
-$availableHeight = $pageHeight - $headerHeight - 15; // 20 is the botto// Calculate the available width
-// Get the image dimensions (to maintain aspect ratio)
-list($imgWidth, $imgHeight) = getimagesize($SamplePicture);
+    $pageWidth = $pdf->GetPageWidth();
+    $pageHeight = $pdf->GetPageHeight();
+    $marginLeft = 20;
+    $marginRight = 20;
+    $imageTop = 52;
+    $bottomMargin = 18;
+    $maxImageWidth = $pageWidth - $marginLeft - $marginRight;
+    $maxImageHeight = $pageHeight - $imageTop - $bottomMargin;
 
-$adw = $imgWidth*($availableHeight/$imgHeight);
-// Position and size the image
-$pdf->Image($SamplePicture, $marginLeft, $currentY,$adw,$availableHeight);
+    if ($SamplePicture !== '' && is_file($SamplePicture) && is_readable($SamplePicture)) {
+        $imageDimensions = @getimagesize($SamplePicture);
+        if ($imageDimensions && !empty($imageDimensions[0]) && !empty($imageDimensions[1])) {
+            $imgWidth = $imageDimensions[0];
+            $imgHeight = $imageDimensions[1];
+            $scale = min($maxImageWidth / $imgWidth, $maxImageHeight / $imgHeight);
+            $displayWidth = $imgWidth * $scale;
+            $displayHeight = $imgHeight * $scale;
+            $imageX = ($pageWidth - $displayWidth) / 2;
+            $imageY = $imageTop + (($maxImageHeight - $displayHeight) / 2);
+            $pdf->Image($SamplePicture, $imageX, $imageY, $displayWidth, $displayHeight);
+        }
+    }
 // Output the PDF as a string for AJAX
 $pdfContent = $pdf->Output('lims_report.pdf', 'S');
 header('Content-Type: application/pdf');
