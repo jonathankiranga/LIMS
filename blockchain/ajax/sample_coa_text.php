@@ -55,31 +55,42 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
             $rs = $stmt->get_result();
             $parts = [];
             while ($r = $rs->fetch_assoc()) {
-                $name = trim((string)($r['ParameterName'] ?? 'Test'));
+                // Keep this interpretation logic aligned with validateresults()
+                // in the COA PHP reports.
                 $grade = '';
                 $value = '';
-                if (isset($r['MRL_Result']) && (string)$r['MRL_Result'] !== '') {
-                    $value = function_exists('formatResultNumber')
-                        ? formatResultNumber($r, $r['MRL_Result']) . ' ' . (string)($r['MRLUnit'] ?? '')
-                        : (string)$r['MRL_Result'] . ' ' . (string)($r['MRLUnit'] ?? '');
+
+                if (!empty($r['MRL_Result'])) {
+                    $value = (function_exists('formatResultNumber')
+                        ? formatResultNumber($r, $r['MRL_Result'])
+                        : (string)$r['MRL_Result']) . ' ' . (string)($r['MRLUnit'] ?? '');
                     $grade = ((float)($r['MRL'] ?? 0) > (float)$r['MRL_Result']) ? 'green' : 'red';
                 }
-                if (isset($r['ResultStatus']) && trim((string)$r['ResultStatus']) !== '') {
+
+                if (!empty($r['ResultStatus'])) {
                     $value = (string)$r['ResultStatus'];
                     $grade = '';
                 }
-                if (isset($r['RangeResult']) && (string)$r['RangeResult'] !== '') {
-                    $value = function_exists('formatResultNumber')
-                        ? formatResultNumber($r, $r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '')
-                        : (string)$r['RangeResult'] . ' ' . (string)($r['UnitOfMeasure'] ?? '');
+
+                if (!empty($r['RangeResult'])) {
+                    $value = (function_exists('formatResultNumber')
+                        ? formatResultNumber($r, $r['RangeResult'])
+                        : (string)$r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '');
                     $grade = 'green';
-                    if ($r['MinLimit'] !== null && (float)$r['MinLimit'] > (float)$r['RangeResult']) $grade = 'blue';
-                    if ($r['MaxLimit'] !== null && (float)$r['RangeResult'] > (float)$r['MaxLimit']) $grade = 'red';
+                    if (($r['MinLimit'] ?? null) !== null && (float)$r['MinLimit'] > (float)$r['RangeResult']) {
+                        $grade = 'blue';
+                    }
+                    if (($r['MaxLimit'] ?? null) !== null && (float)$r['RangeResult'] > (float)$r['MaxLimit']) {
+                        $grade = 'red';
+                    }
                 }
+
                 $interpretation = ($grade === '') ? $value
                     : (($grade === 'blue') ? 'Below the minimum specified level'
                     : (($grade === 'green') ? 'Optimum'
                     : (($grade === 'red') ? ' above the maximum specified level' : $value)));
+
+                $name = trim((string)($r['ParameterName'] ?? ''));
                 if ($name !== '' && $interpretation !== '') {
                     $parts[] = 'Test Results for ' . $name . ' are ' . $interpretation . '.';
                 }
