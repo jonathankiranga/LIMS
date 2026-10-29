@@ -578,7 +578,7 @@ foreach ($signatories as $index => $signatory) {
     $signatureY = $wazitorow + 4;
     $signaturePath = $signatory['signature_path'] ?? '';
     if ($signaturePath !== '' && is_file($signaturePath) && is_readable($signaturePath)) {
-        $pdf->Image($signaturePath, $x + 2, $signatureY, 12, 9);
+        $pdf->Image($signaturePath, $x, $signatureY, 12, 9);
     }
     $pdf->SetFont('montserrat', 'B', 8);
     $pdf->SetXY($x, $signatureY + 9);
