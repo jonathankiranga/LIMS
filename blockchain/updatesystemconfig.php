@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Configuration</title>
     <link href="js/quilljs/1.3.7/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
      <script src="js/quilljs/1.3.7/quill.min.js"></script>
     <style>
         .config-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:10px; margin:12px 0 20px; }
@@ -151,7 +153,7 @@
                     configs.forEach(function(config) {
                         var name = String(config.confname || '');
                         var tile = $('<button type="button" class="config-tile" aria-pressed="false"></button>');
-                        $('<i class="fa ' + iconForConfig(name) + ' config-icon" aria-hidden="true"></i>').appendTo(tile);
+                        $('<i class="fa-solid ' + iconForConfig(name) + ' config-icon" aria-hidden="true"></i>').appendTo(tile);
                         $('<span class="config-label"></span>').text(name).appendTo(tile);
                         tile.on('click', function() { selectConfiguration(name, this); });
                         grid.append(tile);
