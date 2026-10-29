@@ -40,11 +40,13 @@ function validateresults($row) {
             ? formatResultNumber($row, $row['RangeResult'])
             : (string)$row['RangeResult']) . ' ' . (string)($row['UnitOfMeasure'] ?? '');
         $results['standard'] = (string)($row['MinLimit'] ?? '') . ' - ' . (string)($row['MaxLimit'] ?? '');
+        $hasMin = isset($row['MinLimit']) && trim((string)$row['MinLimit']) !== '';
+        $hasMax = isset($row['MaxLimit']) && trim((string)$row['MaxLimit']) !== '';
         $results['grade'] = 'green';
-        if ($row['MinLimit'] > $row['RangeResult']) {
+
+        if ($hasMin && (float)$row['RangeResult'] < (float)$row['MinLimit']) {
             $results['grade'] = 'blue';
-        }
-        if ($row['RangeResult'] > $row['MaxLimit']) {
+        } elseif ($hasMax && (float)$row['RangeResult'] > (float)$row['MaxLimit']) {
             $results['grade'] = 'red';
         }
     }
@@ -96,38 +98,34 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
                 $grade = $validated['grade'];
                 $value = $validated['results'];
 
-                $interpretation = ($grade === '') ? $value
-                    : (($grade === 'blue') ? 'Below the minimum specified level'
-                    : (($grade === 'green') ? 'Optimum'
-                    : (($grade === 'red') ? ' above the maximum specified level' : $value)));
-
                 $name = trim((string)($r['ParameterName'] ?? ''));
                 if ($name === '') {
                     continue;
                 }
 
-                if ($interpretation !== '') {
-                    $parts[] = 'Test Results for ' . $name . ' are ' . $interpretation . '.';
+                // Do not generate an interpretation or a grade when no result exists.
+                if ($value === '') {
                     continue;
                 }
 
-                // If no measured result has been entered yet, show the available
-                // specification limits instead of leaving the interpretation blank.
-                // Do not invent a missing minimum/maximum or grade an unrecorded result.
-                $minLimit = $r['MinLimit'] ?? null;
-                $maxLimit = $r['MaxLimit'] ?? null;
-                $hasMin = $minLimit !== null && trim((string)$minLimit) !== '';
-                $hasMax = $maxLimit !== null && trim((string)$maxLimit) !== '';
+                $hasMin = isset($r['MinLimit']) && trim((string)$r['MinLimit']) !== '';
+                $hasMax = isset($r['MaxLimit']) && trim((string)$r['MaxLimit']) !== '';
+                $hasRangeResult = isset($r['RangeResult']) && $r['RangeResult'] !== '' && $r['RangeResult'] !== null;
 
-                if ($hasMin || $hasMax) {
-                    if ($hasMin && $hasMax) {
-                        $limitText = 'minimum ' . $minLimit . ' and maximum ' . $maxLimit;
-                    } elseif ($hasMin) {
-                        $limitText = 'minimum ' . $minLimit . '; maximum not specified';
-                    } else {
-                        $limitText = 'maximum ' . $maxLimit . '; minimum not specified';
-                    }
-                    $parts[] = 'Specification limits for ' . $name . ': ' . $limitText . '. No result has been recorded.';
+                if ($hasRangeResult && $hasMin && !$hasMax) {
+                    $interpretation = ($grade === 'blue')
+                        ? 'below the minimum specified level'
+                        : 'above the minimum specified level';
+                } else {
+                    $interpretation = ($grade === '')
+                        ? $value
+                        : (($grade === 'blue') ? 'below the minimum specified level'
+                        : (($grade === 'green') ? 'Optimum'
+                        : (($grade === 'red') ? 'above the maximum specified level' : $value)));
+                }
+
+                if ($interpretation !== '') {
+                    $parts[] = 'Test Results for ' . $name . ' are ' . $interpretation . '.';
                 }
             }
             $defaults['ResultsInterpretation'] = implode("\n", $parts);
