@@ -173,7 +173,9 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                         <input type="text" class="form-control" id="name" name="name" placeholder="Enter standard name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label"><i class="fas fa-info-circle"></i> Report Note</label>
+                        <label for="description" class="form-label"><i class="fas fa-info-circle"></i> Certificate Of Analysis NOTES</label>
+                        <div class="small text-muted mb-2">These notes can appear on the COA for samples using this standard method. AI drafts are suggestions; review them for accuracy before saving.</div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mb-2 ai-coa-draft" data-editor="description"><i class="fas fa-wand-magic-sparkles"></i> Generate COA Notes with AI</button>
                         <div class="quill-editor" id="description" name="description"></div>
                     </div>
                     <div class="mb-3">
@@ -212,7 +214,9 @@ tr.row-new .gi, tr.row-new .gs { background-color: #f0fdf4; }
                         <input type="text" class="form-control" id="Clonename" name="name" placeholder="Enter standard name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="Clonedescription" class="form-label"><i class="fas fa-info-circle"></i> Report Note</label>
+                        <label for="Clonedescription" class="form-label"><i class="fas fa-info-circle"></i> Certificate Of Analysis NOTES</label>
+                        <div class="small text-muted mb-2">These notes can appear on the COA for samples using this standard method. AI drafts are suggestions; review them for accuracy before saving.</div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mb-2 ai-coa-draft" data-editor="Clonedescription"><i class="fas fa-wand-magic-sparkles"></i> Generate COA Notes with AI</button>
                         <div class="quill-editor" id="Clonedescription" name="description"></div>
                     </div>
                     <div class="mb-3">
@@ -993,7 +997,49 @@ function initializeQuillEditors() {
         window.quillInstances[editor.id] = quill;
     });
 }
+
 initializeQuillEditors();
+
+// AI-assisted COA notes. The existing Save workflow remains unchanged.
+$(document).on('click', '.ai-coa-draft', function() {
+    var button = $(this);
+    var editorId = button.attr('data-editor');
+    var clone = editorId === 'Clonedescription';
+    var method = $('#' + (clone ? 'Clonestandardmethod' : 'standardmethod')).val() || '';
+    var code = $('#' + (clone ? 'CloneCode' : 'Code')).val() || '';
+    var name = $('#' + (clone ? 'Clonename' : 'name')).val() || '';
+    var regulationEditor = window.quillInstances[clone ? 'CloneApplicableRegulation' : 'ApplicableRegulation'];
+    var regulation = regulationEditor ? regulationEditor.getText().trim() : '';
+    if (!method.trim() && !code.trim() && !name.trim()) {
+        generalPurposeTypeLine('Enter the standard name, code, or method before requesting AI notes.');
+        return;
+    }
+    button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Drafting...');
+    $.ajax({
+        url: 'ajax/generate_coa_notes.php',
+        type: 'POST',
+        dataType: 'json',
+        data: { standardMethod: method, standardCode: code, standardName: name, applicableRegulation: regulation },
+        success: function(res) {
+            if (!res.success || !res.notes) {
+                generalPurposeTypeLine(res.message || 'AI could not draft COA notes.');
+                return;
+            }
+            var editor = window.quillInstances[editorId];
+            if (editor) editor.root.innerHTML = res.notes;
+            generalPurposeTypeLine('AI draft inserted. Review it carefully, then save using the existing Save button.');
+        },
+        error: function(xhr) {
+            var message = 'AI note generation failed.';
+            if (xhr.responseJSON && xhr.responseJSON.message) message = xhr.responseJSON.message;
+            generalPurposeTypeLine(message);
+        },
+        complete: function() {
+            button.prop('disabled', false).html('<i class="fas fa-wand-magic-sparkles"></i> Generate COA Notes with AI');
+        }
+    });
+});
+
 
 // ──────────────────────────────────────────────
 // PARAMETER MODAL
