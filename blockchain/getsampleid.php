@@ -382,6 +382,13 @@ class CustomPDF extends TCPDF {
     }
 
     public function Footer() {
+        // Suppress the first-page footer only when body content reaches its reserved area.
+        if ($this->getPage() === 1 && $this->GetY() > ($this->getPageHeight() - 80)) {
+            $this->SetAutoPageBreak(true, 80);
+            return;
+        }
+        $this->SetAutoPageBreak(true, 80);
+
         global $conn;
         static $printedBy = null;
         if ($printedBy === null) {
@@ -478,6 +485,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
     $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
+    $pdf->SetAutoPageBreak(true, 10); // Allow first-page content to use footer space when required
     $pdf->AddPage();
     
     
@@ -535,7 +543,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>';
     $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">';
     if ($savedCoaText !== null) {
-        $html .= nl2br(htmlspecialchars((string)($savedCoaText['ResultsInterpretation'] ?? ''), ENT_QUOTES, 'UTF-8'));
+        $html .= sanitizeCoaRichText((string)($savedCoaText['ResultsInterpretation'] ?? ''));
     } else {
         foreach ($samples as $sample) {
             $validatedresults = validateresults($sample);
@@ -603,6 +611,21 @@ $pdf->Output($filePath,'F'); // Output the PDF to the specified file path
 }
 
 
+
+
+function sanitizeCoaRichText($html) {
+    $html = (string)$html;
+    $html = str_replace(array("\r\n", "\r"), "\n", $html);
+    $html = preg_replace('/(?:<br\s*\/?\s*>\s*){3,}/i', '<br><br>', $html);
+    $html = preg_replace('/(?:<p>\s*(?:<br\s*\/?\s*>)?\s*<\/p>\s*){2,}/i', '<p><br></p>', $html);
+    $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
+    return preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
+        $tag = strtolower($m[1]);
+        $allowed = array('sup','sub','b','strong','i','em','u','br','p','div','ul','ol','li');
+        if (!in_array($tag, $allowed, true)) return '';
+        return (substr($m[0], 1, 1) === '/') ? '</' . $tag . '>' : '<' . $tag . '>';
+    }, $html);
+}
 
 function findLogoFile($PathPrefix) {
             $dir = $PathPrefix.'logos/' ;
