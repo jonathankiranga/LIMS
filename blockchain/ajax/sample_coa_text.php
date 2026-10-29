@@ -102,8 +102,32 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
                     : (($grade === 'red') ? ' above the maximum specified level' : $value)));
 
                 $name = trim((string)($r['ParameterName'] ?? ''));
-                if ($name !== '' && $interpretation !== '') {
+                if ($name === '') {
+                    continue;
+                }
+
+                if ($interpretation !== '') {
                     $parts[] = 'Test Results for ' . $name . ' are ' . $interpretation . '.';
+                    continue;
+                }
+
+                // If no measured result has been entered yet, show the available
+                // specification limits instead of leaving the interpretation blank.
+                // Do not invent a missing minimum/maximum or grade an unrecorded result.
+                $minLimit = $r['MinLimit'] ?? null;
+                $maxLimit = $r['MaxLimit'] ?? null;
+                $hasMin = $minLimit !== null && trim((string)$minLimit) !== '';
+                $hasMax = $maxLimit !== null && trim((string)$maxLimit) !== '';
+
+                if ($hasMin || $hasMax) {
+                    if ($hasMin && $hasMax) {
+                        $limitText = 'minimum ' . $minLimit . ' and maximum ' . $maxLimit;
+                    } elseif ($hasMin) {
+                        $limitText = 'minimum ' . $minLimit . '; maximum not specified';
+                    } else {
+                        $limitText = 'maximum ' . $maxLimit . '; minimum not specified';
+                    }
+                    $parts[] = 'Specification limits for ' . $name . ': ' . $limitText . '. No result has been recorded.';
                 }
             }
             $defaults['ResultsInterpretation'] = implode("\n", $parts);
