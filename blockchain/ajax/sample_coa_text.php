@@ -77,10 +77,10 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
                         ? formatResultNumber($r, $r['RangeResult'])
                         : (string)$r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '');
                     $grade = 'green';
-                    if (($r['MinLimit'] ?? null) !== null && (float)$r['MinLimit'] > (float)$r['RangeResult']) {
+                    if ($r['MinLimit'] > $r['RangeResult']) {
                         $grade = 'blue';
                     }
-                    if (($r['MaxLimit'] ?? null) !== null && (float)$r['RangeResult'] > (float)$r['MaxLimit']) {
+                    if ($r['RangeResult'] > $r['MaxLimit']) {
                         $grade = 'red';
                     }
                 }
