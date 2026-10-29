@@ -1,5 +1,6 @@
 <?php
 require '../db_connection.php';
+require_once '../functions/functions.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $sampleID = trim((string)($_REQUEST['SampleID'] ?? $_REQUEST['sampleID'] ?? ''));
@@ -31,7 +32,7 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
         $defaults['StatementOfConformity'] = (string)($row['confvalue'] ?? '');
     }
 
-    $stmt = $conn->prepare("SELECT tr.*, tp.ParameterName, tp.MinLimit, tp.MaxLimit,
+    $stmt = $conn->prepare("SELECT tr.*, tp.ParameterName, tp.MinLimit, tp.MaxLimit, tp.MRL, tp.MRLUnit,
                                   tp.UnitOfMeasure, tp.ResultType AS ParameterResultType
         FROM test_results tr
         LEFT JOIN testparameters tp
@@ -47,26 +48,28 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
                 $name = trim((string)($r['ParameterName'] ?? 'Test'));
                 $grade = '';
                 $value = '';
-                if (trim((string)($r['ResultStatus'] ?? '')) !== '') {
-                    $value = (string)$r['ResultStatus'];
-                } elseif ($r['RangeResult'] !== null && $r['RangeResult'] !== '') {
-                    $numeric = (float)$r['RangeResult'];
-                    $value = (string)$r['RangeResult'];
-                    if ($r['MinLimit'] !== null && $numeric < (float)$r['MinLimit']) $grade = 'blue';
-                    elseif ($r['MaxLimit'] !== null && $numeric > (float)$r['MaxLimit']) $grade = 'red';
-                    else $grade = 'green';
-                } elseif ($r['MRL_Result'] !== null && $r['MRL_Result'] !== '') {
-                    $value = (string)$r['MRL_Result'];
-                    if (is_numeric($value) && $r['MinLimit'] !== null && $r['MaxLimit'] !== null) {
-                        $numeric = (float)$value;
-                        if ($numeric < (float)$r['MinLimit']) $grade = 'blue';
-                        elseif ($numeric > (float)$r['MaxLimit']) $grade = 'red';
-                        else $grade = 'green';
-                    }
+                if (!empty($r['MRL_Result'])) {
+                    $value = function_exists('formatResultNumber')
+                        ? formatResultNumber($r, $r['MRL_Result']) . ' ' . (string)($r['MRLUnit'] ?? '')
+                        : (string)$r['MRL_Result'] . ' ' . (string)($r['MRLUnit'] ?? '');
+                    $grade = ((float)($r['MRL'] ?? 0) > (float)$r['MRL_Result']) ? 'green' : 'red';
                 }
-                $interpretation = ($grade === 'blue') ? 'Below the minimum specified level'
+                if (!empty($r['ResultStatus'])) {
+                    $value = (string)$r['ResultStatus'];
+                    $grade = '';
+                }
+                if (!empty($r['RangeResult'])) {
+                    $value = function_exists('formatResultNumber')
+                        ? formatResultNumber($r, $r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '')
+                        : (string)$r['RangeResult'] . ' ' . (string)($r['UnitOfMeasure'] ?? '');
+                    $grade = 'green';
+                    if ($r['MinLimit'] !== null && (float)$r['MinLimit'] > (float)$r['RangeResult']) $grade = 'blue';
+                    if ($r['MaxLimit'] !== null && (float)$r['RangeResult'] > (float)$r['MaxLimit']) $grade = 'red';
+                }
+                $interpretation = ($grade === '') ? $value
+                    : (($grade === 'blue') ? 'Below the minimum specified level'
                     : (($grade === 'green') ? 'Optimum'
-                    : (($grade === 'red') ? 'above the maximum specified level' : $value));
+                    : (($grade === 'red') ? ' above the maximum specified level' : $value)));
                 if ($name !== '' && $interpretation !== '') {
                     $parts[] = 'Test Results for ' . $name . ' are ' . $interpretation . '.';
                 }
