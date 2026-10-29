@@ -412,6 +412,11 @@ private function truncateText($text, $maxLength) {
    
 public function Footer() {
 
+  // The dedicated picture page has no printed-by line or page-number footer.
+  if ($this->picturePage && $this->getPage() > 1) {
+      return;
+  }
+
   global $reportFooterHtml, $conn;
   static $printedBy = null;
   if ($printedBy === null) {
