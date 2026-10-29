@@ -455,9 +455,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $savedCoaStmt = $conn->prepare("SELECT sct.ResultsInterpretation, sct.StatementOfConformity, sct.Notes
         FROM sample_coa_text sct
         WHERE sct.SampleID = ?
+          AND sct.HeaderID = (SELECT tr.HeaderID FROM test_results tr
+                              WHERE tr.SampleID = ? ORDER BY tr.resultsID DESC LIMIT 1)
         ORDER BY sct.UpdatedAt DESC LIMIT 1");
     if ($savedCoaStmt) {
-        $savedCoaStmt->bind_param("s", $sampleID);
+        $savedCoaStmt->bind_param("ss", $sampleID, $sampleID);
         if ($savedCoaStmt->execute()) {
             $savedCoaText = $savedCoaStmt->get_result()->fetch_assoc() ?: null;
         }
@@ -970,9 +972,11 @@ function statementofconformity($sampleID = '') {
     global $conn;
     $sampleID = trim((string)$sampleID);
     if ($sampleID !== '') {
-        $stmt = $conn->prepare("SELECT ResultsInterpretation, StatementOfConformity, Notes FROM sample_coa_text WHERE SampleID = ? ORDER BY UpdatedAt DESC LIMIT 1");
+        $stmt = $conn->prepare("SELECT ResultsInterpretation, StatementOfConformity, Notes FROM sample_coa_text
+            WHERE SampleID = ? AND HeaderID = (SELECT tr.HeaderID FROM test_results tr
+                WHERE tr.SampleID = ? ORDER BY tr.resultsID DESC LIMIT 1) ORDER BY UpdatedAt DESC LIMIT 1");
         if ($stmt) {
-            $stmt->bind_param("s", $sampleID);
+            $stmt->bind_param("ss", $sampleID, $sampleID);
             if ($stmt->execute()) {
                 $saved = $stmt->get_result()->fetch_assoc();
                 $stmt->close();
