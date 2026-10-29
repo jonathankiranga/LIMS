@@ -214,7 +214,8 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','subscript')">x<sub>2</sub></button>
   </div>
   <div id="StatementOfConformityEditor" class="rich-editor" contenteditable="true"></div>
-  <label class="form-label fw-bold mt-3" for="NotesEditor">Notes</label>
+  <label class="form-label fw-bold mt-3" for="NotesEditor">COA Notes</label>
+  <div class="form-text mb-2">These notes appear on the Certificate of Analysis. They are preloaded from the test standard description when no saved COA notes exist. Review and edit them for this sample before approval.</div>
   <div class="rich-toolbar mb-1">
     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','bold')"><b>B</b></button>
     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','italic')"><i>I</i></button>
