@@ -3,8 +3,8 @@
 CREATE TABLE IF NOT EXISTS ai_api_settings (
     setting_name VARCHAR(64) NOT NULL,
     encrypted_value MEDIUMTEXT NOT NULL,
-    nonce VARBINARY(32) NOT NULL,
-    auth_tag VARBINARY(32) NOT NULL,
+    nonce VARCHAR(32) NOT NULL,
+    auth_tag VARCHAR(32) NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (setting_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
