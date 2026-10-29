@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 // retaining every newline; already-formatted rich text is left unchanged.
 function coaTextForEditor($value) {
     $value = (string)$value;
-    if (strpos($value, '<') !== false && preg_match('/<\\/?[a-z][^>]*>/i', $value)) {
+    if (strpos($value, '<') !== false && preg_match('~</?[a-z][^>]*>~i', $value)) {
         return $value;
     }
     return nl2br(htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), false);
