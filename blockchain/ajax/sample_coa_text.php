@@ -20,6 +20,37 @@ if ($sampleID === '' || $headerID <= 0) {
     exit;
 }
 
+// Keep approval-window result grading identical to the COA reports.
+function validateresults($row) {
+    $results = array('results' => '', 'standard' => '', 'grade' => '');
+    if (!empty($row['MRL_Result'])) {
+        $results['results'] = (function_exists('formatResultNumber')
+            ? formatResultNumber($row, $row['MRL_Result'])
+            : (string)$row['MRL_Result']) . ' ' . (string)($row['MRLUnit'] ?? '');
+        $results['standard'] = $row['MRL'] ?? '';
+        $results['grade'] = ((float)($row['MRL'] ?? 0) > (float)$row['MRL_Result']) ? 'green' : 'red';
+    }
+    if (!empty($row['ResultStatus'])) {
+        $results['results'] = (string)$row['ResultStatus'];
+        $results['standard'] = '-';
+        $results['grade'] = '';
+    }
+    if (!empty($row['RangeResult'])) {
+        $results['results'] = (function_exists('formatResultNumber')
+            ? formatResultNumber($row, $row['RangeResult'])
+            : (string)$row['RangeResult']) . ' ' . (string)($row['UnitOfMeasure'] ?? '');
+        $results['standard'] = (string)($row['MinLimit'] ?? '') . ' - ' . (string)($row['MaxLimit'] ?? '');
+        $results['grade'] = 'green';
+        if ($row['MinLimit'] > $row['RangeResult']) {
+            $results['grade'] = 'blue';
+        }
+        if ($row['RangeResult'] > $row['MaxLimit']) {
+            $results['grade'] = 'red';
+        }
+    }
+    return $results;
+}
+
 function coaTextDefaults($conn, $sampleID, $headerID) {
     $defaults = ['ResultsInterpretation' => '', 'StatementOfConformity' => '', 'Notes' => ''];
 
@@ -60,35 +91,10 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
             $rs = $stmt->get_result();
             $parts = [];
             while ($r = $rs->fetch_assoc()) {
-                // Keep this interpretation logic aligned with validateresults()
-                // in the COA PHP reports.
-                $grade = '';
-                $value = '';
-
-                if (!empty($r['MRL_Result'])) {
-                    $value = (function_exists('formatResultNumber')
-                        ? formatResultNumber($r, $r['MRL_Result'])
-                        : (string)$r['MRL_Result']) . ' ' . (string)($r['MRLUnit'] ?? '');
-                    $grade = ((float)($r['MRL'] ?? 0) > (float)$r['MRL_Result']) ? 'green' : 'red';
-                }
-
-                if (!empty($r['ResultStatus'])) {
-                    $value = (string)$r['ResultStatus'];
-                    $grade = '';
-                }
-
-                if (!empty($r['RangeResult'])) {
-                    $value = (function_exists('formatResultNumber')
-                        ? formatResultNumber($r, $r['RangeResult'])
-                        : (string)$r['RangeResult']) . ' ' . (string)($r['UnitOfMeasure'] ?? '');
-                    $grade = 'green';
-                    if ($r['MinLimit'] > $r['RangeResult']) {
-                        $grade = 'blue';
-                    }
-                    if ($r['RangeResult'] > $r['MaxLimit']) {
-                        $grade = 'red';
-                    }
-                }
+                // Use the same result/standard/grade rules as the COA validateresults().
+                $validated = validateresults($r);
+                $grade = $validated['grade'];
+                $value = $validated['results'];
 
                 $interpretation = ($grade === '') ? $value
                     : (($grade === 'blue') ? 'Below the minimum specified level'
