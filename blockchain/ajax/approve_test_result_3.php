@@ -268,6 +268,27 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
         if (!$stmt->execute()) throw new Exception('Failed to update completion dates: '.$stmt->error);
         $stmt->close();
 
+        // Persist the editable COA wording only when the sample is approved.
+        // The composite key keeps text tied to this exact HeaderID + SampleID.
+        if ($approvalStatus === 1) {
+            $interpretation = (string)($_POST['ResultsInterpretation'] ?? '');
+            $conformity = (string)($_POST['StatementOfConformity'] ?? '');
+            $notes = (string)($_POST['Notes'] ?? '');
+            $stmt = $conn->prepare("INSERT INTO sample_coa_text
+                (HeaderID, SampleID, ResultsInterpretation, StatementOfConformity, Notes, UpdatedBy)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    ResultsInterpretation = VALUES(ResultsInterpretation),
+                    StatementOfConformity = VALUES(StatementOfConformity),
+                    Notes = VALUES(Notes),
+                    UpdatedBy = VALUES(UpdatedBy),
+                    UpdatedAt = CURRENT_TIMESTAMP");
+            if (!$stmt) throw new Exception('Failed to prepare COA text save: '.$conn->error);
+            $stmt->bind_param('isssss', $headerID, $sampleID, $interpretation, $conformity, $notes, $userID);
+            if (!$stmt->execute()) throw new Exception('Failed to save COA text: '.$stmt->error);
+            $stmt->close();
+        }
+
         // Blockchain audit is best-effort and must never block approval.
         $blockchainSavepoint = false;
         try {
