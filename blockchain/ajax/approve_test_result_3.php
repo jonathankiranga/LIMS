@@ -196,14 +196,13 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     $conn->begin_transaction();
 
     try {
-        $sql = "SELECT tr.TestID
+        $sql = "SELECT DISTINCT tr.TestID
                 FROM test_results tr
-                JOIN sample_tests st ON st.TestID = tr.TestID
                 JOIN testparameters tp
                   ON tp.ParameterID = tr.ParameterID
                  AND tp.StandardID = tr.StandardID
                 WHERE tr.HeaderID = ?
-                  AND st.SampleID = ?
+                  AND tr.SampleID = ?
                   AND tr.StatusID = 2";
         if (!$isAdminApproval) {
             $sql .= " AND tp.Category = ?";
@@ -233,6 +232,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                  AND tp.StandardID = tr.StandardID
                 SET tr.`$level` = ?, tr.StatusID = ?
                 WHERE tr.HeaderID = ?
+                  AND tr.SampleID = ?
                   AND tr.StatusID = 2";
         if (!$isAdminApproval) {
             $sql .= " AND tp.Category = ?";
@@ -242,9 +242,9 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
         if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
 
         if ($isAdminApproval) {
-            $stmt->bind_param('sii', $userID, $statusID, $headerID);
+            $stmt->bind_param('siss', $userID, $statusID, $headerID, $sampleID);
         } else {
-            $stmt->bind_param('siis', $userID, $statusID, $headerID, $department);
+            $stmt->bind_param('sisss', $userID, $statusID, $headerID, $sampleID, $department);
         }
 
         if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
