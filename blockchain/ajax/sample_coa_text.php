@@ -42,11 +42,16 @@ function coaTextDefaults($conn, $sampleID, $headerID) {
         $defaults['StatementOfConformity'] = (string)($row['confvalue'] ?? '');
     }
 
+    // Use the same parameter mapping as ajax/get_test_results.php.
+    // Some result rows reference testparameters.BaseID rather than ParameterID.
     $stmt = $conn->prepare("SELECT tr.*, tp.ParameterName, tp.MinLimit, tp.MaxLimit, tp.MRL, tp.MRLUnit,
-                                  tp.UnitOfMeasure, tp.ResultType AS ParameterResultType
+                                  tp.UnitOfMeasure, tp.ResultType AS ParameterResultType,
+                                  COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType
         FROM test_results tr
         LEFT JOIN testparameters tp
-          ON tp.ParameterID = tr.ParameterID AND tp.StandardID = tr.StandardID
+          ON tp.StandardID = tr.StandardID
+         AND (tp.ParameterID = tr.ParameterID OR tp.BaseID = tr.ParameterID)
+        LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
         WHERE tr.SampleID = ? AND tr.HeaderID = ? AND tr.StatusID IN (2,3,4)
         ORDER BY tr.resultsID");
     if ($stmt) {
