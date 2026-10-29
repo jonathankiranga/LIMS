@@ -19,12 +19,15 @@ $message = '';
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $providedKey = isset($_POST['api_key']) ? trim($_POST['api_key']) : '';
+    $encryptionSecret = getenv('AI_API_ENCRYPTION_KEY');
     if ($providedKey === '' || strpos($providedKey, 'sk-') !== 0) {
         $error = 'Enter a valid API key. The saved key is not displayed on this page.';
+    } elseif ($encryptionSecret === false || strlen($encryptionSecret) < 32) {
+        $error = 'Server configuration is incomplete: set AI_API_ENCRYPTION_KEY to a random secret of at least 32 characters.';
     } elseif (!function_exists('openssl_encrypt') || !function_exists('random_bytes')) {
         $error = 'OpenSSL is required to encrypt the API key before storage.';
     } else {
-        $key = aiSettingsKey($secretKey);
+        $key = aiSettingsKey($encryptionSecret);
         $nonce = random_bytes(12);
         $tag = '';
         $ciphertext = openssl_encrypt($providedKey, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $nonce, $tag);
@@ -76,7 +79,7 @@ if ($result && $result->num_rows > 0) {
 <body>
 <div class="ai-settings">
 <h2>AI API Settings</h2>
-<p>Configure the OpenAI API key used by AI-assisted Certificate of Analysis Notes. The key is encrypted with the server's existing SECRET_KEY before it is stored in the database. It is never sent back to the browser after saving.</p>
+<p>Configure the OpenAI API key used by AI-assisted Certificate of Analysis Notes. The key is encrypted with a separate server environment secret (AI_API_ENCRYPTION_KEY) before it is stored in the database. It is never sent back to the browser after saving.</p>
 <?php if ($message !== ''): ?><div class="status"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
 <?php if ($error !== ''): ?><div class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
 <p><strong>Configuration status:</strong> <?php echo $configured ? 'An API key is stored.' : 'No API key is configured.'; ?></p>
