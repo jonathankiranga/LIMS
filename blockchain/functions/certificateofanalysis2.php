@@ -488,7 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
 
     // Start creating HTML content
     $html = '<div style="width: 100%; font-family: montserrat, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
-    $html .= '<div style="font-family: montserrat, montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
+    $html .= '<div style="font-family: montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
@@ -583,7 +583,7 @@ $currentY = $pdf->GetY();
 // Define the margin and calculate the remaining space
 $marginLeft = 20;  $headerHeight = 140;
 // Adjust the available height by subtracting the header area
-$availableHeight = $pageHeight - $headerHeight - 80; // 20 is the botto// Calculate the available width
+$availableHeight = $pageHeight - $headerHeight - 15; // 20 is the botto// Calculate the available width
 // Get the image dimensions (to maintain aspect ratio)
 list($imgWidth, $imgHeight) = getimagesize($SamplePicture);
 
