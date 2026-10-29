@@ -474,11 +474,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">Parameter</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 12%;">Units</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Results</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 18%;">Limits</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 45%;">Parameter</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;"><strong>Method</strong></th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">Units</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 25%;">Results</th>
     </tr>
 </thead><tbody>';
  
@@ -491,11 +490,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
  
       $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 40%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 12%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 18%;">' . $standard . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: 45%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 25%;">' . $resutlts . '</td>
           </tr>';
    }
 
