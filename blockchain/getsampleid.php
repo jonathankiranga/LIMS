@@ -382,7 +382,7 @@ class CustomPDF extends TCPDF {
     }
 
     public function Footer() {
-        $this->SetAutoPageBreak(true, 80);
+        $this->SetAutoPageBreak(true, 15);
 
         global $conn;
         static $printedBy = null;
@@ -480,14 +480,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $pdf->SetAuthor('Jonathan');
     $pdf->SetTitle('LIMS Report');
     $pdf->SetMargins(10,98,10); // Adjust top margin to avoid overlap with header
-    $pdf->SetAutoPageBreak(true, 80); // Preserve the existing footer and reserve its space
+    $pdf->SetAutoPageBreak(true, 15); // Reserve only the bottom page-number line; long report footer flows with content
     $pdf->AddPage();
     
     
    
     // Start creating HTML content
-    $html = '<div style="width: 100%; font-family: Helvetica, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
-    $html .= '<div style="font-family: montserrat, Helvetica, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
+    $html = '<div style="width: 100%; font-family: montserrat, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
+    $html .= '<div style="font-family: montserrat, montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
     $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white;">
@@ -532,15 +532,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
     $notesText = (string)$SampletypeNotes;
     if ($savedCoaText !== null && trim((string)($savedCoaText['Notes'] ?? '')) !== '') {
-        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: #000000;">' . sanitizeCoaRichText($notesText) . '</div>';
+        $html .= '<div style="text-align: left; font-family: montserrat, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: #000000;">' . sanitizeCoaRichText($notesText) . '</div>';
     } else {
         foreach (explode("\n", $notesText) as $line) {
-            $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: #000000;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+            $html .= '<div style="text-align: left; font-family: montserrat, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: #000000;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
         }
     }
 
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>';
-    $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">';
+    $html .= '<div style="text-align: left; font-family: montserrat, sans-serif; font-size: 8px; line-height: 1.0; margin: 0; padding: 0;color: grey;">';
     if ($savedCoaText !== null) {
         $html .= sanitizeCoaRichText((string)($savedCoaText['ResultsInterpretation'] ?? ''));
     } else {
@@ -590,12 +590,12 @@ foreach ($signatories as $index => $signatory) {
 $pdf->SetY($wazitorow + ($signatoryCount > 0 ? 24 : 2));
 $samerow = $pdf->GetY();
 $pdf->SetXY(10,$samerow+5);
-$html = '<div style="text-align: center; font-family: Helvetica, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: #000000;">Statement of Conformity</div>'; // Add footer
+$html = '<div style="text-align: center; font-family: montserrat, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: #000000;">Statement of Conformity</div>'; // Add footer
 
 $statementofconformity = statementofconformity($sampleID);
 $lines = explode("\n",$statementofconformity);
 foreach ($lines as $line) {
-  $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: #000000;">'.$line.'</div>'; // Add footer
+  $html .= '<div style="text-align: left; font-family: montserrat, sans-serif; font-size: 5px; line-height: 1.0; margin: 0; padding: 0;color: #000000;">'.$line.'</div>'; // Add footer
 }
 $pdf->writeHTML($html, true, false, true, false, '');
    // Save the PDF to the server
