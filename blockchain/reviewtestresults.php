@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="js/quilljs/1.3.7/quill.snow.css">
 <style>
 /* Excel-like colors */
 table.dataTable {
@@ -127,7 +128,10 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 #pagination span { vertical-align: middle; }
 .rich-editor { min-height: 72px; border: 1px solid #ced4da; border-radius: 4px; padding: 8px; background: #fff; font-size: 14px; line-height: 1.4; }
 .rich-editor:focus { outline: 2px solid #86b7fe; border-color: #86b7fe; }
-.rich-toolbar { display: flex; flex-wrap: wrap; gap: 4px; }
+.quill-editor { background: #fff; font-size: 14px; }
+.quill-editor .ql-editor { min-height: 72px; line-height: 1.4; }
+.quill-editor .ql-container { border-radius: 0 0 4px 4px; }
+.quill-editor .ql-toolbar { border-radius: 4px 4px 0 0; }
 </style>
 <i class="fas fa-project-diagram"></i>Audit Lab Result Workflow
 <!-- Button to trigger modal -->
@@ -195,34 +199,13 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 <thead><tr><th style="background:#17324d;color:#fff;padding:8px;">#</th><th style="background:#17324d;color:#fff;padding:8px;">Parameter</th><th style="background:#17324d;color:#fff;padding:8px;">Result</th><th style="background:#17324d;color:#fff;padding:8px;">Standard Limits</th></tr></thead>
 <tbody id="sampleTestsBody"></tbody></table></div><div class="mt-3">
   <h6 class="fw-bold">COA Text Formatting</h6>
-  <p class="small text-muted mb-2">Select text and use the formatting buttons. Superscript and subscript are supported.</p>
+  <p class="small text-muted mb-2">Use the rich-text toolbar for bold, italic, underline, lists, superscript, subscript, and paragraph line breaks.</p>
   <label class="form-label fw-bold" for="ResultsInterpretationEditor">Interpretation of Analysis Results</label>
-  <div class="rich-toolbar mb-1">
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('ResultsInterpretationEditor','bold')"><b>B</b></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('ResultsInterpretationEditor','italic')"><i>I</i></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('ResultsInterpretationEditor','underline')"><u>U</u></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('ResultsInterpretationEditor','superscript')">x<sup>2</sup></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('ResultsInterpretationEditor','subscript')">x<sub>2</sub></button>
-  </div>
-  <div id="ResultsInterpretationEditor" class="rich-editor" contenteditable="true"></div>
-  <label class="form-label fw-bold mt-3" for="StatementOfConformityEditor">Statement of Conformity</label>
-  <div class="rich-toolbar mb-1">
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','bold')"><b>B</b></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','italic')"><i>I</i></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','underline')"><u>U</u></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','superscript')">x<sup>2</sup></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('StatementOfConformityEditor','subscript')">x<sub>2</sub></button>
-  </div>
-  <div id="StatementOfConformityEditor" class="rich-editor" contenteditable="true"></div>
-  <label class="form-label fw-bold mt-3" for="NotesEditor">Notes</label>
-  <div class="rich-toolbar mb-1">
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','bold')"><b>B</b></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','italic')"><i>I</i></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','underline')"><u>U</u></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','superscript')">x<sup>2</sup></button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="richTextCommand('NotesEditor','subscript')">x<sub>2</sub></button>
-  </div>
-  <div id="NotesEditor" class="rich-editor" contenteditable="true"></div>
+  <div id="ResultsInterpretationEditor" class="quill-editor mb-3"></div>
+  <label class="form-label fw-bold mt-2" for="StatementOfConformityEditor">Statement of Conformity</label>
+  <div id="StatementOfConformityEditor" class="quill-editor mb-3"></div>
+  <label class="form-label fw-bold mt-2" for="NotesEditor">Notes</label>
+  <div id="NotesEditor" class="quill-editor"></div>
 </div>
 <hr>
 <div class="row align-items-end"><div class="col-md-5"><label for="approvalStatus" class="form-label fw-bold">Block Decision</label>
@@ -231,7 +214,19 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 <input type="hidden" id="blockHeaderID"><input type="hidden" id="flag" value="3">
 </div></div></div></div>
 
+<script src="js/quilljs/1.3.7/quill.min.js"></script>
 <script>
+window.quillInstances = window.quillInstances || {};
+function initializeCoaQuillEditors(){
+    var toolbar = [[{ header: [1, 2, false] }], ["bold", "italic", "underline"], [{ script: "sub" }, { script: "super" }], [{ list: "ordered" }, { list: "bullet" }], ["clean"]];
+    ["ResultsInterpretationEditor", "StatementOfConformityEditor", "NotesEditor"].forEach(function(id){
+        var element = document.getElementById(id);
+        if (element && !window.quillInstances[id]) {
+            window.quillInstances[id] = new Quill(element, { theme: "snow", modules: { toolbar: toolbar } });
+        }
+    });
+}
+initializeCoaQuillEditors();
 var wrPage=1,wrPerPage=10,wrRows=[],wrQuery='',wrResults=[];
 function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function resultValue(r){if(r.ResultType==='qualitativeField')return r.ResultStatus||'N/A';if(r.ResultType==='rangeField')return r.RangeResult||'N/A';return r.MRL_Result||'N/A';}
@@ -241,9 +236,9 @@ function wrRenderPager(tp,count){const box=document.getElementById('pagination')
 function wrGo(p){wrPage=p;wrRenderPage();}
 function searchTable(){const i=document.getElementById('searchInput');wrQuery=i?i.value.trim().toLowerCase():'';wrPage=1;wrRenderPage();}
 function fetchTestResults(flag){const tb=document.querySelector('#testResultsTable tbody');tb.innerHTML='<tr><td colspan="7" class="text-center">Loading...</td></tr>';fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1&wholeSample=1').then(r=>r.json()).then(data=>{if(!data.success){wrRows=[];wrResults=[];const message=data.message||'No pending sample blocks were returned.';tb.innerHTML='<tr><td colspan="7" class="text-center">'+esc(message)+'</td></tr>';wrRenderPager(1,0);return;}wrResults=data.results||[];wrRows=[];wrResults.forEach((sample,index)=>{const tests=sample.tests||[];const names=tests.map(t=>'<li>'+esc(t.ParameterName)+'</li>').join('');const summary=tests.map(t=>'<span class="result-badge"><b>'+esc(t.ParameterName)+':</b> '+esc(resultValue(t))+'</span>').join('');const row=document.createElement('tr');row.innerHTML='<td><button class="btn btn-primary btn-sm" onclick="openApprovalModal('+index+')"><i class="fas fa-tasks"></i> Review / Approve</button></td><td>'+(index+1)+'</td><td>'+esc(sample.DocumentNo||'')+'</td><td><strong>'+esc(sample.SampleID||'')+'</strong></td><td>'+esc((sample.Date||'').split(' ')[0])+'</td><td>'+tests.length+'</td><td><ul class="test-list">'+names+'</ul><div>'+summary+'</div></td>';wrRows.push(row);});wrPage=1;wrRenderPage();}).catch(err=>{console.error(err);tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">Error loading results.</td></tr>';});}
-async function openApprovalModal(index){const sample=wrResults[index];if(!sample)return;document.getElementById('blockHeaderID').value=sample.HeaderID||'';document.getElementById('blockSampleID').value=sample.SampleID||'';document.getElementById('blockDocumentNo').value=sample.DocumentNo||'';document.getElementById('blockTestCount').value=(sample.tests||[]).length;document.getElementById('approvalStatus').value='';const body=document.getElementById('sampleTestsBody');body.innerHTML='';(sample.tests||[]).forEach((t,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #e5edf5;">'+(i+1)+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;"><strong>'+esc(t.ParameterName||'')+'</strong>'+(t.ParamCategory?'<br><small>'+esc(t.ParamCategory)+'</small>':'')+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc(resultValue(t))+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc('Limits: '+(t.Limits||'N/A')+' | Unit: '+(t.UnitOfMeasure||'N/A'))+'</td>';body.appendChild(tr);});const editors={ResultsInterpretation:'ResultsInterpretationEditor',StatementOfConformity:'StatementOfConformityEditor',Notes:'NotesEditor'};Object.values(editors).forEach(id=>document.getElementById(id).innerHTML='');const modal=bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));modal.show();try{const url='ajax/sample_coa_text.php?SampleID='+encodeURIComponent(sample.SampleID||'')+'&HeaderID='+encodeURIComponent(sample.HeaderID||'');const response=await fetch(url,{cache:'no-store'});const data=await response.json();if(!data.success)throw new Error(data.message||'Unable to load saved COA text.');Object.keys(editors).forEach(key=>{document.getElementById(editors[key]).innerHTML=(data.texts&&data.texts[key])?data.texts[key]:'';});}catch(error){console.error('Failed to preload COA text:',error);toastr.error('Could not preload Notes, Interpretation and Statement of Conformity. '+(error.message||''));}}
-function coaEditorHtml(value){const text=String(value==null?'':value);if(/<\/?[a-z][^>]*>/i.test(text))return text;return esc(text).replace(/\r\n|\r|\n/g,'<br>');}\nfunction richTextCommand(editorId, command){const editor=document.getElementById(editorId);if(!editor)return;editor.focus();document.execCommand(command,false,null);}
-function submitApproval(){const h=document.getElementById('blockHeaderID').value,s=document.getElementById('blockSampleID').value,a=document.getElementById('approvalStatus').value,f=document.getElementById('flag').value;if(!h||!s){toastr.error('Sample information is missing.');return;}if(!a){toastr.error('Please select a block decision.');return;}const fd=new FormData();for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k==='user_id')fd.append(k,localStorage.getItem(k));}fd.set('blockApproval','1');fd.set('reviewBlockApproval','1');fd.set('HeaderID',h);fd.set('SampleID',s);fd.set('flag',f);fd.set('approvalStatus',a);fd.set('ResultsInterpretation',document.getElementById('ResultsInterpretationEditor').innerHTML);fd.set('StatementOfConformity',document.getElementById('StatementOfConformityEditor').innerHTML);fd.set('Notes',document.getElementById('NotesEditor').innerHTML);if(!fd.get('user_id')){toastr.error('User identity was not found. Please log in again.');return;}const btn=document.querySelector('#approveModal .btn-success');if(btn)btn.disabled=true;fetch('ajax/approve_test_result_3.php',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{if(data.success){toastr.success(data.message);bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();fetchTestResults(3);}else toastr.error(data.message||'Sample block approval failed.');}).catch(err=>{console.error(err);toastr.error('An error occurred while approving the sample block.');}).finally(()=>{if(btn)btn.disabled=false;});}
+async function openApprovalModal(index){const sample=wrResults[index];if(!sample)return;document.getElementById('blockHeaderID').value=sample.HeaderID||'';document.getElementById('blockSampleID').value=sample.SampleID||'';document.getElementById('blockDocumentNo').value=sample.DocumentNo||'';document.getElementById('blockTestCount').value=(sample.tests||[]).length;document.getElementById('approvalStatus').value='';const body=document.getElementById('sampleTestsBody');body.innerHTML='';(sample.tests||[]).forEach((t,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #e5edf5;">'+(i+1)+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;"><strong>'+esc(t.ParameterName||'')+'</strong>'+(t.ParamCategory?'<br><small>'+esc(t.ParamCategory)+'</small>':'')+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc(resultValue(t))+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc('Limits: '+(t.Limits||'N/A')+' | Unit: '+(t.UnitOfMeasure||'N/A'))+'</td>';body.appendChild(tr);});const editors={ResultsInterpretation:'ResultsInterpretationEditor',StatementOfConformity:'StatementOfConformityEditor',Notes:'NotesEditor'};Object.values(editors).forEach(id=>{if(window.quillInstances[id])window.quillInstances[id].root.innerHTML='';});const modal=bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));modal.show();try{const url='ajax/sample_coa_text.php?SampleID='+encodeURIComponent(sample.SampleID||'')+'&HeaderID='+encodeURIComponent(sample.HeaderID||'');const response=await fetch(url,{cache:'no-store'});const data=await response.json();if(!data.success)throw new Error(data.message||'Unable to load saved COA text.');Object.keys(editors).forEach(key=>{if(window.quillInstances[editors[key]])window.quillInstances[editors[key]].root.innerHTML=(data.texts&&data.texts[key])?data.texts[key]:'';});}catch(error){console.error('Failed to preload COA text:',error);toastr.error('Could not preload Notes, Interpretation and Statement of Conformity. '+(error.message||''));}}
+function coaEditorHtml(value){const text=String(value==null?'':value);if(/<\/?[a-z][^>]*>/i.test(text))return text;return esc(text).replace(/\r\n|\r|\n/g,'<br>');}
+function submitApproval(){const h=document.getElementById('blockHeaderID').value,s=document.getElementById('blockSampleID').value,a=document.getElementById('approvalStatus').value,f=document.getElementById('flag').value;if(!h||!s){toastr.error('Sample information is missing.');return;}if(!a){toastr.error('Please select a block decision.');return;}const fd=new FormData();for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k==='user_id')fd.append(k,localStorage.getItem(k));}fd.set('blockApproval','1');fd.set('reviewBlockApproval','1');fd.set('HeaderID',h);fd.set('SampleID',s);fd.set('flag',f);fd.set('approvalStatus',a);fd.set('ResultsInterpretation',window.quillInstances.ResultsInterpretationEditor ? window.quillInstances.ResultsInterpretationEditor.root.innerHTML : '');fd.set('StatementOfConformity',window.quillInstances.StatementOfConformityEditor ? window.quillInstances.StatementOfConformityEditor.root.innerHTML : '');fd.set('Notes',window.quillInstances.NotesEditor ? window.quillInstances.NotesEditor.root.innerHTML : '');if(!fd.get('user_id')){toastr.error('User identity was not found. Please log in again.');return;}const btn=document.querySelector('#approveModal .btn-success');if(btn)btn.disabled=true;fetch('ajax/approve_test_result_3.php',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{if(data.success){toastr.success(data.message);bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();fetchTestResults(3);}else toastr.error(data.message||'Sample block approval failed.');}).catch(err=>{console.error(err);toastr.error('An error occurred while approving the sample block.');}).finally(()=>{if(btn)btn.disabled=false;});}
 fetchTestResults(3);
 var currentSampleID = '';
 
