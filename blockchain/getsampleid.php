@@ -536,8 +536,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && $_GET['id'] !=
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>';
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
     $notesText = (string)$SampletypeNotes;
-    foreach (explode("\n", $notesText) as $line) {
-        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+    if ($savedCoaText !== null && trim((string)($savedCoaText['Notes'] ?? '')) !== '') {
+        $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.8; margin: 0; padding: 0;color: blue;">' . sanitizeCoaRichText($notesText) . '</div>';
+    } else {
+        foreach (explode("\n", $notesText) as $line) {
+            $html .= '<div style="text-align: left; font-family: Helvetica, sans-serif; font-size: 8px; line-height: 0.5; margin: 0; padding: 0;color: blue;">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+        }
     }
 
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>INTERPRETATION OF ANALYSIS RESULTS</u></div>';
