@@ -93,11 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_POST['saveText'])) {
     $stmt->execute();
     $saved = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    echo json_encode(['success' => true, 'texts' => [
-        'ResultsInterpretation' => $saved !== null ? (string)($saved['ResultsInterpretation'] ?? '') : $defaults['ResultsInterpretation'],
-        'StatementOfConformity' => $saved !== null ? (string)($saved['StatementOfConformity'] ?? '') : $defaults['StatementOfConformity'],
-        'Notes' => $saved !== null ? (string)($saved['Notes'] ?? '') : $defaults['Notes']
-    ]]);
+    // Existing rows may have been created by an earlier approval that saved
+    // empty editor values. Use the report defaults for any field not yet saved.
+    $texts = [];
+    foreach (['ResultsInterpretation', 'StatementOfConformity', 'Notes'] as $field) {
+        $savedValue = $saved !== null ? trim((string)($saved[$field] ?? '')) : '';
+        $texts[$field] = $savedValue !== '' ? (string)$saved[$field] : (string)$defaults[$field];
+    }
+    echo json_encode(['success' => true, 'texts' => $texts]);
     exit;
 }
 
