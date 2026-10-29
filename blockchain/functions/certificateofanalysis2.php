@@ -581,6 +581,14 @@ $reportFooterHtml = '';
     // Print the complete COA content before starting the dedicated picture page.
     $pdf->writeHTML($html, true, false, true, false, '');
 
+    // TCPDF can leave the cursor on a newly-created page when the report content
+    // ends at a page boundary. Remove that empty trailing page before adding the
+    // dedicated picture page.
+    $lastContentPage = $pdf->getPage();
+    if ($lastContentPage > 1 && $pdf->GetY() <= 99) {
+        $pdf->deletePage($lastContentPage);
+    }
+
     // The picture page contains only the standard header, Frames 1 and 2, and the image.
     $pdf->picturePage = true;
     $pdf->AddPage();
