@@ -1,8 +1,10 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
     session_start();
 }
-if (!isset($_SESSION['role_id']) || (int) $_SESSION['role_id'] !== 1) {
+$isAdministrator = (isset($_SESSION['UserID']) && (int) $_SESSION['UserID'] === 1) || (isset($_SESSION['role']) && strtolower((string) $_SESSION['role']) === 'admin');
+if (!$isAdministrator) {
     http_response_code(403);
     exit('Administrator access is required to manage AI API settings.');
 }
@@ -19,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $providedKey = isset($_POST['api_key']) ? trim($_POST['api_key']) : '';
     if ($providedKey === '' || strpos($providedKey, 'sk-') !== 0) {
         $error = 'Enter a valid API key. The saved key is not displayed on this page.';
-    } elseif (!function_exists('openssl_encrypt')) {
+    } elseif (!function_exists('openssl_encrypt') || !function_exists('random_bytes')) {
         $error = 'OpenSSL is required to encrypt the API key before storage.';
     } else {
         $key = aiSettingsKey($secretKey);
@@ -33,10 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$stmt) {
                 $error = 'Unable to prepare secure settings storage. Run the AI COA Notes SQL migration first.';
             } else {
-                $stmt->bind_param('sbb', $ciphertext, $nonce, $tag);
-                // mysqli send_long_data avoids binary nonce/tag truncation on prepared statements.
-                $stmt->send_long_data(1, $nonce);
-                $stmt->send_long_data(2, $tag);
+                $ciphertext = base64_encode($ciphertext);
+                $nonce = base64_encode($nonce);
+                $tag = base64_encode($tag);
+                $stmt->bind_param('sss', $ciphertext, $nonce, $tag);
                 if ($stmt->execute()) {
                     $message = 'API key encrypted and saved. The key is never shown again.';
                 } else {
