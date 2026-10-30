@@ -1,4 +1,9 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('BlockchainLIMS');
+    session_start();
+}
+
 require '../db_connection.php';
 
 header('Content-Type: application/json');
@@ -9,11 +14,29 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$userID = isset($_SESSION['UserID']) ? trim((string)$_SESSION['UserID']) : '';
+if ($userID === '') {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Your session has expired. Please sign in again.']);
+    exit;
+}
+
 $sampleID = isset($_POST['sampleID']) ? trim((string)$_POST['sampleID']) : '';
+$reason = isset($_POST['reason']) ? trim((string)$_POST['reason']) : '';
 
 if ($sampleID === '') {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Sample ID is required.']);
+    exit;
+}
+if ($reason === '') {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'A reason is required before returning the sample to Analysis.']);
+    exit;
+}
+if (strlen($reason) > 2000) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'The reason cannot exceed 2,000 characters.']);
     exit;
 }
 
@@ -39,7 +62,6 @@ try {
     $checkResult = $checkStmt->get_result();
     $totalRows = 0;
     $approvedRows = 0;
-
     while ($row = $checkResult->fetch_assoc()) {
         $totalRows++;
         if ((int)$row['StatusID'] === 4) {
@@ -79,15 +101,35 @@ try {
         throw new RuntimeException('No result records required resetting. The sample may already be in Analysis.');
     }
 
+    // Keep the business audit record in the same transaction as the status reset.
+    $previousStatus = 4;
+    $newStatus = 1;
+    $auditStmt = $conn->prepare(
+        "INSERT INTO sample_rollback_audit
+            (sample_id, reason, initiated_by, previous_status, new_status, affected_rows)
+         VALUES (?, ?, ?, ?, ?, ?)"
+    );
+    if (!$auditStmt) {
+        throw new RuntimeException('Failed to prepare sample rollback audit: ' . $conn->error);
+    }
+
+    $auditStmt->bind_param('sssiii', $sampleID, $reason, $userID, $previousStatus, $newStatus, $updatedRows);
+    if (!$auditStmt->execute()) {
+        throw new RuntimeException('Failed to record sample rollback audit: ' . $auditStmt->error);
+    }
+    $auditID = (int)$auditStmt->insert_id;
+    $auditStmt->close();
+
     $conn->commit();
 
     echo json_encode([
         'success' => true,
-        'message' => 'The complete sample block has been returned to Analysis.',
+        'message' => 'The complete sample block has been returned to Analysis and the reason has been recorded.',
         'sampleID' => $sampleID,
+        'auditID' => $auditID,
         'approvedRows' => $approvedRows,
         'updatedRows' => $updatedRows,
-        'newStatus' => 1
+        'newStatus' => $newStatus
     ]);
 } catch (Throwable $throwable) {
     $conn->rollback();
