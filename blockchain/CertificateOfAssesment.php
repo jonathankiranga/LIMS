@@ -350,7 +350,11 @@
                     <label for="statusTargetLabel" class="form-label">New Status</label>
                     <input type="text" id="statusTargetLabel" class="form-control" value="Sample Received (1)" readonly>
                 </div>
-                <p class="mb-0 text-muted">This action will roll back the sample.</p>
+                <div class="mb-3">
+                    <label for="statusRollbackReason" class="form-label">Reason for returning sample to Analysis <span class="text-danger">*</span></label>
+                    <textarea id="statusRollbackReason" class="form-control" rows="4" maxlength="2000" required placeholder="Explain why this approved sample must be returned to Analysis."></textarea>
+                    <div class="form-text">A reason is mandatory and will be retained in the sample rollback audit history.</div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -762,22 +766,35 @@
 	        $("#statusSampleID").val(actionButton.data("sampleid"));
 	        $("#statusCurrentValue").val(actionButton.data("statusid"));
 	        $("#statusCurrentLabel").val(actionButton.data("statuslabel"));
+	        $("#statusRollbackReason").val("").removeClass("is-invalid");
 
 	        const modal = new bootstrap.Modal(document.getElementById('statusModal'), { backdrop: 'static', keyboard: false });
 	        modal.show();
 	    });
 
 	    $("#confirmStatusChange").on("click", function () {
-	        const resultsID = Number($("#statusResultsID").val());
 	        const sampleID = $("#statusSampleID").val();
-	        const currentStatus = Number($("#statusCurrentValue").val());
+	        const reason = $.trim($("#statusRollbackReason").val());
+
+	        if (!reason) {
+	            $("#statusRollbackReason").addClass("is-invalid").trigger("focus");
+	            if (typeof toastr !== 'undefined') {
+	                toastr.error("Please provide a reason for returning this sample to Analysis.");
+	            }
+	            return;
+	        }
+	        $("#statusRollbackReason").removeClass("is-invalid");
+
+	        const confirmButton = $(this);
+	        confirmButton.prop("disabled", true);
 
 	        $.ajax({
 	            url: 'ajax/reopenApprovedSampleAjax.php',
 	            method: 'POST',
 	            dataType: 'json',
 	            data: {
-	                sampleID: sampleID
+	                sampleID: sampleID,
+	                reason: reason
 	            },
 	            success: function (response) {
 	                if (response.success) {
@@ -801,6 +818,9 @@
 	                if (typeof toastr !== 'undefined') {
 	                    toastr.error(response.message || 'Unable to update the sample status.');
 	                }
+	            },
+	            complete: function () {
+	                confirmButton.prop("disabled", false);
 	            }
 	        });
 	    });
