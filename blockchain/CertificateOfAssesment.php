@@ -777,9 +777,7 @@
 	            method: 'POST',
 	            dataType: 'json',
 	            data: {
-	                resultsID: resultsID,
-	                sampleID: sampleID,
-	                currentStatus: currentStatus
+	                sampleID: sampleID
 	            },
 	            success: function (response) {
 	                if (response.success) {
