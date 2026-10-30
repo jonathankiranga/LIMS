@@ -3,16 +3,6 @@ require '../db_connection.php';
 require_once '../functions/functions.php';
 header('Content-Type: application/json; charset=utf-8');
 
-// The editors receive HTML. Convert legacy/plain text to safe HTML while
-// retaining every newline; already-formatted rich text is left unchanged.
-function coaTextForEditor($value) {
-    $value = (string)$value;
-    if (strpos($value, '<') !== false && preg_match('~</?[a-z][^>]*>~i', $value)) {
-        return $value;
-    }
-    return nl2br(htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), false);
-}
-
 $sampleID = trim((string)($_REQUEST['SampleID'] ?? $_REQUEST['sampleID'] ?? ''));
 $headerID = (int)($_REQUEST['HeaderID'] ?? 0);
 if ($sampleID === '' || $headerID <= 0) {
@@ -164,7 +154,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_POST['saveText'])) {
     $texts = [];
     foreach (['ResultsInterpretation', 'StatementOfConformity', 'Notes'] as $field) {
         $savedValue = $saved !== null ? trim((string)($saved[$field] ?? '')) : '';
-        $texts[$field] = coaTextForEditor($savedValue !== '' ? (string)$saved[$field] : (string)$defaults[$field]);
+        // Return the database value unchanged. Quill receives the stored
+        // rich-text markup/text directly; do not inject <br> or rewrite newlines.
+        $texts[$field] = $savedValue !== ''
+            ? (string)$saved[$field]
+            : (string)$defaults[$field];
     }
     echo json_encode(['success' => true, 'texts' => $texts]);
     exit;
