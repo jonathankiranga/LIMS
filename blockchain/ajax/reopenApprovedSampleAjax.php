@@ -5,103 +5,95 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid request method.'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
     exit;
 }
 
-$resultsID = isset($_POST['resultsID']) ? (int) $_POST['resultsID'] : 0;
-$sampleID = trim($_POST['sampleID'] ?? '');
-$currentStatus = isset($_POST['currentStatus']) ? (int) $_POST['currentStatus'] : 0;
+$sampleID = isset($_POST['sampleID']) ? trim((string)$_POST['sampleID']) : '';
 
-if ($resultsID <= 0 || $sampleID === '') {
+if ($sampleID === '') {
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Sample information is incomplete.'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Sample ID is required.']);
     exit;
 }
 
-if ($currentStatus !== 4) {
+try {
+    $conn->begin_transaction();
+
+    // Lock and inspect every result row belonging to this sample.
+    $checkStmt = $conn->prepare(
+        "SELECT resultsID, StatusID
+         FROM test_results
+         WHERE SampleID = ?
+         FOR UPDATE"
+    );
+    if (!$checkStmt) {
+        throw new RuntimeException('Failed to prepare sample validation: ' . $conn->error);
+    }
+
+    $checkStmt->bind_param('s', $sampleID);
+    if (!$checkStmt->execute()) {
+        throw new RuntimeException('Failed to inspect sample results: ' . $checkStmt->error);
+    }
+
+    $checkResult = $checkStmt->get_result();
+    $totalRows = 0;
+    $approvedRows = 0;
+
+    while ($row = $checkResult->fetch_assoc()) {
+        $totalRows++;
+        if ((int)$row['StatusID'] === 4) {
+            $approvedRows++;
+        }
+    }
+    $checkStmt->close();
+
+    if ($totalRows === 0) {
+        throw new RuntimeException('No result records were found for this sample.');
+    }
+    if ($approvedRows === 0) {
+        throw new RuntimeException('This sample no longer has approved results to roll back.');
+    }
+
+    // Reset the complete sample block to Analysis (StatusID 1).
+    $updateStmt = $conn->prepare(
+        "UPDATE test_results
+         SET StatusID = 1,
+             rollback = IFNULL(rollback, 0) + 1
+         WHERE SampleID = ?
+           AND StatusID <> 1"
+    );
+    if (!$updateStmt) {
+        throw new RuntimeException('Failed to prepare the sample-block reset: ' . $conn->error);
+    }
+
+    $updateStmt->bind_param('s', $sampleID);
+    if (!$updateStmt->execute()) {
+        throw new RuntimeException('Failed to reset the sample block: ' . $updateStmt->error);
+    }
+
+    $updatedRows = (int)$updateStmt->affected_rows;
+    $updateStmt->close();
+
+    if ($updatedRows < 1) {
+        throw new RuntimeException('No result records required resetting. The sample may already be in Analysis.');
+    }
+
+    $conn->commit();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'The complete sample block has been returned to Analysis.',
+        'sampleID' => $sampleID,
+        'approvedRows' => $approvedRows,
+        'updatedRows' => $updatedRows,
+        'newStatus' => 1
+    ]);
+} catch (Throwable $throwable) {
+    $conn->rollback();
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Only approved samples with status 4 can be reopened.'
-    ]);
-    exit;
+    echo json_encode(['success' => false, 'message' => $throwable->getMessage()]);
 }
 
-$stmt = $conn->prepare(
-    "UPDATE test_results
-     SET StatusID = 1, rollback = IFNULL(rollback, 0) + 1
-     WHERE resultsID = ? AND SampleID = ? AND StatusID = 4"
-);
-
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to prepare the status update.'
-    ]);
-    exit;
-}
-
-$stmt->bind_param('is', $resultsID, $sampleID);
-$stmt->execute();
-
-if ($stmt->error) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to update sample status: ' . $stmt->error
-    ]);
-    $stmt->close();
-    $conn->close();
-    exit;
-}
-
-if ($stmt->affected_rows < 1) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'No approved sample row was updated. The status may already have changed.'
-    ]);
-    $stmt->close();
-    $conn->close();
-    exit;
-}
-
-if ($stmt->affected_rows < 1) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'No approved sample row was updated. The status may already have changed.'
-    ]);
-    $stmt->close();
-    $conn->close();
-    exit;
-}
-
-// Get the rollback count
-$rollbackCount = 0;
-$getRollback = $conn->prepare("SELECT rollback FROM test_results WHERE resultsID = ?");
-$getRollback->bind_param('i', $resultsID);
-$getRollback->execute();
-$getRollback->bind_result($rollbackCount);
-$getRollback->fetch();
-$getRollback->close();
-
-$stmt->close();
 $conn->close();
-
-echo json_encode([
-    'success' => true,
-    'message' => 'Sample status Rolled back successfully.',
-    'resultsID' => $resultsID,
-    'sampleID' => $sampleID,
-    'oldStatus' => 4,
-    'newStatus' => 1,
-    'rollback' => $rollbackCount
-]);
 ?>
