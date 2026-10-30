@@ -433,12 +433,26 @@ public function Footer() {
   $this->SetXY(10, -8);
   $this->SetFont('montserrat', '', 7);
   if ($printedBy !== '') {
-      $this->Cell(80, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
+      $this->Cell(65, 4, 'Printed By: ' . $printedBy, 0, 0, 'L');
   }
-  $this->SetXY(80, -8);
-  $this->SetFont('montserrat', 'I', 8);
+  $this->SetXY(75, -8);
+  $this->SetFont('montserrat', 'I', 7);
   $pageNumber = 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages();
-  $this->Cell(120, 4, $pageNumber, 0, 0, 'C');
+  $this->Cell(75, 4, $pageNumber, 0, 0, 'C');
+
+  static $coaVersionId = null;
+  if ($coaVersionId === null) {
+      $coaVersionId = 'COA-V1.0.0';
+      if (isset($conn) && $conn instanceof mysqli) {
+          $versionResult = $conn->query("SELECT confvalue FROM config WHERE confname = 'COAVersionID' LIMIT 1");
+          if ($versionResult && ($versionRow = $versionResult->fetch_assoc()) && trim((string)$versionRow['confvalue']) !== '') {
+              $coaVersionId = trim((string)$versionRow['confvalue']);
+          }
+      }
+  }
+  $this->SetXY(150, -8);
+  $this->SetFont('montserrat', '', 6);
+  $this->Cell(50, 4, 'Version ID: ' . $coaVersionId, 0, 0, 'R');
 }
 
 }
