@@ -56,6 +56,7 @@
             if (key.indexOf('phone') !== -1 || key.indexOf('telephone') !== -1 || key.indexOf('mobile') !== -1) return 'fa-phone';
             if (key.indexOf('date') !== -1 || key.indexOf('time') !== -1) return 'fa-calendar-days';
             if (key.indexOf('font') !== -1 || key.indexOf('format') !== -1) return 'fa-font';
+            if (key.indexOf('version') !== -1 || key.indexOf('revision') !== -1) return 'fa-code-branch';
             if (key.indexOf('report') !== -1 || key.indexOf('coa') !== -1 || key.indexOf('certificate') !== -1) return 'fa-file-pdf';
             if (key.indexOf('url') !== -1 || key.indexOf('website') !== -1 || key.indexOf('api') !== -1) return 'fa-link';
             if (key.indexOf('number') !== -1 || key.indexOf('limit') !== -1 || key.indexOf('count') !== -1) return 'fa-hashtag';
