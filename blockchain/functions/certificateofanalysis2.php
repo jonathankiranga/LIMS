@@ -412,8 +412,22 @@ private function truncateText($text, $maxLength) {
    
 public function Footer() {
 
-  // The dedicated picture page has no printed-by line or page-number footer.
+  // The dedicated picture page keeps its clean footer, but still carries the COA version ID.
   if ($this->picturePage && $this->getPage() > 1) {
+      global $conn;
+      static $picturePageCoaVersionId = null;
+      if ($picturePageCoaVersionId === null) {
+          $picturePageCoaVersionId = 'COA-V1.0.0';
+          if (isset($conn) && $conn instanceof mysqli) {
+              $versionResult = $conn->query("SELECT confvalue FROM config WHERE confname = 'COA Version ID' LIMIT 1");
+              if ($versionResult && ($versionRow = $versionResult->fetch_assoc()) && trim((string)$versionRow['confvalue']) !== '') {
+                  $picturePageCoaVersionId = trim((string)$versionRow['confvalue']);
+              }
+          }
+      }
+      $this->SetXY(150, -8);
+      $this->SetFont('montserrat', '', 6);
+      $this->Cell(50, 4, 'Version ID: ' . $picturePageCoaVersionId, 0, 0, 'R');
       return;
   }
 
