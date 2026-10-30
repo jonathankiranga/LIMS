@@ -444,7 +444,7 @@ public function Footer() {
   if ($coaVersionId === null) {
       $coaVersionId = 'COA-V1.0.0';
       if (isset($conn) && $conn instanceof mysqli) {
-          $versionResult = $conn->query("SELECT confvalue FROM config WHERE confname = 'COAVersionID' LIMIT 1");
+          $versionResult = $conn->query("SELECT confvalue FROM config WHERE confname = 'COA Version ID' LIMIT 1");
           if ($versionResult && ($versionRow = $versionResult->fetch_assoc()) && trim((string)$versionRow['confvalue']) !== '') {
               $coaVersionId = trim((string)$versionRow['confvalue']);
           }
