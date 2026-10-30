@@ -200,7 +200,8 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 <tbody id="sampleTestsBody"></tbody></table></div><div class="mt-3">
   <h6 class="fw-bold">COA Text Formatting</h6>
   <p class="small text-muted mb-2">Use the rich-text toolbar for bold, italic, underline, lists, superscript, subscript, and paragraph line breaks.</p>
-  <label class="form-label fw-bold" for="ResultsInterpretationEditor">Interpretation of Analysis Results</label>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2"><label class="form-label fw-bold mb-1" for="ResultsInterpretationEditor">Interpretation of Analysis Results</label><button type="button" id="generateResultsInterpretationBtn" class="btn btn-outline-primary btn-sm" onclick="generateResultsInterpretation()"><i class="fas fa-wand-magic-sparkles"></i> Generate Interpretation with AI</button></div>
+  <div class="small text-muted mb-2">AI prepares a draft using this sample’s Scope of Work, registered standard method, limits and recorded results. Review and edit the draft before saving.</div>
   <div id="ResultsInterpretationEditor" class="quill-editor mb-3"></div>
   <label class="form-label fw-bold mt-2" for="StatementOfConformityEditor">Statement of Conformity</label>
   <div id="StatementOfConformityEditor" class="quill-editor mb-3"></div>
@@ -237,6 +238,34 @@ function wrGo(p){wrPage=p;wrRenderPage();}
 function searchTable(){const i=document.getElementById('searchInput');wrQuery=i?i.value.trim().toLowerCase():'';wrPage=1;wrRenderPage();}
 function fetchTestResults(flag){const tb=document.querySelector('#testResultsTable tbody');tb.innerHTML='<tr><td colspan="7" class="text-center">Loading...</td></tr>';fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1&wholeSample=1').then(r=>r.json()).then(data=>{if(!data.success){wrRows=[];wrResults=[];const message=data.message||'No pending sample blocks were returned.';tb.innerHTML='<tr><td colspan="7" class="text-center">'+esc(message)+'</td></tr>';wrRenderPager(1,0);return;}wrResults=data.results||[];wrRows=[];wrResults.forEach((sample,index)=>{const tests=sample.tests||[];const names=tests.map(t=>'<li>'+esc(t.ParameterName)+'</li>').join('');const summary=tests.map(t=>'<span class="result-badge"><b>'+esc(t.ParameterName)+':</b> '+esc(resultValue(t))+'</span>').join('');const row=document.createElement('tr');row.innerHTML='<td><button class="btn btn-primary btn-sm" onclick="openApprovalModal('+index+')"><i class="fas fa-tasks"></i> Review / Approve</button></td><td>'+(index+1)+'</td><td>'+esc(sample.DocumentNo||'')+'</td><td><strong>'+esc(sample.SampleID||'')+'</strong></td><td>'+esc((sample.Date||'').split(' ')[0])+'</td><td>'+tests.length+'</td><td><ul class="test-list">'+names+'</ul><div>'+summary+'</div></td>';wrRows.push(row);});wrPage=1;wrRenderPage();}).catch(err=>{console.error(err);tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">Error loading results.</td></tr>';});}
 async function openApprovalModal(index){const sample=wrResults[index];if(!sample)return;document.getElementById('blockHeaderID').value=sample.HeaderID||'';document.getElementById('blockSampleID').value=sample.SampleID||'';document.getElementById('blockDocumentNo').value=sample.DocumentNo||'';document.getElementById('blockTestCount').value=(sample.tests||[]).length;document.getElementById('approvalStatus').value='';const body=document.getElementById('sampleTestsBody');body.innerHTML='';(sample.tests||[]).forEach((t,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #e5edf5;">'+(i+1)+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;"><strong>'+esc(t.ParameterName||'')+'</strong>'+(t.ParamCategory?'<br><small>'+esc(t.ParamCategory)+'</small>':'')+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc(resultValue(t))+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc('Limits: '+(t.Limits||'N/A')+' | Unit: '+(t.UnitOfMeasure||'N/A'))+'</td>';body.appendChild(tr);});const editors={ResultsInterpretation:'ResultsInterpretationEditor',StatementOfConformity:'StatementOfConformityEditor',Notes:'NotesEditor'};Object.values(editors).forEach(id=>{if(window.quillInstances[id])window.quillInstances[id].root.innerHTML='';});const modal=bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));modal.show();try{const url='ajax/sample_coa_text.php?SampleID='+encodeURIComponent(sample.SampleID||'')+'&HeaderID='+encodeURIComponent(sample.HeaderID||'');const response=await fetch(url,{cache:'no-store'});const data=await response.json();if(!data.success)throw new Error(data.message||'Unable to load saved COA text.');Object.keys(editors).forEach(key=>{if(window.quillInstances[editors[key]])window.quillInstances[editors[key]].root.innerHTML=(data.texts&&data.texts[key]!=null)?String(data.texts[key]):'';});}catch(error){console.error('Failed to preload COA text:',error);toastr.error('Could not preload Notes, Interpretation and Statement of Conformity. '+(error.message||''));}}
+async function generateResultsInterpretation(){
+    var sampleID=document.getElementById('blockSampleID').value;
+    var headerID=document.getElementById('blockHeaderID').value;
+    var editor=window.quillInstances.ResultsInterpretationEditor;
+    var button=document.getElementById('generateResultsInterpretationBtn');
+    if(!sampleID||!headerID){toastr.error('Sample information is missing.');return;}
+    if(!editor){toastr.error('The Results Interpretation editor is not available.');return;}
+    if(editor.getText().trim() && !window.confirm('Replace the current Results Interpretation with a new AI-generated draft?')) return;
+    var originalButton=button.innerHTML;
+    button.disabled=true;
+    button.innerHTML='<i class="fas fa-spinner fa-spin"></i> Generating...';
+    try{
+        var formData=new FormData();
+        formData.append('SampleID',sampleID);
+        formData.append('HeaderID',headerID);
+        var response=await fetch('ajax/generate_results_interpretation.php',{method:'POST',body:formData,cache:'no-store'});
+        var data=await response.json();
+        if(!response.ok||!data.success) throw new Error(data.message||'AI interpretation could not be generated.');
+        editor.root.innerHTML=String(data.interpretation||'');
+        toastr.success('AI interpretation draft inserted. Review it carefully before saving.');
+    }catch(error){
+        console.error('AI Results Interpretation failed:',error);
+        toastr.error(error.message||'AI interpretation could not be generated.');
+    }finally{
+        button.disabled=false;
+        button.innerHTML=originalButton;
+    }
+}
 function normalizeApprovalHtml(value){var html=String(value==null?'':value);html=html.replace(/[\r\n]+/g,'');html=html.replace(/(?:<p>\s*(?:(?:<br\s*\/?\s*>)|&nbsp;|\s)*<\/p>\s*)+/gi,'');html=html.replace(/(?:<div>\s*<br\s*\/?\s*>\s*<\/div>\s*)+/gi,'');return html;}
 function coaEditorHtml(value){const text=String(value==null?'':value);if(/<\/?[a-z][^>]*>/i.test(text))return text;return esc(text).replace(/\r\n|\r|\n/g,'<br>');}
 function submitApproval(){const h=document.getElementById('blockHeaderID').value,s=document.getElementById('blockSampleID').value,a=document.getElementById('approvalStatus').value,f=document.getElementById('flag').value;if(!h||!s){toastr.error('Sample information is missing.');return;}if(!a){toastr.error('Please select a block decision.');return;}const fd=new FormData();for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k==='user_id')fd.append(k,localStorage.getItem(k));}fd.set('blockApproval','1');fd.set('reviewBlockApproval','1');fd.set('HeaderID',h);fd.set('SampleID',s);fd.set('flag',f);fd.set('approvalStatus',a);fd.set('ResultsInterpretation',normalizeApprovalHtml(window.quillInstances.ResultsInterpretationEditor ? window.quillInstances.ResultsInterpretationEditor.root.innerHTML : ''));fd.set('StatementOfConformity',normalizeApprovalHtml(window.quillInstances.StatementOfConformityEditor ? window.quillInstances.StatementOfConformityEditor.root.innerHTML : ''));fd.set('Notes',normalizeApprovalHtml(window.quillInstances.NotesEditor ? window.quillInstances.NotesEditor.root.innerHTML : ''));if(!fd.get('user_id')){toastr.error('User identity was not found. Please log in again.');return;}const btn=document.querySelector('#approveModal .btn-success');if(btn)btn.disabled=true;fetch('ajax/approve_test_result_3.php',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{if(data.success){toastr.success(data.message);bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();fetchTestResults(3);}else toastr.error(data.message||'Sample block approval failed.');}).catch(err=>{console.error(err);toastr.error('An error occurred while approving the sample block.');}).finally(()=>{if(btn)btn.disabled=false;});}
