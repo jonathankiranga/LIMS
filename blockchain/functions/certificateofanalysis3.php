@@ -437,7 +437,7 @@ public function Footer() {
   }
   $this->SetXY(150, -8);
   $this->SetFont('montserrat', '', 6);
-  $this->Cell(50, 4, 'Version ID: ' . $coaVersionId, 0, 0, 'R');
+  $this->Cell(50, 4, $coaVersionId, 0, 0, 'R');
 }
 }
 
