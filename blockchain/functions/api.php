@@ -1089,6 +1089,36 @@ if ($action === 'getWorkspaceBoard') {
     $board = ensure_workspace_board($db, $workspaceId, $userId);
     $boardId = (int)($board['id'] ?? 0);
     $lists = get_workspace_board_lists($db, $boardId);
+
+    // Workspace-wide events are independent of cards. A sample reversal is
+    // therefore visible here without creating a synthetic card relationship.
+    $workspaceActivity = array();
+    if (table_exists($db, 'workspace_activity')) {
+        $activityResult = db_query_safe(
+            $db,
+            "SELECT wa.id, wa.sample_id, wa.action_type, wa.details, wa.user_id,
+                    COALESCE(u.full_name, wa.user_id) AS full_name, wa.created_at
+             FROM workspace_activity wa
+             LEFT JOIN users u ON wa.user_id = u.user_id
+             ORDER BY wa.created_at DESC, wa.id DESC
+             LIMIT 50",
+            'getWorkspaceBoard:workspace_activity'
+        );
+        if ($activityResult) {
+            while ($activityRow = $activityResult->fetch_assoc()) {
+                $workspaceActivity[] = array(
+                    'id' => (int)$activityRow['id'],
+                    'sample_id' => $activityRow['sample_id'],
+                    'action_type' => $activityRow['action_type'],
+                    'details' => $activityRow['details'],
+                    'user_id' => $activityRow['user_id'],
+                    'full_name' => $activityRow['full_name'],
+                    'created_at' => $activityRow['created_at']
+                );
+            }
+        }
+    }
+
     $cards = array();
     $cardResult = db_query_safe($db, "SELECT c.*, GROUP_CONCAT(cm.user_id ORDER BY cm.id SEPARATOR ',') AS member_ids, GROUP_CONCAT(COALESCE(u.full_name, cm.user_id) ORDER BY cm.id SEPARATOR '||') AS member_names FROM workspace_cards c LEFT JOIN workspace_card_members cm ON c.id = cm.card_id LEFT JOIN users u ON cm.user_id = u.user_id WHERE c.board_id=$boardId AND c.archived=0 GROUP BY c.id ORDER BY c.position ASC, c.updated_at DESC", 'getWorkspaceBoard:cards');
     if ($cardResult) {
@@ -1114,6 +1144,7 @@ if ($action === 'getWorkspaceBoard') {
         'board' => $board,
         'lists' => $lists,
         'cards' => $cards,
+        'workspace_activity' => $workspaceActivity,
         'members' => $members,
         'permissions' => array(
             'can_manage' => can_manage_workspace($db, $workspaceId, $userId),
