@@ -33,6 +33,16 @@
 .kanban-filter-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5e6c84; }
 .kanban-filters input, .kanban-filters select, .kanban-form-group input, .kanban-form-group select, .kanban-form-group textarea { width: 100%; padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 13px; background: #fff; }
 .kanban-filters input:focus, .kanban-filters select:focus, .kanban-form-group input:focus, .kanban-form-group select:focus, .kanban-form-group textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.14); }
+.workspace-activity-panel { margin: 0 0 14px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.35); border-radius: 12px; background: rgba(255,255,255,0.96); box-shadow: 0 6px 14px rgba(9,30,66,0.10); }
+.workspace-activity-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.workspace-activity-head h3 { margin: 0; color: #17324d; font-size: 15px; font-weight: 800; }
+.workspace-activity-list { display: grid; gap: 8px; }
+.workspace-activity-item { display: grid; grid-template-columns: minmax(130px, 0.7fr) minmax(0, 2fr) auto; gap: 12px; align-items: start; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fbfd; }
+.workspace-activity-sample { color: #17324d; font-size: 13px; font-weight: 800; overflow-wrap: anywhere; }
+.workspace-activity-reason { color: #334155; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.workspace-activity-meta { color: #64748b; font-size: 11px; text-align: right; white-space: nowrap; }
+.workspace-activity-tag { display: inline-block; margin-bottom: 4px; padding: 3px 7px; border-radius: 999px; background: #fff1f2; color: #9f1239; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+@media (max-width: 760px) { .workspace-activity-item { grid-template-columns: 1fr; gap: 5px; } .workspace-activity-meta { text-align: left; white-space: normal; } }
 .kanban-board { display: flex; gap: 12px; overflow-x: auto; padding: 2px 2px 10px; align-items: flex-start; }
 .kanban-col { min-width: 280px; width: 280px; max-width: 280px; max-height: calc(100vh - 160px); display: flex; flex-direction: column; border-radius: 12px; background: rgba(235, 240, 245, 0.96); box-shadow: 0 8px 16px rgba(9, 30, 66, 0.12); overflow: hidden; }
 .kanban-col-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px; background: rgba(255,255,255,0.84); border-bottom: 1px solid #d9e2ec; }
@@ -211,6 +221,16 @@
         <button class="kanban-view-btn" data-view="field-activities"><i class="fas fa-clipboard-list"></i> Field Activities</button>
     </div>
 </div>
+
+<section class="workspace-activity-panel" aria-labelledby="workspaceActivityTitle">
+    <div class="workspace-activity-head">
+        <h3 id="workspaceActivityTitle"><i class="fas fa-clock-rotate-left"></i> Workspace Activity</h3>
+        <span class="kanban-filter-label">Latest sample and workspace events</span>
+    </div>
+    <div id="workspaceActivityList" class="workspace-activity-list">
+        <div class="kanban-empty">Loading workspace activity...</div>
+    </div>
+</section>
 
 <div id="kanbanBoard" class="kanban-board"></div>
 
@@ -1087,6 +1107,32 @@ async function toggleArchiveCard() {
     await loadBoard();
 }
 
+function renderWorkspaceActivity(activity) {
+    const container = document.getElementById('workspaceActivityList');
+    if (!container) return;
+    const entries = Array.isArray(activity) ? activity : [];
+    if (!entries.length) {
+        container.innerHTML = '<div class="kanban-empty">No workspace activity has been recorded yet.</div>';
+        return;
+    }
+    container.innerHTML = entries.map(item => {
+        const isComplaint = item.action_type === 'customer_complaint';
+        const label = isComplaint ? 'Customer Complaint' : String(item.action_type || 'Workspace activity').replace(/_/g, ' ');
+        const sample = item.sample_id ? escapeHtml(item.sample_id) : '';
+        const reason = escapeHtml(item.details || '');
+        const person = escapeHtml(item.full_name || item.user_id || 'User');
+        const when = escapeHtml(formatDateTime(item.created_at));
+        return `<article class="workspace-activity-item">
+            <div>
+                <span class="workspace-activity-tag">${escapeHtml(label)}</span>
+                ${sample ? `<div class="workspace-activity-sample">Sample ID: ${sample}</div>` : ''}
+            </div>
+            <div class="workspace-activity-reason">${reason}</div>
+            <div class="workspace-activity-meta">${person}<br>${when}</div>
+        </article>`;
+    }).join('');
+}
+
 async function loadBoard() {
     const data = await fetchJson(API_URL + '?action=getWorkspaceBoard&workspace_id=' + WORKSPACE_ID);
     if (!data.data) {
@@ -1094,6 +1140,7 @@ async function loadBoard() {
         return;
     }
     boardData = data.data;
+    renderWorkspaceActivity(data.data.workspace_activity || []);
     lists = data.data.lists || [];
     cards = data.data.cards || [];
     members = data.data.members || [];
