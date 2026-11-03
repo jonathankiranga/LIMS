@@ -30,7 +30,7 @@ $Arraysystypes=array();
 
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' .$Title.'" alt="" />' . ' ' .$Title. '</p>';
  
-if(isset($_POST['confirm']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno'])){
+if(isset($_POST['confirm']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno']) && in_array((int)$_POST['documenttype'], array(18, 21, 24), true) && preg_match('/^[A-Za-z0-9._\\/-]{1,20}$/', $_POST['documentno'])){
     $approvalDocumentType = (int)$_POST['documenttype'];
     $approvalDocumentNo = trim($_POST['documentno']);
     DB_query("UPDATE `PurchaseHeader` SET `released` = 1,`status`=2 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
