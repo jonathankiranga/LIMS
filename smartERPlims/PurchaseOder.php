@@ -24,8 +24,8 @@ If($_SESSION['SINGLEUSER']=='Singleuser'){
     }
 
     if(isset($_POST['confirm'])){
-        DB_query("UPDATE `PurchaseHeader` SET `released` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
-        DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+        DB_query("UPDATE `PurchaseHeader` SET `released` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
+        DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
      
       echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
