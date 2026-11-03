@@ -41,6 +41,9 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
+    if (!isset($_POST['FormID']) || !hash_equals((string)$_SESSION['FormID'], (string)$_POST['FormID'])) {
+        $error = 'Your session validation has expired. Reload the page and try again.';
+    }
     $title = rfq_post('title');
     $description = rfq_post('description');
     $terms = rfq_post('terms_conditions');
@@ -52,8 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
     $lineUnits = isset($_POST['line_unit']) ? $_POST['line_unit'] : array();
     $lineCodes = isset($_POST['line_itemcode']) ? $_POST['line_itemcode'] : array();
 
-    if ($title === '' || $terms === '' || $currency === '' || $closing === '' || count($lineDescriptions) === 0) {
+    if ($error === '' && ($title === '' || $terms === '' || $currency === '' || $closing === '' || count($lineDescriptions) === 0)) {
         $error = 'Complete the RFQ title, terms and conditions, currency, closing date, and at least one line.';
+    } elseif ($error === '' && strtotime($closing) <= time()) {
+        $error = 'The quotation closing date and time must be in the future.';
     } else {
         $validLines = array();
         foreach ($lineDescriptions as $i => $descriptionLine) {
@@ -92,10 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
+    if (!isset($_POST['FormID']) || !hash_equals((string)$_SESSION['FormID'], (string)$_POST['FormID'])) {
+        $error = 'Your session validation has expired. Reload the page and try again.';
+    }
     $rfqId = (int)$_POST['rfq_id'];
     $selected = isset($_POST['supplier_codes']) && is_array($_POST['supplier_codes']) ? array_unique($_POST['supplier_codes']) : array();
     $rfqResult = DB_query("SELECT * FROM rfq_header WHERE id=" . $rfqId . " AND status='draft'", $db);
-    if (DB_num_rows($rfqResult) !== 1 || count($selected) === 0) {
+    if ($error !== '' || DB_num_rows($rfqResult) !== 1 || count($selected) === 0) {
         $error = 'Select at least one supplier and a valid draft RFQ.';
     } else {
         $rfq = DB_fetch_array($rfqResult);
@@ -131,11 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
+    if (!isset($_POST['FormID']) || !hash_equals((string)$_SESSION['FormID'], (string)$_POST['FormID'])) {
+        $error = 'Your session validation has expired. Reload the page and try again.';
+    }
     $rfqId = (int)$_POST['rfq_id'];
     $quoteId = (int)$_POST['quote_id'];
     $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,h.status FROM rfq_quotes q
         JOIN rfq_header h ON h.id=q.rfq_id WHERE q.id=" . $quoteId . " AND q.rfq_id=" . $rfqId, $db);
-    if (DB_num_rows($qr) !== 1) {
+    if ($error !== '' || DB_num_rows($qr) !== 1) {
         $error = 'The selected quotation does not belong to this RFQ.';
     } else {
         $selectedQuote = DB_fetch_array($qr);
