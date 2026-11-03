@@ -84,7 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                     DB_escape_string($currency) . "','" . DB_escape_string(str_replace('T', ' ', $closing)) .
                     ":00','draft','" . DB_escape_string(isset($_SESSION['UsersRealName']) ? $_SESSION['UsersRealName'] : $_SESSION['UserID']) . "')";
             DB_query($sql, $db);
-            $rfqId = mysqli_insert_id($db);
+            $newRfqResult = DB_query("SELECT id FROM rfq_header WHERE rfq_no='" . DB_escape_string($rfqNo) . "' LIMIT 1", $db);
+            $newRfqRow = DB_fetch_array($newRfqResult);
+            $rfqId = (int)$newRfqRow['id'];
             foreach ($validLines as $i => $line) {
                 DB_query("INSERT INTO rfq_lines (rfq_id,itemcode,description,specification,quantity,unit,line_no)
                     VALUES (" . (int)$rfqId . ",'" . DB_escape_string($line['itemcode']) . "','" .
