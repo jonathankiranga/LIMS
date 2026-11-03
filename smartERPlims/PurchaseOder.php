@@ -113,12 +113,19 @@ if ($rfqPrefillError !== '') {
  
  if(isset($_GET['new']) && !isset($_GET['rfq_quote_id'])){
      $POSclass->neworder();
+     unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
  }
  
 If($_SESSION['SINGLEUSER']=='Singleuser'){
     if(isset($_POST['Delete'])){
         DB_query("Delete from `PurchaseLine` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
         DB_query("delete from `PurchaseHeader` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
+        if (isset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'])) {
+            DB_query("UPDATE rfq_header SET po_documentno=NULL WHERE id=" . (int)$_SESSION['RFQHeaderID'] .
+                " AND awarded_quote_id=" . (int)$_SESSION['RFQQuoteID'] . " AND po_documentno='" .
+                DB_escape_string($_SESSION['CompleteDocument']) . "'", $db);
+        }
+        unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
         prnMsg('Purchase order :'.$_SESSION['CompleteDocument'].' has been Deleted.');
         unset($_POST);
     }
@@ -126,6 +133,7 @@ If($_SESSION['SINGLEUSER']=='Singleuser'){
     if(isset($_POST['confirm'])){
         DB_query("UPDATE `PurchaseHeader` SET `released` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
         DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
+        unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
      
       echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
