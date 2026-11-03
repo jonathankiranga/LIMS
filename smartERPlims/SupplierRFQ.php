@@ -1,5 +1,22 @@
 <?php
 // Public supplier quotation portal. Access is granted only by an invitation token.
+// Resolve the tenant database from the invitation URL before the normal ERP bootstrap.
+session_name('ErpWithCRM');
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+include('config.php');
+$requestedDatabase = isset($_GET['company']) ? trim($_GET['company']) : (isset($_POST['company']) ? trim($_POST['company']) : '');
+$allowedDatabases = array();
+if (isset($CompanyList) && is_array($CompanyList)) {
+    foreach ($CompanyList as $companyEntry) {
+        if (isset($companyEntry['database'])) { $allowedDatabases[] = $companyEntry['database']; }
+    }
+}
+if ($requestedDatabase === '' || !in_array($requestedDatabase, $allowedDatabases, true)) {
+    http_response_code(403);
+    die('The supplier invitation does not identify a valid company database.');
+}
+$DatabaseName = $requestedDatabase;
+$_SESSION['DatabaseName'] = $requestedDatabase;
 $AllowAnyone = true;
 include('includes/session.inc');
 
@@ -119,7 +136,7 @@ echo '<div class="row"><div class="col-sm-8"><h4>' . supplier_rfq_h($invitation[
 if ($invitation['description'] !== '') { echo '<p>' . nl2br(supplier_rfq_h($invitation['description'])) . '</p>'; }
 echo '</div><div class="col-sm-4 text-right"><strong>Quotation deadline</strong><br>' . supplier_rfq_h($invitation['closing_at']) . '<br><strong>Currency:</strong> ' . supplier_rfq_h($invitation['currencycode']) . '</div></div><hr>';
 echo '<h4>Terms and conditions</h4><div class="terms">' . supplier_rfq_h($invitation['terms_conditions']) . '</div>';
-echo '<form method="post" style="margin-top:20px"><input type="hidden" name="token" value="' . supplier_rfq_h($token) . '"><h4>Quoted prices</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Product / reagent</th><th>Specification</th><th>Requested Qty</th><th>Unit Price (' . supplier_rfq_h($invitation['currencycode']) . ')</th><th>Tax %</th><th>Availability / brand / pack details</th></tr></thead><tbody>';
+echo '<form method="post" style="margin-top:20px"><input type="hidden" name="token" value="' . supplier_rfq_h($token) . '"><input type="hidden" name="company" value="' . supplier_rfq_h($requestedDatabase) . '"><h4>Quoted prices</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Product / reagent</th><th>Specification</th><th>Requested Qty</th><th>Unit Price (' . supplier_rfq_h($invitation['currencycode']) . ')</th><th>Tax %</th><th>Availability / brand / pack details</th></tr></thead><tbody>';
 foreach ($lines as $idx => $line) {
     echo '<tr><td>' . supplier_rfq_h($line['description']) . '</td><td>' . nl2br(supplier_rfq_h($line['specification'])) . '</td><td>' . supplier_rfq_h($line['quantity'] . ' ' . $line['unit']) . '</td>';
     echo '<td><input class="form-control" type="number" min="0" step="0.0001" name="unit_price[' . $idx . ']" required></td><td><input class="form-control" type="number" min="0" max="100" step="0.01" name="tax_rate[' . $idx . ']" value="0" required></td><td><input class="form-control" name="availability_notes[' . $idx . ']" placeholder="Brand, pack size, stock availability"></td></tr>';
