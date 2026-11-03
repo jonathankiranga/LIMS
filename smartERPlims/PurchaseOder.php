@@ -77,6 +77,17 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                     'vatrate' => 0
                 );
             }
+            $firstPrefillLine = reset($_SESSION['Purchase_orders']);
+            $_POST['stockitemcode'] = $firstPrefillLine['itemcode'];
+            $_POST['qty'] = $firstPrefillLine['quantity'];
+            $_POST['units'] = $firstPrefillLine['uom'];
+            $_POST['packzize'] = $firstPrefillLine['partsperunit'];
+            $_POST['cost'] = $firstPrefillLine['price'];
+            $_POST['vatcategory'] = $firstPrefillLine['vatcategory'];
+            $_POST['discount'] = $firstPrefillLine['discount'];
+            $_POST['recqty'] = $firstPrefillLine['ReceivedQuantity'];
+            $_POST['unitsreceived'] = $firstPrefillLine['uomreceived'];
+            $_POST['packzizegrn'] = $firstPrefillLine['packzizegrn'];
             $todayResult = DB_query("SELECT NOW() AS today", $db);
             $todayRow = DB_fetch_array($todayResult);
             $_POST['date'] = ConvertSQLDate($todayRow['today']);
