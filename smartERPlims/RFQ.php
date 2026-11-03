@@ -219,6 +219,11 @@ if (isset($_GET['compare'])) {
         echo '<h3>Quotation comparison — ' . rfq_h($head['rfq_no']) . '</h3>';
         if ($head['status'] === 'awarded') {
             echo '<div class="alert alert-success">Awarded to supplier ' . rfq_h($head['awarded_supplier_code']) . '. Selected quotation ID: ' . (int)$head['awarded_quote_id'] . '.</div>';
+            if (empty($head['po_documentno'])) {
+                echo '<p><a class="btn btn-primary" href="PurchaseOder.php?rfq_quote_id=' . (int)$head['awarded_quote_id'] . '">Create Purchase Order from awarded quotation</a></p>';
+            } else {
+                echo '<p class="alert alert-info">Purchase Order created: ' . rfq_h($head['po_documentno']) . '</p>';
+            }
         }
         $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
         $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode=q.supplier_code WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
