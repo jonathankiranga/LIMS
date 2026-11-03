@@ -240,16 +240,44 @@ if (isset($_GET['compare'])) {
             echo '</th>';
         }
         echo '</tr></thead><tbody>';
+        $quoteTotals = array_fill(0, count($quoteRows), 0);
         while ($line = DB_fetch_array($lines)) {
             echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['unit']) . '</small></th>';
-            foreach ($quoteRows as $q) {
+            foreach ($quoteRows as $quoteIndex => $q) {
                 $qr = DB_query("SELECT unit_price,tax_rate,availability_notes FROM rfq_quote_lines WHERE quote_id=" . (int)$q['id'] . " AND rfq_line_id=" . (int)$line['id'], $db);
-                if (DB_num_rows($qr)) { $v = DB_fetch_array($qr); echo '<td>' . rfq_h($head['currencycode']) . ' ' . number_format((float)$v['unit_price'], 4) . '<br><small>Tax: ' . number_format((float)$v['tax_rate'], 2) . '%<br>' . rfq_h($v['availability_notes']) . '</small></td>'; }
-                else { echo '<td>—</td>'; }
+                if (DB_num_rows($qr)) {
+                    $v = DB_fetch_array($qr);
+                    $lineTotal = (float)$line['quantity'] * (float)$v['unit_price'];
+                    if (empty($q['tax_inclusive'])) { $lineTotal *= (1 + ((float)$v['tax_rate'] / 100)); }
+                    $quoteTotals[$quoteIndex] += $lineTotal;
+                    echo '<td>' . rfq_h($head['currencycode']) . ' ' . number_format((float)$v['unit_price'], 4) .
+                        '<br><small>Tax: ' . number_format((float)$v['tax_rate'], 2) . '%<br>' . rfq_h($v['availability_notes']) . '</small></td>';
+                } else { echo '<td>—</td>'; }
             }
             echo '</tr>';
         }
-        echo '</tbody></table></div><p><strong>Note:</strong> Supplier selection and PO conversion are the next integration stage; quotations are preserved as submitted.</p>';
+        echo '<tr><th>Indicative quotation total (' . 'quoted tax treatment applied' . ')</th>';
+        foreach ($quoteRows as $quoteIndex => $q) {
+            echo '<td><strong>' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</strong></td>';
+        }
+        echo '</tr></tbody></table></div>';
+
+        echo '<h4>Commercial terms comparison</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Term</th>';
+        foreach ($quoteRows as $q) { echo '<th>' . rfq_h($q['customer']) . '</th>'; }
+        echo '</tr></thead><tbody>';
+        $commercialFields = array(
+            'Tax treatment' => function($q) { return !empty($q['tax_inclusive']) ? 'Prices inclusive of tax' : 'Tax additional'; },
+            'Quotation validity' => function($q) { return $q['validity_date'] ? $q['validity_date'] : 'Not specified'; },
+            'Delivery lead time' => function($q) { return $q['delivery_days'] !== null ? $q['delivery_days'] . ' days' : 'Not specified'; },
+            'Payment terms' => function($q) { return $q['payment_terms'] !== '' ? $q['payment_terms'] : 'Not specified'; },
+            'Supplier notes / deviations' => function($q) { return $q['supplier_notes'] !== '' ? $q['supplier_notes'] : 'None stated'; }
+        );
+        foreach ($commercialFields as $label => $valueFunction) {
+            echo '<tr><th>' . rfq_h($label) . '</th>';
+            foreach ($quoteRows as $q) { echo '<td>' . nl2br(rfq_h($valueFunction($q))) . '</td>'; }
+            echo '</tr>';
+        }
+        echo '</tbody></table></div><p><strong>Indicative totals</strong> use each supplier’s declared tax-inclusive or tax-exclusive pricing treatment. Confirm freight and any other excluded charges before awarding.</p>';
     }
 }
 echo '</div>';
