@@ -111,7 +111,22 @@ if (count($grnValidationErrors) > 0) {
         }
         $journal = GetNextTransNo(0, $db);
         $sql = array();
-        RecordGRN($INVOICENO, $receivedLines);
+
+        $receiptValue = 0;
+        foreach ($receivedLines as $receipt) {
+            $sourceLine = $receipt['line'];
+            $sourceQty = (float)$sourceLine['QuantityToReceive'];
+            if ($sourceQty > 0) {
+                $receiptValue += (float)$sourceLine['invoiceamount'] * ($receipt['qty'] / $sourceQty);
+            }
+        }
+        $orderValueResult = DB_query("SELECT SUM(invoiceamount) AS ordervalue
+            FROM PurchaseLine WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'", $db);
+        $orderValueRow = DB_fetch_array($orderValueResult);
+        $orderValue = isset($orderValueRow['ordervalue']) ? (float)$orderValueRow['ordervalue'] : 0;
+        $freightRatio = ($orderValue > 0) ? min(1, max(0, $receiptValue / $orderValue)) : 0;
+
+        RecordGRN($INVOICENO, $receivedLines, $freightRatio);
 
         foreach ($receivedLines as $entryNo => $receipt) {
             $qty = $receipt['qty'];
@@ -165,7 +180,7 @@ if (count($grnValidationErrors) > 0) {
     }
 }
 
-Function RecordGRN($DOCNO, $receivedLines){
+Function RecordGRN($DOCNO, $receivedLines, $freightRatio){
     Global $db, $sql;
     $sourceDocumentNo = $_SESSION['DocumentNo'];
 
@@ -181,7 +196,7 @@ Function RecordGRN($DOCNO, $receivedLines){
            ".(Is_date($_POST['datedue'])?',duedate':'')."
            ,vendorcode, vendorname, yourreference, locationcode, postinggroup,
             currencycode, status, userid, period, vatinclusive, Dimension_1,
-            Dimension_2, freight
+            Dimension_2, (IFNULL(freight,0) * ".sprintf('%.8f', (float)$freightRatio).")
        FROM PurchaseHeader
        WHERE documenttype=18 AND documentno='".$sourceDocumentNo."')";
 
