@@ -238,17 +238,19 @@ $MenuItems['AccountsReceivable']['Maintenance']['URL'] = array('/CustomersPostin
                                                               '/Customer.php');
 
 /***********************************************/
-$MenuItems['Purchases']['Transactions']['Caption'] = array(_('Purchase\'s Order'),
+$MenuItems['Purchases']['Transactions']['Caption'] = array(_('Request for Quotation (RFQ)'),
+                                                           _('Purchase\\'s Order'),
                                                            _('Goods Received Note'),
-                                                           _('Supplier\'s Purchase Invoice'),
-                                                           _('Supplier\'s Return Stock'),
-                                                           _('Supplier\'s Debit Note'),
+                                                           _('Supplier\\'s Purchase Invoice'),
+                                                           _('Supplier\\'s Return Stock'),
+                                                           _('Supplier\\'s Debit Note'),
                                                            _('Request for Assets'),
                                                            _('Receive for Assets'),
                                                            _('Fixed Assets Invoice'));
 
 
-$MenuItems['Purchases']['Transactions']['URL'] = array('/PurchaseOder.php?new=YES',
+$MenuItems['Purchases']['Transactions']['URL'] = array('/RFQ.php',
+                                                       '/PurchaseOder.php?new=YES',
                                                        '/PurchaseOrderList.php',
                                                        '/GoodsReceivedNote.php',
                                                        '/PurchaseOrderDBlist.php',
