@@ -557,9 +557,12 @@
      }
       
      function Getitems($itemcode,$qty,$uom,$packzize,$prize,$vatcategory,$discount=0,$recqty,$receiveduom,$packzizegrn){
-         $StockList = $this->GetStockdetails($itemcode,$vatcategory);
+         $StockList = array();
+         if (trim((string)$itemcode) !== '') {
+             $StockList = $this->GetStockdetails($itemcode,$vatcategory);
+         }
           
-         if(mb_strwidth($StockList['itemcode'])>0){
+         if(isset($StockList['itemcode']) && mb_strwidth($StockList['itemcode'])>0){
          $id = trim($StockList['itemcode']);
          $_SESSION['Purchase_orders'][$id]= 
                   array('line_no'=>$id,
@@ -612,7 +615,7 @@
               
             $debtorsrow = DB_fetch_row($results);
             $this->customerposting = $debtorsrow[7];
-            $this->VATinclusive = $debtorsrow[8];
+            $this->VATinclusive = isset($_SESSION['RFQTaxInclusive']) ? (int)$_SESSION['RFQTaxInclusive'] : $debtorsrow[8];
             $this->IsTaxed = $debtorsrow[9];
 
             
@@ -628,6 +631,9 @@
                 
                 $stocklist = $this->GetStockdetails($itemcode,$vatcategory);
                 $rate = (($this->IsTaxed==false)?0:$stocklist['vat']);
+                if (isset($rowvalue['rfq_tax_rate'])) {
+                    $rate = (float)$rowvalue['rfq_tax_rate'];
+                }
     
                 $qty       =(float) $rowvalue['quantity'] ;
                 $UOM       = trim($rowvalue['uom']);
@@ -664,7 +670,7 @@
              $arrayi = $_SESSION['Purchase_orders'][$lineno];
            
              $_SESSION['Purchase_orders'][$lineno] = array_replace_recursive($arrayi,
-               array('netamount'=>$netamount, 'vatamount'=>$vatamount,'grossamount'=>$grossamount));
+               array('netamount'=>$netamount, 'vatamount'=>$vatamount,'grossamount'=>$grossamount,'vatrate'=>$rate));
        
              $runningnettotal += $netamount;  $runningvattotal += $vatamount; $runninggrosstotal += $grossamount; $runningDiscounttotal += $discountAmount;
                 
