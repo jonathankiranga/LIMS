@@ -25,6 +25,7 @@ $SQL="select
       ,sum(PurchaseLine.`invoiceamount`) as OrderValue
       ,`PurchaseHeader`.printed
       from `PurchaseHeader` join PurchaseLine on `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
+        and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
       where `PurchaseHeader`.`documenttype`='18' and `released`=1  
       group by 
        `PurchaseHeader`.`documentno`
