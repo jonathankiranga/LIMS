@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request for Quotation (RFQ) - User Guide</title>
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1f2933; line-height: 1.6; }
+    header { background: #1f3a56; color: #fff; padding: 18px 24px; }
+    header h1 { margin: 0 0 5px; font-size: 1.65rem; }
+    header p { margin: 0; color: #d9e2ec; }
+    main { max-width: 980px; margin: 20px auto; background: #fff; padding: 24px; border: 1px solid #d9e2ec; }
+    h2,h3 { color: #102a43; margin-top: 1.5em; }
+    .back a { color: #243b53; text-decoration: none; }
+    .note { background: #f0f4f8; border-left: 4px solid #486581; padding: 12px 16px; margin: 16px 0; }
+    .warning { background: #fff8e6; border-left: 4px solid #d69e2e; padding: 12px 16px; margin: 16px 0; }
+    code { background: #f0f4f8; padding: 2px 5px; overflow-wrap: anywhere; }
+    li { margin: 7px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th,td { border: 1px solid #d9e2ec; padding: 9px; text-align: left; vertical-align: top; }
+    th { background: #f0f4f8; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Request for Quotation (RFQ)</h1>
+    <p>Staff procedure and online supplier quotation guide</p>
+  </header>
+  <main>
+    <div class="back"><a href="../SystemManual.html">&larr; Back to System Manual</a></div>
+
+    <h2>1. What the RFQ module does</h2>
+    <p>The Request for Quotation (RFQ) module allows procurement staff to invite selected suppliers to quote for required goods or services. Suppliers complete and submit their quotations online through a secure invitation link. Staff then review and compare the submitted quotations, select the successful quotation and proceed to create a purchase order.</p>
+    <div class="note"><strong>Important:</strong> The supplier completes the quotation online. Staff do not need to enter the supplier's prices on the supplier's behalf.</div>
+
+    <h2>2. Roles and responsibilities</h2>
+    <table>
+      <thead><tr><th>Procurement staff</th><th>Supplier</th></tr></thead>
+      <tbody>
+        <tr><td>Create the RFQ, define requested items and terms, select suppliers, issue invitations, compare quotations, record the award and initiate the purchase order.</td><td>Open the invitation link, review the RFQ, enter prices and commercial details, and submit the quotation online.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Staff: create and issue an RFQ</h2>
+    <ol>
+      <li>Open <strong>Purchases &rarr; Transactions &rarr; Request for Quotation (RFQ)</strong>.</li>
+      <li>Create an RFQ and enter its title, currency and quotation closing date/time.</li>
+      <li>Enter the purpose or description of the request.</li>
+      <li>Add each requested product or service. Provide a description, technical specification or grade, pack size where applicable, quantity and unit. An inventory item may be linked when appropriate; free-text descriptions are also supported.</li>
+      <li>Enter the RFQ terms and conditions. Include relevant technical, quality, delivery, payment, packaging, shelf-life, certification, safety-data-sheet and return requirements.</li>
+      <li>Save the RFQ as a draft.</li>
+      <li>Use the supplier invitation section for that draft and select the suppliers to invite. Check that each supplier has a valid email address in the supplier master.</li>
+      <li>Select <strong>Issue RFQ and email invitations</strong>. The system creates an individual invitation token and sends each selected supplier an email.</li>
+    </ol>
+
+    <h2>4. What the supplier receives</h2>
+    <p>The invitation is sent to the supplier's registered email address. Its subject is <strong>Request for Quotation [RFQ number]</strong> and the sender display name is <strong>Smarternow ERP - Procurement</strong>.</p>
+    <p>The message identifies the supplier, RFQ title and RFQ reference. It asks the supplier to review the requirements and submit before the deadline, and provides the link labelled <strong>Open RFQ and submit quotation</strong>.</p>
+    <p>The link opens <code>SupplierRFQ.php</code>. Its URL contains the company/database identifier and a unique token for that supplier. The token is validated by the portal before the RFQ form is displayed.</p>
+    <div class="warning"><strong>Invitation security:</strong> The link is supplier-specific. Do not publish it or forward it to another supplier. If the invitation is sent to the wrong email address, correct the supplier contact details and handle the invitation through the procurement administrator.</div>
+
+    <h2>5. Supplier: submit a quotation online</h2>
+    <ol>
+      <li>Open the invitation email and select <strong>Open RFQ and submit quotation</strong>.</li>
+      <li>Review the RFQ reference, requested items, quantities, specifications and terms displayed in the supplier portal.</li>
+      <li>Enter the requested unit prices and applicable tax information for the quotation lines.</li>
+      <li>Indicate whether quoted prices are tax-inclusive, as applicable.</li>
+      <li>Complete the commercial details requested by the form, including availability, delivery information or delivery lead time, quotation reference, quotation validity, payment terms and notes.</li>
+      <li>Check all prices, taxes, quantities and terms carefully, then submit the quotation.</li>
+    </ol>
+    <p>The supplier portal is separate from the staff ERP session. The supplier does not need a staff LIMS/ERP username or password; access is granted through the invitation token.</p>
+
+    <h2>6. One final submission</h2>
+    <p>An invitation is intended for one final quotation submission. The system validates the invitation token and prevents the same invitation from being used to submit another quotation. Suppliers should therefore verify their entries before submitting.</p>
+
+    <h2>7. Staff: compare, award and create the purchase order</h2>
+    <ol>
+      <li>Return to the RFQ page and open the quotation comparison for the relevant RFQ.</li>
+      <li>Review the quotations received from invited suppliers, including prices and the commercial details supplied.</li>
+      <li>Select the quotation to award. Ensure the selection is supported by the organisation's procurement and approval procedures; the lowest price is not automatically the best-value decision.</li>
+      <li>After the award is recorded, use <strong>Create Purchase Order from awarded quotation</strong> to proceed to purchase-order creation.</li>
+      <li>For conversion, each RFQ line must be mapped to an active inventory item and a matching unit in the stock master. Resolve unmapped items or unit differences before conversion.</li>
+      <li>Complete the normal purchase-order checks and approval process.</li>
+    </ol>
+    <div class="note"><strong>PO conversion constraint:</strong> The current integration does not infer pack-size or unit conversions. Where an RFQ line cannot be matched safely to an active stock item and its unit, correct the mapping before creating the PO.</div>
+
+    <h2>8. Email and deployment checks</h2>
+    <ul>
+      <li>Confirm the ERP email configuration and SMTP credentials are valid.</li>
+      <li>Confirm the application is accessed through HTTPS so supplier invitation links use the secure site address.</li>
+      <li>Confirm the RFQ database migration has been applied before using the module.</li>
+      <li>Test the complete process with a controlled supplier email: issue an RFQ, receive the invitation, open the link, submit a test quotation and verify that staff can compare it.</li>
+      <li>If an invitation is not received, check the supplier email address, SMTP configuration and the error reported when the RFQ is issued.</li>
+    </ul>
+
+    <h2>9. Quick process summary</h2>
+    <p><strong>Staff creates RFQ &rarr; selects suppliers &rarr; issues invitations &rarr; supplier receives email &rarr; supplier opens secure link &rarr; supplier submits quotation online &rarr; staff compares quotations &rarr; staff awards quotation &rarr; staff creates purchase order.</strong></p>
+  </main>
+</body>
+</html>
