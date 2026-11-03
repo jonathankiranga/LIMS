@@ -1,8 +1,7 @@
 <?php
 // Public supplier quotation portal. Access is granted only by an invitation token.
 // Resolve the tenant database from the invitation URL before the normal ERP bootstrap.
-session_name('ErpWithCRM');
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$SessionName = 'ErpRFQPortal';
 include('config.php');
 $requestedDatabase = isset($_GET['company']) ? trim($_GET['company']) : (isset($_POST['company']) ? trim($_POST['company']) : '');
 $allowedDatabases = array();
@@ -16,10 +15,9 @@ if ($requestedDatabase === '' || !in_array($requestedDatabase, $allowedDatabases
     die('The supplier invitation does not identify a valid company database.');
 }
 $DatabaseName = $requestedDatabase;
-$_SESSION['DatabaseName'] = $requestedDatabase;
-$_SESSION['UserID'] = 'SUPPLIER_PORTAL';
 $AllowAnyone = true;
 include('includes/session.inc');
+$_SESSION['UserID'] = 'SUPPLIER_PORTAL';
 
 function supplier_rfq_h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
