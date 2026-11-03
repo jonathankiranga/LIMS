@@ -1,0 +1,92 @@
+-- RFQ module: additive schema migration.
+-- Run against the same database used by smartERPlims.
+-- Existing supplier, inventory and purchase tables are not modified.
+
+CREATE TABLE IF NOT EXISTS rfq_header (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  rfq_no VARCHAR(30) NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  description TEXT NULL,
+  terms_conditions MEDIUMTEXT NOT NULL,
+  currencycode CHAR(3) NOT NULL,
+  issue_date DATETIME NULL,
+  closing_at DATETIME NOT NULL,
+  status ENUM('draft','issued','closed','awarded','cancelled') NOT NULL DEFAULT 'draft',
+  awarded_supplier_code VARCHAR(20) NULL,
+  awarded_quote_id BIGINT UNSIGNED NULL,
+  created_by VARCHAR(50) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rfq_no (rfq_no),
+  KEY idx_rfq_status_close (status, closing_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq_lines (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  rfq_id BIGINT UNSIGNED NOT NULL,
+  itemcode VARCHAR(50) NULL,
+  description VARCHAR(255) NOT NULL,
+  specification MEDIUMTEXT NULL,
+  quantity DECIMAL(18,4) NOT NULL,
+  unit VARCHAR(30) NULL,
+  required_delivery_date DATE NULL,
+  line_no INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (id),
+  KEY idx_rfq_lines_rfq (rfq_id),
+  CONSTRAINT fk_rfq_lines_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq_invites (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  rfq_id BIGINT UNSIGNED NOT NULL,
+  supplier_code VARCHAR(20) NOT NULL,
+  supplier_email VARCHAR(150) NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  status ENUM('invited','submitted','declined','expired') NOT NULL DEFAULT 'invited',
+  invited_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  submitted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rfq_supplier (rfq_id, supplier_code),
+  UNIQUE KEY uq_rfq_token_hash (token_hash),
+  KEY idx_rfq_invites_status (rfq_id, status),
+  CONSTRAINT fk_rfq_invites_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq_quotes (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  invite_id BIGINT UNSIGNED NOT NULL,
+  rfq_id BIGINT UNSIGNED NOT NULL,
+  supplier_code VARCHAR(20) NOT NULL,
+  quote_reference VARCHAR(80) NULL,
+  validity_date DATE NULL,
+  delivery_days INT NULL,
+  payment_terms TEXT NULL,
+  supplier_notes MEDIUMTEXT NULL,
+  accepted_terms TINYINT(1) NOT NULL DEFAULT 0,
+  submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  submit_ip VARCHAR(45) NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rfq_quote_invite (invite_id),
+  KEY idx_rfq_quotes_rfq (rfq_id),
+  CONSTRAINT fk_rfq_quotes_invite FOREIGN KEY (invite_id) REFERENCES rfq_invites(id),
+  CONSTRAINT fk_rfq_quotes_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq_quote_lines (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  quote_id BIGINT UNSIGNED NOT NULL,
+  rfq_line_id BIGINT UNSIGNED NOT NULL,
+  unit_price DECIMAL(18,4) NOT NULL,
+  tax_rate DECIMAL(8,4) NOT NULL DEFAULT 0,
+  availability_notes VARCHAR(255) NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rfq_quote_line (quote_id, rfq_line_id),
+  KEY idx_rfq_quote_lines_line (rfq_line_id),
+  CONSTRAINT fk_rfq_quote_lines_quote FOREIGN KEY (quote_id) REFERENCES rfq_quotes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_rfq_quote_lines_rfq_line FOREIGN KEY (rfq_line_id) REFERENCES rfq_lines(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Register the staff page in the existing page-security catalogue.
+INSERT IGNORE INTO scripts (script, pagesecurity, description)
+VALUES ('RFQ.php', 0, 'Request for Quotation management');
