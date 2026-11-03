@@ -75,6 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quote'])) {
 
     if (!$accepted) {
         $error = 'You must confirm acceptance of the RFQ terms and conditions before submitting.';
+    } elseif (!isset($_POST['tax_inclusive']) || !in_array((string)$_POST['tax_inclusive'], array('0', '1'), true)) {
+        $error = 'Select whether the quoted prices include tax.';
     } elseif (count($prices) !== count($lines)) {
         $error = 'A unit price is required for every requested product.';
     } else {
