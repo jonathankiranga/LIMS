@@ -288,6 +288,8 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo, $receiptDocumen
                 ) AS narration
               FROM PurchaseHeader
               JOIN PurchaseLine         ON PurchaseLine.documentno         = PurchaseHeader.documentno
+                                         AND PurchaseLine.documenttype=PurchaseHeader.documenttype
+                                         AND PurchaseLine.documenttype=18
               JOIN stockmaster          ON PurchaseLine.code               = stockmaster.itemcode
               JOIN inventorypostinggroup ON inventorypostinggroup.code     = stockmaster.postinggroup
               JOIN currencies           ON PurchaseHeader.currencycode     = currencies.currabrev
