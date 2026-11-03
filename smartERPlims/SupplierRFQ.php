@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quote'])) {
     $reference = isset($_POST['quote_reference']) ? trim($_POST['quote_reference']) : '';
     $paymentTerms = isset($_POST['payment_terms']) ? trim($_POST['payment_terms']) : '';
     $notes = isset($_POST['supplier_notes']) ? trim($_POST['supplier_notes']) : '';
+    $taxInclusive = (isset($_POST['tax_inclusive']) && $_POST['tax_inclusive'] === '1') ? 1 : 0;
 
     if (!$accepted) {
         $error = 'You must confirm acceptance of the RFQ terms and conditions before submitting.';
@@ -102,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quote'])) {
                 throw new Exception('This RFQ has closed or a quotation has already been submitted.');
             }
             DB_query("INSERT INTO rfq_quotes
-                (invite_id,rfq_id,supplier_code,quote_reference,validity_date,delivery_days,payment_terms,supplier_notes,accepted_terms,submit_ip)
+                (invite_id,rfq_id,supplier_code,quote_reference,validity_date,delivery_days,payment_terms,supplier_notes,accepted_terms,tax_inclusive,submit_ip)
                 VALUES (" . (int)$invitation['invite_id'] . "," . (int)$invitation['rfq_id'] . ",'" .
                 DB_escape_string($invitation['supplier_code']) . "','" . DB_escape_string($reference) . "'," .
                 ($validity !== '' ? "'" . DB_escape_string($validity) . "'" : "NULL") . "," . max(0, $deliveryDays) . ",'" .
@@ -145,7 +146,8 @@ foreach ($lines as $idx => $line) {
     echo '<td><input class="form-control" type="number" min="0" step="0.0001" name="unit_price[' . $idx . ']" required></td><td><input class="form-control" type="number" min="0" max="100" step="0.01" name="tax_rate[' . $idx . ']" value="0" required></td><td><input class="form-control" name="availability_notes[' . $idx . ']" placeholder="Brand, pack size, stock availability"></td></tr>';
 }
 echo '</tbody></table></div><h4>Commercial quotation details</h4><div class="row"><div class="col-md-4"><label>Supplier quotation reference</label><input class="form-control" name="quote_reference" maxlength="80"></div><div class="col-md-4"><label>Quotation valid until</label><input class="form-control" type="date" name="validity_date"></div><div class="col-md-4"><label>Delivery lead time (days)</label><input class="form-control" type="number" min="0" name="delivery_days"></div></div>';
-echo '<div class="form-group" style="margin-top:12px"><label>Payment terms offered</label><textarea class="form-control" name="payment_terms" rows="2"></textarea></div><div class="form-group"><label>Additional notes / deviations / exclusions</label><textarea class="form-control" name="supplier_notes" rows="3"></textarea></div>';
+echo '<div class="form-group" style="margin-top:12px"><label>Are the unit prices inclusive of tax?</label><div><label class="radio-inline"><input type="radio" name="tax_inclusive" value="1" required> Yes, prices include tax</label> <label class="radio-inline"><input type="radio" name="tax_inclusive" value="0" required checked> No, tax is additional</label></div></div>';
+echo '<div class="form-group"><label>Payment terms offered</label><textarea class="form-control" name="payment_terms" rows="2"></textarea></div><div class="form-group"><label>Additional notes / deviations / exclusions</label><textarea class="form-control" name="supplier_notes" rows="3"></textarea></div>';
 echo '<div class="checkbox"><label><input type="checkbox" name="accept_terms" value="1" required> I confirm that I have reviewed and accept the RFQ requirements and terms and conditions, and that the prices and information submitted are accurate.</label></div>';
 echo '<div class="alert alert-info">Important: You can submit this quotation only once. Review all prices, tax rates, delivery information and terms before final submission.</div><button class="btn btn-primary btn-lg" type="submit" name="submit_quote" value="1" onclick="return confirm(\'Submit this quotation now? It cannot be edited or submitted again.\')">Submit Final Quotation</button></form>';
 echo '</div></div></div></body></html>';
