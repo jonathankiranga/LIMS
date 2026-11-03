@@ -14,7 +14,7 @@ $POSclass = new PurchaseOrder();
 $rfqPrefillError = '';
 if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) {
     $rfqQuoteId = (int)$_GET['rfq_quote_id'];
-    $quoteResult = DB_query("SELECT q.id,q.rfq_id,q.supplier_code,q.quote_reference,h.rfq_no,h.currencycode,
+    $quoteResult = DB_query("SELECT q.id,q.rfq_id,q.supplier_code,q.quote_reference,q.tax_inclusive,h.rfq_no,h.currencycode,
             h.po_documentno,c.customer
         FROM rfq_quotes q
         JOIN rfq_header h ON h.id=q.rfq_id
@@ -26,7 +26,7 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
     } else {
         $rfqQuote = DB_fetch_array($quoteResult);
         $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.unit,
-                ql.unit_price,sm.itemcode AS stock_itemcode,sm.barcode,sm.descrip AS stock_description,
+                ql.unit_price,ql.tax_rate,sm.itemcode AS stock_itemcode,sm.barcode,sm.descrip AS stock_description,
                 sm.units,ipg.vatcategory,u.descrip AS unit_description
             FROM rfq_quote_lines ql
             JOIN rfq_lines rl ON rl.id=ql.rfq_line_id
@@ -74,7 +74,8 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                     'ReceivedQuantity' => (float)$quoteLine['quantity'],
                     'discount' => 0,
                     'vatcategory' => $quoteLine['vatcategory'],
-                    'vatrate' => 0
+                    'vatrate' => (float)$quoteLine['tax_rate'],
+                    'rfq_tax_rate' => (float)$quoteLine['tax_rate']
                 );
             }
             $firstPrefillLine = reset($_SESSION['Purchase_orders']);
@@ -99,6 +100,7 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
             $_POST['reference'] = $rfqQuote['rfq_no'] . ($rfqQuote['quote_reference'] !== '' ? ' / ' . $rfqQuote['quote_reference'] : '');
             $_POST['FREIGHT'] = '0';
             $_POST['stockitemcode'] = '';
+            $_SESSION['RFQTaxInclusive'] = (int)$rfqQuote['tax_inclusive'];
             $_SESSION['RFQQuoteID'] = $rfqQuoteId;
             $_SESSION['RFQHeaderID'] = (int)$rfqQuote['rfq_id'];
             $_SESSION['RFQNo'] = $rfqQuote['rfq_no'];
