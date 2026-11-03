@@ -1,7 +1,10 @@
 <?php
 
 ini_set('session.gc_maxlifetime', 3600);
-session_name('ErpWithCRM');
+if (!isset($SessionName) || !preg_match('/^[A-Za-z0-9_-]+$/', $SessionName)) {
+    $SessionName = 'ErpWithCRM';
+}
+session_name($SessionName);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
