@@ -108,7 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quote'])) {
                 ($validity !== '' ? "'" . DB_escape_string($validity) . "'" : "NULL") . "," . max(0, $deliveryDays) . ",'" .
                 DB_escape_string($paymentTerms) . "','" . DB_escape_string($notes) . "',1,'" .
                 DB_escape_string(isset($_SERVER['REMOTE_ADDR']) ? substr($_SERVER['REMOTE_ADDR'], 0, 45) : '') . "')", $db);
-            $quoteId = mysqli_insert_id($db);
+            $newQuoteResult = DB_query("SELECT id FROM rfq_quotes WHERE invite_id=" . (int)$invitation['invite_id'] . " LIMIT 1", $db);
+            $newQuoteRow = DB_fetch_array($newQuoteResult);
+            $quoteId = (int)$newQuoteRow['id'];
             foreach ($lines as $idx => $line) {
                 DB_query("INSERT INTO rfq_quote_lines (quote_id,rfq_line_id,unit_price,tax_rate,availability_notes)
                     VALUES (" . (int)$quoteId . "," . (int)$line['id'] . "," . (float)$prices[$idx] . "," .
