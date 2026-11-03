@@ -120,6 +120,22 @@ try {
     $auditID = (int)$auditStmt->insert_id;
     $auditStmt->close();
 
+    // Publish the reversal in the Workspace-wide activity stream. SampleID is
+    // intentionally stored as plain text; it is not linked to a workspace card.
+    $activityStmt = $conn->prepare(
+        "INSERT INTO workspace_activity (sample_id, action_type, details, user_id)
+         VALUES (?, 'customer_complaint', ?, ?)"
+    );
+    if (!$activityStmt) {
+        throw new RuntimeException('Failed to prepare Workspace activity entry: ' . $conn->error);
+    }
+    $activityStmt->bind_param('sss', $sampleID, $reason, $userID);
+    if (!$activityStmt->execute()) {
+        throw new RuntimeException('Failed to publish Workspace activity: ' . $activityStmt->error);
+    }
+    $activityID = (int)$activityStmt->insert_id;
+    $activityStmt->close();
+
     $conn->commit();
 
     echo json_encode([
@@ -127,6 +143,7 @@ try {
         'message' => 'The complete sample block has been returned to Analysis and the reason has been recorded.',
         'sampleID' => $sampleID,
         'auditID' => $auditID,
+        'activityID' => $activityID,
         'approvedRows' => $approvedRows,
         'updatedRows' => $updatedRows,
         'newStatus' => $newStatus
