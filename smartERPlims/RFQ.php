@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
         $error = 'Complete the RFQ title, terms and conditions, currency, closing date, and at least one line.';
     } elseif ($error === '' && strtotime($closing) <= time()) {
         $error = 'The quotation closing date and time must be in the future.';
-    } else {
+    } elseif ($error === '') {
         $validLines = array();
         foreach ($lineDescriptions as $i => $descriptionLine) {
             $descriptionLine = trim($descriptionLine);
