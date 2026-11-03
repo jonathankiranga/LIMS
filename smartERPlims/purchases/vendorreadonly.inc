@@ -19,7 +19,7 @@ $sql[]="INSERT INTO PurchaseHeader
            (documenttype
            ,documentno
            ,docdate
-           ".(Is_date($_POST['Salesoderdate'])?',oderdate':'')."
+           ".(Is_date($_POST['Purchaseoderdate'])?',oderdate':'')."
            ".(Is_date($_POST['datedue'])?',duedate':'')."
            ,vendorcode
            ,vendorname
@@ -38,7 +38,7 @@ $sql[]="INSERT INTO PurchaseHeader
            ('18'
            ,'".$_POST['documentno']."'
            ,'".FormatDateForSQL($_POST['date'])."'
-           ".(Is_date($_POST['Salesoderdate'])?",'".FormatDateForSQL($_POST['Salesoderdate'])."'":'')."
+           ".(Is_date($_POST['Purchaseoderdate'])?",'".FormatDateForSQL($_POST['Purchaseoderdate'])."'":'')."
            ".(Is_date($_POST['datedue'])?",'".FormatDateForSQL($_POST['datedue'])."'":'') ."
            ,'".$_POST['VendorID']."'
            ,'".$_POST['VendorName']."'
