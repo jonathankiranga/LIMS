@@ -57,7 +57,7 @@ $sql[]="INSERT INTO PurchaseHeader
 
 
 foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
- if($rows['grossamount']>0){
+ if($rows['grossamount']>0 || (isset($_SESSION['RFQQuoteID']) && isset($rows['itemcode']))){
         
         $stockcode =$rows['itemcode'];
         
