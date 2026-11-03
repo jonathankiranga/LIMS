@@ -13,7 +13,7 @@ $pge=htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');
     
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' . _('Goods Recived Note') .'" alt="" />' . ' ' . _('Goods Recived Note') . '</p>';
 
-if(isset($_POST['submit']) and $_POST['submit']=='Receive Goods' and $_SESSION['Grossamounttotal']!=0){
+if(isset($_POST['submit']) and $_POST['submit']=='Receive Goods'){
     include('purchases/SaveGRN.inc');
 }
 
@@ -43,7 +43,7 @@ $filter="SELECT
            ,`currencycode`
            ,`vatinclusive`
        FROM `PurchaseHeader` 
-       where `documentno`='".$_POST['documentno']."'";
+       where `documenttype`=18 and `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
     
@@ -130,7 +130,7 @@ $SQL="SELECT `entryno`
       ,containercode
       ,`discount`
   FROM `PurchaseLine` 
- where `documentno`='".$_POST['documentno']."'";
+ where `documenttype`=18 and `documentno`='".$_POST['documentno']."'";
 
  
 
@@ -174,9 +174,7 @@ while($stocklist=DB_fetch_array($ResultIndex)){
         $qtyorderd = $stocklist['QuantityToReceive'];
     }
     
-     if(isset($_POST['Toreceive'][$itemcode])){
-        $Toreceive =(int) $_POST['Toreceive'][$itemcode];
-    }
+     $Toreceive = (isset($_POST['Toreceive'][$itemcode]) && is_numeric($_POST['Toreceive'][$itemcode])) ? (float) $_POST['Toreceive'][$itemcode] : 0;
     
    
      $qtytoreceive =($qtyorderd - ($stocklist['Qunatity_delivered'] + $Toreceive));
@@ -184,13 +182,11 @@ while($stocklist=DB_fetch_array($ResultIndex)){
     if(isset($_POST['salesprice'][$itemcode]) and $_POST['salesprice'][$itemcode]>0){
         $salesprice =(float) $_POST['salesprice'][$itemcode];
     }else{
-         $salesprice =(float) ($stocklist['UnitPrice']*$stocklist['Quantity']) / $stocklist['QuantityToReceive'];
+         $salesprice = ((float)$stocklist['QuantityToReceive'] != 0) ? (float) ($stocklist['UnitPrice']*$stocklist['Quantity']) / $stocklist['QuantityToReceive'] : 0;
     }
     
                 
-    if($discount>0){
-      $discountAmount = ($salesprice * $Toreceive ) * round($discount/100,2);
-    }
+    $discountAmount = ($discount > 0) ? (($salesprice * $Toreceive) * ($discount/100)) : 0;
     
     if($partperunit>1){
          $baseamount = ($Toreceive * $salesprice * $partperunit)-$discountAmount ;
