@@ -75,7 +75,7 @@
     
      function showtable(){
         global $db;
-        
+        $this->htmltable = '';
         $runningnettotal = 0;
         $runningvattotal = 0;
         $runninggrosstotal = 0;
@@ -117,7 +117,7 @@
                 
                 if(isset($_POST['discount'][$line_no])){
                     $discount = $_POST['discount'][$line_no];
-                    $discountAmount = $salesprice * round($discount/100,2);
+                    $discountAmount = $salesprice * ($discount/100);
                 }
                 
                 $baseamount = ($salesprice * $qty)-$discountAmount;
@@ -128,7 +128,7 @@
                 $vatamount   = $baseamount - $netamount;
                 $grossamount = $baseamount ;
             }else{
-                $vatamount  = $baseamount * round($rate/100,2);
+                $vatamount  = $baseamount * ($rate/100);
                 $grossamount= $baseamount + $vatamount;
                 $netamount  = $baseamount;
             }
@@ -640,7 +640,7 @@
                 $InpacksReceived = $_SESSION['units'][$uomreceived]['descrip'];
              
                 if($discount>0){
-                  $discountAmount = ($salesprice * $qty * $package) * round($discount/100,2);
+                  $discountAmount = ($salesprice * $qty * $package) * ($discount/100);
                 }
                 
                 $baseamount = ($salesprice * $qty * $package)-$discountAmount;
@@ -652,7 +652,7 @@
                 $vatamount   = $baseamount - $netamount;
                 $grossamount = $baseamount ;
             }else{
-                $vatamount  = $baseamount * round($rate/100,2);
+                $vatamount  = $baseamount * ($rate/100);
                 $grossamount= $baseamount + $vatamount;
                 $netamount  = $baseamount;
             }
@@ -664,7 +664,7 @@
              $arrayi = $_SESSION['Purchase_orders'][$lineno];
            
              $_SESSION['Purchase_orders'][$lineno] = array_replace_recursive($arrayi,
-               array('discount'=>$discountAmount, 'netamount'=>$netamount, 'vatamount'=>$vatamount,'grossamount'=>$grossamount));
+               array('netamount'=>$netamount, 'vatamount'=>$vatamount,'grossamount'=>$grossamount));
        
              $runningnettotal += $netamount;  $runningvattotal += $vatamount; $runninggrosstotal += $grossamount; $runningDiscounttotal += $discountAmount;
                 
