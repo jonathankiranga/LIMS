@@ -24,7 +24,8 @@ $SQL="Select
       ,`PurchaseHeader`.`yourreference`
       ,`PurchaseHeader`.`printed`
       from `PurchaseHeader` join PurchaseLine on 
-      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
+      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno`
+       and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
       join creditors on `PurchaseHeader`.`vendorcode`=creditors.itemcode
       where (`PurchaseHeader`.`documenttype`='18'   or `PurchaseHeader`.`documenttype`='41')
       and `PurchaseHeader`.`documentno`='".$_GET['No']."'";
@@ -172,7 +173,9 @@ $SQL="select
       ,sum(PurchaseLine.`invoiceamount`) as OrderValue
       ,`PurchaseHeader`.printed
       from `PurchaseHeader` join PurchaseLine on 
-      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
+      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno`
+       and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
+       and PurchaseLine.documenttype=18
       where `PurchaseHeader`.`documenttype`='18' ".
         (isset($_POST['VendorID'])?" and `PurchaseHeader`.`vendorcode`='".$_POST['VendorID']."'":'')."
        group by 
