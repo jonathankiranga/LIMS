@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quote'])) {
                 VALUES (" . (int)$invitation['invite_id'] . "," . (int)$invitation['rfq_id'] . ",'" .
                 DB_escape_string($invitation['supplier_code']) . "','" . DB_escape_string($reference) . "'," .
                 ($validity !== '' ? "'" . DB_escape_string($validity) . "'" : "NULL") . "," . max(0, $deliveryDays) . ",'" .
-                DB_escape_string($paymentTerms) . "','" . DB_escape_string($notes) . "',1,'" .
+                DB_escape_string($paymentTerms) . "','" . DB_escape_string($notes) . "',1," . $taxInclusive . ",'" .
                 DB_escape_string(isset($_SERVER['REMOTE_ADDR']) ? substr($_SERVER['REMOTE_ADDR'], 0, 45) : '') . "')", $db);
             $newQuoteResult = DB_query("SELECT id FROM rfq_quotes WHERE invite_id=" . (int)$invitation['invite_id'] . " LIMIT 1", $db);
             $newQuoteRow = DB_fetch_array($newQuoteResult);
