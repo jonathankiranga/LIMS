@@ -161,7 +161,7 @@ function GetStockRegister()
  * @param string $journal
  * @param string $PeriodNo
  */
-function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
+function PostStockRegister($Quantity, $key, $journal, $PeriodNo, $receiptDocumentNo = null)
 {
     global $db;
 
@@ -189,7 +189,8 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
                      JOIN   stockmaster smi ON PLi.code = smi.itemcode
                      WHERE  PLi.entryno = $key
                  )
-                 AND SM.isstock =2 ) AS Totunits
+                 AND SM.isstock =2 ) AS Totunits,
+                PurchaseLine.QuantityToReceive
             FROM PurchaseHeader
             JOIN PurchaseLine ON PurchaseLine.documentno = PurchaseHeader.documentno
             JOIN currencies   ON currencies.currabrev    = PurchaseHeader.currencycode
@@ -205,11 +206,16 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
         return;
     }
 
-    $GRN            = mysqli_real_escape_string($db, trim($rows[0]));
+    $GRN            = mysqli_real_escape_string($db, ($receiptDocumentNo !== null) ? trim($receiptDocumentNo) : trim($rows[0]));
     $Price          = (float)$rows[4];
     $itemcode       = mysqli_real_escape_string($db, trim($rows[3]));
     $UOM            = trim($rows[5]);
     $AMOUNT         = (float)$rows[7];
+    if ($receiptDocumentNo !== null) {
+        $orderedReceiptQty = (float)$rows[11];
+        $AMOUNT = ($orderedReceiptQty > 0) ? ($AMOUNT * ($Quantity / $orderedReceiptQty)) : 0;
+    }
+    $postingDocumentType = ($receiptDocumentNo !== null) ? '30' : 'PurchaseHeader.documenttype';
     $freight        = is_null($rows[8]) ? 0 : (float)$rows[8];
     $Unitstodevide  = (float)$rows[10];
 
@@ -256,8 +262,8 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
                 '$journal',
                 PurchaseHeader.docdate,
                 '$PeriodNo',
-                PurchaseHeader.documentno,
-                PurchaseHeader.documenttype,
+                '$GRN',
+                $postingDocumentType,
                 inventorypostinggroup.balancesheet,
                 inventorypostinggroup.stockvariance,
                 '',
