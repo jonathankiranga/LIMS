@@ -35,12 +35,19 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
             LEFT JOIN unit u ON u.code=sm.units
             WHERE ql.quote_id=" . $rfqQuoteId . " ORDER BY rl.line_no", $db);
         $prefillLines = array();
+        $seenRfqItems = array();
         $lineError = '';
         while ($quoteLine = DB_fetch_array($quoteLinesResult)) {
             if (empty($quoteLine['stock_itemcode'])) {
                 $lineError = 'Every RFQ line must be linked to an active inventory item before it can be converted to a Purchase Order. Missing mapping: ' . $quoteLine['description'];
                 break;
             }
+            $itemCodeKey = trim($quoteLine['stock_itemcode']);
+            if (isset($seenRfqItems[$itemCodeKey])) {
+                $lineError = 'The same inventory item appears on more than one RFQ line. Consolidate those lines before generating a Purchase Order so quantities and quoted prices are not overwritten.';
+                break;
+            }
+            $seenRfqItems[$itemCodeKey] = true;
             $requestedUnit = trim((string)$quoteLine['unit']);
             if ($requestedUnit !== '' && strcasecmp($requestedUnit, $quoteLine['units']) !== 0 &&
                 strcasecmp($requestedUnit, $quoteLine['unit_description']) !== 0) {
