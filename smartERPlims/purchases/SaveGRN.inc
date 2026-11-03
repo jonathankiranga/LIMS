@@ -144,7 +144,7 @@ if (count($grnValidationErrors) > 0) {
                 $entryNo, $qty, $qty, $qty, $qty, $qty, $location, $journal,
                 $PeriodNo, $INVOICENO, $salesoderno, $entryNo);
 
-            $results = PostStockRegister($qty, $entryNo, $journal, $PeriodNo);
+            $results = PostStockRegister($qty, $entryNo, $journal, $PeriodNo, $INVOICENO);
         }
 
         foreach ($sql as $query) {
