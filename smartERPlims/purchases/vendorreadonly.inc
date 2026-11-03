@@ -87,7 +87,7 @@ foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
    $package = (float) $rows['partsperunit'];
    $packzizegrn  = (float) $rows['packzizegrn'];
    $salesprice = (float) $rows['price'];
-   $discountAmount =(float) $rows['discount'];
+   $discountRate =(float) $rows['discount'];
    $grossamount =(float) $rows['grossamount'] ;
    $vatamount  =(float) $rows['vatamount'];     
    $Inpacks = $_SESSION['units'][$UnitCode]['descrip'];
@@ -148,7 +148,7 @@ foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
            ,(isset($vatrate)?$vatrate:0)
            ,(isset($VATinclusive)?$VATinclusive:0)
            ,$package
-           ,$discountAmount
+           ,$discountRate
            ,$drumCode
            ,$ReceivedQuantity
            ,(($salesprice*$qty)/$ReceivedQuantity)
