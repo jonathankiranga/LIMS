@@ -10,8 +10,95 @@ $Title = _('PURCHASES');
 include('includes/header.inc');
  
 $POSclass = new PurchaseOrder();
+
+$rfqPrefillError = '';
+if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) {
+    $rfqQuoteId = (int)$_GET['rfq_quote_id'];
+    $quoteResult = DB_query("SELECT q.id,q.rfq_id,q.supplier_code,q.quote_reference,h.rfq_no,h.currencycode,
+            h.po_documentno,c.customer
+        FROM rfq_quotes q
+        JOIN rfq_header h ON h.id=q.rfq_id
+        JOIN creditors c ON c.itemcode=q.supplier_code
+        WHERE q.id=" . $rfqQuoteId . " AND h.awarded_quote_id=q.id
+          AND h.status='awarded' AND h.po_documentno IS NULL", $db);
+    if (DB_num_rows($quoteResult) !== 1) {
+        $rfqPrefillError = 'This RFQ quotation has not been awarded, or a Purchase Order has already been created from it.';
+    } else {
+        $rfqQuote = DB_fetch_array($quoteResult);
+        $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.unit,
+                ql.unit_price,sm.itemcode AS stock_itemcode,sm.barcode,sm.descrip AS stock_description,
+                sm.units,ipg.vatcategory,u.descrip AS unit_description
+            FROM rfq_quote_lines ql
+            JOIN rfq_lines rl ON rl.id=ql.rfq_line_id
+            LEFT JOIN stockmaster sm ON sm.itemcode=rl.itemcode AND (sm.inactive=0 OR sm.inactive IS NULL)
+            LEFT JOIN inventorypostinggroup ipg ON ipg.code=sm.postinggroup
+            LEFT JOIN unit u ON u.code=sm.units
+            WHERE ql.quote_id=" . $rfqQuoteId . " ORDER BY rl.line_no", $db);
+        $prefillLines = array();
+        $lineError = '';
+        while ($quoteLine = DB_fetch_array($quoteLinesResult)) {
+            if (empty($quoteLine['stock_itemcode'])) {
+                $lineError = 'Every RFQ line must be linked to an active inventory item before it can be converted to a Purchase Order. Missing mapping: ' . $quoteLine['description'];
+                break;
+            }
+            $requestedUnit = trim((string)$quoteLine['unit']);
+            if ($requestedUnit !== '' && strcasecmp($requestedUnit, $quoteLine['units']) !== 0 &&
+                strcasecmp($requestedUnit, $quoteLine['unit_description']) !== 0) {
+                $lineError = 'The RFQ unit for ' . $quoteLine['description'] . ' does not match the inventory unit (' . $quoteLine['unit_description'] . '). Correct the unit or inventory mapping before creating the PO.';
+                break;
+            }
+            $prefillLines[] = $quoteLine;
+        }
+        $expectedLinesResult = DB_query("SELECT COUNT(*) AS line_count FROM rfq_lines WHERE rfq_id=" . (int)$rfqQuote['rfq_id'], $db);
+        $expectedLines = DB_fetch_array($expectedLinesResult);
+        if ($lineError === '' && count($prefillLines) !== (int)$expectedLines['line_count']) {
+            $lineError = 'The selected quotation does not contain a complete set of RFQ product prices.';
+        }
+        if ($lineError !== '') {
+            $rfqPrefillError = $lineError;
+        } else {
+            $_SESSION['Purchase_orders'] = array();
+            foreach ($prefillLines as $quoteLine) {
+                $itemCode = trim($quoteLine['stock_itemcode']);
+                $_SESSION['Purchase_orders'][$itemCode] = array(
+                    'line_no' => $itemCode,
+                    'itemcode' => $itemCode,
+                    'barcode' => $quoteLine['barcode'],
+                    'stockname' => $quoteLine['stock_description'],
+                    'uom' => $quoteLine['units'],
+                    'uomreceived' => $quoteLine['units'],
+                    'partsperunit' => 1,
+                    'packzizegrn' => 1,
+                    'price' => (float)$quoteLine['unit_price'],
+                    'quantity' => (float)$quoteLine['quantity'],
+                    'ReceivedQuantity' => (float)$quoteLine['quantity'],
+                    'discount' => 0,
+                    'vatcategory' => $quoteLine['vatcategory'],
+                    'vatrate' => 0
+                );
+            }
+            $todayResult = DB_query("SELECT NOW() AS today", $db);
+            $todayRow = DB_fetch_array($todayResult);
+            $_POST['date'] = ConvertSQLDate($todayRow['today']);
+            $_POST['Purchaseoderdate'] = $_POST['date'];
+            $_POST['datedue'] = '';
+            $_POST['VendorID'] = $rfqQuote['supplier_code'];
+            $_POST['VendorName'] = $rfqQuote['customer'];
+            $_POST['currencycode'] = $rfqQuote['currencycode'];
+            $_POST['reference'] = $rfqQuote['rfq_no'] . ($rfqQuote['quote_reference'] !== '' ? ' / ' . $rfqQuote['quote_reference'] : '');
+            $_POST['FREIGHT'] = '0';
+            $_POST['stockitemcode'] = '';
+            $_SESSION['RFQQuoteID'] = $rfqQuoteId;
+            $_SESSION['RFQHeaderID'] = (int)$rfqQuote['rfq_id'];
+            $_SESSION['RFQNo'] = $rfqQuote['rfq_no'];
+        }
+    }
+}
+if ($rfqPrefillError !== '') {
+    echo '<div class="alert alert-warning" style="margin:15px">' . htmlspecialchars($rfqPrefillError, ENT_QUOTES, 'UTF-8') . '</div>';
+}
  
- if(isset($_GET['new'])){
+ if(isset($_GET['new']) && !isset($_GET['rfq_quote_id'])){
      $POSclass->neworder();
  }
  
