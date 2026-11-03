@@ -17,6 +17,7 @@ if ($requestedDatabase === '' || !in_array($requestedDatabase, $allowedDatabases
 }
 $DatabaseName = $requestedDatabase;
 $_SESSION['DatabaseName'] = $requestedDatabase;
+$_SESSION['UserID'] = 'SUPPLIER_PORTAL';
 $AllowAnyone = true;
 include('includes/session.inc');
 
