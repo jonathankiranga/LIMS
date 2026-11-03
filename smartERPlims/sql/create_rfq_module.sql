@@ -90,3 +90,22 @@ CREATE TABLE IF NOT EXISTS rfq_quote_lines (
 -- Register the staff page in the existing page-security catalogue.
 INSERT IGNORE INTO scripts (script, pagesecurity, description)
 VALUES ('RFQ.php', 0, 'Request for Quotation management');
+
+-- Link an awarded RFQ quotation to the resulting purchase order.
+SET @has_rfq_quote_id = (
+  SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'PurchaseHeader' AND column_name = 'rfq_quote_id'
+);
+SET @rfq_alter_sql = IF(@has_rfq_quote_id = 0,
+  'ALTER TABLE PurchaseHeader ADD COLUMN rfq_quote_id BIGINT UNSIGNED NULL, ADD KEY idx_purchaseheader_rfq_quote (rfq_quote_id)',
+  'SELECT ''PurchaseHeader.rfq_quote_id already exists'' AS status');
+PREPARE rfq_stmt FROM @rfq_alter_sql; EXECUTE rfq_stmt; DEALLOCATE PREPARE rfq_stmt;
+
+SET @has_rfq_po_documentno = (
+  SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'rfq_header' AND column_name = 'po_documentno'
+);
+SET @rfq_alter_sql = IF(@has_rfq_po_documentno = 0,
+  'ALTER TABLE rfq_header ADD COLUMN po_documentno VARCHAR(20) NULL',
+  'SELECT ''rfq_header.po_documentno already exists'' AS status');
+PREPARE rfq_stmt FROM @rfq_alter_sql; EXECUTE rfq_stmt; DEALLOCATE PREPARE rfq_stmt;
