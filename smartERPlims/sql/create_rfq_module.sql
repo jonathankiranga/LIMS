@@ -109,3 +109,12 @@ SET @rfq_alter_sql = IF(@has_rfq_po_documentno = 0,
   'ALTER TABLE rfq_header ADD COLUMN po_documentno VARCHAR(20) NULL',
   'SELECT ''rfq_header.po_documentno already exists'' AS status');
 PREPARE rfq_stmt FROM @rfq_alter_sql; EXECUTE rfq_stmt; DEALLOCATE PREPARE rfq_stmt;
+
+SET @has_rfq_tax_inclusive = (
+  SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'rfq_quotes' AND column_name = 'tax_inclusive'
+);
+SET @rfq_alter_sql = IF(@has_rfq_tax_inclusive = 0,
+  'ALTER TABLE rfq_quotes ADD COLUMN tax_inclusive TINYINT(1) NOT NULL DEFAULT 0 AFTER accepted_terms',
+  'SELECT ''rfq_quotes.tax_inclusive already exists'' AS status');
+PREPARE rfq_stmt FROM @rfq_alter_sql; EXECUTE rfq_stmt; DEALLOCATE PREPARE rfq_stmt;
