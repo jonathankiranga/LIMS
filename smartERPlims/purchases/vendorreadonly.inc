@@ -6,7 +6,8 @@ echo '<input type="hidden" name="FormID" value="'. $_SESSION['FormID'] .'" />';
 $sqldebtors=DB_query("SELECT itemcode,customer,phone,email,city,country,curr_cod,supplierposting,VATinclusive
 FROM creditors join arpostinggroups on code=supplierposting where itemcode='".$_POST['VendorID']."'", $db);
 $debtorsrow = DB_fetch_row($sqldebtors);
-$customerposting = $debtorsrow[7]; $VATinclusive = $debtorsrow[8];
+$customerposting = $debtorsrow[7];
+$VATinclusive = isset($_SESSION['RFQTaxInclusive']) ? (int)$_SESSION['RFQTaxInclusive'] : $debtorsrow[8];
 
 if(($_SESSION['ManualNumber']==0)){
   $_POST['documentno'] = GetNextTransNo(18,$db);
@@ -180,7 +181,7 @@ $transstart = DB_Txn_Begin($db);
     }else{
         DB_Txn_Commit($db);
         if (isset($_SESSION['RFQQuoteID'])) {
-            unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo']);
+            unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
         }
         prnMsg('new Purchase order :'.$_POST['documentno'].' has been created','inf');
     }
