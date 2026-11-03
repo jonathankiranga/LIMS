@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
             $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
             if (!preg_match('/^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/', $host)) { $mailErrors[] = 'Invalid web host; email skipped for ' . $supplier['customer']; continue; }
             $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-            $url = 'https://' . $host . $basePath . '/SupplierRFQ.php?token=' . rawurlencode($token);
+            $url = 'https://' . $host . $basePath . '/SupplierRFQ.php?company=' . rawurlencode($_SESSION['DatabaseName']) . '&token=' . rawurlencode($token);
             $sent = rfq_send_invitation($supplier['email'], $supplier['customer'], $rfq['rfq_no'], $rfq['title'], $url);
             if ($sent !== true) { $mailErrors[] = $supplier['customer'] . ': ' . $sent; }
             $issued++;
@@ -127,6 +127,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
             $error = 'No supplier invitations were created. Check supplier email addresses and whether they were already invited.';
         }
         if (count($mailErrors)) { $error .= ($error ? ' ' : '') . 'Email issues: ' . implode(' | ', $mailErrors); }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
+    $rfqId = (int)$_POST['rfq_id'];
+    $quoteId = (int)$_POST['quote_id'];
+    $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,h.status FROM rfq_quotes q
+        JOIN rfq_header h ON h.id=q.rfq_id WHERE q.id=" . $quoteId . " AND q.rfq_id=" . $rfqId, $db);
+    if (DB_num_rows($qr) !== 1) {
+        $error = 'The selected quotation does not belong to this RFQ.';
+    } else {
+        $selectedQuote = DB_fetch_array($qr);
+        if (!in_array($selectedQuote['status'], array('issued','closed'), true)) {
+            $error = 'This RFQ cannot be awarded in its current status.';
+        } else {
+            DB_query("UPDATE rfq_header SET status='awarded',awarded_supplier_code='" .
+                DB_escape_string($selectedQuote['supplier_code']) . "',awarded_quote_id=" . $quoteId .
+                " WHERE id=" . $rfqId . " AND status IN ('issued','closed')", $db);
+            if (mysqli_affected_rows($db) === 1) {
+                $message = 'Quotation selected. RFQ award recorded against supplier ' . $selectedQuote['supplier_code'] . '. PO conversion is the next integration step.';
+            } else {
+                $error = 'The RFQ has already been awarded or its status changed. Refresh and review it.';
+            }
+        }
     }
 }
 
@@ -182,11 +206,21 @@ if (isset($_GET['compare'])) {
     if (DB_num_rows($hr) === 1) {
         $head = DB_fetch_array($hr);
         echo '<h3>Quotation comparison — ' . rfq_h($head['rfq_no']) . '</h3>';
+        if ($head['status'] === 'awarded') {
+            echo '<div class="alert alert-success">Awarded to supplier ' . rfq_h($head['awarded_supplier_code']) . '. Selected quotation ID: ' . (int)$head['awarded_quote_id'] . '.</div>';
+        }
         $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
         $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode=q.supplier_code WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         echo '<div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Supplier / product</th>';
         $quoteRows = array();
-        while ($q = DB_fetch_array($quotes)) { $quoteRows[] = $q; echo '<th>' . rfq_h($q['customer']) . '<br><small>' . rfq_h($q['quote_reference']) . '</small></th>'; }
+        while ($q = DB_fetch_array($quotes)) {
+            $quoteRows[] = $q;
+            echo '<th>' . rfq_h($q['customer']) . '<br><small>' . rfq_h($q['quote_reference']) . '</small>';
+            if ($head['status'] !== 'awarded') {
+                echo '<form method="post" style="margin-top:6px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><input type="hidden" name="quote_id" value="' . (int)$q['id'] . '"><button class="btn btn-xs btn-success" name="award_quote" value="1" onclick="return confirm(\'Select this supplier quotation?\')">Select supplier</button></form>';
+            }
+            echo '</th>';
+        }
         echo '</tr></thead><tbody>';
         while ($line = DB_fetch_array($lines)) {
             echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['unit']) . '</small></th>';
