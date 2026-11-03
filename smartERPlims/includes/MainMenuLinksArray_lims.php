@@ -239,11 +239,11 @@ $MenuItems['AccountsReceivable']['Maintenance']['URL'] = array('/CustomersPostin
 
 /***********************************************/
 $MenuItems['Purchases']['Transactions']['Caption'] = array(_('Request for Quotation (RFQ)'),
-                                                           _('Purchase\\'s Order'),
+                                                           _('Purchase\'s Order'),
                                                            _('Goods Received Note'),
-                                                           _('Supplier\\'s Purchase Invoice'),
-                                                           _('Supplier\\'s Return Stock'),
-                                                           _('Supplier\\'s Debit Note'),
+                                                           _('Supplier\'s Purchase Invoice'),
+                                                           _('Supplier\'s Return Stock'),
+                                                           _('Supplier\'s Debit Note'),
                                                            _('Request for Assets'),
                                                            _('Receive for Assets'),
                                                            _('Fixed Assets Invoice'));
