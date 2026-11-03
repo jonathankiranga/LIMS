@@ -33,7 +33,7 @@ $sql[]="INSERT INTO PurchaseHeader
            ,vatinclusive
            ,Dimension_1
            ,Dimension_2
-           ,freight)
+           ,freight".(isset($_SESSION['RFQQuoteID'])?',rfq_quote_id':'').")
      VALUES
            ('18'
            ,'".$_POST['documentno']."'
@@ -52,7 +52,7 @@ $sql[]="INSERT INTO PurchaseHeader
            ,'".$VATinclusive."'
            ,'".$_POST['DimensionOne']."'
            ,'".$_POST['DimensionTwo']."'
-           ,'".$_POST['FREIGHT']."')" ;
+           ,'".$_POST['FREIGHT']."'".(isset($_SESSION['RFQQuoteID'])?",".(int)$_SESSION['RFQQuoteID']:'').")" ;
 
 
 
@@ -162,11 +162,26 @@ $transstart = DB_Txn_Begin($db);
         $ResultIndex=DB_query($value,$db);
     }
 
-    if(DB_error_no($db)>0){
+    $rfqLinkFailed = false;
+    if (isset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'])) {
+        $linkSQL = "UPDATE rfq_header SET po_documentno='" . DB_escape_string($_POST['documentno']) .
+            "' WHERE id=" . (int)$_SESSION['RFQHeaderID'] . " AND awarded_quote_id=" .
+            (int)$_SESSION['RFQQuoteID'] . " AND status='awarded' AND po_documentno IS NULL";
+        $linkResult = $db->query($linkSQL);
+        if (!$linkResult || $db->affected_rows !== 1) {
+            $rfqLinkFailed = true;
+        }
+    }
+
+    if(DB_error_no($db)>0 || $rfqLinkFailed){
         DB_Txn_Rollback($db);
-        prnMsg('Failed to save Purchase order :'.$_POST['documentno'],'warn');
+        prnMsg('Failed to save Purchase order :'.$_POST['documentno'] .
+            ($rfqLinkFailed ? ' The awarded RFQ could not be linked; no PO was committed.' : ''),'warn');
     }else{
         DB_Txn_Commit($db);
+        if (isset($_SESSION['RFQQuoteID'])) {
+            unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo']);
+        }
         prnMsg('new Purchase order :'.$_POST['documentno'].' has been created','inf');
     }
     
