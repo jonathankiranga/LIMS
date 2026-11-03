@@ -180,9 +180,6 @@ $transstart = DB_Txn_Begin($db);
             ($rfqLinkFailed ? ' The awarded RFQ could not be linked; no PO was committed.' : ''),'warn');
     }else{
         DB_Txn_Commit($db);
-        if (isset($_SESSION['RFQQuoteID'])) {
-            unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
-        }
         prnMsg('new Purchase order :'.$_POST['documentno'].' has been created','inf');
     }
     
