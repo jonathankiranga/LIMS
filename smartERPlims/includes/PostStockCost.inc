@@ -192,10 +192,12 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo, $receiptDocumen
                  AND SM.isstock =2 ) AS Totunits,
                 PurchaseLine.QuantityToReceive
             FROM PurchaseHeader
-            JOIN PurchaseLine ON PurchaseLine.documentno = PurchaseHeader.documentno
+            JOIN PurchaseLine ON PurchaseLine.documentno = PurchaseHeader.documentno AND PurchaseLine.documenttype=18
             JOIN currencies   ON currencies.currabrev    = PurchaseHeader.currencycode
             JOIN stockmaster  ON PurchaseLine.code       = stockmaster.itemcode
             WHERE stockmaster.isstock =2 
+              AND PurchaseLine.documenttype=18
+              AND PurchaseHeader.documenttype=18
               AND PurchaseLine.entryno = $key";
 
     $RESULTS       = DB_query($SQL, $db);
