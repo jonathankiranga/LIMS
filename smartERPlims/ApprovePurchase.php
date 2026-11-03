@@ -30,15 +30,19 @@ $Arraysystypes=array();
 
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' .$Title.'" alt="" />' . ' ' .$Title. '</p>';
  
-if(isset($_POST['confirm'])){
-    DB_query("UPDATE `PurchaseHeader` SET `released` = 1,`status`=2 where documentno='".$_POST['documentno']."'", $db);
-    DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documentno='".$_POST['documentno']."'", $db);
+if(isset($_POST['confirm']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno'])){
+    $approvalDocumentType = (int)$_POST['documenttype'];
+    $approvalDocumentNo = trim($_POST['documentno']);
+    DB_query("UPDATE `PurchaseHeader` SET `released` = 1,`status`=2 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
     unset($_POST);
 }
 
-if(isset($_POST['Reject'])){
-    DB_query("UPDATE `PurchaseHeader` SET `released`=NULL,`status`=0 where documentno='".$_POST['documentno']."'", $db);
-    DB_query("UPDATE `PurchaseLine` SET `completed`=NULL where documentno='".$_POST['documentno']."'", $db);
+if(isset($_POST['Reject']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno'])){
+    $approvalDocumentType = (int)$_POST['documenttype'];
+    $approvalDocumentNo = trim($_POST['documentno']);
+    DB_query("UPDATE `PurchaseHeader` SET `released`=NULL,`status`=0 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `PurchaseLine` SET `completed`=NULL where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
     prnMsg('Purchase Document :'.$_POST['documentno'].' has been Rejected.');
     unset($_POST);
 }
