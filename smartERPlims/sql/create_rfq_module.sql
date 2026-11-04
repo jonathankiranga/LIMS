@@ -118,3 +118,23 @@ SET @rfq_alter_sql = IF(@has_rfq_tax_inclusive = 0,
   'ALTER TABLE rfq_quotes ADD COLUMN tax_inclusive TINYINT(1) NOT NULL DEFAULT 0 AFTER accepted_terms',
   'SELECT ''rfq_quotes.tax_inclusive already exists'' AS status');
 PREPARE rfq_stmt FROM @rfq_alter_sql; EXECUTE rfq_stmt; DEALLOCATE PREPARE rfq_stmt;
+
+
+-- Internal inventory classification used by LIMS sync and RFQ filtering.
+SET @has_is_test_parameter = (
+  SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'stockmaster' AND column_name = 'is_test_parameter'
+);
+SET @rfq_tag_sql = IF(@has_is_test_parameter = 0,
+  'ALTER TABLE stockmaster ADD COLUMN is_test_parameter TINYINT(1) NOT NULL DEFAULT 0',
+  'SELECT ''stockmaster.is_test_parameter already exists'' AS status');
+PREPARE rfq_tag_stmt FROM @rfq_tag_sql; EXECUTE rfq_tag_stmt; DEALLOCATE PREPARE rfq_tag_stmt;
+
+SET @has_is_standard_method = (
+  SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'stockmaster' AND column_name = 'is_standard_method'
+);
+SET @rfq_tag_sql = IF(@has_is_standard_method = 0,
+  'ALTER TABLE stockmaster ADD COLUMN is_standard_method TINYINT(1) NOT NULL DEFAULT 0',
+  'SELECT ''stockmaster.is_standard_method already exists'' AS status');
+PREPARE rfq_tag_stmt FROM @rfq_tag_sql; EXECUTE rfq_tag_stmt; DEALLOCATE PREPARE rfq_tag_stmt;
