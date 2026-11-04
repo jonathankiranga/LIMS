@@ -6,9 +6,16 @@
 -- keys, indexes and existing column definitions must be audited before a
 -- database-wide conversion is applied.
 
-ALTER DATABASE `mozillaerpv2`
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+-- Apply to whichever tenant database is currently selected.
+SET @rfq_db_name = DATABASE();
+SET @rfq_alter_database = CONCAT(
+  'ALTER DATABASE `',
+  REPLACE(@rfq_db_name, '`', '``'),
+  '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+);
+PREPARE rfq_collation_stmt FROM @rfq_alter_database;
+EXECUTE rfq_collation_stmt;
+DEALLOCATE PREPARE rfq_collation_stmt;
 
 ALTER TABLE rfq_header
   CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
