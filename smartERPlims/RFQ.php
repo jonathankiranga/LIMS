@@ -21,8 +21,8 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
     include_once('Mailer/PHPMailerAutoload.php');
 
     $transports = array(
-        array('mode' => 'TLS', 'secure' => 'tls', 'port' => 587),
-        array('mode' => 'SSL', 'secure' => 'ssl', 'port' => 465)
+        array('mode' => 'SSL', 'secure' => 'ssl', 'port' => 465),
+        array('mode' => 'TLS', 'secure' => 'tls', 'port' => 587)
     );
     foreach ($transports as $transport) {
         $mail = new PHPMailer;
