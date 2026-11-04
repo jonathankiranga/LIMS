@@ -38,7 +38,7 @@ $sql = "SELECT i.id AS invite_id,i.status AS invite_status,i.supplier_code,i.sup
                h.closing_at,h.status AS rfq_status,c.customer
         FROM rfq_invites i
         JOIN rfq_header h ON h.id=i.rfq_id
-        JOIN creditors c ON c.itemcode=i.supplier_code
+        JOIN creditors c ON c.itemcode = i.supplier_code COLLATE utf8mb4_unicode_ci
         WHERE i.token_hash='" . DB_escape_string($tokenHash) . "'
         LIMIT 1";
 $result = DB_query($sql, $db);
