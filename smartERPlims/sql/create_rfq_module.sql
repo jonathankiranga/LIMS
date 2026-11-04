@@ -138,3 +138,20 @@ SET @rfq_tag_sql = IF(@has_is_standard_method = 0,
   'ALTER TABLE stockmaster ADD COLUMN is_standard_method TINYINT(1) NOT NULL DEFAULT 0',
   'SELECT ''stockmaster.is_standard_method already exists'' AS status');
 PREPARE rfq_tag_stmt FROM @rfq_tag_sql; EXECUTE rfq_tag_stmt; DEALLOCATE PREPARE rfq_tag_stmt;
+
+
+-- Record SMTP transport attempts and exact failure reasons for RFQ invitations.
+CREATE TABLE IF NOT EXISTS rfq_email_log (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  rfq_id BIGINT UNSIGNED NOT NULL,
+  supplier_code VARCHAR(20) NOT NULL,
+  supplier_email VARCHAR(150) NOT NULL,
+  transport VARCHAR(20) NOT NULL,
+  success TINYINT(1) NOT NULL DEFAULT 0,
+  error_message TEXT NULL,
+  attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_rfq_email_log_rfq (rfq_id),
+  KEY idx_rfq_email_log_attempted (attempted_at),
+  CONSTRAINT fk_rfq_email_log_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
