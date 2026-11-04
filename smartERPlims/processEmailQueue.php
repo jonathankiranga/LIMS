@@ -29,11 +29,15 @@ function sendQueuedEmail($id, $recipientEmail, $recipientName, $subject, $body) 
     $mail->SMTPDebug = 0;
     $mail->Debugoutput = 'html';
     $mail->Host = HOST;
-    $mail->Port = PORT;
-    $mail->SMTPSecure = 'tls';
-    $mail->SMTPAuth = true;
+    $mail->Port = (int)PORT;
+    $mail->SMTPSecure = defined('SECURE') ? SECURE : '';
+    $mail->SMTPAuth = defined('auth') ? ((string)auth === '1') : true;
+    $mail->Timeout = defined('timeout') ? (int)timeout : 30;
+    if (defined('heloaddress') && heloaddress !== '') {
+        $mail->Helo = heloaddress;
+    }
     $mail->Username = username;
-    $mail->Password = trim(decrypt(password));
+    $mail->Password = password;
     $mail->setFrom(username,'SmarternowERP');
     
     // Add recipient
