@@ -16,6 +16,10 @@ if ($db->connect_error) {
 
 // Set charset to utf8mb4
 $db->set_charset("utf8mb4");
+// Use one connection collation consistently for string literals and comparisons.
+if (!$db->query("SET collation_connection = 'utf8mb4_unicode_ci'")) {
+    die("Unable to set MySQL connection collation: " . $db->error);
+}
 
 require_once ($PathPrefix .'includes/MiscFunctions.php');
 
