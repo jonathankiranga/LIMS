@@ -12,29 +12,46 @@ function rfq_post($key, $default = '') {
     return isset($_POST[$key]) ? trim((string)$_POST[$key]) : $default;
 }
 function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
+    $attempts = array();
     if (!file_exists('chats/EmailConfig.php') || !file_exists('Mailer/PHPMailerAutoload.php')) {
-        return 'Email configuration is not available; invitation link was created but email was not sent.';
+        return array('success' => false, 'attempts' => array(array('mode' => 'configuration', 'error' => 'Email configuration or PHPMailer files are missing.')));
     }
     include_once('includes/encrypt.inc');
     include_once('chats/EmailConfig.php');
     include_once('Mailer/PHPMailerAutoload.php');
-    $mail = new PHPMailer;
-    $mail->isSMTP();
-    $mail->SMTPDebug = 0;
-    $mail->Host = HOST;
-    $mail->Port = PORT;
-    $mail->SMTPSecure = 'tls';
-    $mail->SMTPAuth = true;
-    $mail->Username = username;
-    $mail->Password = trim(decrypt(password));
-    $mail->CharSet = 'UTF-8';
-    $mail->setFrom(username, 'Smarternow ERP - Procurement');
-    $mail->addAddress($email, $supplier);
-    $mail->Subject = 'Request for Quotation ' . $rfqNo;
-    $mail->isHTML(true);
-    $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
-    $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
-    return $mail->send() ? true : $mail->ErrorInfo;
+
+    $transports = array(
+        array('mode' => 'TLS', 'secure' => 'tls', 'port' => 587),
+        array('mode' => 'SSL', 'secure' => 'ssl', 'port' => 465)
+    );
+    foreach ($transports as $transport) {
+        $mail = new PHPMailer;
+        $mail->isSMTP();
+        $mail->SMTPDebug = 0;
+        $mail->Host = HOST;
+        $mail->Port = $transport['port'];
+        $mail->SMTPSecure = $transport['secure'];
+        $mail->SMTPAuth = true;
+        $mail->Username = username;
+        $mail->Password = trim(decrypt(password));
+        $mail->CharSet = 'UTF-8';
+        $mail->setFrom(username, 'Smarternow ERP - Procurement');
+        $mail->addAddress($email, $supplier);
+        $mail->Subject = 'Request for Quotation ' . $rfqNo;
+        $mail->isHTML(true);
+        $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
+        $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
+
+        if ($mail->send()) {
+            $attempts[] = array('mode' => $transport['mode'], 'error' => '');
+            return array('success' => true, 'attempts' => $attempts);
+        }
+        $reason = trim((string)$mail->ErrorInfo);
+        if ($reason === '') { $reason = 'PHPMailer returned false without an error message.'; }
+        $attempts[] = array('mode' => $transport['mode'], 'error' => $reason);
+        error_log('RFQ email failed via ' . $transport['mode'] . ' to ' . $email . ': ' . $reason);
+    }
+    return array('success' => false, 'attempts' => $attempts);
 }
 
 $message = '';
@@ -128,11 +145,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
             $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
             $url = 'https://' . $host . $basePath . '/SupplierRFQ.php?company=' . rawurlencode($_SESSION['DatabaseName']) . '&token=' . rawurlencode($token);
             $invitesCreated++;
-            $sent = rfq_send_invitation($supplier['email'], $supplier['customer'], $rfq['rfq_no'], $rfq['title'], $url);
-            if ($sent === true) {
+            $sendResult = rfq_send_invitation($supplier['email'], $supplier['customer'], $rfq['rfq_no'], $rfq['title'], $url);
+            foreach ($sendResult['attempts'] as $attempt) {
+                DB_query("INSERT INTO rfq_email_log (rfq_id,supplier_code,supplier_email,transport,success,error_message)
+                    VALUES (" . $rfqId . ",'" . DB_escape_string($supplier['itemcode']) . "','" .
+                    DB_escape_string($supplier['email']) . "','" . DB_escape_string($attempt['mode']) . "'," .
+                    (!empty($sendResult['success']) && $attempt['error'] === '' ? 1 : 0) . ",'" .
+                    DB_escape_string($attempt['error']) . "')", $db);
+            }
+            if (!empty($sendResult['success'])) {
                 $emailsSent++;
             } else {
-                $mailErrors[] = $supplier['customer'] . ' (' . $supplier['email'] . '): ' . $sent;
+                $reasons = array();
+                foreach ($sendResult['attempts'] as $attempt) {
+                    $reasons[] = $attempt['mode'] . ': ' . $attempt['error'];
+                }
+                $mailErrors[] = $supplier['customer'] . ' (' . $supplier['email'] . '): ' . implode(' | ', $reasons);
             }
         }
         if ($invitesCreated > 0) {
