@@ -32,7 +32,7 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
         ));
     }
 
-    $mail = new \\PHPMailer\\PHPMailer\\PHPMailer(true);
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
     $transport = strtoupper(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : 'TLS') . ':' .
         (isset($smtp['smtp_port']) ? (int)$smtp['smtp_port'] : 587);
 
@@ -57,9 +57,9 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
 
         $secure = strtolower(trim((string)(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : '')));
         if ($secure === 'ssl' || $mail->Port === 465) {
-            $mail->SMTPSecure = \\PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         } elseif ($secure === 'tls' || $mail->Port === 587) {
-            $mail->SMTPSecure = \\PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         }
 
         $fromEmail = !empty($smtp['from_email']) ? trim((string)$smtp['from_email']) : $mail->Username;
@@ -78,7 +78,7 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
         $mail->send();
         $attempts[] = array('mode' => $transport, 'error' => '');
         return array('success' => true, 'attempts' => $attempts);
-    } catch (\\Throwable $exception) {
+    } catch (\Throwable $exception) {
         $reason = trim((string)$mail->ErrorInfo);
         if ($reason === '') {
             $reason = $exception->getMessage();
