@@ -13,40 +13,44 @@ function rfq_post($key, $default = '') {
 }
 function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
     $attempts = array();
-    $blockchainRoot = dirname(__DIR__) . '/blockchain';
-    $autoloadPath = $blockchainRoot . '/vendor/autoload.php';
-    $smtpConfigPath = $blockchainRoot . '/config.php';
 
-    if (!is_file($autoloadPath) || !is_file($smtpConfigPath)) {
+    $mailerPath = __DIR__ . '/Mailer/PHPMailerAutoload.php';
+    $smtpConfigPath = __DIR__ . '/chats/EmailConfig.php';
+
+    if (!is_file($mailerPath) || !is_file($smtpConfigPath)) {
         return array('success' => false, 'attempts' => array(
-            array('mode' => 'configuration', 'error' => 'The working LIMS Blockchain mailer or SMTP configuration could not be found.')
+            array('mode' => 'configuration', 'error' => 'The SmartERPlims mailer or SMTP configuration could not be found.')
         ));
     }
 
-    require_once $autoloadPath;
-    $smtp = include $smtpConfigPath;
-    if (!is_array($smtp) || empty($smtp['smtp_host']) || empty($smtp['smtp_username']) ||
-        !array_key_exists('smtp_password', $smtp)) {
+    require_once $mailerPath;
+    require_once $smtpConfigPath;
+
+    if (!defined('HOST') || !defined('PORT') || !defined('username') ||
+        !defined('password') || !defined('SECURE')) {
         return array('success' => false, 'attempts' => array(
-            array('mode' => 'configuration', 'error' => 'The LIMS Blockchain SMTP configuration is incomplete.')
+            array('mode' => 'configuration', 'error' => 'The SmartERPlims SMTP configuration is incomplete.')
         ));
     }
 
-    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-    $transport = strtoupper(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : 'TLS') . ':' .
-        (isset($smtp['smtp_port']) ? (int)$smtp['smtp_port'] : 587);
+    $mail = new PHPMailer(true);
+    $port = (int)PORT;
+    $secure = strtolower(trim((string)SECURE));
+    $transport = strtoupper($secure) . ':' . $port;
 
     try {
-        // Use the same Composer PHPMailer and SMTP transport configuration as LIMS Blockchain.
+        // SmartERPlims uses its own PHPMailer 7.1.1 installation and SMTP configuration.
         $mail->isSMTP();
         $mail->SMTPDebug = 0;
-        $mail->Host = trim((string)$smtp['smtp_host']);
-        $mail->Port = isset($smtp['smtp_port']) && (int)$smtp['smtp_port'] > 0 ? (int)$smtp['smtp_port'] : 587;
-        $mail->SMTPAuth = array_key_exists('smtp_auth', $smtp) ? (bool)$smtp['smtp_auth'] : true;
-        $mail->Username = trim((string)$smtp['smtp_username']);
-        $mail->Password = (string)$smtp['smtp_password'];
-        $mail->Helo = $mail->Host;
-        $mail->Timeout = isset($smtp['smtp_timeout']) && (int)$smtp['smtp_timeout'] > 0 ? (int)$smtp['smtp_timeout'] : 20;
+        $mail->Host = trim((string)HOST);
+        $mail->Port = $port > 0 ? $port : 587;
+        $mail->SMTPAuth = (string)auth === '1' || (string)auth === 'true';
+        $mail->Username = trim((string)username);
+        $mail->Password = (string)password;
+        $mail->Helo = defined('heloaddress') && trim((string)heloaddress) !== ''
+            ? trim((string)heloaddress)
+            : $mail->Host;
+        $mail->Timeout = defined('timeout') && (int)timeout > 0 ? (int)timeout : 20;
         $mail->SMTPOptions = array(
             'ssl' => array(
                 'verify_peer' => false,
@@ -55,19 +59,18 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
             )
         );
 
-        $secure = strtolower(trim((string)(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : '')));
         if ($secure === 'ssl' || $mail->Port === 465) {
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         } elseif ($secure === 'tls' || $mail->Port === 587) {
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         }
 
-        $fromEmail = !empty($smtp['from_email']) ? trim((string)$smtp['from_email']) : $mail->Username;
-        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+        $fromEmail = filter_var($mail->Username, FILTER_VALIDATE_EMAIL) ? $mail->Username : '';
+        if ($fromEmail === '') {
             throw new RuntimeException('The configured SMTP sender address is invalid.');
         }
-        $fromName = 'Smarternow ERP - Procurement';
-        $mail->setFrom($fromEmail, $fromName);
+
+        $mail->setFrom($fromEmail, 'Smarternow ERP - Procurement');
         $mail->addAddress($email, $supplier);
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
@@ -78,7 +81,7 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
         $mail->send();
         $attempts[] = array('mode' => $transport, 'error' => '');
         return array('success' => true, 'attempts' => $attempts);
-    } catch (\Throwable $exception) {
+    } catch (Throwable $exception) {
         $reason = trim((string)$mail->ErrorInfo);
         if ($reason === '') {
             $reason = $exception->getMessage();
