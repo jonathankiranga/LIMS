@@ -16,41 +16,40 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
     if (!file_exists('chats/EmailConfig.php') || !file_exists('Mailer/PHPMailerAutoload.php')) {
         return array('success' => false, 'attempts' => array(array('mode' => 'configuration', 'error' => 'Email configuration or PHPMailer files are missing.')));
     }
-    include_once('includes/encrypt.inc');
+
     include_once('chats/EmailConfig.php');
     include_once('Mailer/PHPMailerAutoload.php');
 
-    $transports = array(
-        array('mode' => 'SSL', 'secure' => 'ssl', 'port' => 465),
-        array('mode' => 'TLS', 'secure' => 'tls', 'port' => 587)
-    );
-    foreach ($transports as $transport) {
-        $mail = new PHPMailer;
-        $mail->isSMTP();
-        $mail->SMTPDebug = 0;
-        $mail->Host = HOST;
-        $mail->Port = $transport['port'];
-        $mail->SMTPSecure = $transport['secure'];
-        $mail->SMTPAuth = true;
-        $mail->Username = username;
-        $mail->Password = trim(decrypt(password));
-        $mail->CharSet = 'UTF-8';
-        $mail->setFrom(username, 'Smarternow ERP - Procurement');
-        $mail->addAddress($email, $supplier);
-        $mail->Subject = 'Request for Quotation ' . $rfqNo;
-        $mail->isHTML(true);
-        $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
-        $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
-
-        if ($mail->send()) {
-            $attempts[] = array('mode' => $transport['mode'], 'error' => '');
-            return array('success' => true, 'attempts' => $attempts);
-        }
-        $reason = trim((string)$mail->ErrorInfo);
-        if ($reason === '') { $reason = 'PHPMailer returned false without an error message.'; }
-        $attempts[] = array('mode' => $transport['mode'], 'error' => $reason);
-        error_log('RFQ email failed via ' . $transport['mode'] . ' to ' . $email . ': ' . $reason);
+    $mail = new PHPMailer;
+    $mail->isSMTP();
+    $mail->SMTPDebug = 0;
+    $mail->Host = HOST;
+    $mail->Port = (int)PORT;
+    $mail->SMTPSecure = SECURE;
+    $mail->SMTPAuth = (string)auth === '1';
+    $mail->Timeout = (int)timeout;
+    if (defined('heloaddress') && heloaddress !== '') {
+        $mail->Helo = heloaddress;
     }
+    $mail->Username = username;
+    $mail->Password = password;
+    $mail->CharSet = 'UTF-8';
+    $mail->setFrom(username, 'Smarternow ERP - Procurement');
+    $mail->addAddress($email, $supplier);
+    $mail->Subject = 'Request for Quotation ' . $rfqNo;
+    $mail->isHTML(true);
+    $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
+    $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
+
+    if ($mail->send()) {
+        $attempts[] = array('mode' => strtoupper(SECURE) . ':' . PORT, 'error' => '');
+        return array('success' => true, 'attempts' => $attempts);
+    }
+
+    $reason = trim((string)$mail->ErrorInfo);
+    if ($reason === '') { $reason = 'PHPMailer returned false without an error message.'; }
+    $attempts[] = array('mode' => strtoupper(SECURE) . ':' . PORT, 'error' => $reason);
+    error_log('RFQ email failed via ' . strtoupper(SECURE) . ':' . PORT . ' to ' . $email . ': ' . $reason);
     return array('success' => false, 'attempts' => $attempts);
 }
 
