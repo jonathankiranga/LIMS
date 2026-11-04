@@ -168,32 +168,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
 }
 
 $currencies = DB_query("SELECT currabrev,currency FROM currencies ORDER BY currency", $db);
-$stockItems = DB_query("SELECT itemcode,descrip FROM stockmaster WHERE (inactive=0 OR inactive IS NULL) ORDER BY descrip LIMIT 500", $db);
+$stockItems = DB_query("SELECT itemcode,descrip FROM stockmaster WHERE (inactive=0 OR inactive IS NULL) AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0 ORDER BY descrip LIMIT 500", $db);
 $rfqs = DB_query("SELECT h.*, (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id) AS invite_count,
     (SELECT COUNT(*) FROM rfq_quotes q WHERE q.rfq_id=h.id) AS quote_count
     FROM rfq_header h ORDER BY h.created_at DESC LIMIT 100", $db);
 $suppliers = DB_query("SELECT itemcode,customer,email FROM creditors WHERE inactive=0 ORDER BY customer", $db);
 
-echo '<div class="container-fluid" style="max-width:1500px">';
+echo '<style>
+.rfq-page{max-width:1180px;margin:0 auto;padding:0 12px}
+.rfq-page .rfq-card{border:1px solid #dbe2ea;border-radius:8px;background:#fff;margin:14px 0;overflow:hidden}
+.rfq-page .rfq-card-heading{padding:12px 16px;background:#f5f7fa;border-bottom:1px solid #dbe2ea;font-weight:600}
+.rfq-page .rfq-card-body{padding:16px}
+.rfq-page .rfq-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px}
+.rfq-page .rfq-field{min-width:0;display:flex;flex-direction:column;gap:5px}
+.rfq-page .rfq-field label{font-size:13px;font-weight:600;margin:0}
+.rfq-page .form-control{width:100%;max-width:100%;box-sizing:border-box}
+.rfq-page textarea{resize:vertical}
+.rfq-page .rfq-lines th{font-size:12px;white-space:normal}
+.rfq-page .rfq-lines td{vertical-align:top}
+.rfq-page .rfq-lines input,.rfq-page .rfq-lines select,.rfq-page .rfq-lines textarea{min-width:0}
+.rfq-page .rfq-lines .rfq-description{min-width:160px}
+.rfq-page .rfq-lines .rfq-specification{min-width:180px}
+.rfq-page .rfq-register{font-size:13px}
+@media(max-width:768px){.rfq-page{padding:0 8px}.rfq-page .rfq-card-body{padding:12px}.rfq-page .rfq-form-grid{grid-template-columns:1fr}}
+</style><div class="rfq-page">';
 echo '<h2>Request for Quotation (RFQ)</h2>';
 if ($message !== '') { echo '<div class="alert alert-success">' . rfq_h($message) . '</div>'; }
 if ($error !== '') { echo '<div class="alert alert-warning">' . rfq_h($error) . '</div>'; }
-echo '<div class="panel panel-default"><div class="panel-heading"><strong>Create RFQ</strong></div><div class="panel-body">';
+echo '<section class="rfq-card"><div class="rfq-card-heading">Create RFQ</div><div class="rfq-card-body">';
 echo '<form method="post"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '">';
-echo '<div class="row"><div class="col-md-6"><label>RFQ title</label><input class="form-control" name="title" required maxlength="150"></div>';
-echo '<div class="col-md-3"><label>Currency</label><select class="form-control" name="currencycode" required>';
+echo '<div class="rfq-form-grid"><div class="rfq-field"><label>RFQ title</label><input class="form-control" name="title" required maxlength="150"></div>';
+echo '<div class="rfq-field"><label>Currency</label><select class="form-control" name="currencycode" required>';
 while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['currabrev']) . '">' . rfq_h($c['currency']) . ' (' . rfq_h($c['currabrev']) . ')</option>'; }
-echo '</select></div><div class="col-md-3"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div></div>';
-echo '<div class="form-group" style="margin-top:12px"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div>';
-echo '<h4>Requested products / reagents</h4><div class="table-responsive"><table class="table table-bordered" id="rfqLines"><thead><tr><th>Inventory item (optional)</th><th>Description</th><th>Technical specifications / grade / pack size</th><th>Quantity</th><th>Unit</th><th></th></tr></thead><tbody>';
+echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
+echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
+echo '<h4>Requested products / reagents</h4><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item (optional)</th><th>Description</th><th>Technical specifications / grade / pack size</th><th>Quantity</th><th>Unit</th><th></th></tr></thead><tbody>';
 echo '<tr><td><select class="form-control" name="line_itemcode[]"><option value="">Not linked</option>';
 while ($st = DB_fetch_array($stockItems)) { echo '<option value="' . rfq_h($st['itemcode']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>'; }
-echo '</select></td><td><input class="form-control" name="line_description[]" required></td><td><textarea class="form-control" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" name="line_unit[]" placeholder="e.g. bottle, kg"></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
+echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" style="width:100px" name="line_unit[]" placeholder="e.g. bottle, kg"></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
 echo '</tbody></table></div><button type="button" class="btn btn-default" id="addRfqLine">Add product line</button>';
-echo '<div class="form-group" style="margin-top:14px"><label>Terms and conditions (technical, quality, delivery, payment, packaging, shelf life, certificates, MSDS/SDS, returns, etc.)</label><textarea class="form-control" name="terms_conditions" rows="7" required></textarea></div>';
-echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></div>';
+echo '<div class="rfq-field" style="margin:16px 0"><label>Terms and conditions (technical, quality, delivery, payment, packaging, shelf life, certificates, MSDS/SDS, returns, etc.)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
+echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></section>';
 
-echo '<h3>RFQ Register</h3><div class="table-responsive"><table class="table table-striped table-bordered"><thead><tr><th>RFQ No.</th><th>Title</th><th>Closing</th><th>Status</th><th>Invited</th><th>Quotes</th><th>Action</th></tr></thead><tbody>';
+echo '<section class="rfq-card"><div class="rfq-card-heading">RFQ Register</div><div class="rfq-card-body"><div class="table-responsive"><table class="table table-striped table-bordered table-sm rfq-register"><thead><tr><th>RFQ No.</th><th>Title</th><th>Closing</th><th>Status</th><th>Invited</th><th>Quotes</th><th>Action</th></tr></thead><tbody>';
 while ($h = DB_fetch_array($rfqs)) {
     echo '<tr><td>' . rfq_h($h['rfq_no']) . '</td><td>' . rfq_h($h['title']) . '</td><td>' . rfq_h($h['closing_at']) . '</td><td>' . rfq_h(ucfirst($h['status'])) . '</td><td>' . (int)$h['invite_count'] . '</td><td>' . (int)$h['quote_count'] . '</td><td>';
     if ($h['status'] === 'draft') {
@@ -211,7 +228,7 @@ while ($h = DB_fetch_array($rfqs)) {
         echo '</div><button class="btn btn-success" name="issue_rfq" value="1">Issue RFQ and email invitations</button></form></td></tr>';
     }
 }
-echo '</tbody></table></div>';
+echo '</tbody></table></div></div></section>';
 
 if (isset($_GET['compare'])) {
     $compareId = (int)$_GET['compare'];
