@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS rfq_header (
   PRIMARY KEY (id),
   UNIQUE KEY uq_rfq_no (rfq_no),
   KEY idx_rfq_status_close (status, closing_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rfq_lines (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS rfq_lines (
   PRIMARY KEY (id),
   KEY idx_rfq_lines_rfq (rfq_id),
   CONSTRAINT fk_rfq_lines_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rfq_invites (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS rfq_invites (
   UNIQUE KEY uq_rfq_token_hash (token_hash),
   KEY idx_rfq_invites_status (rfq_id, status),
   CONSTRAINT fk_rfq_invites_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rfq_quotes (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS rfq_quotes (
   KEY idx_rfq_quotes_rfq (rfq_id),
   CONSTRAINT fk_rfq_quotes_invite FOREIGN KEY (invite_id) REFERENCES rfq_invites(id),
   CONSTRAINT fk_rfq_quotes_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rfq_quote_lines (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS rfq_quote_lines (
   KEY idx_rfq_quote_lines_line (rfq_line_id),
   CONSTRAINT fk_rfq_quote_lines_quote FOREIGN KEY (quote_id) REFERENCES rfq_quotes(id) ON DELETE CASCADE,
   CONSTRAINT fk_rfq_quote_lines_rfq_line FOREIGN KEY (rfq_line_id) REFERENCES rfq_lines(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Register the staff page in the existing page-security catalogue.
 INSERT IGNORE INTO scripts (script, pagesecurity, description)
@@ -154,4 +154,4 @@ CREATE TABLE IF NOT EXISTS rfq_email_log (
   KEY idx_rfq_email_log_rfq (rfq_id),
   KEY idx_rfq_email_log_attempted (attempted_at),
   CONSTRAINT fk_rfq_email_log_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
