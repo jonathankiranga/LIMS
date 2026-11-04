@@ -66,7 +66,7 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
         if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException('The configured SMTP sender address is invalid.');
         }
-        $fromName = !empty($smtp['from_name']) ? 'Smarternow ERP - Procurement' : 'Smarternow ERP - Procurement';
+        $fromName = 'Smarternow ERP - Procurement';
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($email, $supplier);
         $mail->CharSet = 'UTF-8';
