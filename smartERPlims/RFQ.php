@@ -70,7 +70,8 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
             throw new RuntimeException('The configured SMTP sender address is invalid.');
         }
 
-        $mail->setFrom($fromEmail, 'Smarternow ERP - Procurement');
+        $companyName = isset($_SESSION['CompanyRecord']['coyname']) ? trim((string)$_SESSION['CompanyRecord']['coyname']) : '';
+        $mail->setFrom($fromEmail, $companyName);
         $mail->addAddress($email, $supplier);
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
