@@ -245,7 +245,7 @@ if (isset($_GET['compare'])) {
             }
         }
         $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
-        $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode=q.supplier_code WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
+        $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         echo '<div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Supplier / product</th>';
         $quoteRows = array();
         while ($q = DB_fetch_array($quotes)) {
