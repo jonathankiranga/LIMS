@@ -109,7 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
         $error = 'Select at least one supplier and a valid draft RFQ.';
     } else {
         $rfq = DB_fetch_array($rfqResult);
-        $issued = 0;
+        $invitesCreated = 0;
+        $emailsSent = 0;
         $mailErrors = array();
         foreach ($selected as $supplierCode) {
             $supplierCode = DB_escape_string($supplierCode);
@@ -126,17 +127,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
             if (!preg_match('/^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/', $host)) { $mailErrors[] = 'Invalid web host; email skipped for ' . $supplier['customer']; continue; }
             $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
             $url = 'https://' . $host . $basePath . '/SupplierRFQ.php?company=' . rawurlencode($_SESSION['DatabaseName']) . '&token=' . rawurlencode($token);
+            $invitesCreated++;
             $sent = rfq_send_invitation($supplier['email'], $supplier['customer'], $rfq['rfq_no'], $rfq['title'], $url);
-            if ($sent !== true) { $mailErrors[] = $supplier['customer'] . ': ' . $sent; }
-            $issued++;
+            if ($sent === true) {
+                $emailsSent++;
+            } else {
+                $mailErrors[] = $supplier['customer'] . ' (' . $supplier['email'] . '): ' . $sent;
+            }
         }
-        if ($issued > 0) {
+        if ($invitesCreated > 0) {
             DB_query("UPDATE rfq_header SET status='issued',issue_date=NOW() WHERE id=" . $rfqId, $db);
-            $message = 'RFQ issued to ' . $issued . ' supplier(s).';
+            $message = 'RFQ invitations created for ' . $invitesCreated . ' supplier(s); SMTP accepted ' . $emailsSent . ' email(s).';
         } else {
             $error = 'No supplier invitations were created. Check supplier email addresses and whether they were already invited.';
         }
-        if (count($mailErrors)) { $error .= ($error ? ' ' : '') . 'Email issues: ' . implode(' | ', $mailErrors); }
+        if (count($mailErrors)) { $error .= ($error ? ' ' : '') . 'Email sending failed: ' . implode(' | ', $mailErrors); }
     }
 }
 
