@@ -163,13 +163,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_rfq'])) {
                 $mailErrors[] = $supplier['customer'] . ' (' . $supplier['email'] . '): ' . implode(' | ', $reasons);
             }
         }
-        if ($invitesCreated > 0) {
-            DB_query("UPDATE rfq_header SET status='issued',issue_date=NOW() WHERE id=" . $rfqId, $db);
+        if ($emailsSent > 0) {
+            DB_query("UPDATE rfq_header SET status='issued',issue_date=IFNULL(issue_date,NOW()) WHERE id=" . $rfqId . " AND status='draft'", $db);
             $message = 'RFQ invitations created for ' . $invitesCreated . ' supplier(s); SMTP accepted ' . $emailsSent . ' email(s).';
+        } elseif ($invitesCreated > 0) {
+            $error = 'Supplier invitations were created, but no email was accepted by SMTP. The RFQ remains Draft. Use Retry failed emails after correcting the mail configuration.';
         } else {
             $error = 'No supplier invitations were created. Check supplier email addresses and whether they were already invited.';
         }
         if (count($mailErrors)) { $error .= ($error ? ' ' : '') . 'Email sending failed: ' . implode(' | ', $mailErrors); }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retry_rfq_emails'])) {
+    if (!isset($_POST['FormID']) || !hash_equals((string)$_SESSION['FormID'], (string)$_POST['FormID'])) {
+        $error = 'Your session validation has expired. Reload the page and try again.';
+    } else {
+        $rfqId = isset($_POST['rfq_id']) ? (int)$_POST['rfq_id'] : 0;
+        $rfqResult = DB_query("SELECT * FROM rfq_header WHERE id=" . $rfqId . " AND status IN ('draft','issued')", $db);
+        if (DB_num_rows($rfqResult) !== 1) {
+            $error = 'The RFQ does not exist or cannot accept email retries in its current status.';
+        } else {
+            $rfq = DB_fetch_array($rfqResult);
+            $failedInvites = DB_query("SELECT i.id,i.supplier_code,i.supplier_email
+                FROM rfq_invites i
+                WHERE i.rfq_id=" . $rfqId . " AND i.status='invited'
+                  AND NOT EXISTS (
+                    SELECT 1 FROM rfq_email_log l
+                    WHERE l.rfq_id=i.rfq_id AND l.supplier_code=i.supplier_code AND l.success=1
+                  )
+                ORDER BY i.id", $db);
+            $retried = 0;
+            $emailsSent = 0;
+            $mailErrors = array();
+            $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+            $validHost = preg_match('/^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/', $host);
+            $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+            while ($invite = DB_fetch_array($failedInvites)) {
+                $retried++;
+                $supplierName = $invite['supplier_code'];
+                $supplierLookup = DB_query("SELECT customer FROM creditors WHERE itemcode COLLATE utf8mb4_unicode_ci='" .
+                    DB_escape_string($invite['supplier_code']) . "' COLLATE utf8mb4_unicode_ci LIMIT 1", $db);
+                if (DB_num_rows($supplierLookup) === 1) {
+                    $supplierRow = DB_fetch_array($supplierLookup);
+                    $supplierName = $supplierRow['customer'];
+                }
+                if (!filter_var($invite['supplier_email'], FILTER_VALIDATE_EMAIL)) {
+                    $reason = 'Stored supplier email address is invalid: ' . $invite['supplier_email'];
+                    DB_query("INSERT INTO rfq_email_log (rfq_id,supplier_code,supplier_email,transport,success,error_message)
+                        VALUES (" . $rfqId . ",'" . DB_escape_string($invite['supplier_code']) . "','" .
+                        DB_escape_string($invite['supplier_email']) . "','configuration',0,'" . DB_escape_string($reason) . "')", $db);
+                    $mailErrors[] = $supplierName . ': ' . $reason;
+                    continue;
+                }
+                if (!$validHost) {
+                    $reason = 'Invalid web host; email was not attempted.';
+                    DB_query("INSERT INTO rfq_email_log (rfq_id,supplier_code,supplier_email,transport,success,error_message)
+                        VALUES (" . $rfqId . ",'" . DB_escape_string($invite['supplier_code']) . "','" .
+                        DB_escape_string($invite['supplier_email']) . "','configuration',0,'" . DB_escape_string($reason) . "')", $db);
+                    $mailErrors[] = $supplierName . ': ' . $reason;
+                    continue;
+                }
+                $token = bin2hex(random_bytes(32));
+                DB_query("UPDATE rfq_invites SET token_hash='" . hash('sha256', $token) .
+                    "',supplier_email='" . DB_escape_string($invite['supplier_email']) . "' WHERE id=" . (int)$invite['id'], $db);
+                $url = 'https://' . $host . $basePath . '/SupplierRFQ.php?company=' .
+                    rawurlencode($_SESSION['DatabaseName']) . '&token=' . rawurlencode($token);
+                $sendResult = rfq_send_invitation($invite['supplier_email'], $supplierName, $rfq['rfq_no'], $rfq['title'], $url);
+                foreach ($sendResult['attempts'] as $attempt) {
+                    DB_query("INSERT INTO rfq_email_log (rfq_id,supplier_code,supplier_email,transport,success,error_message)
+                        VALUES (" . $rfqId . ",'" . DB_escape_string($invite['supplier_code']) . "','" .
+                        DB_escape_string($invite['supplier_email']) . "','" . DB_escape_string($attempt['mode']) . "'," .
+                        (!empty($sendResult['success']) && $attempt['error'] === '' ? 1 : 0) . ",'" .
+                        DB_escape_string($attempt['error']) . "')", $db);
+                }
+                if (!empty($sendResult['success'])) {
+                    $emailsSent++;
+                } else {
+                    $reasons = array();
+                    foreach ($sendResult['attempts'] as $attempt) {
+                        $reasons[] = $attempt['mode'] . ': ' . $attempt['error'];
+                    }
+                    $mailErrors[] = $supplierName . ' (' . $invite['supplier_email'] . '): ' . implode(' | ', $reasons);
+                }
+            }
+            if ($emailsSent > 0) {
+                DB_query("UPDATE rfq_header SET status='issued',issue_date=IFNULL(issue_date,NOW()) WHERE id=" . $rfqId . " AND status='draft'", $db);
+                $message = 'Retried ' . $retried . ' failed invitation(s); SMTP accepted ' . $emailsSent . ' email(s).';
+            } elseif ($retried === 0) {
+                $message = 'There are no failed or pending invitation emails to retry.';
+            } else {
+                $error = 'Retry attempted for ' . $retried . ' invitation(s), but SMTP accepted none. The RFQ remains ' .
+                    ucfirst($rfq['status']) . '. Check the email log for the recorded errors.';
+            }
+            if (count($mailErrors)) { $error .= ($error ? ' ' : '') . 'Email sending failed: ' . implode(' | ', $mailErrors); }
+        }
     }
 }
 
@@ -203,7 +291,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
 $currencies = DB_query("SELECT currabrev,currency FROM currencies ORDER BY currency", $db);
 $stockItems = DB_query("SELECT itemcode,descrip FROM stockmaster WHERE (inactive=0 OR inactive IS NULL) AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0 ORDER BY descrip LIMIT 500", $db);
 $rfqs = DB_query("SELECT h.*, (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id) AS invite_count,
-    (SELECT COUNT(*) FROM rfq_quotes q WHERE q.rfq_id=h.id) AS quote_count
+    (SELECT COUNT(*) FROM rfq_quotes q WHERE q.rfq_id=h.id) AS quote_count,
+    (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id AND i.status='invited'
+        AND NOT EXISTS (SELECT 1 FROM rfq_email_log l WHERE l.rfq_id=i.rfq_id
+            AND l.supplier_code=i.supplier_code AND l.success=1)) AS failed_email_count
     FROM rfq_header h ORDER BY h.created_at DESC LIMIT 100", $db);
 $suppliers = DB_query("SELECT itemcode,customer,email FROM creditors WHERE inactive=0 ORDER BY customer", $db);
 
@@ -247,9 +338,12 @@ echo '<section class="rfq-card"><div class="rfq-card-heading">RFQ Register</div>
 while ($h = DB_fetch_array($rfqs)) {
     echo '<tr><td>' . rfq_h($h['rfq_no']) . '</td><td>' . rfq_h($h['title']) . '</td><td>' . rfq_h($h['closing_at']) . '</td><td>' . rfq_h(ucfirst($h['status'])) . '</td><td>' . (int)$h['invite_count'] . '</td><td>' . (int)$h['quote_count'] . '</td><td>';
     if ($h['status'] === 'draft') {
-        echo '<button type="button" class="btn btn-sm btn-primary" data-toggle="collapse" data-target="#issue' . (int)$h['id'] . '">Select suppliers / Issue</button>';
+        echo '<button type="button" class="btn btn-sm btn-primary" data-toggle="collapse" data-target="#issue' . (int)$h['id'] . '">Select suppliers / Issue</button> ';
     } else {
-        echo '<a class="btn btn-sm btn-default" href="RFQ.php?compare=' . (int)$h['id'] . '">Compare quotations</a>';
+        echo '<a class="btn btn-sm btn-default" href="RFQ.php?compare=' . (int)$h['id'] . '">Compare quotations</a> ';
+    }
+    if (in_array($h['status'], array('draft','issued'), true) && (int)$h['failed_email_count'] > 0) {
+        echo '<form method="post" style="display:inline-block;margin:2px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . (int)$h['id'] . '"><button class="btn btn-sm btn-warning" name="retry_rfq_emails" value="1">Retry failed emails (' . (int)$h['failed_email_count'] . ')</button></form>';
     }
     echo '</td></tr>';
     if ($h['status'] === 'draft') {
