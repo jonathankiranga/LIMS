@@ -15,7 +15,7 @@ function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
     $attempts = array();
 
     $mailerPath = __DIR__ . '/Mailer/PHPMailerAutoload.php';
-    $smtpConfigPath = __DIR__ . '/chats/EmailConfig.php';
+    $smtpConfigPath = __DIR__ . '/Mailer/RFQEmailConfig.php';
 
     if (!is_file($mailerPath) || !is_file($smtpConfigPath)) {
         return array('success' => false, 'attempts' => array(
