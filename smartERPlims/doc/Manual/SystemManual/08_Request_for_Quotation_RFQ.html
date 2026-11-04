@@ -53,8 +53,44 @@
       <li>Select <strong>Issue RFQ and email invitations</strong>. The system creates an individual invitation token and sends each selected supplier an email.</li>
     </ol>
 
+    <h3>3.1 Understanding the RFQ terms and conditions</h3>
+    <p>The <strong>Terms and conditions</strong> field records the purchaser's requirements and conditions that suppliers must consider when preparing their quotations. It is not the supplier's quotation or a place to enter the supplier's proposed terms. These requirements help all invited suppliers quote on a consistent basis and help procurement assess whether an offer is technically and commercially acceptable.</p>
+    <table>
+      <thead><tr><th>Requirement</th><th>What it covers</th><th>Example of what procurement may specify</th></tr></thead>
+      <tbody>
+        <tr><td>Technical</td><td>Product identity, specification, grade, concentration, purity, performance and compatibility.</td><td>State the required reagent grade, concentration, purity and manufacturer specification.</td></tr>
+        <tr><td>Quality</td><td>Quality standards, traceability, batch identification and acceptance criteria.</td><td>Goods must be new, fit for purpose and supplied with batch/lot details.</td></tr>
+        <tr><td>Delivery</td><td>Delivery address, required delivery date, lead time and responsibility for transport costs.</td><td>Deliver to the nominated store or laboratory by the date stated in the RFQ.</td></tr>
+        <tr><td>Payment</td><td>Payment conditions proposed by the purchaser.</td><td>State the organisation's applicable payment terms or indicate that payment terms are subject to the purchase order.</td></tr>
+        <tr><td>Packaging</td><td>Required packaging, labelling, handling and protection during transport.</td><td>Supply in original, sealed manufacturer containers with readable labels.</td></tr>
+        <tr><td>Shelf life</td><td>Minimum remaining usable life when goods are delivered.</td><td>Specify a minimum remaining shelf life, for example 12 months, where appropriate for the product.</td></tr>
+        <tr><td>Certificates</td><td>Documents required to demonstrate product identity or conformity.</td><td>Require a Certificate of Analysis (CoA), certificate of conformity or manufacturer documentation, as applicable.</td></tr>
+        <tr><td>MSDS/SDS</td><td>Material Safety Data Sheet / Safety Data Sheet and relevant safe-handling information.</td><td>Require the current SDS for each applicable chemical or reagent.</td></tr>
+        <tr><td>Returns and replacement</td><td>How damaged, expired, incorrect or non-conforming goods will be handled.</td><td>Require the supplier to replace rejected goods at the supplier's cost within an agreed period.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><strong>Purchaser sets the actual conditions:</strong> Examples such as 12 months' remaining shelf life, a particular delivery deadline or a specific payment period are illustrative only. Enter the requirements that apply to the purchase. Do not assume example values are mandatory for every RFQ.</div>
+
+    <h3>Example: RFQ terms for laboratory reagents</h3>
+    <p>The following is a sample that procurement can adapt. Remove or amend any condition that does not apply to the goods being requested.</p>
+    <ul>
+      <li><strong>Specification:</strong> Supply the reagent in the grade, concentration, pack size and manufacturer specification stated against each RFQ line. Identify the manufacturer and product/catalogue number in the quotation.</li>
+      <li><strong>Quality and documentation:</strong> Supply new, genuine products with batch/lot numbers and expiry dates. Provide a Certificate of Analysis and the applicable Safety Data Sheet (SDS) with the goods.</li>
+      <li><strong>Packaging:</strong> Deliver in original, unopened and properly labelled manufacturer packaging. Packaging must protect the contents during transport and storage.</li>
+      <li><strong>Shelf life:</strong> State the expiry date and confirm that the goods will meet the minimum remaining shelf-life requirement specified by the purchaser at delivery.</li>
+      <li><strong>Delivery:</strong> State the delivery lead time and any delivery charges. Deliver to the location specified in the RFQ or subsequent purchase order.</li>
+      <li><strong>Pricing and tax:</strong> Quote in the currency stated in the RFQ. Clearly indicate whether prices include or exclude applicable taxes and identify any additional charges.</li>
+      <li><strong>Payment:</strong> State the payment terms requested by the supplier and note that the final agreed terms are subject to the purchaser's approval and purchase order.</li>
+      <li><strong>Non-conforming goods:</strong> Incorrect, damaged, expired or non-conforming goods may be rejected and must be collected and replaced by the supplier under the agreed return/replacement terms.</li>
+      <li><strong>Quotation validity:</strong> State the period for which the quotation and prices remain valid.</li>
+    </ul>
+
+    <h3>Supplier responses, exceptions and deviations</h3>
+    <p>Suppliers should quote against the purchaser's stated requirements. If a supplier cannot meet a requirement or is proposing an alternative, the supplier must clearly disclose the exception in the quotation notes/deviations field. Examples include a different manufacturer, an alternative grade or pack size, a shorter shelf life, additional delivery charges or different payment terms.</p>
+    <p>Procurement should review each disclosed deviation before comparing or awarding quotations. A supplier's alternative condition must not be treated as accepted merely because it appears in the quotation; acceptance is subject to the organisation's evaluation and approval process.</p>
+
     <h2>4. What the supplier receives</h2>
-    <p>The invitation is sent to the supplier's registered email address. Its subject is <strong>Request for Quotation [RFQ number]</strong> and the sender display name is <strong>Smarternow ERP - Procurement</strong>.</p>
+    <p>The invitation is sent to the supplier's registered email address. Its subject is <strong>Request for Quotation [RFQ number]</strong>. The sender display name is taken from the company name configured in the ERP.</p>
     <p>The message identifies the supplier, RFQ title and RFQ reference. It asks the supplier to review the requirements and submit before the deadline, and provides the link labelled <strong>Open RFQ and submit quotation</strong>.</p>
     <p>The link opens <code>SupplierRFQ.php</code>. Its URL contains the company/database identifier and a unique token for that supplier. The token is validated by the portal before the RFQ form is displayed.</p>
     <div class="warning"><strong>Invitation security:</strong> The link is supplier-specific. Do not publish it or forward it to another supplier. If the invitation is sent to the wrong email address, correct the supplier contact details and handle the invitation through the procurement administrator.</div>
