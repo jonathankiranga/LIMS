@@ -1,54 +1,36 @@
 <?php
 /**
- * PHPMailer SPL autoloader.
- * PHP Version 5
- * @package PHPMailer
- * @link https://github.com/PHPMailer/PHPMailer/ The PHPMailer GitHub project
- * @author Marcus Bointon (Synchro/coolbru) <phpmailer@synchromedia.co.uk>
- * @author Jim Jagielski (jimjag) <jimjag@gmail.com>
- * @author Andy Prevost (codeworxtech) <codeworxtech@users.sourceforge.net>
- * @author Brent R. Matzelle (original founder)
- * @copyright 2012 - 2014 Marcus Bointon
- * @copyright 2010 - 2012 Jim Jagielski
- * @copyright 2004 - 2009 Andy Prevost
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @note This program is distributed in the hope that it will be useful - WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.
+ * Backward-compatible loader for the PHPMailer 7.x upgrade.
+ *
+ * Existing ERP code continues to use the legacy global class names
+ * PHPMailer and phpmailerException. The implementation is provided by
+ * the namespaced PHPMailer 7.1.1 classes.
  */
 
-if (function_exists('PHPMailerAutoload')) {
-    // Function already defined, ensure SPL autoloader is registered but don't return early
-    // so the rest of the file executes
-} else {
+$mailerPath = dirname(__FILE__);
+
+require_once $mailerPath . '/src/Exception.php';
+require_once $mailerPath . '/src/PHPMailer.php';
+require_once $mailerPath . '/src/SMTP.php';
+
+if (!class_exists('PHPMailer', false)) {
+    class_alias('PHPMailer\\PHPMailer\\PHPMailer', 'PHPMailer');
+}
+
+if (!class_exists('phpmailerException', false)) {
+    class_alias('PHPMailer\\PHPMailer\\Exception', 'phpmailerException');
+}
+
 /**
- * PHPMailer SPL autoloader.
- * @param string $classname The name of the class to load
+ * Retain the old autoloader function name for legacy includes.
+ * The PHPMailer classes are loaded eagerly above.
+ *
+ * @param string $classname
+ * @return void
  */
-function PHPMailerAutoload($classname)
-{
-    //Can't use __DIR__ as it's only in PHP 5.3+
-    $filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'class.'.strtolower($classname).'.php';
-    if (is_readable($filename)) {
-        require $filename;
-    }
-}
-}
-
-if (version_compare(PHP_VERSION, '5.1.2', '>=')) {
-    //SPL autoloading was introduced in PHP 5.1.2
-    if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-        spl_autoload_register('PHPMailerAutoload', true, true);
-    } else {
-        spl_autoload_register('PHPMailerAutoload');
-    }
-} else {
-    /**
-     * Fall back to traditional autoload for old PHP versions
-     * @param string $classname The name of the class to load
-     */
-    function spl_autoload_register($classname)
+if (!function_exists('PHPMailerAutoload')) {
+    function PHPMailerAutoload($classname)
     {
-        PHPMailerAutoload($classname);
+        // Compatibility entry point; the namespaced classes are already loaded.
     }
 }
