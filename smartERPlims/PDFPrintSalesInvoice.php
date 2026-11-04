@@ -644,51 +644,21 @@ if($kenhaPath && $ilacPath && $neemaPath && $kraQRcodePath){
 }
 
 
-function encrypt($data){
- // Store cipher method
-$ciphering = "BF-CBC";
- 
-$options = 0;
-// Use random_bytes() function which gives
-// randomly 16 digit values
-$encryption_iv = "12345678";
-// Alternatively, we can use any 16 digit
-// characters or numeric for iv
-$encryption_key = "12345678";
-// Encryption of string process starts
-$encryption = openssl_encrypt($data, $ciphering,$encryption_key, $options, $encryption_iv);
-
-return $encryption;
-}
-
-
-function decrypt($data){
-// Store cipher method
-$ciphering = "BF-CBC";
-
-$options = 0;
-
-$decryption_iv ="12345678" ;
-// Store the decryption key
-$decryption_key = "12345678";
-// Descrypt the string
-$decryption = openssl_decrypt ($data, $ciphering,$decryption_key, $options,$decryption_iv);
-
-return $decryption;
-}
-
-
 function sendInvoiceEmail($toEmail, $toName, $pdfContent, $pdfFilename, $invoiceNo) {
     $mail = new PHPMailer(true);
     try {
         // Server Settings
         $mail->isSMTP();
         $mail->Host       = HOST;
-        $mail->SMTPAuth   = true; // Ensure this is true
+        $mail->SMTPAuth   = defined('auth') ? ((string)auth === '1') : true;
         $mail->Username   = username;
-        $mail->Password   = trim(password);
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
+        $mail->Password   = password;
+        $mail->SMTPSecure = defined('SECURE') ? SECURE : '';
+        $mail->Port       = (int)PORT;
+        $mail->Timeout    = defined('timeout') ? (int)timeout : 30;
+        if (defined('heloaddress') && heloaddress !== '') {
+            $mail->Helo = heloaddress;
+        }
 
         // Identity - Fixes the 554 error
         $mail->setFrom(username,htmlspecialchars($_SESSION['CompanyRecord']['coyname']));
