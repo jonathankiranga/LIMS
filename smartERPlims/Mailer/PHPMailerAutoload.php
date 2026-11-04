@@ -7,9 +7,11 @@
  * the namespaced PHPMailer 7.1.1 classes.
  */
 
-require_once __DIR__ . '/src/Exception.php';
-require_once __DIR__ . '/src/PHPMailer.php';
-require_once __DIR__ . '/src/SMTP.php';
+$mailerPath = dirname(__FILE__);
+
+require_once $mailerPath . '/src/Exception.php';
+require_once $mailerPath . '/src/PHPMailer.php';
+require_once $mailerPath . '/src/SMTP.php';
 
 if (!class_exists('PHPMailer', false)) {
     class_alias('PHPMailer\\PHPMailer\\PHPMailer', 'PHPMailer');
