@@ -13,44 +13,83 @@ function rfq_post($key, $default = '') {
 }
 function rfq_send_invitation($email, $supplier, $rfqNo, $title, $url) {
     $attempts = array();
-    if (!file_exists('chats/EmailConfig.php') || !file_exists('Mailer/PHPMailerAutoload.php')) {
-        return array('success' => false, 'attempts' => array(array('mode' => 'configuration', 'error' => 'Email configuration or PHPMailer files are missing.')));
+    $blockchainRoot = dirname(__DIR__) . '/blockchain';
+    $autoloadPath = $blockchainRoot . '/vendor/autoload.php';
+    $smtpConfigPath = $blockchainRoot . '/config.php';
+
+    if (!is_file($autoloadPath) || !is_file($smtpConfigPath)) {
+        return array('success' => false, 'attempts' => array(
+            array('mode' => 'configuration', 'error' => 'The working LIMS Blockchain mailer or SMTP configuration could not be found.')
+        ));
     }
 
-    include_once('chats/EmailConfig.php');
-    include_once('Mailer/PHPMailerAutoload.php');
-
-    $mail = new PHPMailer;
-    $mail->isSMTP();
-    $mail->SMTPDebug = 0;
-    $mail->Host = HOST;
-    $mail->Port = (int)PORT;
-    $mail->SMTPSecure = SECURE;
-    $mail->SMTPAuth = (string)auth === '1';
-    $mail->Timeout = (int)timeout;
-    if (defined('heloaddress') && heloaddress !== '') {
-        $mail->Helo = heloaddress;
+    require_once $autoloadPath;
+    $smtp = include $smtpConfigPath;
+    if (!is_array($smtp) || empty($smtp['smtp_host']) || empty($smtp['smtp_username']) ||
+        !array_key_exists('smtp_password', $smtp)) {
+        return array('success' => false, 'attempts' => array(
+            array('mode' => 'configuration', 'error' => 'The LIMS Blockchain SMTP configuration is incomplete.')
+        ));
     }
-    $mail->Username = username;
-    $mail->Password = password;
-    $mail->CharSet = 'UTF-8';
-    $mail->setFrom(username, 'Smarternow ERP - Procurement');
-    $mail->addAddress($email, $supplier);
-    $mail->Subject = 'Request for Quotation ' . $rfqNo;
-    $mail->isHTML(true);
-    $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
-    $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
 
-    if ($mail->send()) {
-        $attempts[] = array('mode' => strtoupper(SECURE) . ':' . PORT, 'error' => '');
+    $mail = new \\PHPMailer\\PHPMailer\\PHPMailer(true);
+    $transport = strtoupper(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : 'TLS') . ':' .
+        (isset($smtp['smtp_port']) ? (int)$smtp['smtp_port'] : 587);
+
+    try {
+        // Use the same Composer PHPMailer and SMTP transport configuration as LIMS Blockchain.
+        $mail->isSMTP();
+        $mail->SMTPDebug = 0;
+        $mail->Host = trim((string)$smtp['smtp_host']);
+        $mail->Port = isset($smtp['smtp_port']) && (int)$smtp['smtp_port'] > 0 ? (int)$smtp['smtp_port'] : 587;
+        $mail->SMTPAuth = array_key_exists('smtp_auth', $smtp) ? (bool)$smtp['smtp_auth'] : true;
+        $mail->Username = trim((string)$smtp['smtp_username']);
+        $mail->Password = (string)$smtp['smtp_password'];
+        $mail->Helo = $mail->Host;
+        $mail->Timeout = isset($smtp['smtp_timeout']) && (int)$smtp['smtp_timeout'] > 0 ? (int)$smtp['smtp_timeout'] : 20;
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+
+        $secure = strtolower(trim((string)(isset($smtp['smtp_secure']) ? $smtp['smtp_secure'] : '')));
+        if ($secure === 'ssl' || $mail->Port === 465) {
+            $mail->SMTPSecure = \\PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($secure === 'tls' || $mail->Port === 587) {
+            $mail->SMTPSecure = \\PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        $fromEmail = !empty($smtp['from_email']) ? trim((string)$smtp['from_email']) : $mail->Username;
+        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('The configured SMTP sender address is invalid.');
+        }
+        $fromName = !empty($smtp['from_name']) ? 'Smarternow ERP - Procurement' : 'Smarternow ERP - Procurement';
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($email, $supplier);
+        $mail->CharSet = 'UTF-8';
+        $mail->isHTML(true);
+        $mail->Subject = 'Request for Quotation ' . $rfqNo;
+        $mail->Body = '<p>Dear ' . rfq_h($supplier) . ',</p><p>You are invited to submit a quotation for <strong>' . rfq_h($title) . '</strong> (' . rfq_h($rfqNo) . ').</p><p>Please review the specifications and terms in the supplier portal and submit your quotation before the stated deadline.</p><p><a href="' . rfq_h($url) . '">Open RFQ and submit quotation</a></p><p>This invitation permits one final submission. Please ensure your prices and terms are correct before submitting.</p>';
+        $mail->AltBody = 'You are invited to submit a quotation for ' . $title . ' (' . $rfqNo . '). Open: ' . $url;
+
+        $mail->send();
+        $attempts[] = array('mode' => $transport, 'error' => '');
         return array('success' => true, 'attempts' => $attempts);
+    } catch (\\Throwable $exception) {
+        $reason = trim((string)$mail->ErrorInfo);
+        if ($reason === '') {
+            $reason = $exception->getMessage();
+        }
+        if ($reason === '') {
+            $reason = 'PHPMailer could not send the message.';
+        }
+        $attempts[] = array('mode' => $transport, 'error' => $reason);
+        error_log('RFQ email failed via ' . $transport . ' to ' . $email . ': ' . $reason);
+        return array('success' => false, 'attempts' => $attempts);
     }
-
-    $reason = trim((string)$mail->ErrorInfo);
-    if ($reason === '') { $reason = 'PHPMailer returned false without an error message.'; }
-    $attempts[] = array('mode' => strtoupper(SECURE) . ':' . PORT, 'error' => $reason);
-    error_log('RFQ email failed via ' . strtoupper(SECURE) . ':' . PORT . ' to ' . $email . ': ' . $reason);
-    return array('success' => false, 'attempts' => $attempts);
 }
 
 $message = '';
