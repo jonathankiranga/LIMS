@@ -600,7 +600,7 @@ class LimsSalesApi{
             $sql = sprintf("INSERT INTO `stockmaster`
                 (`itemcode`, `isstock`, isstock_1, isstock_2, isstock_3, isstock_4, isstock_5, isstock_6,
                 `barcode`, `descrip`, `postinggroup`, `averagestock`, `reorderlevel`, `eoq`,
-                `category`, `units`, `inactive`, `nextserialno`, `container`, `sellingprice`, `production`, `labid`)
+                `category`, `units`, `inactive`, `nextserialno`, `container`, `sellingprice`, `production`, `labid`, is_test_parameter)
                 VALUES
                 ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
                 '%s', '%s', '%s', 0, %f, %f,
@@ -1782,17 +1782,17 @@ class LimsSalesApi{
             if (preg_match('/^TS\d{4}$/', $catId)) {
                 $bundleChk = $this->db->query("SELECT itemcode FROM stockmaster WHERE itemcode = '" . $catId . "' LIMIT 1");
                 if ($bundleChk && $bundleChk->num_rows > 0) {
-                    $q = $this->db->query("UPDATE stockmaster SET descrip = '$stdName', category = '$catId', isstock = '1', isstock_1 = '1', inactive = '0' WHERE itemcode = '" . $catId . "'");
+                    $q = $this->db->query("UPDATE stockmaster SET descrip = '$stdName', category = '$catId', isstock = '1', isstock_1 = '1', inactive = '0', is_standard_method = 1 WHERE itemcode = '" . $catId . "'");
                     if (!$q) $errors[] = 'bundle update ' . $catId . ': ' . $this->db->error;
                 } else {
                     $q = $this->db->query("INSERT INTO stockmaster
                         (`itemcode`, `isstock`, isstock_1, isstock_2, isstock_3, isstock_4, isstock_5, isstock_6,
                         `barcode`, `descrip`, `postinggroup`, `averagestock`, `reorderlevel`, `eoq`,
-                        `category`, `units`, `inactive`, `nextserialno`, `container`, `sellingprice`, `production`)
+                        `category`, `units`, `inactive`, `nextserialno`, `container`, `sellingprice`, `production`, is_standard_method)
                         VALUES
                         ('" . $catId . "', '1', '1', '0', '0', '0', '0', '0',
                         '" . $catId . "', '" . $stdName . "', 'GENERAL', 0, 0, 0,
-                        '" . $catId . "', 'PCS', '0', 1, '', 0, '')");
+                        '" . $catId . "', 'PCS', '0', 1, '', 0, '', 1)");
                     if (!$q) $errors[] = 'bundle insert ' . $catId . ': ' . $this->db->error;
                 }
             }
@@ -1817,7 +1817,7 @@ class LimsSalesApi{
             if ($existing) {
                 $upd = $this->db->query(sprintf(
                     "UPDATE `stockmaster` SET `descrip` = '%s', `units` = '%s', `category` = '%s',
-                        `inactive` = '0', `isstock` = '1', isstock_1 = '1' WHERE `pkey` = %d",
+                        `inactive` = '0', `isstock` = '1', isstock_1 = '1', is_test_parameter = 1 WHERE `pkey` = %d",
                     $pnameEsc, $units, $category, (int)$existing['pkey']
                 ));
                 if (!$upd) {
@@ -1838,7 +1838,7 @@ class LimsSalesApi{
                      `category`, `units`, `inactive`, `nextserialno`, `container`, `sellingprice`, `production`, `labid`)
                      VALUES ('%s', '1', '1', '0', '0', '0', '0', '0',
                      '%s', '%s', 'GENERAL', 0, 0, 0,
-                     '%s', '%s', '0', 1, '', 0, '', %d)",
+                     '%s', '%s', '0', 1, '', 0, '', %d, 1)",
                     $itemCode, $itemCode, $pnameEsc, $category, $units, $pid
                 ));
                 if (!$ins) {
