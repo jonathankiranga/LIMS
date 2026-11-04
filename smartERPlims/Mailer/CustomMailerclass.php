@@ -47,9 +47,13 @@ Class MyMailer {
         $mail->isSMTP();
         $mail->SMTPDebug  = 0;
         $mail->Host       = $this->host;
-        $mail->Port       = $this->port;
-        $mail->SMTPSecure = (defined('SECURE') && SECURE !== '') ? SECURE : 'tls';
-        $mail->SMTPAuth   = true;
+        $mail->Port       = (int)$this->port;
+        $mail->SMTPSecure = defined('SECURE') ? SECURE : '';
+        $mail->SMTPAuth   = (string)$this->auth === '1';
+        $mail->Timeout    = defined('timeout') ? (int)timeout : 30;
+        if (defined('heloaddress') && heloaddress !== '') {
+            $mail->Helo = heloaddress;
+        }
         $mail->Username   = $this->username;
         $mail->Password   = $this->password;
         // Explicit envelope + From: without these Gmail drops the message
