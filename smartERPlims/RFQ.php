@@ -388,11 +388,106 @@ echo '<style>
 .rfq-page .rfq-legend{font-size:12px;color:#7c8695;margin:10px 0 0}
 .rfq-page .rfq-legend span{display:inline-block;width:11px;height:11px;border:2px solid #6385e6;background:#f0f5ff;border-radius:3px;vertical-align:-1px;margin-right:5px}
 @media(max-width:768px){.rfq-page{padding:0 8px}.rfq-page .rfq-card-body{padding:12px}.rfq-page .rfq-form-grid{grid-template-columns:1fr}.rfq-page .rfq-supplier-board{grid-template-columns:1fr}.rfq-page .rfq-compare-title{font-size:21px}}
+
+.rfq-workspace{max-width:1600px;margin:0 auto;padding:20px 22px 40px;color:#202a3b}
+.rfq-workspace .rfq-topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:4px 0 24px}
+.rfq-workspace .rfq-eyebrow{font-size:10px;letter-spacing:1.8px;font-weight:800;color:#77849a;margin-bottom:7px}
+.rfq-workspace .rfq-topbar h1{font-size:27px;line-height:1.2;font-weight:750;margin:0;color:#1d293b}
+.rfq-workspace .rfq-topbar p{font-size:13px;color:#788498;margin:7px 0 0}
+.rfq-workspace .rfq-top-actions{display:flex;gap:10px;align-items:center}
+.rfq-workspace .rfq-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.rfq-workspace .rfq-metric{background:#fff;border:1px solid #e5eaf1;border-radius:12px;padding:16px 18px;box-shadow:0 3px 12px rgba(23,39,64,.035)}
+.rfq-workspace .rfq-metric-label{display:block;font-size:10px;letter-spacing:1px;font-weight:800;color:#8490a2}
+.rfq-workspace .rfq-metric strong{display:block;font-size:27px;line-height:1.35;color:#26344a;margin-top:6px}
+.rfq-workspace .rfq-metric small{font-size:11px;color:#8994a4}
+.rfq-workspace .rfq-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:7px;padding:9px 13px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer}
+.rfq-workspace .rfq-btn-primary{background:#315ee8;color:#fff}
+.rfq-workspace .rfq-btn-primary:hover{background:#244bc5;color:#fff}
+.rfq-workspace .rfq-btn-secondary{background:#fff;color:#34445e;border-color:#dce3ed}
+.rfq-workspace .rfq-btn-success{background:#16845b;color:#fff}
+.rfq-workspace .rfq-btn-warning{background:#fff8e9;color:#9b6410;border-color:#f1dfb9}
+.rfq-workspace .rfq-create-panel,.rfq-workspace .rfq-register-panel{background:#fff;border:1px solid #e4e9f0;border-radius:12px;margin-bottom:20px;box-shadow:0 3px 12px rgba(23,39,64,.035);overflow:hidden}
+.rfq-workspace .rfq-create-panel>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:16px 19px;cursor:pointer}
+.rfq-workspace .rfq-create-panel>summary::-webkit-details-marker{display:none}
+.rfq-workspace .rfq-create-panel>summary strong{display:block;font-size:14px;color:#2a374c}
+.rfq-workspace .rfq-create-panel>summary small{display:block;font-size:11px;color:#8490a2;margin-top:4px}
+.rfq-workspace .rfq-create-toggle{font-size:23px;color:#526be0}
+.rfq-workspace .rfq-create-panel[open]>summary{border-bottom:1px solid #e9edf3;background:#fafbfe}
+.rfq-workspace .rfq-create-content{padding:20px}
+.rfq-workspace .rfq-register-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 20px;border-bottom:1px solid #e9edf3}
+.rfq-workspace .rfq-register-heading h2{font-size:17px;font-weight:750;margin:0;color:#26344a}
+.rfq-workspace .rfq-register-heading p{font-size:11px;color:#8490a2;margin:5px 0 0}
+.rfq-workspace .rfq-register-tools{display:flex;gap:9px;width:min(470px,55%)}
+.rfq-workspace .rfq-register-tools .form-control{height:36px;border:1px solid #dfe5ee;border-radius:7px;box-shadow:none;font-size:12px}
+.rfq-workspace .rfq-card-list{padding:4px 20px 18px}
+.rfq-workspace .rfq-register-card{border:1px solid #e7ebf1;border-radius:10px;margin-top:14px;background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.rfq-workspace .rfq-register-card:hover{border-color:#cbd5e5;box-shadow:0 4px 14px rgba(26,43,70,.055)}
+.rfq-workspace .rfq-card-main{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(150px,.75fr) auto;align-items:center;gap:20px;padding:17px 18px}
+.rfq-workspace .rfq-number{font-size:10px;font-weight:800;letter-spacing:.5px;color:#5570d9}
+.rfq-workspace .rfq-card-identity h3{font-size:14px;font-weight:750;margin:5px 0;color:#27354a}
+.rfq-workspace .rfq-card-date{font-size:11px;color:#8792a2}
+.rfq-workspace .rfq-card-status{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.rfq-workspace .rfq-status-pill{display:inline-block;padding:5px 10px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;background:#eef1f5;color:#647084}
+.rfq-workspace .rfq-status-pill.draft{background:#fff4df;color:#a16b13}
+.rfq-workspace .rfq-status-pill.issued{background:#eaf0ff;color:#4562c8}
+.rfq-workspace .rfq-status-pill.closed{background:#edf0f4;color:#59677b}
+.rfq-workspace .rfq-status-pill.awarded{background:#e6f6ef;color:#18764f}
+.rfq-workspace .rfq-response-counts{display:flex;gap:10px;font-size:10px;color:#8590a0}
+.rfq-workspace .rfq-response-counts strong{color:#34445d;font-size:12px}
+.rfq-workspace .rfq-card-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.rfq-workspace .rfq-inline-action{display:inline-block;margin:0}
+.rfq-workspace .rfq-invite-panel{padding:16px 18px;background:#f8faff;border-top:1px solid #e7edf7}
+.rfq-workspace .rfq-invite-panel>form>strong{display:block;font-size:12px;margin-bottom:12px;color:#35435a}
+.rfq-workspace .rfq-supplier-select-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.rfq-workspace .rfq-supplier-option{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;background:#fff;border:1px solid #e5eaf2;border-radius:7px;font-weight:400}
+.rfq-workspace .rfq-supplier-option input{margin-top:3px}
+.rfq-workspace .rfq-supplier-option strong{display:block;font-size:11px;color:#34435a}
+.rfq-workspace .rfq-supplier-option small{display:block;font-size:10px;color:#8994a4;margin-top:3px;overflow-wrap:anywhere}
+.rfq-workspace .rfq-empty,.rfq-workspace .rfq-no-results{padding:36px 20px;text-align:center;color:#7d899a;font-size:12px}
+.rfq-workspace .rfq-empty strong{display:block;color:#34435a;font-size:14px;margin-bottom:5px}
+.rfq-workspace .rfq-empty p{margin:0}
+.rfq-workspace .rfq-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.rfq-workspace .rfq-field{min-width:0;display:flex;flex-direction:column;gap:6px}
+.rfq-workspace .rfq-field label{font-size:12px;font-weight:650;margin:0;color:#50596a}
+.rfq-workspace .form-control{width:100%;max-width:100%;box-sizing:border-box;border:1px solid #dce2eb;border-radius:7px;box-shadow:none;min-height:38px}
+.rfq-workspace .form-control:focus{border-color:#6478d3;box-shadow:0 0 0 3px rgba(91,111,204,.12)}
+.rfq-workspace textarea{resize:vertical}
+.rfq-workspace .rfq-lines th{font-size:12px;white-space:normal;background:#f8f9fc;color:#4b5362}
+.rfq-workspace .rfq-lines td{vertical-align:top}
+.rfq-workspace .rfq-lines input,.rfq-workspace .rfq-lines select,.rfq-workspace .rfq-lines textarea{min-width:0}
+.rfq-workspace .rfq-lines .rfq-description{min-width:160px}
+.rfq-workspace .rfq-lines .rfq-specification{min-width:180px}
+@media(max-width:900px){.rfq-workspace .rfq-card-main{grid-template-columns:minmax(0,1fr) auto}.rfq-workspace .rfq-card-status{grid-column:1}.rfq-workspace .rfq-card-actions{grid-column:2;grid-row:1/3}.rfq-workspace .rfq-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.rfq-workspace{padding:12px 8px 28px}.rfq-workspace .rfq-topbar{align-items:flex-start;flex-direction:column}.rfq-workspace .rfq-topbar h1{font-size:22px}.rfq-workspace .rfq-metric-grid{gap:8px}.rfq-workspace .rfq-metric{padding:12px}.rfq-workspace .rfq-metric strong{font-size:22px}.rfq-workspace .rfq-register-heading{align-items:stretch;flex-direction:column}.rfq-workspace .rfq-register-tools{width:100%}.rfq-workspace .rfq-card-list{padding:0 10px 12px}.rfq-workspace .rfq-card-main{display:flex;align-items:flex-start;flex-direction:column;gap:12px;padding:14px}.rfq-workspace .rfq-card-actions{justify-content:flex-start;width:100%}.rfq-workspace .rfq-supplier-select-grid,.rfq-workspace .rfq-form-grid{grid-template-columns:1fr}.rfq-workspace .rfq-create-content{padding:12px}}
+
 </style><div class="rfq-page">';
-echo '<h2>Request for Quotation (RFQ)</h2>';
+
+// Load the existing RFQ register rows once; all actions below continue to post to
+// the existing handlers above and use the existing database records.
+$rfqRows = array();
+while ($rfqRow = DB_fetch_array($rfqs)) { $rfqRows[] = $rfqRow; }
+$rfqCounts = array('draft' => 0, 'issued' => 0, 'closed' => 0, 'awarded' => 0);
+foreach ($rfqRows as $rfqRow) {
+    if (isset($rfqCounts[$rfqRow['status']])) { $rfqCounts[$rfqRow['status']]++; }
+}
+$totalRfqs = count($rfqRows);
+$openRfqs = $rfqCounts['draft'] + $rfqCounts['issued'];
+$receivedQuotes = 0;
+foreach ($rfqRows as $rfqRow) { $receivedQuotes += (int)$rfqRow['quote_count']; }
+
+echo '<div class="rfq-workspace">';
+echo '<header class="rfq-topbar"><div><div class="rfq-eyebrow">PROCUREMENT WORKSPACE</div><h1>Requests for Quotation</h1><p>Manage supplier invitations, track responses and compare submitted quotations.</p></div><div class="rfq-top-actions"><button type="button" class="rfq-btn rfq-btn-primary" onclick="document.getElementById(\'rfqCreatePanel\').open=true;document.getElementById(\'rfqCreatePanel\').scrollIntoView({behavior:\'smooth\',block:\'start\'});"><span class="glyphicon glyphicon-plus"></span> Create new RFQ</button></div></header>';
 if ($message !== '') { echo '<div class="alert alert-success">' . rfq_h($message) . '</div>'; }
 if ($error !== '') { echo '<div class="alert alert-warning">' . rfq_h($error) . '</div>'; }
-echo '<section class="rfq-card"><div class="rfq-card-heading">Create RFQ</div><div class="rfq-card-body">';
+
+echo '<div class="rfq-metric-grid">';
+echo '<div class="rfq-metric"><span class="rfq-metric-label">TOTAL REQUESTS</span><strong>' . $totalRfqs . '</strong><small>All recorded RFQs</small></div>';
+echo '<div class="rfq-metric"><span class="rfq-metric-label">ACTIVE</span><strong>' . $openRfqs . '</strong><small>Draft and issued</small></div>';
+echo '<div class="rfq-metric"><span class="rfq-metric-label">QUOTATIONS RECEIVED</span><strong>' . $receivedQuotes . '</strong><small>Supplier submissions</small></div>';
+echo '<div class="rfq-metric"><span class="rfq-metric-label">AWARDED</span><strong>' . $rfqCounts['awarded'] . '</strong><small>Completed selections</small></div>';
+echo '</div>';
+
+echo '<details class="rfq-create-panel" id="rfqCreatePanel"><summary><span><strong>Create a request</strong><small>Define products, quantities, closing date and supplier terms</small></span><span class="rfq-create-toggle">＋</span></summary><div class="rfq-create-content">';
 echo '<form method="post"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '">';
 echo '<div class="rfq-form-grid"><div class="rfq-field"><label>RFQ title</label><input class="form-control" name="title" required maxlength="150"></div>';
 echo '<div class="rfq-field"><label>Currency</label><select class="form-control" name="currencycode" required>';
@@ -405,30 +500,43 @@ while ($st = DB_fetch_array($stockItems)) { echo '<option value="' . rfq_h($st['
 echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" style="width:100px" name="line_unit[]" placeholder="e.g. bottle, kg"></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
 echo '</tbody></table></div><button type="button" class="btn btn-default" id="addRfqLine">Add product line</button>';
 echo '<div class="rfq-field" style="margin:16px 0"><label>Terms and conditions (technical, quality, delivery, payment, packaging, shelf life, certificates, MSDS/SDS, returns, etc.)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
-echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></section>';
+echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></details>';
 
-echo '<section class="rfq-card"><div class="rfq-card-heading">RFQ Register</div><div class="rfq-card-body"><div class="table-responsive"><table class="table table-striped table-bordered table-sm rfq-register"><thead><tr><th>RFQ No.</th><th>Title</th><th>Closing</th><th>Status</th><th>Invited</th><th>Quotes</th><th>Action</th></tr></thead><tbody>';
-while ($h = DB_fetch_array($rfqs)) {
-    echo '<tr><td>' . rfq_h($h['rfq_no']) . '</td><td>' . rfq_h($h['title']) . '</td><td>' . rfq_h($h['closing_at']) . '</td><td>' . rfq_h(ucfirst($h['status'])) . '</td><td>' . (int)$h['invite_count'] . '</td><td>' . (int)$h['quote_count'] . '</td><td>';
-    if ($h['status'] === 'draft') {
-        echo '<button type="button" class="btn btn-sm btn-primary" data-toggle="collapse" data-target="#issue' . (int)$h['id'] . '">Select suppliers / Issue</button> ';
-    } else {
-        echo '<a class="btn btn-sm btn-default" href="RFQ.php?compare=' . (int)$h['id'] . '">Compare quotations</a> ';
-    }
-    if (in_array($h['status'], array('draft','issued'), true) && (int)$h['failed_email_count'] > 0) {
-        echo '<form method="post" style="display:inline-block;margin:2px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . (int)$h['id'] . '"><button class="btn btn-sm btn-warning" name="retry_rfq_emails" value="1">Retry failed emails (' . (int)$h['failed_email_count'] . ')</button></form>';
-    }
-    echo '</td></tr>';
-    if ($h['status'] === 'draft') {
-        echo '<tr class="collapse" id="issue' . (int)$h['id'] . '"><td colspan="7"><form method="post"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . (int)$h['id'] . '"><strong>Invite suppliers</strong><div class="row">';
-        $sr = DB_query("SELECT itemcode,customer,email FROM creditors WHERE inactive=0 ORDER BY customer", $db);
-        while ($sp = DB_fetch_array($sr)) {
-            echo '<div class="col-md-4"><label><input type="checkbox" name="supplier_codes[]" value="' . rfq_h($sp['itemcode']) . '"> ' . rfq_h($sp['customer']) . ' <small>(' . rfq_h($sp['email']) . ')</small></label></div>';
+echo '<section class="rfq-register-panel"><div class="rfq-register-heading"><div><h2>RFQ register</h2><p>Recent requests and supplier response progress</p></div><div class="rfq-register-tools"><input type="search" id="rfqSearch" class="form-control" placeholder="Search RFQ number or title"><select id="rfqStatusFilter" class="form-control"><option value="">All statuses</option><option value="draft">Draft</option><option value="issued">Issued</option><option value="closed">Closed</option><option value="awarded">Awarded</option></select></div></div>';
+if (!$totalRfqs) {
+    echo '<div class="rfq-empty"><strong>No RFQs created yet</strong><p>Create your first request to begin inviting suppliers and collecting quotations.</p></div>';
+} else {
+    echo '<div class="rfq-card-list" id="rfqCardList">';
+    foreach ($rfqRows as $h) {
+        $statusKey = strtolower($h['status']);
+        $statusClass = preg_replace('/[^a-z0-9_-]/', '', $statusKey);
+        $searchText = strtolower($h['rfq_no'] . ' ' . $h['title']);
+        echo '<article class="rfq-register-card" data-status="' . rfq_h($statusKey) . '" data-search="' . rfq_h($searchText) . '">';
+        echo '<div class="rfq-card-main"><div class="rfq-card-identity"><span class="rfq-number">' . rfq_h($h['rfq_no']) . '</span><h3>' . rfq_h($h['title']) . '</h3><span class="rfq-card-date">Closing ' . rfq_h($h['closing_at']) . '</span></div>';
+        echo '<div class="rfq-card-status"><span class="rfq-status-pill ' . rfq_h($statusClass) . '">' . rfq_h(ucfirst($h['status'])) . '</span><div class="rfq-response-counts"><span><strong>' . (int)$h['invite_count'] . '</strong> invited</span><span><strong>' . (int)$h['quote_count'] . '</strong> quotes</span></div></div>';
+        echo '<div class="rfq-card-actions">';
+        if ($h['status'] === 'draft') {
+            echo '<button type="button" class="rfq-btn rfq-btn-primary" data-toggle="collapse" data-target="#issue' . (int)$h['id'] . '">Invite suppliers</button>';
+        } else {
+            echo '<a class="rfq-btn rfq-btn-secondary" href="RFQ.php?compare=' . (int)$h['id'] . '">Compare quotations <span aria-hidden="true">→</span></a>';
         }
-        echo '</div><button class="btn btn-success" name="issue_rfq" value="1">Issue RFQ and email invitations</button></form></td></tr>';
+        if (in_array($h['status'], array('draft','issued'), true) && (int)$h['failed_email_count'] > 0) {
+            echo '<form method="post" class="rfq-inline-action"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . (int)$h['id'] . '"><button class="rfq-btn rfq-btn-warning" name="retry_rfq_emails" value="1">Retry email (' . (int)$h['failed_email_count'] . ')</button></form>';
+        }
+        echo '</div></div>';
+        if ($h['status'] === 'draft') {
+            echo '<div class="collapse rfq-invite-panel" id="issue' . (int)$h['id'] . '"><form method="post"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . (int)$h['id'] . '"><strong>Choose suppliers to invite</strong><div class="rfq-supplier-select-grid">';
+            $sr = DB_query("SELECT itemcode,customer,email FROM creditors WHERE inactive=0 ORDER BY customer", $db);
+            while ($sp = DB_fetch_array($sr)) {
+                echo '<label class="rfq-supplier-option"><input type="checkbox" name="supplier_codes[]" value="' . rfq_h($sp['itemcode']) . '"><span><strong>' . rfq_h($sp['customer']) . '</strong><small>' . rfq_h($sp['email']) . '</small></span></label>';
+            }
+            echo '</div><button class="rfq-btn rfq-btn-success" name="issue_rfq" value="1">Issue RFQ and email invitations</button></form></div>';
+        }
+        echo '</article>';
     }
+    echo '</div><div class="rfq-no-results" id="rfqNoResults" style="display:none">No RFQs match the selected search or status.</div>';
 }
-echo '</tbody></table></div></div></section>';
+echo '</section></div>';
 
 if (isset($_GET['compare'])) {
     $compareId = (int)$_GET['compare'];
