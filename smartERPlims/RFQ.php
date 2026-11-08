@@ -311,7 +311,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
     $selectedQuoteIds = isset($_POST['quote_choice']) && is_array($_POST['quote_choice'])
         ? array_values(array_unique(array_map('intval', $_POST['quote_choice']))) : array();
     $quoteId = count($selectedQuoteIds) === 1 ? $selectedQuoteIds[0] : 0;
-    $rfqId = (int)$_POST['rfq_id'];
     $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,h.status FROM rfq_quotes q
         JOIN rfq_header h ON h.id=q.rfq_id WHERE q.id=" . $quoteId . " AND q.rfq_id=" . $rfqId, $db);
     if ($error !== '' || count($selectedQuoteIds) !== 1 || $quoteId < 1 || DB_num_rows($qr) !== 1) {
