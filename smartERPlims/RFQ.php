@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
     $lineDescriptions = isset($_POST['line_description']) ? $_POST['line_description'] : array();
     $lineSpecs = isset($_POST['line_specification']) ? $_POST['line_specification'] : array();
     $lineQty = isset($_POST['line_quantity']) ? $_POST['line_quantity'] : array();
-    $linePackaging = isset($_POST['line_packaging']) ? $_POST['line_packaging'] : array();
+    $lineUnits = isset($_POST['line_unit']) ? $_POST['line_unit'] : array();
     $lineCodes = isset($_POST['line_itemcode']) ? $_POST['line_itemcode'] : array();
 
     if ($error === '' && ($title === '' || $terms === '' || $currency === '' || $closing === '' || count($lineDescriptions) === 0)) {
@@ -124,17 +124,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
             $descriptionLine = trim($descriptionLine);
             $qty = isset($lineQty[$i]) ? (float)$lineQty[$i] : 0;
             if ($descriptionLine !== '' && $qty > 0) {
-                $requestedPack = isset($linePackaging[$i]) ? trim($linePackaging[$i]) : '';
-                if ($requestedPack === '') {
-                    $error = 'Specify the exact packaging required by the buyer for RFQ line ' . ((int)$i + 1) . '.';
+                $itemCode = isset($lineCodes[$i]) ? trim($lineCodes[$i]) : '';
+                $requestedUnit = isset($lineUnits[$i]) ? trim($lineUnits[$i]) : '';
+                if ($itemCode === '' || $requestedUnit === '') {
+                    $error = 'Select an inventory item and one of its configured Full Unit / Loose Unit options for RFQ line ' . ((int)$i + 1) . '.';
+                    break;
+                }
+                $itemCheck = DB_query("SELECT itemcode,units,subunits,partperunit FROM stockmaster
+                    WHERE itemcode='" . DB_escape_string($itemCode) . "'
+                      AND (inactive=0 OR inactive IS NULL)
+                      AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0 LIMIT 1", $db);
+                if (DB_num_rows($itemCheck) !== 1) {
+                    $error = 'The selected inventory item is not available for RFQ line ' . ((int)$i + 1) . '.';
+                    break;
+                }
+                $itemMapping = DB_fetch_array($itemCheck);
+                $fullUnit = trim((string)$itemMapping['units']);
+                $looseUnit = trim((string)$itemMapping['subunits']);
+                if ($requestedUnit !== $fullUnit && ($looseUnit === '' || $requestedUnit !== $looseUnit)) {
+                    $error = 'The selected unit is not configured as the Full Unit or Loose Unit for inventory item ' . $itemCode . '.';
                     break;
                 }
                 $validLines[] = array(
                     'description' => $descriptionLine,
                     'specification' => isset($lineSpecs[$i]) ? trim($lineSpecs[$i]) : '',
                     'quantity' => $qty,
-                    'requested_pack' => $requestedPack,
-                    'itemcode' => isset($lineCodes[$i]) ? trim($lineCodes[$i]) : ''
+                    'requested_pack' => $requestedUnit,
+                    'itemcode' => $itemCode
                 );
             }
         }
@@ -340,7 +356,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
 }
 
 $currencies = DB_query("SELECT currabrev,currency FROM currencies ORDER BY currency", $db);
-$stockItems = DB_query("SELECT itemcode,descrip FROM stockmaster WHERE (inactive=0 OR inactive IS NULL) AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0 ORDER BY descrip LIMIT 500", $db);
+$stockItems = DB_query("SELECT sm.itemcode,sm.descrip,sm.units,sm.subunits,sm.partperunit,
+    uf.descrip AS full_unit_description,ul.descrip AS loose_unit_description
+    FROM stockmaster sm
+    LEFT JOIN unit uf ON uf.code=sm.units
+    LEFT JOIN unit ul ON ul.code=sm.subunits
+    WHERE (sm.inactive=0 OR sm.inactive IS NULL)
+      AND COALESCE(sm.is_test_parameter,0)=0 AND COALESCE(sm.is_standard_method,0)=0
+    ORDER BY sm.descrip LIMIT 500", $db);
+$rfqStockItems = array();
+while ($stockItem = DB_fetch_array($stockItems)) { $rfqStockItems[] = $stockItem; }
 $rfqs = DB_query("SELECT h.*, (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id) AS invite_count,
     (SELECT COUNT(*) FROM rfq_quotes q WHERE q.rfq_id=h.id) AS quote_count,
     (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id AND i.status='invited'
@@ -503,10 +528,12 @@ echo '<div class="rfq-field"><label>Currency</label><select class="form-control"
 while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['currabrev']) . '">' . rfq_h($c['currency']) . ' (' . rfq_h($c['currabrev']) . ')</option>'; }
 echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
 echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
-echo '<h4>Requested products / reagents</h4><p class="text-muted">Specify the exact pack the supplier must provide. For linked inventory items, this pack must correspond to the inventory item’s configured Full Unit; the system uses its Full Unit / Loose Unit relationship when preparing the Purchase Order.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item (optional)</th><th>Description</th><th>Technical specifications / grade</th><th>Quantity (packs)</th><th>Buyer-defined packaging</th><th></th></tr></thead><tbody>';
-echo '<tr><td><select class="form-control" name="line_itemcode[]"><option value="">Not linked</option>';
-while ($st = DB_fetch_array($stockItems)) { echo '<option value="' . rfq_h($st['itemcode']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>'; }
-echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" style="width:190px" name="line_packaging[]" maxlength="100" placeholder="e.g. 500 ml bottle, 25 kg bag" required></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
+echo '<h4>Requested products / reagents</h4><p class="text-muted">Select the inventory item, then choose only its configured Full Unit or Loose Unit. The conversion factor is taken directly from inventory; suppliers cannot change the requested unit or pack size.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Technical specifications / grade</th><th>Quantity</th><th>Requested unit (Full / Loose)</th><th></th></tr></thead><tbody>';
+echo '<tr><td><select class="form-control rfq-item-select" name="line_itemcode[]" required><option value="">Select inventory item</option>';
+foreach ($rfqStockItems as $st) {
+    echo '<option value="' . rfq_h($st['itemcode']) . '" data-full-unit="' . rfq_h($st['units']) . '" data-full-label="' . rfq_h($st['full_unit_description']) . '" data-loose-unit="' . rfq_h($st['subunits']) . '" data-loose-label="' . rfq_h($st['loose_unit_description']) . '" data-factor="' . rfq_h($st['partperunit']) . '" data-description="' . rfq_h($st['descrip']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>';
+}
+echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><select class="form-control rfq-unit-select" name="line_unit[]" required disabled><option value="">Select item first</option></select><small class="text-muted rfq-unit-factor"></small></td><td><button type="button" class="btn btn-default" onclick="this.closest(\\'tr\\').remove()">Remove</button></td></tr>';
 echo '</tbody></table></div><button type="button" class="btn btn-default" id="addRfqLine">Add product line</button>';
 echo '<div class="rfq-field" style="margin:16px 0"><label>Terms and conditions (technical, quality, delivery, payment, packaging, shelf life, certificates, MSDS/SDS, returns, etc.)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
 echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></details>';
@@ -666,12 +693,32 @@ echo '</div>';
 ?>
 <script>
 (function(){
+ function configureRfqUnit(row){
+  var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select'),factorLabel=row.querySelector('.rfq-unit-factor');
+  if(!item||!unit){return;}
+  var selected=item.options[item.selectedIndex];unit.innerHTML='';unit.disabled=true;
+  if(!item.value||!selected){unit.add(new Option('Select item first',''));if(factorLabel){factorLabel.textContent='';}return;}
+  var full=selected.getAttribute('data-full-unit')||'',fullLabel=selected.getAttribute('data-full-label')||full;
+  var loose=selected.getAttribute('data-loose-unit')||'',looseLabel=selected.getAttribute('data-loose-label')||loose;
+  var factor=parseFloat(selected.getAttribute('data-factor')||'1');
+  unit.add(new Option('Select requested unit',''));
+  if(full){unit.add(new Option('Full Unit — '+fullLabel,full));}
+  if(loose&&loose!==full){unit.add(new Option('Loose Unit — '+looseLabel,loose));}
+  unit.disabled=false;
+  if(factorLabel){factorLabel.textContent='1 Full Unit = '+(isFinite(factor)&&factor>0?factor:1)+' '+(looseLabel||fullLabel);}
+ }
+ function bindRfqItem(row){
+  var item=row.querySelector('.rfq-item-select');
+  if(item){item.addEventListener('change',function(){configureRfqUnit(row);var opt=item.options[item.selectedIndex],desc=row.querySelector('.rfq-description');if(opt&&opt.value&&desc){desc.value=opt.getAttribute('data-description')||desc.value;}});}
+ }
+ document.querySelectorAll('#rfqLines tbody tr').forEach(bindRfqItem);
  var add=document.getElementById('addRfqLine');
  if(add){add.addEventListener('click',function(){
-  var body=document.querySelector('#rfqLines tbody');
-  var row=body.querySelector('tr').cloneNode(true);
+  var body=document.querySelector('#rfqLines tbody'),row=body.querySelector('tr').cloneNode(true);
   row.querySelectorAll('input,textarea,select').forEach(function(el){el.value='';});
-  body.appendChild(row);
+  var unit=row.querySelector('.rfq-unit-select');if(unit){unit.innerHTML='<option value="">Select item first</option>';unit.disabled=true;}
+  var factor=row.querySelector('.rfq-unit-factor');if(factor){factor.textContent='';}
+  body.appendChild(row);bindRfqItem(row);
  });}
  var quoteChoices=document.querySelectorAll('.rfq-quote-choice-input');
  quoteChoices.forEach(function(choice){
