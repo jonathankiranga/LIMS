@@ -659,6 +659,25 @@ echo '</div>';
   row.querySelectorAll('input,textarea,select').forEach(function(el){el.value='';});
   body.appendChild(row);
  });}
+ var search=document.getElementById('rfqSearch');
+ var status=document.getElementById('rfqStatusFilter');
+ var cards=document.querySelectorAll('#rfqCardList .rfq-register-card');
+ var noResults=document.getElementById('rfqNoResults');
+ function filterRfqs(){
+  var term=search?search.value.toLowerCase().trim():'';
+  var selected=status?status.value:'';
+  var visible=0;
+  cards.forEach(function(card){
+   var matchesText=!term||(card.getAttribute('data-search')||'').indexOf(term)!==-1;
+   var matchesStatus=!selected||card.getAttribute('data-status')===selected;
+   var show=matchesText&&matchesStatus;
+   card.style.display=show?'':'none';
+   if(show){visible++;}
+  });
+  if(noResults){noResults.style.display=visible?'none':'';}
+ }
+ if(search){search.addEventListener('input',filterRfqs);}
+ if(status){status.addEventListener('change',filterRfqs);}
 })();
 </script>
 <?php include('includes/footer.inc'); ?>
