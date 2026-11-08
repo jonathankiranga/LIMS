@@ -590,7 +590,7 @@ if (isset($_GET['compare'])) {
         } else {
             echo '<h3 style="font-size:19px;font-weight:700;margin:4px 0 12px">Quotes</h3>';
             if ($head['status'] !== 'awarded') {
-                echo '<form method="post" id="rfqAwardForm" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 12px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><button class="btn btn-primary" type="submit" name="award_quote" value="1" onclick="return confirm(\\'Award the selected supplier quotation?\\')">Award selected quotation</button></form>';
+                echo '<form method="post" id="rfqAwardForm" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 12px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><button class="btn btn-primary" type="submit" name="award_quote" value="1" onclick="return confirm(&quot;Award the selected supplier quotation?&quot;)">Award selected quotation</button></form>';
             }
             echo '<div class="rfq-quotes-wrap"><table class="table rfq-quotes"><thead><tr><th>Item / requested quantity</th>';
             foreach ($quoteRows as $q) {
