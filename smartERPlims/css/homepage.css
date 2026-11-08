@@ -81,7 +81,6 @@ li.divider {
 }
 
 .table-responsive {
-    max-height:80%;
     max-width:100%;
 }
 
@@ -99,16 +98,7 @@ li.divider {
     max-width:100px;
 }
 
-a{
-    color:#1f4e79;
-    text-decoration:none;
-    text-align: left;
-}
- 
-a:hover{
-    color:#2a7f62;
-    text-decoration:underline;
-}
+/* Link colors and hover states are defined in css/erp-ui.css. */
 
 label.grouper{
     color:  #d97706;
@@ -149,19 +139,9 @@ p.page_title_text{ /* page title, used in many *.php */
 	text-align:center;
 }
 
-td{
-    vertical-align:top;
-    align-content: center;
-}
 
-th{
-	font-weight:normal;
-	background-color:#eaf1f8;
-	font-size:100%;
-	color:#111827;
-	text-align:center;
-	vertical-align:middle;
-}
+
+/* Table heading presentation is defined in css/erp-ui.css. */
 
 th.number{
 	font-weight:normal;
@@ -202,10 +182,7 @@ th.descending:after {
 	visibility: visible;
 }
 
-td{
-	font-size:100%;
-	text-align:left;
-}
+
 
 td.select{
 	background-color:#eee;
