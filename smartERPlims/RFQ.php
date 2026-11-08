@@ -341,22 +341,53 @@ $rfqs = DB_query("SELECT h.*, (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id
 $suppliers = DB_query("SELECT itemcode,customer,email FROM creditors WHERE inactive=0 ORDER BY customer", $db);
 
 echo '<style>
-.rfq-page{max-width:1180px;margin:0 auto;padding:0 12px}
-.rfq-page .rfq-card{border:1px solid #dbe2ea;border-radius:8px;background:#fff;margin:14px 0;overflow:hidden}
-.rfq-page .rfq-card-heading{padding:12px 16px;background:#f5f7fa;border-bottom:1px solid #dbe2ea;font-weight:600}
-.rfq-page .rfq-card-body{padding:16px}
-.rfq-page .rfq-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px}
-.rfq-page .rfq-field{min-width:0;display:flex;flex-direction:column;gap:5px}
-.rfq-page .rfq-field label{font-size:13px;font-weight:600;margin:0}
-.rfq-page .form-control{width:100%;max-width:100%;box-sizing:border-box}
+.rfq-page{max-width:1500px;margin:0 auto;padding:0 16px;color:#202532}
+.rfq-page .rfq-card{border:1px solid #e0e5ed;border-radius:12px;background:#fff;margin:16px 0;overflow:hidden;box-shadow:0 2px 8px rgba(22,34,58,.035)}
+.rfq-page .rfq-card-heading{padding:14px 18px;background:#f8f9fc;border-bottom:1px solid #e8ebf1;font-weight:700;color:#252b3a}
+.rfq-page .rfq-card-body{padding:18px}
+.rfq-page .rfq-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 18px}
+.rfq-page .rfq-field{min-width:0;display:flex;flex-direction:column;gap:6px}
+.rfq-page .rfq-field label{font-size:13px;font-weight:650;margin:0;color:#50596a}
+.rfq-page .form-control{width:100%;max-width:100%;box-sizing:border-box;border:1px solid #dce2eb;border-radius:7px;box-shadow:none;min-height:38px}
+.rfq-page .form-control:focus{border-color:#6478d3;box-shadow:0 0 0 3px rgba(91,111,204,.12)}
 .rfq-page textarea{resize:vertical}
-.rfq-page .rfq-lines th{font-size:12px;white-space:normal}
+.rfq-page .rfq-lines th{font-size:12px;white-space:normal;background:#f8f9fc;color:#4b5362}
 .rfq-page .rfq-lines td{vertical-align:top}
 .rfq-page .rfq-lines input,.rfq-page .rfq-lines select,.rfq-page .rfq-lines textarea{min-width:0}
 .rfq-page .rfq-lines .rfq-description{min-width:160px}
 .rfq-page .rfq-lines .rfq-specification{min-width:180px}
 .rfq-page .rfq-register{font-size:13px}
-@media(max-width:768px){.rfq-page{padding:0 8px}.rfq-page .rfq-card-body{padding:12px}.rfq-page .rfq-form-grid{grid-template-columns:1fr}}
+.rfq-page .rfq-compare-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:18px 0 20px}
+.rfq-page .rfq-compare-title{margin:0;font-size:25px;font-weight:700;color:#202638}
+.rfq-page .rfq-compare-subtitle{margin:5px 0 0;color:#7b8494;font-size:13px}
+.rfq-page .rfq-status{display:inline-block;border-radius:20px;padding:5px 11px;background:#eef1ff;color:#5365bd;font-size:12px;font-weight:700;text-transform:capitalize}
+.rfq-page .rfq-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rfq-page .rfq-actions .btn,.rfq-page .rfq-card .btn{border-radius:7px;font-weight:600}
+.rfq-page .rfq-supplier-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.rfq-page .rfq-lane{background:#f7f8fb;border:1px solid #edf0f5;border-radius:10px;padding:14px;min-width:0;min-height:105px}
+.rfq-page .rfq-lane-title{font-size:14px;font-weight:700;margin:0 0 12px;color:#454d5d}
+.rfq-page .rfq-lane-title .glyphicon{color:#8a93a3;margin-right:7px}
+.rfq-page .rfq-supplier-chip{background:#fff;border:1px solid #e3e7ee;border-radius:8px;padding:10px 12px;margin-top:8px;box-shadow:0 1px 3px rgba(20,30,50,.04);font-size:13px}
+.rfq-page .rfq-supplier-chip small{display:block;color:#8a93a3;margin-top:4px}
+.rfq-page .rfq-quotes-wrap{border:1px solid #dfe4ec;border-radius:10px;overflow:auto;background:#fff}
+.rfq-page .rfq-quotes{margin:0;min-width:760px;border:0}
+.rfq-page .rfq-quotes>thead>tr>th{background:#fff;border-bottom:1px solid #dfe4ec;border-top:0;padding:14px 13px;vertical-align:middle;white-space:normal}
+.rfq-page .rfq-quotes>thead>tr>th:first-child{min-width:235px}
+.rfq-page .rfq-quotes>thead>tr>th:not(:first-child){min-width:175px}
+.rfq-page .rfq-quotes>tbody>tr>th{background:#f8f9fb;font-weight:650;vertical-align:middle;min-width:235px}
+.rfq-page .rfq-quotes>tbody>tr>td{vertical-align:middle;min-width:175px}
+.rfq-page .rfq-supplier-head{font-weight:700;color:#272e3c;font-size:13px}
+.rfq-page .rfq-supplier-head small{display:block;color:#8992a1;font-weight:400;margin-top:4px}
+.rfq-page .rfq-price{font-size:14px;font-weight:600;color:#343b49;white-space:nowrap}
+.rfq-page .rfq-cell-meta{display:block;color:#7d8796;font-size:12px;margin-top:7px;line-height:1.55}
+.rfq-page .rfq-best{background:#f0f5ff!important;box-shadow:inset 0 0 0 2px #6385e6;border-radius:8px}
+.rfq-page .rfq-best .rfq-price{font-weight:800;color:#25375f}
+.rfq-page .rfq-total-row th,.rfq-page .rfq-total-row td{background:#f8f9fc;font-weight:700}
+.rfq-page .rfq-commercial{min-width:760px;margin-top:18px}
+.rfq-page .rfq-commercial th{background:#f8f9fc}
+.rfq-page .rfq-legend{font-size:12px;color:#7c8695;margin:10px 0 0}
+.rfq-page .rfq-legend span{display:inline-block;width:11px;height:11px;border:2px solid #6385e6;background:#f0f5ff;border-radius:3px;vertical-align:-1px;margin-right:5px}
+@media(max-width:768px){.rfq-page{padding:0 8px}.rfq-page .rfq-card-body{padding:12px}.rfq-page .rfq-form-grid{grid-template-columns:1fr}.rfq-page .rfq-supplier-board{grid-template-columns:1fr}.rfq-page .rfq-compare-title{font-size:21px}}
 </style><div class="rfq-page">';
 echo '<h2>Request for Quotation (RFQ)</h2>';
 if ($message !== '') { echo '<div class="alert alert-success">' . rfq_h($message) . '</div>'; }
@@ -415,38 +446,84 @@ if (isset($_GET['compare'])) {
         }
         $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
         $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
-        echo '<div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Supplier / product</th>';
+        echo '<div class="rfq-compare-head"><div><h2 class="rfq-compare-title">Request ' . rfq_h($head['rfq_no']) . '</h2><p class="rfq-compare-subtitle">' . rfq_h($head['title']) . ' &nbsp;·&nbsp; Closing ' . rfq_h($head['closing_at']) . '</p></div><div class="rfq-actions"><span class="rfq-status">' . rfq_h($head['status']) . '</span><a class="btn btn-default" href="RFQ.php">Back to RFQ Register</a></div></div>';
+        $inviteResult = DB_query("SELECT i.status,i.invited_at,i.submitted_at,c.customer
+            FROM rfq_invites i JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = i.supplier_code COLLATE utf8mb4_unicode_ci
+            WHERE i.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
+        $supplierLanes = array('declined' => array(), 'expired' => array(), 'invited' => array(), 'submitted' => array());
+        while ($inviteRow = DB_fetch_array($inviteResult)) {
+            $laneKey = $inviteRow['status'];
+            if (!isset($supplierLanes[$laneKey])) { $supplierLanes[$laneKey] = array(); }
+            $supplierLanes[$laneKey][] = $inviteRow;
+        }
+        echo '<div class="rfq-supplier-board">';
+        echo '<section class="rfq-lane"><h4 class="rfq-lane-title"><span class="glyphicon glyphicon-ban-circle"></span>No Bid <small>(' . (count($supplierLanes['declined']) + count($supplierLanes['expired'])) . ')</small></h4>';
+        foreach (array_merge($supplierLanes['declined'], $supplierLanes['expired']) as $supplierRow) {
+            echo '<div class="rfq-supplier-chip">' . rfq_h($supplierRow['customer']) . '<small>' . ($supplierRow['status'] === 'declined' ? 'Supplier declined' : 'Invitation expired') . '</small></div>';
+        }
+        if (!count($supplierLanes['declined']) && !count($supplierLanes['expired'])) { echo '<div class="rfq-supplier-chip text-muted">No suppliers in this category</div>'; }
+        echo '</section><section class="rfq-lane"><h4 class="rfq-lane-title"><span class="glyphicon glyphicon-refresh"></span>Open <small>(' . count($supplierLanes['invited']) . ')</small></h4>';
+        foreach ($supplierLanes['invited'] as $supplierRow) {
+            echo '<div class="rfq-supplier-chip">' . rfq_h($supplierRow['customer']) . '<small>Invitation sent ' . rfq_h($supplierRow['invited_at']) . '</small></div>';
+        }
+        if (!count($supplierLanes['invited'])) { echo '<div class="rfq-supplier-chip text-muted">No suppliers awaiting a response</div>'; }
+        echo '</section><section class="rfq-lane"><h4 class="rfq-lane-title"><span class="glyphicon glyphicon-ok-circle"></span>Completed <small>(' . count($supplierLanes['submitted']) . ')</small></h4>';
+        foreach ($supplierLanes['submitted'] as $supplierRow) {
+            echo '<div class="rfq-supplier-chip">' . rfq_h($supplierRow['customer']) . '<small>Quotation submitted ' . rfq_h($supplierRow['submitted_at']) . '</small></div>';
+        }
+        if (!count($supplierLanes['submitted'])) { echo '<div class="rfq-supplier-chip text-muted">No quotations submitted yet</div>'; }
+        echo '</section></div>';
+
+        $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
+        $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         $quoteRows = array();
-        while ($q = DB_fetch_array($quotes)) {
-            $quoteRows[] = $q;
-            echo '<th>' . rfq_h($q['customer']) . '<br><small>' . rfq_h($q['quote_reference']) . '</small>';
-            if ($head['status'] !== 'awarded') {
-                echo '<form method="post" style="margin-top:6px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><input type="hidden" name="quote_id" value="' . (int)$q['id'] . '"><button class="btn btn-xs btn-success" name="award_quote" value="1" onclick="return confirm(\'Select this supplier quotation?\')">Select supplier</button></form>';
+        while ($q = DB_fetch_array($quotes)) { $quoteRows[] = $q; }
+        if (!count($quoteRows)) {
+            echo '<div class="alert alert-info">No supplier quotations have been submitted for this RFQ yet.</div>';
+        } else {
+            echo '<h3 style="font-size:19px;font-weight:700;margin:4px 0 12px">Quotes</h3><div class="rfq-quotes-wrap"><table class="table rfq-quotes"><thead><tr><th>Item / requested quantity</th>';
+            foreach ($quoteRows as $q) {
+                echo '<th><div class="rfq-supplier-head">' . rfq_h($q['customer']) . '<small>' . rfq_h($q['quote_reference'] ? $q['quote_reference'] : 'Quotation submitted') . '</small></div>';
+                if ($head['status'] !== 'awarded') {
+                    echo '<form method="post" style="margin-top:9px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><input type="hidden" name="quote_id" value="' . (int)$q['id'] . '"><button class="btn btn-xs btn-primary" name="award_quote" value="1" onclick="return confirm(\'Select this supplier quotation?\')">Select supplier</button></form>';
+                }
+                echo '</th>';
             }
-            echo '</th>';
-        }
-        echo '</tr></thead><tbody>';
-        $quoteTotals = array_fill(0, count($quoteRows), 0);
-        while ($line = DB_fetch_array($lines)) {
-            echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['unit']) . '</small></th>';
+            echo '</tr></thead><tbody>';
+            $quoteTotals = array_fill(0, count($quoteRows), 0);
+            $lineRows = array();
+            while ($line = DB_fetch_array($lines)) { $lineRows[] = $line; }
+            foreach ($lineRows as $line) {
+                $values = array();
+                $lowestComparablePrice = null;
+                foreach ($quoteRows as $quoteIndex => $q) {
+                    $qr = DB_query("SELECT unit_price,tax_rate,availability_notes FROM rfq_quote_lines WHERE quote_id=" . (int)$q['id'] . " AND rfq_line_id=" . (int)$line['id'], $db);
+                    if (DB_num_rows($qr)) {
+                        $v = DB_fetch_array($qr);
+                        $effectiveUnitPrice = (float)$v['unit_price'];
+                        if (empty($q['tax_inclusive'])) { $effectiveUnitPrice *= (1 + ((float)$v['tax_rate'] / 100)); }
+                        $lineTotal = (float)$line['quantity'] * $effectiveUnitPrice;
+                        $quoteTotals[$quoteIndex] += $lineTotal;
+                        $values[$quoteIndex] = array('unit_price' => (float)$v['unit_price'], 'tax_rate' => (float)$v['tax_rate'], 'notes' => $v['availability_notes'], 'effective' => $effectiveUnitPrice);
+                        if ($lowestComparablePrice === null || $effectiveUnitPrice < $lowestComparablePrice) { $lowestComparablePrice = $effectiveUnitPrice; }
+                    } else { $values[$quoteIndex] = null; }
+                }
+                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['unit']) . '</small></th>';
+                foreach ($quoteRows as $quoteIndex => $q) {
+                    $v = $values[$quoteIndex];
+                    if ($v !== null) {
+                        $isBest = abs($v['effective'] - $lowestComparablePrice) < 0.00001;
+                        echo '<td' . ($isBest ? ' class="rfq-best"' : '') . '><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($v['unit_price'], 2) . '</span><span class="rfq-cell-meta">Tax: ' . number_format($v['tax_rate'], 2) . '%<br>' . rfq_h($v['notes']) . '</span></td>';
+                    } else { echo '<td class="text-muted">—</td>'; }
+                }
+                echo '</tr>';
+            }
+            echo '<tr class="rfq-total-row"><th>Indicative quotation total<br><small>Tax treatment applied</small></th>';
             foreach ($quoteRows as $quoteIndex => $q) {
-                $qr = DB_query("SELECT unit_price,tax_rate,availability_notes FROM rfq_quote_lines WHERE quote_id=" . (int)$q['id'] . " AND rfq_line_id=" . (int)$line['id'], $db);
-                if (DB_num_rows($qr)) {
-                    $v = DB_fetch_array($qr);
-                    $lineTotal = (float)$line['quantity'] * (float)$v['unit_price'];
-                    if (empty($q['tax_inclusive'])) { $lineTotal *= (1 + ((float)$v['tax_rate'] / 100)); }
-                    $quoteTotals[$quoteIndex] += $lineTotal;
-                    echo '<td>' . rfq_h($head['currencycode']) . ' ' . number_format((float)$v['unit_price'], 4) .
-                        '<br><small>Tax: ' . number_format((float)$v['tax_rate'], 2) . '%<br>' . rfq_h($v['availability_notes']) . '</small></td>';
-                } else { echo '<td>—</td>'; }
+                echo '<td><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days delivery' : 'Delivery not specified') . '</span></td>';
             }
-            echo '</tr>';
+            echo '</tr></tbody></table></div><p class="rfq-legend"><span></span> Lowest comparable unit price for the item, including applicable tax.</p>';
         }
-        echo '<tr><th>Indicative quotation total (' . 'quoted tax treatment applied' . ')</th>';
-        foreach ($quoteRows as $quoteIndex => $q) {
-            echo '<td><strong>' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</strong></td>';
-        }
-        echo '</tr></tbody></table></div>';
 
         echo '<h4>Commercial terms comparison</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Term</th>';
         foreach ($quoteRows as $q) { echo '<th>' . rfq_h($q['customer']) . '</th>'; }
