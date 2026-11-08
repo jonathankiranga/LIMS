@@ -27,12 +27,11 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
         $rfqQuote = DB_fetch_array($quoteResult);
         $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.unit,
                 ql.unit_price,ql.tax_rate,sm.itemcode AS stock_itemcode,sm.barcode,sm.descrip AS stock_description,
-                sm.units,ipg.vatcategory,u.descrip AS unit_description
+                sm.units,sm.subunits,sm.partperunit,ipg.vatcategory
             FROM rfq_quote_lines ql
             JOIN rfq_lines rl ON rl.id=ql.rfq_line_id
             LEFT JOIN stockmaster sm ON sm.itemcode=rl.itemcode AND (sm.inactive=0 OR sm.inactive IS NULL)
             LEFT JOIN inventorypostinggroup ipg ON ipg.code=sm.postinggroup
-            LEFT JOIN unit u ON u.code=sm.units
             WHERE ql.quote_id=" . $rfqQuoteId . " ORDER BY rl.line_no", $db);
         $prefillLines = array();
         $seenRfqItems = array();
@@ -48,12 +47,28 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                 break;
             }
             $seenRfqItems[$itemCodeKey] = true;
-            $requestedUnit = trim((string)$quoteLine['unit']);
-            if ($requestedUnit !== '' && strcasecmp($requestedUnit, $quoteLine['units']) !== 0 &&
-                strcasecmp($requestedUnit, $quoteLine['unit_description']) !== 0) {
-                $lineError = 'The RFQ unit for ' . $quoteLine['description'] . ' does not match the inventory unit (' . $quoteLine['unit_description'] . '). Correct the unit or inventory mapping before creating the PO.';
+            $requestedPack = trim((string)$quoteLine['unit']);
+            if ($requestedPack === '') {
+                $lineError = 'The buyer-defined packaging is missing for ' . $quoteLine['description'] . '. Recreate or correct the RFQ before creating the PO.';
                 break;
             }
+            $fullUnit = trim((string)$quoteLine['units']);
+            $looseUnit = trim((string)$quoteLine['subunits']);
+            $partsPerFullUnit = (float)$quoteLine['partperunit'];
+            if ($partsPerFullUnit <= 0) {
+                $partsPerFullUnit = 1;
+            }
+            if ($fullUnit === '' || !isset($_SESSION['units'][$fullUnit])) {
+                $lineError = 'The full-unit inventory mapping is missing for ' . $quoteLine['description'] . '. Correct the inventory item before creating the PO.';
+                break;
+            }
+            if ($partsPerFullUnit > 1 && ($looseUnit === '' || !isset($_SESSION['units'][$looseUnit]))) {
+                $lineError = 'The loose-unit inventory mapping is missing for ' . $quoteLine['description'] . '. Correct the inventory item before creating the PO.';
+                break;
+            }
+            $quoteLine['rfq_parts_per_full_unit'] = $partsPerFullUnit;
+            $quoteLine['rfq_full_unit'] = $fullUnit;
+            $quoteLine['rfq_loose_unit'] = ($partsPerFullUnit > 1) ? $looseUnit : $fullUnit;
             $prefillLines[] = $quoteLine;
         }
         $expectedLinesResult = DB_query("SELECT COUNT(*) AS line_count FROM rfq_lines WHERE rfq_id=" . (int)$rfqQuote['rfq_id'], $db);
@@ -72,11 +87,11 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                     'itemcode' => $itemCode,
                     'barcode' => $quoteLine['barcode'],
                     'stockname' => $quoteLine['stock_description'],
-                    'uom' => $quoteLine['units'],
-                    'uomreceived' => $quoteLine['units'],
-                    'partsperunit' => 1,
-                    'packzizegrn' => 1,
-                    'price' => (float)$quoteLine['unit_price'],
+                    'uom' => $quoteLine['rfq_full_unit'],
+                    'uomreceived' => $quoteLine['rfq_loose_unit'],
+                    'partsperunit' => $quoteLine['rfq_parts_per_full_unit'],
+                    'packzizegrn' => $quoteLine['rfq_parts_per_full_unit'],
+                    'price' => (float)$quoteLine['unit_price'] / $quoteLine['rfq_parts_per_full_unit'],
                     'quantity' => (float)$quoteLine['quantity'],
                     'ReceivedQuantity' => (float)$quoteLine['quantity'],
                     'discount' => 0,
