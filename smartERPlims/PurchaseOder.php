@@ -25,7 +25,7 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
         $rfqPrefillError = 'This RFQ quotation has not been awarded, or a Purchase Order has already been created from it.';
     } else {
         $rfqQuote = DB_fetch_array($quoteResult);
-        $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.unit,
+        $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.requested_pack,
                 ql.unit_price,ql.tax_rate,sm.itemcode AS stock_itemcode,sm.barcode,sm.descrip AS stock_description,
                 sm.units,sm.subunits,sm.partperunit,ipg.vatcategory
             FROM rfq_quote_lines ql
@@ -47,7 +47,7 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                 break;
             }
             $seenRfqItems[$itemCodeKey] = true;
-            $requestedPack = trim((string)$quoteLine['unit']);
+            $requestedPack = trim((string)$quoteLine['requested_pack']);
             if ($requestedPack === '') {
                 $lineError = 'The buyer-defined packaging is missing for ' . $quoteLine['description'] . '. Recreate or correct the RFQ before creating the PO.';
                 break;
