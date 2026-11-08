@@ -52,7 +52,10 @@ if ($invitation['invite_status'] === 'submitted') {
 if ($invitation['rfq_status'] !== 'issued' || strtotime($invitation['closing_at']) < time()) {
     supplier_rfq_fail('This RFQ is no longer accepting quotations because it has been closed or its submission deadline has passed.', 410);
 }
-$lineResult = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . (int)$invitation['rfq_id'] . " ORDER BY line_no", $db);
+$lineResult = DB_query("SELECT rl.*,u.descrip AS requested_unit_description
+    FROM rfq_lines rl
+    LEFT JOIN unit u ON u.code=rl.requested_pack
+    WHERE rl.rfq_id=" . (int)$invitation['rfq_id'] . " ORDER BY rl.line_no", $db);
 $lines = array();
 while ($line = DB_fetch_array($lineResult)) { $lines[] = $line; }
 if (!count($lines)) {
@@ -140,9 +143,9 @@ echo '<div class="row"><div class="col-sm-8"><h4>' . supplier_rfq_h($invitation[
 if ($invitation['description'] !== '') { echo '<p>' . nl2br(supplier_rfq_h($invitation['description'])) . '</p>'; }
 echo '</div><div class="col-sm-4 text-right"><strong>Quotation deadline</strong><br>' . supplier_rfq_h($invitation['closing_at']) . '<br><strong>Currency:</strong> ' . supplier_rfq_h($invitation['currencycode']) . '</div></div><hr>';
 echo '<h4>Terms and conditions</h4><div class="terms">' . supplier_rfq_h($invitation['terms_conditions']) . '</div>';
-echo '<form method="post" style="margin-top:20px"><input type="hidden" name="token" value="' . supplier_rfq_h($token) . '"><input type="hidden" name="company" value="' . supplier_rfq_h($requestedDatabase) . '"><h4>Quoted prices</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Product / reagent</th><th>Specification</th><th>Requested quantity / packaging</th><th>Price per requested pack (' . supplier_rfq_h($invitation['currencycode']) . ')</th><th>Tax %</th><th>Brand / availability</th></tr></thead><tbody>';
+echo '<form method="post" style="margin-top:20px"><input type="hidden" name="token" value="' . supplier_rfq_h($token) . '"><input type="hidden" name="company" value="' . supplier_rfq_h($requestedDatabase) . '"><h4>Quoted prices</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Product / reagent</th><th>Specification</th><th>Requested quantity / unit</th><th>Price per requested unit (' . supplier_rfq_h($invitation['currencycode']) . ')</th><th>Tax %</th><th>Brand / availability</th></tr></thead><tbody>';
 foreach ($lines as $idx => $line) {
-    echo '<tr><td>' . supplier_rfq_h($line['description']) . '</td><td>' . nl2br(supplier_rfq_h($line['specification'])) . '</td><td>' . supplier_rfq_h($line['quantity'] . ' packs — ' . $line['requested_pack']) . '</td>';
+    echo '<tr><td>' . supplier_rfq_h($line['description']) . '</td><td>' . nl2br(supplier_rfq_h($line['specification'])) . '</td><td>' . supplier_rfq_h($line['quantity'] . ' ' . ($line['requested_unit_description'] !== '' ? $line['requested_unit_description'] : $line['requested_pack'])) . '</td>';
     echo '<td><input class="form-control" type="number" min="0" step="0.0001" name="unit_price[' . $idx . ']" required></td><td><input class="form-control" type="number" min="0" max="100" step="0.01" name="tax_rate[' . $idx . ']" value="0" required></td><td><input class="form-control" name="availability_notes[' . $idx . ']" placeholder="Brand and stock availability"></td></tr>';
 }
 echo '</tbody></table></div><h4>Commercial quotation details</h4><div class="row"><div class="col-md-4"><label>Supplier quotation reference</label><input class="form-control" name="quote_reference" maxlength="80"></div><div class="col-md-4"><label>Quotation valid until</label><input class="form-control" type="date" name="validity_date"></div><div class="col-md-4"><label>Delivery lead time (days)</label><input class="form-control" type="number" min="0" name="delivery_days"></div></div>';
