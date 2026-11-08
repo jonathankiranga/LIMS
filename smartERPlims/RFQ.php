@@ -588,14 +588,15 @@ if (isset($_GET['compare'])) {
         if (!count($quoteRows)) {
             echo '<div class="alert alert-info">No supplier quotations have been submitted for this RFQ yet.</div>';
         } else {
+            echo '<h3 style="font-size:19px;font-weight:700;margin:4px 0 12px">Quotes</h3>';
             if ($head['status'] !== 'awarded') {
-                echo '<form method="post" id="rfqAwardForm"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '">';
+                echo '<form method="post" id="rfqAwardForm" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 12px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><button class="btn btn-primary" type="submit" name="award_quote" value="1" onclick="return confirm(\\'Award the selected supplier quotation?\\')">Award selected quotation</button></form>';
             }
-            echo '<h3 style="font-size:19px;font-weight:700;margin:4px 0 12px">Quotes</h3><div class="rfq-quotes-wrap"><table class="table rfq-quotes"><thead><tr><th>Item / requested quantity</th>';
+            echo '<div class="rfq-quotes-wrap"><table class="table rfq-quotes"><thead><tr><th>Item / requested quantity</th>';
             foreach ($quoteRows as $q) {
                 echo '<th><div class="rfq-supplier-head">' . rfq_h($q['customer']) . '<small>' . rfq_h($q['quote_reference'] ? $q['quote_reference'] : 'Quotation submitted') . '</small></div>';
                 if ($head['status'] !== 'awarded') {
-                    echo '<label class="rfq-quote-choice" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-weight:600"><input type="checkbox" name="quote_choice[]" value="' . (int)$q['id'] . '" class="rfq-quote-choice-input"> Select quotation</label>';
+                    echo '<label class="rfq-quote-choice" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-weight:600"><input type="checkbox" form="rfqAwardForm" name="quote_choice[]" value="' . (int)$q['id'] . '" class="rfq-quote-choice-input"> Select quotation</label>';
                 }
                 echo '</th>';
             }
@@ -633,9 +634,6 @@ if (isset($_GET['compare'])) {
                 echo '<td><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days delivery' : 'Delivery not specified') . '</span></td>';
             }
             echo '</tr></tbody></table></div>';
-            if ($head['status'] !== 'awarded') {
-                echo '<div style="display:flex;justify-content:flex-end;margin:12px 0 20px"><button class="btn btn-primary" type="submit" name="award_quote" value="1" onclick="return confirm(\'Award the selected supplier quotation?\')">Award selected quotation</button></div></form>';
-            }
             echo '<p class="rfq-legend"><span></span> Lowest comparable unit price for the item, including applicable tax.</p>';
         }
 
