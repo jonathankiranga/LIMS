@@ -513,7 +513,7 @@ if (isset($_GET['compare'])) {
                     $v = $values[$quoteIndex];
                     if ($v !== null) {
                         $isBest = abs($v['effective'] - $lowestComparablePrice) < 0.00001;
-                        echo '<td' . ($isBest ? ' class="rfq-best"' : '') . '><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($v['unit_price'], 2) . '</span><span class="rfq-cell-meta">Tax: ' . number_format($v['tax_rate'], 2) . '%<br>' . rfq_h($v['notes']) . '</span></td>';
+                        echo '<td' . ($isBest ? ' class="rfq-best"' : '') . '><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($v['unit_price'], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days' : 'Delivery not specified') . '<br>Tax: ' . number_format($v['tax_rate'], 2) . '%<br>' . rfq_h($v['notes']) . '</span></td>';
                     } else { echo '<td class="text-muted">—</td>'; }
                 }
                 echo '</tr>';
