@@ -66,6 +66,9 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
             $partsPerFullUnit = (float)$quoteLine['partperunit'];
             if ($partsPerFullUnit <= 0) {
                 $partsPerFullUnit = 1;
+            } elseif ($partsPerFullUnit < 1) {
+                $lineError = 'The full-to-loose unit conversion is invalid for ' . $quoteLine['description'] . '. The inventory pack factor must be 1 or greater.';
+                break;
             }
             if ($fullUnit === '' || !isset($_SESSION['units'][$fullUnit])) {
                 $lineError = 'The full-unit inventory mapping is missing for ' . $quoteLine['description'] . '. Correct the inventory item before creating the PO.';
