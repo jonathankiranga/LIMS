@@ -308,11 +308,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
         $error = 'Your session validation has expired. Reload the page and try again.';
     }
     $rfqId = (int)$_POST['rfq_id'];
-    $quoteId = (int)$_POST['quote_id'];
+    $selectedQuoteIds = isset($_POST['quote_choice']) && is_array($_POST['quote_choice'])
+        ? array_values(array_unique(array_map('intval', $_POST['quote_choice']))) : array();
+    $quoteId = count($selectedQuoteIds) === 1 ? $selectedQuoteIds[0] : 0;
+    $rfqId = (int)$_POST['rfq_id'];
     $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,h.status FROM rfq_quotes q
         JOIN rfq_header h ON h.id=q.rfq_id WHERE q.id=" . $quoteId . " AND q.rfq_id=" . $rfqId, $db);
-    if ($error !== '' || DB_num_rows($qr) !== 1) {
-        $error = 'The selected quotation does not belong to this RFQ.';
+    if ($error !== '' || count($selectedQuoteIds) !== 1 || $quoteId < 1 || DB_num_rows($qr) !== 1) {
+        $error = 'Select exactly one supplier quotation belonging to this RFQ.';
     } else {
         $selectedQuote = DB_fetch_array($qr);
         if (!in_array($selectedQuote['status'], array('issued','closed'), true)) {
@@ -586,11 +589,14 @@ if (isset($_GET['compare'])) {
         if (!count($quoteRows)) {
             echo '<div class="alert alert-info">No supplier quotations have been submitted for this RFQ yet.</div>';
         } else {
+            if ($head['status'] !== 'awarded') {
+                echo '<form method="post" id="rfqAwardForm"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '">';
+            }
             echo '<h3 style="font-size:19px;font-weight:700;margin:4px 0 12px">Quotes</h3><div class="rfq-quotes-wrap"><table class="table rfq-quotes"><thead><tr><th>Item / requested quantity</th>';
             foreach ($quoteRows as $q) {
                 echo '<th><div class="rfq-supplier-head">' . rfq_h($q['customer']) . '<small>' . rfq_h($q['quote_reference'] ? $q['quote_reference'] : 'Quotation submitted') . '</small></div>';
                 if ($head['status'] !== 'awarded') {
-                    echo '<form method="post" style="margin-top:9px"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '"><input type="hidden" name="rfq_id" value="' . $compareId . '"><input type="hidden" name="quote_id" value="' . (int)$q['id'] . '"><button class="btn btn-xs btn-primary" name="award_quote" value="1" onclick="return confirm(\'Select this supplier quotation?\')">Select supplier</button></form>';
+                    echo '<label class="rfq-quote-choice" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-weight:600"><input type="checkbox" name="quote_choice[]" value="' . (int)$q['id'] . '" class="rfq-quote-choice-input"> Select quotation</label>';
                 }
                 echo '</th>';
             }
@@ -627,7 +633,11 @@ if (isset($_GET['compare'])) {
             foreach ($quoteRows as $quoteIndex => $q) {
                 echo '<td><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days delivery' : 'Delivery not specified') . '</span></td>';
             }
-            echo '</tr></tbody></table></div><p class="rfq-legend"><span></span> Lowest comparable unit price for the item, including applicable tax.</p>';
+            echo '</tr></tbody></table></div>';
+            if ($head['status'] !== 'awarded') {
+                echo '<div style="display:flex;justify-content:flex-end;margin:12px 0 20px"><button class="btn btn-primary" type="submit" name="award_quote" value="1" onclick="return confirm(\'Award the selected supplier quotation?\')">Award selected quotation</button></div></form>';
+            }
+            echo '<p class="rfq-legend"><span></span> Lowest comparable unit price for the item, including applicable tax.</p>';
         }
 
         echo '<h4>Commercial terms comparison</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Term</th>';
@@ -659,6 +669,14 @@ echo '</div>';
   row.querySelectorAll('input,textarea,select').forEach(function(el){el.value='';});
   body.appendChild(row);
  });}
+ var quoteChoices=document.querySelectorAll('.rfq-quote-choice-input');
+ quoteChoices.forEach(function(choice){
+  choice.addEventListener('change',function(){
+   if(this.checked){
+    quoteChoices.forEach(function(other){if(other!==choice){other.checked=false;}});
+   }
+  });
+ });
  var search=document.getElementById('rfqSearch');
  var status=document.getElementById('rfqStatusFilter');
  var cards=document.querySelectorAll('#rfqCardList .rfq-register-card');
