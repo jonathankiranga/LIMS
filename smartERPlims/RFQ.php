@@ -435,7 +435,6 @@ if (isset($_GET['compare'])) {
     $hr = DB_query("SELECT * FROM rfq_header WHERE id=" . $compareId, $db);
     if (DB_num_rows($hr) === 1) {
         $head = DB_fetch_array($hr);
-        echo '<h3>Quotation comparison — ' . rfq_h($head['rfq_no']) . '</h3>';
         if ($head['status'] === 'awarded') {
             echo '<div class="alert alert-success">Awarded to supplier ' . rfq_h($head['awarded_supplier_code']) . '. Selected quotation ID: ' . (int)$head['awarded_quote_id'] . '.</div>';
             if (empty($head['po_documentno'])) {
@@ -444,8 +443,6 @@ if (isset($_GET['compare'])) {
                 echo '<p class="alert alert-info">Purchase Order created: ' . rfq_h($head['po_documentno']) . '</p>';
             }
         }
-        $lines = DB_query("SELECT * FROM rfq_lines WHERE rfq_id=" . $compareId . " ORDER BY line_no", $db);
-        $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         echo '<div class="rfq-compare-head"><div><h2 class="rfq-compare-title">Request ' . rfq_h($head['rfq_no']) . '</h2><p class="rfq-compare-subtitle">' . rfq_h($head['title']) . ' &nbsp;·&nbsp; Closing ' . rfq_h($head['closing_at']) . '</p></div><div class="rfq-actions"><span class="rfq-status">' . rfq_h($head['status']) . '</span><a class="btn btn-default" href="RFQ.php">Back to RFQ Register</a></div></div>';
         $inviteResult = DB_query("SELECT i.status,i.invited_at,i.submitted_at,c.customer
             FROM rfq_invites i JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = i.supplier_code COLLATE utf8mb4_unicode_ci
