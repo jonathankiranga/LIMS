@@ -23,22 +23,22 @@ body {
     background: var(--erp-page);
 }
 
-#CanvasDiv {
+body {
     box-sizing: border-box;
     padding: 12px;
 }
 
-#CanvasDiv *,
-#CanvasDiv *::before,
-#CanvasDiv *::after {
+body *,
+body *::before,
+body *::after {
     box-sizing: border-box;
 }
 
 /* Consistent form control geometry. Width follows the available parent cell. */
-#CanvasDiv input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="file"]):not([type="hidden"]),
-#CanvasDiv select,
-#CanvasDiv .form-control,
-#CanvasDiv .form-select {
+body input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="file"]):not([type="hidden"]),
+body select,
+body .form-control,
+body .form-select {
     display: inline-block;
     width: 100%;
     max-width: 100%;
@@ -57,8 +57,8 @@ body {
     box-shadow: none;
 }
 
-#CanvasDiv textarea,
-#CanvasDiv textarea.form-control {
+body textarea,
+body textarea.form-control {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -74,19 +74,19 @@ body {
     box-shadow: none;
 }
 
-#CanvasDiv input:focus,
-#CanvasDiv select:focus,
-#CanvasDiv textarea:focus,
-#CanvasDiv .form-control:focus,
-#CanvasDiv .form-select:focus {
+body input:focus,
+body select:focus,
+body textarea:focus,
+body .form-control:focus,
+body .form-select:focus {
     border-color: #6d9fc2;
     outline: 0;
     background-color: #fff;
     box-shadow: 0 0 0 3px var(--erp-focus);
 }
 
-#CanvasDiv input[type="checkbox"],
-#CanvasDiv input[type="radio"] {
+body input[type="checkbox"],
+body input[type="radio"] {
     width: auto;
     height: auto;
     min-height: 0;
@@ -94,18 +94,18 @@ body {
     vertical-align: middle;
 }
 
-#CanvasDiv input[type="file"] {
+body input[type="file"] {
     height: auto;
     min-height: 36px;
     padding: 5px;
     background: #fff;
 }
 
-#CanvasDiv input[type="button"],
-#CanvasDiv input[type="submit"],
-#CanvasDiv input[type="reset"],
-#CanvasDiv button,
-#CanvasDiv .btn {
+body input[type="button"],
+body input[type="submit"],
+body input[type="reset"],
+body button,
+body .btn {
     min-height: 34px;
     padding: 6px 13px;
     border-radius: 4px;
@@ -117,9 +117,9 @@ body {
     box-shadow: none;
 }
 
-#CanvasDiv label,
-#CanvasDiv .control-label,
-#CanvasDiv .form-label {
+body label,
+body .control-label,
+body .form-label {
     display: inline-block;
     margin: 0 0 5px;
     color: #344054;
@@ -128,43 +128,43 @@ body {
     line-height: 1.35;
 }
 
-#CanvasDiv .form-group {
+body .form-group {
     margin-bottom: 12px;
 }
 
 /* Consistent surfaces without changing table structure or data behavior. */
-#CanvasDiv .well,
-#CanvasDiv .panel,
-#CanvasDiv .modal-content {
+body .well,
+body .panel,
+body .modal-content {
     border: 1px solid var(--erp-border);
     border-radius: 6px;
     background: var(--erp-surface);
     box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
 }
 
-#CanvasDiv .panel-heading,
-#CanvasDiv .modal-header {
+body .panel-heading,
+body .modal-header {
     border-bottom: 1px solid var(--erp-border);
     background: #f8fafc;
     color: var(--erp-text);
     font-weight: 600;
 }
 
-#CanvasDiv table {
+body table {
     max-width: 100%;
 }
 
-#CanvasDiv table.table,
-#CanvasDiv table.table-bordered,
-#CanvasDiv .table {
+body table.table,
+body table.table-bordered,
+body .table {
     border-color: var(--erp-border);
     color: var(--erp-text);
 }
 
-#CanvasDiv table.table th,
-#CanvasDiv table.table-bordered th,
-#CanvasDiv .table th,
-#CanvasDiv th {
+body table.table th,
+body table.table-bordered th,
+body .table th,
+body th {
     padding: 9px 10px;
     border-color: var(--erp-border);
     background: #edf2f7;
@@ -174,27 +174,27 @@ body {
     vertical-align: middle;
 }
 
-#CanvasDiv table.table td,
-#CanvasDiv table.table-bordered td,
-#CanvasDiv .table td,
-#CanvasDiv td {
+body table.table td,
+body table.table-bordered td,
+body .table td,
+body td {
     border-color: #e3e8ef;
     vertical-align: middle;
 }
 
-#CanvasDiv table.table tbody tr:nth-child(even) td,
-#CanvasDiv table.table-bordered tbody tr:nth-child(even) td,
-#CanvasDiv .table tbody tr:nth-child(even) td {
+body table.table tbody tr:nth-child(even) td,
+body table.table-bordered tbody tr:nth-child(even) td,
+body .table tbody tr:nth-child(even) td {
     background-color: var(--erp-row-alt);
 }
 
-#CanvasDiv table.table tbody tr:hover td,
-#CanvasDiv table.table-bordered tbody tr:hover td,
-#CanvasDiv .table tbody tr:hover td {
+body table.table tbody tr:hover td,
+body table.table-bordered tbody tr:hover td,
+body .table tbody tr:hover td {
     background-color: #eef5fb;
 }
 
-#CanvasDiv .table-responsive {
+body .table-responsive {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
@@ -233,32 +233,32 @@ a:focus {
 }
 
 /* Keep legacy status and validation states visible. */
-#CanvasDiv input.inputerror,
-#CanvasDiv input.error,
-#CanvasDiv select.error,
-#CanvasDiv select.selecterror,
-#CanvasDiv label.error {
+body input.inputerror,
+body input.error,
+body select.error,
+body select.selecterror,
+body label.error {
     border: 1px solid #c93636;
     background-color: #fff5f5;
     color: #b42318;
 }
 
-#CanvasDiv input:disabled,
-#CanvasDiv select:disabled,
-#CanvasDiv textarea:disabled,
-#CanvasDiv input[readonly],
-#CanvasDiv textarea[readonly] {
+body input:disabled,
+body select:disabled,
+body textarea:disabled,
+body input[readonly],
+body textarea[readonly] {
     background-color: #f2f4f7;
     color: #667085;
     cursor: not-allowed;
 }
 
 @media (max-width: 767px) {
-    #CanvasDiv {
+    body {
         padding: 8px;
     }
 
-    #CanvasDiv .table-responsive {
+    body .table-responsive {
         -webkit-overflow-scrolling: touch;
     }
 
