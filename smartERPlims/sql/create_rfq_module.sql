@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS rfq_lines (
   specification MEDIUMTEXT NULL,
   quantity DECIMAL(18,4) NOT NULL,
   unit VARCHAR(30) NULL,
+  requested_pack VARCHAR(100) NULL,
   required_delivery_date DATE NULL,
   line_no INT NOT NULL DEFAULT 1,
   PRIMARY KEY (id),
