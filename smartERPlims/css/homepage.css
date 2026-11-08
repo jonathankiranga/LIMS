@@ -1,11 +1,4 @@
-body{
-    font-family:Arial, Verdana, Helvetica, sans-serif;
-    padding-left: 10px;
-    font-size:12px;
-    line-height:20px;
-    color: #111827;
-    background-color:#f7f9fc;
-}
+/* Global typography, spacing and page background are controlled by css/erp-ui.css. */
 
 iframe{
     position:absolute;
@@ -89,7 +82,7 @@ li.divider {
 
 .table-responsive {
     max-height:80%;
-    max-width:80%;
+    max-width:100%;
 }
 
 .mini{
@@ -264,44 +257,14 @@ DIV.form{
     padding-left: 0;
  }
 
-input{
-	font-size:100%;
-	background-color:#e3e1e1;
-	border-width:1px;
-	border-bottom-color:gray;
-	border-bottom-style:solid;
-	border-top-color:gray;
-	border-top-style:solid;
-	border-left-color:gray;
-	border-left-style:solid;
-	border-right-color:gray;
-	border-right-style:solid;
-}
-
-
-input:hover{
-	font-family:Arial, Verdana, Helvetica, sans-serif;
-	font-size:100%;
-	background-color:#e3e5f5;
-	border-width:1px;
-	border-bottom-color:gray;
-	border-bottom-style:solid;
-	border-top-color:gray;
-	border-top-style:solid;
-	border-left-color:gray;
-	border-left-style:solid;
-	border-right-color:gray;
-	border-right-style:solid;
-}
+/* Generic input styling moved to css/erp-ui.css.
+   Keep control-specific classes below for legacy page behavior. */
 
 input.number{
     text-align:right;
-    width: 100px;
 }
 
-textarea {
-  border: 1px solid #888; 
-}
+/* Textarea dimensions, border and focus state are defined in css/erp-ui.css. */
 
 input.image{
 	border-width:0px;
@@ -313,14 +276,10 @@ input.inputerror, input.error, select.error, select.selecterror, label.error {
     border: 2px solid red;
 }
 
-input:required, select:required, textarea:required {
-    background-color:lightyellow;
-}
+/* Required-field appearance is standardized in css/erp-ui.css. */
 
-select, option {
-    font-family:Arial, Verdana, Helvetica, sans-serif;
-    width: 150px;
-}
+/* Generic select sizing moved to css/erp-ui.css.
+   Option text overflow behavior remains below. */
 
 option {
     overflow: visible;
