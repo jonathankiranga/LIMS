@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
     $lineDescriptions = isset($_POST['line_description']) ? $_POST['line_description'] : array();
     $lineSpecs = isset($_POST['line_specification']) ? $_POST['line_specification'] : array();
     $lineQty = isset($_POST['line_quantity']) ? $_POST['line_quantity'] : array();
-    $lineUnits = isset($_POST['line_unit']) ? $_POST['line_unit'] : array();
+    $linePackaging = isset($_POST['line_packaging']) ? $_POST['line_packaging'] : array();
     $lineCodes = isset($_POST['line_itemcode']) ? $_POST['line_itemcode'] : array();
 
     if ($error === '' && ($title === '' || $terms === '' || $currency === '' || $closing === '' || count($lineDescriptions) === 0)) {
@@ -124,16 +124,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
             $descriptionLine = trim($descriptionLine);
             $qty = isset($lineQty[$i]) ? (float)$lineQty[$i] : 0;
             if ($descriptionLine !== '' && $qty > 0) {
+                $requestedPack = isset($linePackaging[$i]) ? trim($linePackaging[$i]) : '';
+                if ($requestedPack === '') {
+                    $error = 'Specify the exact packaging required by the buyer for RFQ line ' . ((int)$i + 1) . '.';
+                    break;
+                }
                 $validLines[] = array(
                     'description' => $descriptionLine,
                     'specification' => isset($lineSpecs[$i]) ? trim($lineSpecs[$i]) : '',
                     'quantity' => $qty,
-                    'unit' => isset($lineUnits[$i]) ? trim($lineUnits[$i]) : '',
+                    'requested_pack' => $requestedPack,
                     'itemcode' => isset($lineCodes[$i]) ? trim($lineCodes[$i]) : ''
                 );
             }
         }
-        if (count($validLines) === 0) {
+        if ($error !== '') {
+            // Do not save an RFQ with an unspecified supplier pack.
+        } elseif (count($validLines) === 0) {
             $error = 'At least one RFQ line must have a description and a quantity greater than zero.';
         } else {
             $rfqNo = 'RFQ-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
@@ -147,10 +154,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
             $newRfqRow = DB_fetch_array($newRfqResult);
             $rfqId = (int)$newRfqRow['id'];
             foreach ($validLines as $i => $line) {
-                DB_query("INSERT INTO rfq_lines (rfq_id,itemcode,description,specification,quantity,unit,line_no)
+                DB_query("INSERT INTO rfq_lines (rfq_id,itemcode,description,specification,quantity,requested_pack,line_no)
                     VALUES (" . (int)$rfqId . ",'" . DB_escape_string($line['itemcode']) . "','" .
                     DB_escape_string($line['description']) . "','" . DB_escape_string($line['specification']) . "'," .
-                    $line['quantity'] . ",'" . DB_escape_string($line['unit']) . "'," . ($i + 1) . ")", $db);
+                    $line['quantity'] . ",'" . DB_escape_string($line['requested_pack']) . "'," . ($i + 1) . ")", $db);
             }
             $message = 'RFQ ' . $rfqNo . ' created as a draft. Select suppliers and issue it when ready.';
         }
@@ -496,10 +503,10 @@ echo '<div class="rfq-field"><label>Currency</label><select class="form-control"
 while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['currabrev']) . '">' . rfq_h($c['currency']) . ' (' . rfq_h($c['currabrev']) . ')</option>'; }
 echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
 echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
-echo '<h4>Requested products / reagents</h4><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item (optional)</th><th>Description</th><th>Technical specifications / grade / pack size</th><th>Quantity</th><th>Unit</th><th></th></tr></thead><tbody>';
+echo '<h4>Requested products / reagents</h4><p class="text-muted">Specify the exact pack the supplier must provide. For linked inventory items, this pack must correspond to the inventory item’s configured Full Unit; the system uses its Full Unit / Loose Unit relationship when preparing the Purchase Order.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item (optional)</th><th>Description</th><th>Technical specifications / grade</th><th>Quantity (packs)</th><th>Buyer-defined packaging</th><th></th></tr></thead><tbody>';
 echo '<tr><td><select class="form-control" name="line_itemcode[]"><option value="">Not linked</option>';
 while ($st = DB_fetch_array($stockItems)) { echo '<option value="' . rfq_h($st['itemcode']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>'; }
-echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" style="width:100px" name="line_unit[]" placeholder="e.g. bottle, kg"></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
+echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><input class="form-control" style="width:190px" name="line_packaging[]" maxlength="100" placeholder="e.g. 500 ml bottle, 25 kg bag" required></td><td><button type="button" class="btn btn-default" onclick="this.closest(\'tr\').remove()">Remove</button></td></tr>';
 echo '</tbody></table></div><button type="button" class="btn btn-default" id="addRfqLine">Add product line</button>';
 echo '<div class="rfq-field" style="margin:16px 0"><label>Terms and conditions (technical, quality, delivery, payment, packaging, shelf life, certificates, MSDS/SDS, returns, etc.)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
 echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></details>';
@@ -619,7 +626,7 @@ if (isset($_GET['compare'])) {
                         if ($lowestComparablePrice === null || $effectiveUnitPrice < $lowestComparablePrice) { $lowestComparablePrice = $effectiveUnitPrice; }
                     } else { $values[$quoteIndex] = null; }
                 }
-                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['unit']) . '</small></th>';
+                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' packs — ' . rfq_h($line['requested_pack']) . '</small></th>';
                 foreach ($quoteRows as $quoteIndex => $q) {
                     $v = $values[$quoteIndex];
                     if ($v !== null) {
@@ -634,7 +641,7 @@ if (isset($_GET['compare'])) {
                 echo '<td><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days delivery' : 'Delivery not specified') . '</span></td>';
             }
             echo '</tr></tbody></table></div>';
-            echo '<p class="rfq-legend"><span></span> Lowest comparable unit price for the item, including applicable tax.</p>';
+            echo '<p class="rfq-legend"><span></span> Lowest comparable price per buyer-requested pack, including applicable tax.</p>';
         }
 
         echo '<h4>Commercial terms comparison</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Term</th>';
