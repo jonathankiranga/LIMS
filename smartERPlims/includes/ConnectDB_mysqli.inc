@@ -81,7 +81,11 @@ function DB_query($SQL,$Conn,$ErrorMessage='',$DebugMessage= '',$Transaction=fal
 
 		if (($SQLArray[0] == 'INSERT')  OR ($SQLArray[0] == 'UPDATE')  OR ($SQLArray[0] == 'DELETE')) {
 
-			if ($SQLArray[2]!='audittrail' and $SQLArray[2]!='systypes_1' ){
+			if (
+                $SQLArray[2] != 'audittrail' &&
+                $SQLArray[2] != 'systypes_1' &&
+                (!isset($_SESSION['UserID']) || $_SESSION['UserID'] !== 'SUPPLIER_PORTAL')
+            ) {
                 // to ensure the auto delete of audit trail history is not logged
                 $AuditSQL = sprintf("INSERT INTO audittrail (transactiondate,userid,querystring) VALUES ('%s','%s','%s')", 
                     Date('Y-m-d H:i:s'),$_SESSION['UserID'],DB_escape_string($SQL));
