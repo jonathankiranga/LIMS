@@ -11,6 +11,15 @@ include('includes/header.inc');
  
 $POSclass = new PurchaseOrder();
 
+if (!isset($_SESSION['units']) || !is_array($_SESSION['units'])) {
+    $_SESSION['units'] = array();
+    $ResultIndex = DB_query("SELECT code, descrip FROM unit", $db);
+    while ($row = DB_fetch_array($ResultIndex)) {
+        $code = trim($row['code']);
+        $_SESSION['units'][$code] = $row;
+    }
+}
+
 $rfqPrefillError = '';
 if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) {
     $rfqQuoteId = (int)$_GET['rfq_quote_id'];
@@ -167,13 +176,6 @@ If($_SESSION['SINGLEUSER']=='Singleuser'){
     }
 }
 
-if(!isset($_SESSION['units'])){
-            $ResultIndex=DB_query("select code, descrip from unit",$db);
-             while($row = DB_fetch_array($ResultIndex)){
-                $code = trim($row['code']);
-                $_SESSION['units'][$code]=$row;
-            }
-       }
  
  if(!isset($_POST['date'])){ 
     $ResultIndex = DB_query('Select NOW() as date ',$db);
