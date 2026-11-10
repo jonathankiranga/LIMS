@@ -152,7 +152,7 @@ foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
            ,$discountRate
            ,$drumCode
            ,$ReceivedQuantity
-           ,(($salesprice*$qty)/$ReceivedQuantity)
+           ,(($salesprice*$qty*$package)/$ReceivedQuantity)
            ,$InpacksReceived
            ,$packzizegrn );
         }
