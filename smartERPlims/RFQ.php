@@ -148,7 +148,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                 $fullUnit = trim((string)$itemMapping['units']);
                 $looseUnit = trim((string)$itemMapping['subunits']);
                 $partsPerFullUnit = (float)$itemMapping['partperunit'];
-                if ($partsPerFullUnit <= 0) { $partsPerFullUnit = 1; }
+                if ($partsPerFullUnit <= 0) {
+                    if ($looseUnit !== '') {
+                        $error = 'The inventory conversion is missing for ' . $itemCode . '. Configure stockmaster.partperunit to 1 or greater because a Loose Unit is configured.';
+                        break;
+                    }
+                    $partsPerFullUnit = 1;
+                }
                 if ($partsPerFullUnit < 1 || ($partsPerFullUnit > 1 && $looseUnit === '')) {
                     $error = 'The inventory conversion is incomplete or invalid for ' . $itemCode . '. Configure the Full Unit, Loose Unit and partperunit in inventory configuration.';
                     break;
