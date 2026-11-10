@@ -674,7 +674,7 @@
        
              $runningnettotal += $netamount;  $runningvattotal += $vatamount; $runninggrosstotal += $grossamount; $runningDiscounttotal += $discountAmount;
                 
-              $this->htmltable .= sprintf('<tr onclick="purchaseOrderInventorygrid(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\');">'
+              $this->htmltable .= sprintf('<tr onclick="purchaseOrderInventorygrid(\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\')">'
               . '<td>%s</td>'
               . '<td>%s</td>'
               . '<td>'.$qty.' X %s  <input type="hidden" name="quantity['.$line_no.']" value="'.$qty.'" size="5" readonly="readonly" /></td>'
@@ -687,6 +687,7 @@
               . '<td class="number cell">'.number_format($vatamount,2).'<input type="hidden" class="number" name="vatamount['.$line_no.']" value="'.$vatamount.'" /></td>'
               . '<td class="number cell">'.number_format($grossamount,2).'<input type="hidden" class="number" name="grossamount['.$line_no.']" value="'.$grossamount.'" /></td>'
               . '</tr>',$ID,$BC,$NAME,$qty,$ReceivedQuantity,$salesprice,$package,$rowvalue['discount'],
+                      $UOM,$uomreceived,$packzizegrn,$vatcategory,
                       trim($stocklist['barcode']),trim($stocklist['stockname']),$Inpacksdescription);
               //,getGriduom($line_no,$UOM)
             }
