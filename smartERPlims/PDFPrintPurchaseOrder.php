@@ -113,15 +113,15 @@ $SQL = "SELECT
 
          $QTY = rtrim(rtrim(number_format($lineQuantity,4,'.',','), '0'), '.');
          
-          $LeftOvers = $pdf->addTextWrap(42, $YPos,103, $FontSize, $rows['barcode'],'left');
-          $LeftOvers = $pdf->addTextWrap(145, $YPos,250, $FontSize, $rows['description'],'left');
-          $LeftOvers = $pdf->addTextWrap(300, $YPos, 85, $FontSize, $units,'right');
-          $LeftOvers = $pdf->addTextWrap(362, $YPos, 85, $FontSize, $QTY,'right');
-          $LeftOvers = $pdf->addTextWrap(420, $YPos, 85, $FontSize, number_format($PRICE,2),'right');
-          $LeftOvers = $pdf->addTextWrap(492, $YPos, 85, $FontSize, number_format($discountRate,2).'%','right');
-          $LeftOvers = $pdf->addTextWrap(590, $YPos, 55, $FontSize, number_format($rows['vatrate'],0),'right');
-          $LeftOvers = $pdf->addTextWrap(650, $YPos, 70, $FontSize, number_format($rows['vatamount'],2),'right');
-          $LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100,$YPos,90,$FontSize,number_format($lineInvoiceAmount,2),'right');
+          $LeftOvers = $pdf->addTextWrap(42, $YPos,95, $FontSize, $rows['barcode'],'left');
+          $LeftOvers = $pdf->addTextWrap(145, $YPos,145, $FontSize, $rows['description'],'left');
+          $LeftOvers = $pdf->addTextWrap(300, $YPos, 75, $FontSize, $units,'right');
+          $LeftOvers = $pdf->addTextWrap(380, $YPos, 55, $FontSize, $QTY,'right');
+          $LeftOvers = $pdf->addTextWrap(440, $YPos, 70, $FontSize, number_format($PRICE,2),'right');
+          $LeftOvers = $pdf->addTextWrap(515, $YPos, 50, $FontSize, number_format($discountRate,2).'%','right');
+          $LeftOvers = $pdf->addTextWrap(570, $YPos, 55, $FontSize, number_format($rows['vatrate'],0),'right');
+          $LeftOvers = $pdf->addTextWrap(630, $YPos, 75, $FontSize, number_format($rows['vatamount'],2),'right');
+          $LeftOvers = $pdf->addTextWrap(720,$YPos,90,$FontSize,number_format($lineInvoiceAmount,2),'right');
 
          $YPos -= $line_height * 2;
          if($YPos < $lastrow){
