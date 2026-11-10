@@ -93,12 +93,13 @@ function rfq_xlsx_sheet($rows) {
     $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     $xml .= '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
     $xml .= '<sheetViews><sheetView workbookViewId="0"><pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>';
+    $xml .= '<sheetFormatPr defaultRowHeight="19"/>';
     $columnCount = count($rows[0]);
     $xml .= '<cols><col min="1" max="1" width="58" customWidth="1"/>';
     if ($columnCount > 1) {
         $xml .= '<col min="2" max="' . (int)$columnCount . '" width="24" customWidth="1"/>';
     }
-    $xml .= '</cols><sheetFormatPr defaultRowHeight="19"/><sheetData>';
+    $xml .= '</cols><sheetData>';
     foreach ($rows as $rowIndex => $row) {
         $rowNumber = $rowIndex + 1;
         $xml .= '<row r="' . $rowNumber . '">';
