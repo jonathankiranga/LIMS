@@ -56,11 +56,11 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                 break;
             }
             $seenRfqItems[$itemCodeKey] = true;
-            // stockmaster is authoritative for the valid Full Unit, Loose Unit and conversion.
-            // requested_pack records which of those configured units the supplier quoted.
+            // stockmaster is authoritative for the actual unit codes and conversion.
+            // requested_pack stores the inventory field name: 'units' or 'subunits'.
             $fullUnit = trim((string)$quoteLine['units']);
             $looseUnit = trim((string)$quoteLine['subunits']);
-            $requestedUnit = trim((string)$quoteLine['requested_pack']);
+            $requestedUnitRole = trim((string)$quoteLine['requested_pack']);
             $partsPerFullUnit = (float)$quoteLine['partperunit'];
             if ($partsPerFullUnit <= 0) {
                 $partsPerFullUnit = 1;
@@ -77,10 +77,16 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
                 $lineError = 'The Loose Unit inventory mapping is missing for ' . $quoteLine['description'] . '. Correct the inventory configuration before creating the PO.';
                 break;
             }
-            $isLooseUnit = ($looseUnit !== '' && $requestedUnit === $looseUnit && $requestedUnit !== $fullUnit);
-            $isFullUnit = ($requestedUnit !== '' && $requestedUnit === $fullUnit);
+            $isFullUnit = ($requestedUnitRole === 'units' && $fullUnit !== '');
+            $isLooseUnit = ($requestedUnitRole === 'subunits' && $looseUnit !== '');
+            // Backward compatibility for RFQs created before requested_pack stored the role.
+            // Only infer old unit codes when they identify exactly one inventory field.
+            if (!$isFullUnit && !$isLooseUnit && $requestedUnitRole !== 'units' && $requestedUnitRole !== 'subunits') {
+                $isFullUnit = ($requestedUnitRole !== '' && $requestedUnitRole === $fullUnit && $requestedUnitRole !== $looseUnit);
+                $isLooseUnit = ($requestedUnitRole !== '' && $requestedUnitRole === $looseUnit && $requestedUnitRole !== $fullUnit);
+            }
             if (!$isFullUnit && !$isLooseUnit) {
-                $lineError = 'The RFQ unit selected for ' . $quoteLine['description'] . ' is no longer configured as the Full Unit or Loose Unit in stockmaster. Correct the inventory mapping or revise the RFQ before creating the PO.';
+                $lineError = 'The RFQ unit role for ' . $quoteLine['description'] . ' is missing or ambiguous. The RFQ must identify either stockmaster.units (Full Unit) or stockmaster.subunits (Loose Unit). Review this RFQ line before creating the PO.';
                 break;
             }
             if ($isLooseUnit && $partsPerFullUnit <= 0) {
