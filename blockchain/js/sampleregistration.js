@@ -46,10 +46,16 @@ function addSampleRow() {
         <input type="hidden" id="rowindex_${irow}" name="rowindex[]" value="${irow}" />
         <input type="hidden" id="MatrixID_${irow}" name="matrix_id[]" value="0" />
         <input type="hidden" id="StandardID_${irow}" name="standard_id[]" />
-        <label class="small text-muted" for="StandardName_${irow}">Standard</label>
-        <input type="text" id="StandardName_${irow}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="samples_${irow}">Number of Samples</label>
-        <input type="number" id="samples_${irow}" name="samples[]" class="form-control form-control-sm" min="1" value="1" />
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:end;">
+          <div>
+            <label class="small text-muted d-block mb-1" for="StandardName_${irow}">Standard</label>
+            <input type="text" id="StandardName_${irow}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm" />
+          </div>
+          <div>
+            <label class="small text-muted d-block mb-1" for="samples_${irow}">Number of Samples</label>
+            <input type="number" id="samples_${irow}" name="samples[]" class="form-control form-control-sm" min="1" value="1" />
+          </div>
+        </div>
       </td>
     `;
 
