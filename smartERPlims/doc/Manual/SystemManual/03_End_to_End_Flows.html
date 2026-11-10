@@ -36,6 +36,14 @@
       <li>Prepare and approve vouchers in <b>Accounts Payable / Cash Management</b>.</li>
       <li>Execute payment and allocate to supplier open entries.</li>
     </ol>
+    <h3>Serialised Stock Receiving</h3>
+    <ol>
+      <li>Enable serial tracking on the Stock Master item (<code>requireserial = 1</code>).</li>
+      <li>Create and approve the Purchase Order.</li>
+      <li>Enter the goods received in the Goods Received Note.</li>
+      <li>Post the GRN. The stock-posting routine generates serial numbers for each whole loose unit received and records them in <code>StockRegister</code>.</li>
+      <li>Review or print the generated numbers using <b>Purchases → Reports → Last Serial Numbers (Goods Received)</b>.</li>
+    </ol>
 
     <h2>Inventory to Production to Quality</h2>
     <ol>
