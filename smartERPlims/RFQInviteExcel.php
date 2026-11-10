@@ -128,13 +128,7 @@ foreach ($rfqLines as $line) {
         if (isset($quoteMatrix[$supplierCode][$lineId])) {
             $quote = $quoteMatrix[$supplierCode][$lineId];
             $taxTreatment = ((int)$quote['tax_inclusive'] === 1) ? 'Tax inclusive' : 'Tax exclusive';
-            $cellText = (float)$quote['unit_price'];
-            $cellText = number_format($cellText, 2, '.', '') . ' ' . $rfq['currencycode'];
-            $cellText .= ' | ' . $taxTreatment . ' | Tax ' . number_format((float)$quote['tax_rate'], 2) . '%';
-            if (trim((string)$quote['availability_notes']) !== '') {
-                $cellText .= ' | ' . trim((string)$quote['availability_notes']);
-            }
-            $row[] = array($cellText, 3);
+            $row[] = array((float)$quote['unit_price'], 3);
         } else {
             $row[] = array('Not submitted', 4);
         }
@@ -143,6 +137,28 @@ foreach ($rfqLines as $line) {
 }
 if (!count($rfqLines)) {
     $matrixRows[] = array(array('No stock items are recorded on this RFQ.', 4));
+}
+
+$quoteDetailRows = array(
+    array(array('Stock Item',1),array('Item Code',1),array('Supplier',1),array('Supplier Code',1),array('Unit Price',1),array('Currency',1),array('Tax Treatment',1),array('Tax Rate %',1),array('Availability Notes',1))
+);
+foreach ($rfqLines as $line) {
+    foreach ($invites as $invite) {
+        $supplierCode = $invite['supplier_code'];
+        $lineId = (int)$line['id'];
+        if (!isset($quoteMatrix[$supplierCode][$lineId])) { continue; }
+        $quote = $quoteMatrix[$supplierCode][$lineId];
+        $supplierName = trim((string)$invite['customer']) !== '' ? $invite['customer'] : $supplierCode;
+        $quoteDetailRows[] = array(
+            array($line['description']), array($line['itemcode']), array($supplierName), array($supplierCode),
+            array((float)$quote['unit_price']), array($rfq['currencycode']),
+            array(((int)$quote['tax_inclusive'] === 1) ? 'Tax inclusive' : 'Tax exclusive'),
+            array((float)$quote['tax_rate']), array($quote['availability_notes'])
+        );
+    }
+}
+if (count($quoteDetailRows) === 1) {
+    $quoteDetailRows[] = array(array('No supplier line prices have been submitted.'));
 }
 
 $invitationRows = array(
@@ -191,12 +207,12 @@ $styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
 
 $workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
 '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' .
-'<sheet name="Quote Matrix" sheetId="1" r:id="rId1"/><sheet name="Invitations" sheetId="2" r:id="rId2"/><sheet name="RFQ Details" sheetId="3" r:id="rId3"/>' .
+'<sheet name="Quote Matrix" sheetId="1" r:id="rId1"/><sheet name="Quote Details" sheetId="2" r:id="rId2"/><sheet name="Invitations" sheetId="3" r:id="rId3"/><sheet name="RFQ Details" sheetId="4" r:id="rId4"/>' .
 '</sheets></workbook>';
 $workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
 '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' .
 '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' .
-'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>' .
+'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/><Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet4.xml"/>' .
 '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>' .
 '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' .
 '</Relationships>';
@@ -206,7 +222,7 @@ $contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
 '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' .
 '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' .
 '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' .
-'<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' .
+'<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet4.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' .
 '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
 $rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
 '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
@@ -223,8 +239,9 @@ $zip->addFromString('xl/workbook.xml', $workbook);
 $zip->addFromString('xl/_rels/workbook.xml.rels', $workbookRels);
 $zip->addFromString('xl/styles.xml', $styles);
 $zip->addFromString('xl/worksheets/sheet1.xml', rfq_xlsx_sheet($matrixRows));
-$zip->addFromString('xl/worksheets/sheet2.xml', rfq_xlsx_sheet($invitationRows));
-$zip->addFromString('xl/worksheets/sheet3.xml', rfq_xlsx_sheet($detailRows));
+$zip->addFromString('xl/worksheets/sheet2.xml', rfq_xlsx_sheet($quoteDetailRows));
+$zip->addFromString('xl/worksheets/sheet3.xml', rfq_xlsx_sheet($invitationRows));
+$zip->addFromString('xl/worksheets/sheet4.xml', rfq_xlsx_sheet($detailRows));
 $zip->close();
 
 $fileName = 'RFQ-' . preg_replace('/[^A-Za-z0-9_-]/', '-', $rfq['rfq_no']) . '-Supplier-Responses.xlsx';
