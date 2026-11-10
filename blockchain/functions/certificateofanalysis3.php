@@ -485,33 +485,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     // Start creating HTML content
     $html = '<div style="width: 100%; font-family: montserrat, sans-serif; font-size: 10px;margin-left: 15mm; margin-right: 15mm;">';
     $html .= '<div style="font-family: montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
-    $html .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+        $html .= '<table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
-    <tr style="background-color: #3498db; color: white;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 45%;">Parameter</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;"><strong>Method</strong></th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 15%;">Units</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 25%;">Results</th>
+    <tr style="background-color: #3498db; color: white; font-size: 7px;">
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: left; width: 27%; white-space: nowrap;">Parameter</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: left; width: 8%; white-space: nowrap;">Unit</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: left; width: 12%; white-space: nowrap;">Results</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: left; width: 17%; white-space: nowrap;">Method</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">Low</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">Opt</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">High</th>
+        <th nobr="true" style="border: 1px solid #ddd; padding: 3px; text-align: left; width: 18%; white-space: nowrap;">Limit</th>
     </tr>
 </thead><tbody>';
- 
-    // Generate table rows dynamically
-    foreach ($samples as $sample) {
-    $validatedresults = validateresults($sample);
-    $resutlts = (strpos($validatedresults['results'], '<sup>') !== false)
-        ? $validatedresults['results']
-        : htmlentities($validatedresults['results'], ENT_QUOTES, 'UTF-8');
-    $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
- 
-      $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 45%;">' . accreditationParameterName($sample) . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $sample['Method'] . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 25%;">' . $resutlts . '</td>
-          </tr>';
-   }
+     // Generate table rows dynamically
 
-    $html .= '</tbody></table>'; // Close the table
+     foreach ($samples as $sample) {
+        $validatedresults = validateresults($sample);
+        $resutlts = (strpos($validatedresults['results'], '<sup>') !== false)
+            ? $validatedresults['results']
+            : htmlentities($validatedresults['results'], ENT_QUOTES, 'UTF-8');
+        $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
+
+        $html .= '<tr>
+            <td style="border: 1px solid #ddd; padding: 5px; width: 27%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 4px; width: 8%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
+            <td style="border: 1px solid #ddd; padding: 4px; width: 12%;">' . $resutlts . '</td>
+            <td style="border: 1px solid #ddd; padding: 4px; width: 17%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'blue' ? 'background-color: #000000; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'green' ? 'background-color: green; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'red' ? 'background-color: red; color: white;' : '') . '"></td>
+            <td style="border: 1px solid #ddd; padding: 4px; width: 18%;">' . $standard . '</td>
+          </tr>';
+    }
+
     $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
