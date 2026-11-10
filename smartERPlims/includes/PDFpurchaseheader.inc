@@ -14,11 +14,12 @@ if ($PageNumber>1) {
 //$pdf->addText(361,500,16, $headerName );
 
 // Print 'Quotation' info
-$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*2, 200, $FontSize,($headerName=='ORDER')?_('Order Due:'):''. ($headerName=='ORDER'? ConvertSQLDate($myrow[3]):''), 'right');
-$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*3, 200, $FontSize, _('Date').': '. ConvertSQLDate($myrow[1]), 'right');
+$dueDateText = !empty($myrow['duedate']) ? _('Order Due:').' '.ConvertSQLDate($myrow['duedate']) : '';
+$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*2, 200, $FontSize, $dueDateText, 'right');
+$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*3, 200, $FontSize, _('Date').': '. ConvertSQLDate($myrow['docdate']), 'right');
 $pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*4, 200, $FontSize, _('Page').': '.$PageNumber, 'right');
-$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*6, 200, $FontSize, _('Your Ref '). ': '.$myrow[16], 'right');
-$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*7, 200, $FontSize, _($headerName.' No'). ': '.$_GET['No'], 'right');
+$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*6, 200, $FontSize, _('Your Ref '). ': '.$myrow['yourreference'], 'right');
+$pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*7, 200, $FontSize, _($headerName.' No'). ': '.$myrow['documentno'], 'right');
 $pdf->addTextWrap($Page_Width-$Right_Margin-200, $Page_Height-$Top_Margin-$FontSize*8, 200, $FontSize, _('This Order is Only Valid when Approved'), 'right');
 
 // Print company logo
@@ -44,10 +45,12 @@ $pdf->addText($XPos, $YPos-65, $FontSize,  _('VAT') . ': ' .$_SESSION['CompanyRe
 // Print 'Quotation For' info
 $YPos -= 80;
 $pdf->addText($XPos, $YPos, $FontSize, _($headerName.' TO').':');
-$pdf->addText($XPos, $YPos-15, $FontSize, htmlspecialcharsLocal_decode($myrow[5]));
-$pdf->addText($XPos, $YPos-30, $FontSize, $myrow[12]);
-$pdf->addText($XPos, $YPos-45, $FontSize, $myrow[13]);
-$pdf->addText($XPos, $YPos-45, $FontSize, $myrow[15]);
+$pdf->addText($XPos, $YPos-15, $FontSize, htmlspecialcharsLocal_decode($myrow['vendorname']));
+$supplierAddress = trim($myrow['supplier_city'].' '.$myrow['supplier_postcode'].' '.$myrow['supplier_country']);
+$pdf->addText($XPos, $YPos-30, $FontSize, $supplierAddress);
+$pdf->addText($XPos, $YPos-45, $FontSize, _('Phone').': '.$myrow['supplier_phone']);
+$supplierContact = trim($myrow['supplier_contact'].' '.$myrow['supplier_email']);
+$pdf->addText($XPos, $YPos-60, $FontSize, $supplierContact);
 
 // Draw a rectangle with rounded corners around 'Delivery To' info
 $XPos= 50;
@@ -61,7 +64,9 @@ $pdf->RoundRectangle($XPos-10, $YPos+60+10, 225+10+10, 60+10+10, 10, 10);// Func
 // Print 'Quotation' title
 $pdf->addText(361,$YPos+30,16, $headerName );
 // Print the currency name
-$pdf->addText($Page_Width/2-60, $YPos-5, $FontSize, _('Currency') . ' - ' . $myrow[6] . ' ' . $CurrencyName[$myrow[6]]);
+$currencyCode = $myrow['currencycode'];
+$currencyName = isset($CurrencyName[$currencyCode]) ? $CurrencyName[$currencyCode] : $currencyCode;
+$pdf->addText($Page_Width/2-60, $YPos-5, $FontSize, _('Currency') . ' - ' . $currencyCode . ' ' . $currencyName);
 
 // Print table header
 $XPos = 40;
