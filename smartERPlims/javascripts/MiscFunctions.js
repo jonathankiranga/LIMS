@@ -359,15 +359,19 @@ function SalesOrderInventorygrid(line_no,id,bc,name,qty,sp,pak,uom,disc){
     
 } 
 
-function purchaseOrderInventorygrid(id,bc,name,qty,recqty,sp,pak,discount){
+function purchaseOrderInventorygrid(id,bc,name,qty,recqty,sp,pak,discount,uom,receiveduom,packzizegrn,vatcategory){
     document.getElementById('stockitemcode').value = id ;
     document.getElementById('barcode').value = bc ;
     document.getElementById('stockname').value = name ;
     document.getElementById('qty').value = qty;
     document.getElementById('recqty').value = recqty;
     document.getElementById('cost').value = sp;
-    document.getElementById('packzize').value = pak; 
+    document.getElementById('packzize').value = pak;
     document.getElementById('discount').value = discount;
+    document.getElementById('packid').value = uom;
+    document.getElementById('receivedid').value = receiveduom;
+    document.getElementById('packzizegrn').value = packzizegrn;
+    document.getElementById('vatcategory').value = vatcategory;
 } 
 
 function ProductionGrid(id,bc,name,qty){
