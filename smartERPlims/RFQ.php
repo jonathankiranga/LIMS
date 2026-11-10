@@ -369,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
                 DB_escape_string($selectedQuote['supplier_code']) . "',awarded_quote_id=" . $quoteId .
                 " WHERE id=" . $rfqId . " AND status IN ('issued','closed')", $db);
             if (mysqli_affected_rows($db) === 1) {
-                $message = 'Quotation selected. RFQ award recorded against supplier ' . $selectedQuote['supplier_code'] . '. PO conversion is the next integration step.';
+                $message = 'Quotation awarded to supplier ' . $selectedQuote['supplier_code'] . '. It is now available in Purchases > Suppliers > Awarded RFQs for Purchase Order creation.';
             } else {
                 $error = 'The RFQ has already been awarded or its status changed. Refresh and review it.';
             }
@@ -548,7 +548,43 @@ echo '<div class="rfq-metric"><span class="rfq-metric-label">QUOTATIONS RECEIVED
 echo '<div class="rfq-metric"><span class="rfq-metric-label">AWARDED</span><strong>' . $rfqCounts['awarded'] . '</strong><small>Completed selections</small></div>';
 echo '</div>';
 
-echo '<details class="rfq-create-panel" id="rfqCreatePanel"><summary><span><strong>Create a request</strong><small>Define laboratory items, quantities, closing date and supplier terms</small></span><span class="rfq-create-toggle">＋</span></summary><div class="rfq-create-content">';
+if (isset($_GET['awarded'])) {
+    $awardedRows = DB_query("SELECT h.id,h.rfq_no,h.title,h.currencycode,h.awarded_supplier_code,
+        h.awarded_quote_id,h.po_documentno,h.created_at,c.customer,
+        (SELECT COUNT(*) FROM rfq_lines rl WHERE rl.rfq_id=h.id) AS line_count,
+        (SELECT COUNT(*) FROM rfq_quote_lines ql WHERE ql.quote_id=h.awarded_quote_id) AS quoted_line_count,
+        (SELECT SUM(ql.unit_price * rl.quantity) FROM rfq_quote_lines ql
+            JOIN rfq_lines rl ON rl.id=ql.rfq_line_id
+            WHERE ql.quote_id=h.awarded_quote_id) AS quotation_total
+        FROM rfq_header h
+        LEFT JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = h.awarded_supplier_code COLLATE utf8mb4_unicode_ci
+        WHERE h.status='awarded'
+        ORDER BY h.updated_at DESC,h.created_at DESC", $db);
+    echo '<section class="rfq-register-panel"><div class="rfq-register-heading"><div><h2>Awarded RFQs</h2><p>Supplier quotations selected for procurement and Purchase Order conversion</p></div><div class="rfq-register-tools"><a class="rfq-btn rfq-btn-secondary" href="RFQ.php">Back to RFQ Register</a></div></div>';
+    if (DB_num_rows($awardedRows) === 0) {
+        echo '<div class="rfq-empty"><strong>No awarded invitations</strong><p>RFQs appear here after a supplier quotation has been awarded.</p></div>';
+    } else {
+        echo '<div class="table-responsive"><table class="table table-bordered rfq-register"><thead><tr><th>RFQ No.</th><th>Request</th><th>Awarded Supplier</th><th>Quotation Total</th><th>Lines</th><th>Purchase Order</th><th>Action</th></tr></thead><tbody>';
+        while ($awarded = DB_fetch_array($awardedRows)) {
+            $supplierName = trim((string)$awarded['customer']) !== '' ? $awarded['customer'] : $awarded['awarded_supplier_code'];
+            $poCreated = trim((string)$awarded['po_documentno']) !== '';
+            echo '<tr><td><strong>' . rfq_h($awarded['rfq_no']) . '</strong></td>';
+            echo '<td>' . rfq_h($awarded['title']) . '</td>';
+            echo '<td>' . rfq_h($supplierName) . '<br><small>' . rfq_h($awarded['awarded_supplier_code']) . '</small></td>';
+            echo '<td>' . rfq_h($awarded['currencycode']) . ' ' . number_format((float)$awarded['quotation_total'], 2) . '</td>';
+            echo '<td>' . (int)$awarded['quoted_line_count'] . ' / ' . (int)$awarded['line_count'] . '</td>';
+            if ($poCreated) {
+                echo '<td><strong>' . rfq_h($awarded['po_documentno']) . '</strong></td><td><span class="label label-success">PO created</span></td>';
+            } else {
+                echo '<td><span class="text-muted">Not created</span></td><td><a class="btn btn-primary btn-sm" href="PurchaseOder.php?rfq_quote_id=' . (int)$awarded['awarded_quote_id'] . '">Create Purchase Order</a></td>';
+            }
+            echo '</tr>';
+        }
+        echo '</tbody></table></div>';
+    }
+    echo '</section>';
+} else {
+    echo '<details class="rfq-create-panel" id="rfqCreatePanel"><summary><span><strong>Create a request</strong><small>Define laboratory items, quantities, closing date and supplier terms</small></span><span class="rfq-create-toggle">＋</span></summary><div class="rfq-create-content">';
 echo '<form method="post"><input type="hidden" name="FormID" value="' . rfq_h($_SESSION['FormID']) . '">';
 echo '<div class="rfq-form-grid"><div class="rfq-field"><label>RFQ title</label><input class="form-control" name="title" required maxlength="150"></div>';
 echo '<div class="rfq-field"><label>Currency</label><select class="form-control" name="currencycode" required>';
@@ -601,6 +637,7 @@ if (!$totalRfqs) {
     echo '</div><div class="rfq-no-results" id="rfqNoResults" style="display:none">No RFQs match the selected search or status.</div>';
 }
 echo '</section></div>';
+}
 
 if (isset($_GET['compare'])) {
     $compareId = (int)$_GET['compare'];
