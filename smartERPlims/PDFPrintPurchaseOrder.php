@@ -87,6 +87,11 @@ $SQL = "SELECT
      
      $Results=DB_query($SQL,$db);
      while($rows = DB_fetch_array($Results)){
+         if($YPos < $lastrow){
+             include('includes/PDFpurchaseheader.inc');
+             $YPos = $firstrowpos - 20;
+         }
+
          $lineQuantity = (float)$rows['Quantity'];
          $linePackage = (float)$rows['PartPerUnit'];
          $lineUnitPrice = (float)$rows['Sp'];
@@ -124,10 +129,6 @@ $SQL = "SELECT
           $LeftOvers = $pdf->addTextWrap(720,$YPos,90,$FontSize,number_format($lineInvoiceAmount,2),'right');
 
          $YPos -= $line_height * 2;
-         if($YPos < $lastrow){
-             include('includes/PDFpurchaseheader.inc');
-             $YPos=$firstrowpos-20;
-         }
                
         }
      
