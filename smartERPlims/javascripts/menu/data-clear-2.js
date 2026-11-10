@@ -202,7 +202,6 @@ var menuItems = [
             ["||Supplier Posting Group","SupplierPostingGroups.php", "", "", "", "", "", "", "", "", "", ],
         ["|Post Items","", "", "", "", "", "", "", "", "", "", ],
             ["||Create Purchase order","PurchaseOder.php", "", "", "", "", "", "", "", "", "", ],
-            ["||Awarded RFQs","RFQ.php?awarded=1", "", "", "", "", "", "", "", "", "", ],
             ["||Receive Inventory from supplier","PurchaseOrderList.php", "", "", "", "", "", "", "", "", "", ],
             ["||Post vendor Invoices on items Received","GoodsReceivedNote.php", "", "", "", "", "", "", "", "", "", ],
             ["||Post vendor Invoices on Services","EnterBills.php", "", "", "", "", "", "", "", "", "", ],
