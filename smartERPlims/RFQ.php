@@ -683,7 +683,7 @@ if (isset($_GET['compare'])) {
                 $requestedDescription = trim((string)$line['description']);
                 echo '<tr><th>' . rfq_h($inventoryName) .
                     ($requestedDescription !== '' && strcasecmp($requestedDescription, $inventoryName) !== 0 ? '<br><small>Requested description: ' . rfq_h($requestedDescription) . '</small>' : '') .
-                    '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['requested_pack']) . '</small></th>';
+                    '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h(!empty($line['requested_unit_description']) ? $line['requested_unit_description'] : $line['requested_pack']) . '</small></th>';
                 foreach ($quoteRows as $quoteIndex => $q) {
                     $v = $values[$quoteIndex];
                     if ($v !== null) {
