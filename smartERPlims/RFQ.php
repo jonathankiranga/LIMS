@@ -153,8 +153,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                     $error = 'The inventory conversion is incomplete or invalid for ' . $itemCode . '. Configure the Full Unit, Loose Unit and partperunit in inventory configuration.';
                     break;
                 }
-                if ($requestedUnit !== $fullUnit && ($looseUnit === '' || $requestedUnit !== $looseUnit)) {
-                    $error = 'The selected unit is not configured as the Pack or Each for inventory item ' . $itemCode . '.';
+                if ($requestedUnit !== 'units' && $requestedUnit !== 'subunits') {
+                    $error = 'Select either the configured Full Unit or Loose Unit for inventory item ' . $itemCode . '.';
+                    break;
+                }
+                if (($requestedUnit === 'units' && $fullUnit === '') || ($requestedUnit === 'subunits' && $looseUnit === '')) {
+                    $error = 'The selected unit role is not configured in inventory for item ' . $itemCode . '. Correct the stockmaster mapping before creating the RFQ.';
                     break;
                 }
                 $validLines[] = array(
@@ -636,7 +640,7 @@ if (isset($_GET['compare'])) {
         $lines = DB_query("SELECT rl.*,sm.descrip AS inventory_name,u.descrip AS requested_unit_description
             FROM rfq_lines rl
             LEFT JOIN stockmaster sm ON sm.itemcode COLLATE utf8mb4_unicode_ci = rl.itemcode COLLATE utf8mb4_unicode_ci
-            LEFT JOIN unit u ON u.code=rl.requested_pack
+            LEFT JOIN unit u ON u.code=CASE rl.requested_pack WHEN 'units' THEN sm.units WHEN 'subunits' THEN sm.subunits ELSE rl.requested_pack END
             WHERE rl.rfq_id=" . $compareId . " ORDER BY rl.line_no", $db);
         $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         $quoteRows = array();
@@ -728,8 +732,8 @@ echo '</div>';
   var loose=selected.getAttribute('data-loose-unit')||'',looseLabel=selected.getAttribute('data-loose-label')||loose;
   var factor=parseFloat(selected.getAttribute('data-factor')||'1');
   unit.add(new Option('Select requested unit',''));
-  if(full){unit.add(new Option('Full Unit — '+fullLabel,full));}
-  if(loose&&loose!==full){unit.add(new Option('Loose Unit — '+looseLabel,loose));}
+  if(full){unit.add(new Option('Full Unit — '+fullLabel,'units'));}
+  if(loose){unit.add(new Option('Loose Unit — '+looseLabel,'subunits'));}
   unit.disabled=false;
   if(factorLabel){
    var validFactor=isFinite(factor)&&factor>=1?factor:1;
@@ -743,7 +747,7 @@ echo '</div>';
   var opt=item.options[item.selectedIndex],fullLabel=opt.getAttribute('data-full-label')||'Full Unit';
   var looseLabel=opt.getAttribute('data-loose-label')||'Loose Unit';
   var factor=parseFloat(opt.getAttribute('data-factor')||'1');if(!isFinite(factor)||factor<1){factor=1;}
-  if(unit.value===(opt.getAttribute('data-loose-unit')||'')&&unit.value!==(opt.getAttribute('data-full-unit')||'')){
+  if(unit.value==='subunits'){
    factorLabel.textContent='Quantity entered in '+looseLabel+'. '+factor+' '+looseLabel+' = 1 '+fullLabel+'. Supplier quotes per '+looseLabel+'; PO quantity is converted to '+fullLabel+'.';
   }else{
    factorLabel.textContent='Quantity entered in '+fullLabel+'. 1 '+fullLabel+' = '+factor+' '+looseLabel+'. Supplier quotes per '+fullLabel+'.';
