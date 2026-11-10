@@ -674,7 +674,7 @@
        
              $runningnettotal += $netamount;  $runningvattotal += $vatamount; $runninggrosstotal += $grossamount; $runningDiscounttotal += $discountAmount;
                 
-              $this->htmltable .= sprintf('<tr onclick="purchaseOrderInventorygrid(\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\',\\'%s\\')">'
+              $this->htmltable .= sprintf('<tr onclick="purchaseOrderInventorygrid(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\')">'
               . '<td>%s</td>'
               . '<td>%s</td>'
               . '<td>'.$qty.' X %s  <input type="hidden" name="quantity['.$line_no.']" value="'.$qty.'" size="5" readonly="readonly" /></td>'
