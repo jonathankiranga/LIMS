@@ -149,11 +149,7 @@
                 <table class="table table-bordered table-hover table-sm align-middle table-responsive" id="sampleTable">
                     <thead class="table-light">
                         <tr>
-                            <th>Standard / Sample Count</th>
-                            <th>Product / Batch Details</th>
-                            <th>Manufacture / Expiry Dates</th>
-                            <th>Sample Details</th>
-                            <th>Picture</th>
+                            <th colspan="5">Standard / Sample Count</th>
                         </tr>
                     </thead>
                     <tbody id="sampleRows"></tbody>
