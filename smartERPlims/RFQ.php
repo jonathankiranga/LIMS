@@ -518,6 +518,24 @@ echo '<style>
 .rfq-workspace .rfq-lines input,.rfq-workspace .rfq-lines select,.rfq-workspace .rfq-lines textarea{min-width:0}
 .rfq-workspace .rfq-lines .rfq-description{min-width:160px}
 .rfq-workspace .rfq-lines .rfq-specification{min-width:180px}
+.rfq-workspace .rfq-item-finder{display:flex;flex-direction:column;gap:6px;min-width:175px}
+.rfq-workspace .rfq-item-display{background:#fff;cursor:default;font-size:11px}
+.rfq-workspace .rfq-open-finder{align-self:flex-start;font-size:11px}
+.rfq-inventory-finder{position:fixed;inset:0;z-index:10050;background:rgba(18,27,43,.55);align-items:center;justify-content:center;padding:20px}
+.rfq-inventory-dialog{width:min(720px,100%);max-height:min(82vh,760px);display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.22);overflow:hidden}
+.rfq-inventory-heading{display:flex;align-items:center;justify-content:space-between;padding:17px 20px;border-bottom:1px solid #e8edf3}
+.rfq-inventory-heading strong{display:block;font-size:16px;color:#26344a}
+.rfq-inventory-heading small{display:block;margin-top:4px;color:#8490a2;font-size:11px}
+.rfq-inventory-close{border:0;background:transparent;font-size:27px;line-height:1;color:#788498;cursor:pointer}
+.rfq-inventory-search{padding:14px 18px;border-bottom:1px solid #edf0f4}
+.rfq-inventory-results{overflow:auto;padding:8px 14px;min-height:120px}
+.rfq-inventory-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:15px;text-align:left;padding:11px 12px;border:0;border-bottom:1px solid #edf0f4;background:#fff;cursor:pointer}
+.rfq-inventory-option:hover{background:#f3f6ff}
+.rfq-inventory-option strong{font-size:12px;font-weight:650;color:#34435a}
+.rfq-inventory-option span{font-size:11px;color:#8490a2;white-space:nowrap}
+.rfq-inventory-empty{padding:24px;text-align:center;color:#8490a2;font-size:12px}
+.rfq-inventory-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-top:1px solid #e8edf3;color:#8490a2;font-size:11px}
+@media(max-width:620px){.rfq-inventory-finder{padding:8px}.rfq-inventory-dialog{max-height:90vh}.rfq-inventory-option{align-items:flex-start;flex-direction:column;gap:4px}}
 @media(max-width:900px){.rfq-workspace .rfq-card-main{grid-template-columns:minmax(0,1fr) auto}.rfq-workspace .rfq-card-status{grid-column:1}.rfq-workspace .rfq-card-actions{grid-column:2;grid-row:1/3}.rfq-workspace .rfq-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.rfq-workspace{padding:12px 8px 28px}.rfq-workspace .rfq-topbar{align-items:flex-start;flex-direction:column}.rfq-workspace .rfq-topbar h1{font-size:22px}.rfq-workspace .rfq-metric-grid{gap:8px}.rfq-workspace .rfq-metric{padding:12px}.rfq-workspace .rfq-metric strong{font-size:22px}.rfq-workspace .rfq-register-heading{align-items:stretch;flex-direction:column}.rfq-workspace .rfq-register-tools{width:100%}.rfq-workspace .rfq-card-list{padding:0 10px 12px}.rfq-workspace .rfq-card-main{display:flex;align-items:flex-start;flex-direction:column;gap:12px;padding:14px}.rfq-workspace .rfq-card-actions{justify-content:flex-start;width:100%}.rfq-workspace .rfq-supplier-select-grid,.rfq-workspace .rfq-form-grid{grid-template-columns:1fr}.rfq-workspace .rfq-create-content{padding:12px}}
 
@@ -596,13 +614,15 @@ while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['cu
 echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
 echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
 echo '<h4>Requested laboratory inventory items</h4><p class="text-muted">Select a purchasable laboratory stock item (for example, a reagent, chemical, consumable or equipment item), then choose its configured Full Unit or Loose Unit. The conversion shown is read directly from stockmaster.partperunit (for example, 1 Pack = 20 Litres). Enter the quantity in the unit you select; suppliers quote against that same unit. Test parameters and laboratory standard/method records are excluded automatically.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Laboratory specification / grade</th><th>Quantity</th><th>Requested unit and conversion</th><th></th></tr></thead><tbody>';
-echo '<tr><td><select class="form-control rfq-item-select" name="line_itemcode[]" required><option value="">Select inventory item</option>';
-foreach ($rfqStockItems as $st) {
-    echo '<option value="' . rfq_h($st['itemcode']) . '" data-full-unit="' . rfq_h($st['units']) . '" data-full-label="' . rfq_h($st['full_unit_description']) . '" data-loose-unit="' . rfq_h($st['subunits']) . '" data-loose-label="' . rfq_h($st['loose_unit_description']) . '" data-factor="' . rfq_h($st['partperunit']) . '" data-description="' . rfq_h($st['descrip']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>';
-}
-echo '</select></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><select class="form-control rfq-unit-select" name="line_unit[]" required disabled><option value="">Select item first</option></select><small class="text-muted rfq-unit-factor"></small></td><td><button type="button" class="btn btn-default" onclick="this.closest(&quot;tr&quot;).remove()">Remove</button></td></tr>';
+echo '<tr><td><div class="rfq-item-finder"><input type="hidden" class="rfq-item-select" name="line_itemcode[]"><input type="text" class="form-control rfq-item-display" placeholder="No inventory item selected" readonly><button type="button" class="btn btn-default rfq-open-finder">Find inventory</button></div></td><td><input class="form-control rfq-description" name="line_description[]" required></td><td><textarea class="form-control rfq-specification" name="line_specification[]" rows="2"></textarea></td><td><input class="form-control" style="width:100px" type="number" min="0.0001" step="0.0001" name="line_quantity[]" required></td><td><select class="form-control rfq-unit-select" name="line_unit[]" required disabled><option value="">Select item first</option></select><small class="text-muted rfq-unit-factor"></small></td><td><button type="button" class="btn btn-default" onclick="this.closest(&quot;tr&quot;).remove()">Remove</button></td></tr>';
 echo '</tbody></table></div><button type="button" class="btn btn-default" id="addRfqLine">Add product line</button>';
-echo '<div class="rfq-field" style="margin:16px 0"><label>Laboratory requirements (purity or concentration, analytical/reagent grade, pack size, certificate of analysis, SDS, shelf life, storage/transport, delivery and payment terms, as applicable)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
+echo '<div class="rfq-inventory-finder" id="rfqInventoryFinder" aria-hidden="true" style="display:none"><div class="rfq-inventory-dialog"><div class="rfq-inventory-heading"><div><strong>Find inventory item</strong><small>Search by stock code or item description</small></div><button type="button" class="rfq-inventory-close" data-close-rfq-finder aria-label="Close">&times;</button></div><div class="rfq-inventory-search"><input type="search" class="form-control" id="rfqInventorySearch" placeholder="Enter stock code or description"></div><div class="rfq-inventory-results" id="rfqInventoryResults">';
+foreach ($rfqStockItems as $st) {
+    $finderSearchText = strtolower($st['itemcode'] . ' ' . $st['descrip']);
+    echo '<button type="button" class="rfq-inventory-option" data-search="' . rfq_h($finderSearchText) . '" data-itemcode="' . rfq_h($st['itemcode']) . '" data-description="' . rfq_h($st['descrip']) . '" data-full-unit="' . rfq_h($st['units']) . '" data-full-label="' . rfq_h($st['full_unit_description']) . '" data-loose-unit="' . rfq_h($st['subunits']) . '" data-loose-label="' . rfq_h($st['loose_unit_description']) . '" data-factor="' . rfq_h($st['partperunit']) . '"><strong>' . rfq_h($st['descrip']) . '</strong><span>' . rfq_h($st['itemcode']) . '</span></button>';
+}
+echo '<div id="rfqInventoryEmpty" class="rfq-inventory-empty" style="display:none">No matching inventory items found.</div></div><div class="rfq-inventory-footer"><span>Select an item to add it to the RFQ line.</span><button type="button" class="btn btn-default" data-close-rfq-finder>Cancel</button></div></div></div>';
+echo '<div class="rfq-field" style="margin:16px 0"><label>Laboratory requirements style="margin:16px 0"><label>Laboratory requirements (purity or concentration, analytical/reagent grade, pack size, certificate of analysis, SDS, shelf life, storage/transport, delivery and payment terms, as applicable)</label><textarea class="form-control" name="terms_conditions" rows="5" required></textarea></div>';
 echo '<button class="btn btn-primary" name="create_rfq" value="1">Save RFQ as Draft</button></form></div></details>';
 
 echo '<section class="rfq-register-panel"><div class="rfq-register-heading"><div><h2>RFQ register</h2><p>Recent requests and supplier response progress</p></div><div class="rfq-register-tools"><input type="search" id="rfqSearch" class="form-control" placeholder="Search RFQ number or title"><select id="rfqStatusFilter" class="form-control"><option value="">All statuses</option><option value="draft">Draft</option><option value="issued">Issued</option><option value="closed">Closed</option><option value="awarded">Awarded</option></select></div></div>';
@@ -770,14 +790,18 @@ echo '</div>';
 ?>
 <script>
 (function(){
+ var activeRfqRow=null;
+ var finder=document.getElementById('rfqInventoryFinder');
+ var finderSearch=document.getElementById('rfqInventorySearch');
+ var finderItems=document.querySelectorAll('.rfq-inventory-option');
  function configureRfqUnit(row){
   var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select'),factorLabel=row.querySelector('.rfq-unit-factor');
   if(!item||!unit){return;}
-  var selected=item.options[item.selectedIndex];unit.innerHTML='';unit.disabled=true;
-  if(!item.value||!selected){unit.add(new Option('Select item first',''));if(factorLabel){factorLabel.textContent='';}return;}
-  var full=selected.getAttribute('data-full-unit')||'',fullLabel=selected.getAttribute('data-full-label')||full;
-  var loose=selected.getAttribute('data-loose-unit')||'',looseLabel=selected.getAttribute('data-loose-label')||loose;
-  var factor=parseFloat(selected.getAttribute('data-factor')||'1');
+  unit.innerHTML='';unit.disabled=true;
+  if(!item.value){unit.add(new Option('Select item first',''));if(factorLabel){factorLabel.textContent='';}return;}
+  var full=item.getAttribute('data-full-unit')||'',fullLabel=item.getAttribute('data-full-label')||full;
+  var loose=item.getAttribute('data-loose-unit')||'',looseLabel=item.getAttribute('data-loose-label')||loose;
+  var factor=parseFloat(item.getAttribute('data-factor')||'1');
   unit.add(new Option('Select requested unit',''));
   if(full){unit.add(new Option('Full Unit — '+fullLabel,'units'));}
   if(loose){unit.add(new Option('Loose Unit — '+looseLabel,'subunits'));}
@@ -791,9 +815,9 @@ echo '</div>';
  function updateRfqUnitExplanation(row){
   var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select'),factorLabel=row.querySelector('.rfq-unit-factor');
   if(!item||!unit||!factorLabel||!unit.value){return;}
-  var opt=item.options[item.selectedIndex],fullLabel=opt.getAttribute('data-full-label')||'Full Unit';
-  var looseLabel=opt.getAttribute('data-loose-label')||'Loose Unit';
-  var factor=parseFloat(opt.getAttribute('data-factor')||'1');if(!isFinite(factor)||factor<1){factor=1;}
+  var fullLabel=item.getAttribute('data-full-label')||'Full Unit';
+  var looseLabel=item.getAttribute('data-loose-label')||'Loose Unit';
+  var factor=parseFloat(item.getAttribute('data-factor')||'1');if(!isFinite(factor)||factor<1){factor=1;}
   if(unit.value==='subunits'){
    factorLabel.textContent='Quantity entered in '+looseLabel+'. '+factor+' '+looseLabel+' = 1 '+fullLabel+'. Supplier quotes per '+looseLabel+'; PO quantity is converted to '+fullLabel+'.';
   }else{
@@ -801,11 +825,43 @@ echo '</div>';
   }
  }
  function bindRfqItem(row){
-  var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select');
-  if(item){item.addEventListener('change',function(){configureRfqUnit(row);var opt=item.options[item.selectedIndex],desc=row.querySelector('.rfq-description');if(opt&&opt.value&&desc){desc.value=opt.getAttribute('data-description')||desc.value;}});}
+  var openButton=row.querySelector('.rfq-open-finder'),unit=row.querySelector('.rfq-unit-select');
+  if(openButton){openButton.addEventListener('click',function(){
+   activeRfqRow=row;
+   if(finder){finder.style.display='flex';finder.setAttribute('aria-hidden','false');}
+   if(finderSearch){finderSearch.value='';filterInventory();finderSearch.focus();}
+  });}
   if(unit){unit.addEventListener('change',function(){updateRfqUnitExplanation(row);});}
  }
+ function filterInventory(){
+  var term=finderSearch?finderSearch.value.toLowerCase().trim():'',shown=0;
+  finderItems.forEach(function(option){
+   var match=!term||(option.getAttribute('data-search')||'').indexOf(term)!==-1;
+   option.style.display=match?'':'none';if(match){shown++;}
+  });
+  var empty=document.getElementById('rfqInventoryEmpty');if(empty){empty.style.display=shown?'none':'block';}
+ }
+ function closeInventoryFinder(){
+  if(finder){finder.style.display='none';finder.setAttribute('aria-hidden','true');}
+  activeRfqRow=null;
+ }
  document.querySelectorAll('#rfqLines tbody tr').forEach(bindRfqItem);
+ finderItems.forEach(function(option){
+  option.addEventListener('click',function(){
+   if(!activeRfqRow){return;}
+   var item=activeRfqRow.querySelector('.rfq-item-select'),display=activeRfqRow.querySelector('.rfq-item-display');
+   var attrs=['data-full-unit','data-full-label','data-loose-unit','data-loose-label','data-factor'];
+   item.value=option.getAttribute('data-itemcode')||'';
+   attrs.forEach(function(attr){item.setAttribute(attr,option.getAttribute(attr)||'');});
+   if(display){display.value=(option.getAttribute('data-itemcode')||'')+' - '+(option.getAttribute('data-description')||'');}
+   var desc=activeRfqRow.querySelector('.rfq-description');if(desc){desc.value=option.getAttribute('data-description')||desc.value;}
+   configureRfqUnit(activeRfqRow);closeInventoryFinder();
+  });
+ });
+ if(finderSearch){finderSearch.addEventListener('input',filterInventory);}
+ var finderClose=document.querySelectorAll('[data-close-rfq-finder]');
+ finderClose.forEach(function(el){el.addEventListener('click',closeInventoryFinder);});
+ document.addEventListener('keydown',function(event){if(event.key==='Escape'&&finder&&finder.style.display==='flex'){closeInventoryFinder();}});
  var add=document.getElementById('addRfqLine');
  if(add){add.addEventListener('click',function(){
   var body=document.querySelector('#rfqLines tbody'),row=body.querySelector('tr').cloneNode(true);
