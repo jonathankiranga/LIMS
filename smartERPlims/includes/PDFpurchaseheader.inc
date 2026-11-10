@@ -72,17 +72,17 @@ $pdf->addText($Page_Width/2-60, $YPos-5, $FontSize, _('Currency') . ' - ' . $cur
 $XPos = 40;
 $YPos -= 37;
 $FontSize=10;
-$LeftOvers = $pdf->addTextWrap( 42, $YPos,103, $FontSize, _('Item Code'),'left');
+$LeftOvers = $pdf->addTextWrap( 42, $YPos,95, $FontSize, _('Item Code'),'left');
 	
         if (strlen($LeftOvers) > 0) { // If translated text is greater than 103, prints remainder
 		$LeftOvers = $pdf->addTextWrap(585,$YPos-$FontSize,65, $FontSize, $LeftOvers,'left');
 	}
-$LeftOvers = $pdf->addTextWrap(145, $YPos,250, $FontSize, _('Item Description'),'left');
-$LeftOvers = $pdf->addTextWrap(300, $YPos, 85, $FontSize, _('UOM'),'right');
-$LeftOvers = $pdf->addTextWrap(365, $YPos, 85, $FontSize, _('Quantity'),'right');
-$LeftOvers = $pdf->addTextWrap(420, $YPos, 85, $FontSize, _('Price'),'right');
-$LeftOvers = $pdf->addTextWrap(480, $YPos, 85, $FontSize, _('Disc'),'right');
-$LeftOvers = $pdf->addTextWrap(580, $YPos, 55, $FontSize, _('VAT Rate (%)'),'right');
+$LeftOvers = $pdf->addTextWrap(145, $YPos,145, $FontSize, _('Item Description'),'left');
+$LeftOvers = $pdf->addTextWrap(300, $YPos, 75, $FontSize, _('UOM'),'right');
+$LeftOvers = $pdf->addTextWrap(380, $YPos, 55, $FontSize, _('Quantity'),'right');
+$LeftOvers = $pdf->addTextWrap(440, $YPos, 70, $FontSize, _('Price'),'right');
+$LeftOvers = $pdf->addTextWrap(515, $YPos, 50, $FontSize, _('Disc'),'right');
+$LeftOvers = $pdf->addTextWrap(570, $YPos, 55, $FontSize, _('VAT Rate (%)'),'right');
 
 $firstrowpos = $YPos-$line_height ;
 $lastrow  = $Bottom_Margin+100;
@@ -91,18 +91,20 @@ if (strlen($LeftOvers) > 0) { // If translated text is greater than 55, prints r
     $LeftOvers = $pdf->addTextWrap(580,$YPos-$FontSize,55, $FontSize, $LeftOvers,'right');
 }
 
-$LeftOvers = $pdf->addTextWrap(650, $YPos, 70, $FontSize, _('VAT Amount'),'right');
+$LeftOvers = $pdf->addTextWrap(630, $YPos, 75, $FontSize, _('VAT Amount'),'right');
 if (strlen($LeftOvers) > 0) { // If translated text is greater than 70, prints remainder
     $LeftOvers = $pdf->addTextWrap(665, $YPos-$FontSize, 70, $FontSize, $LeftOvers,'right');
 }
-$LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100, $YPos, 90, $FontSize, _('Gross Amount'),'right');
+$LeftOvers = $pdf->addTextWrap(720, $YPos, 90, $FontSize, _('Gross Amount'),'right');
 /*Column lines*/
-$pdf->line(410, $Bottom_Margin+360,410, $Bottom_Margin+100);
-$pdf->line(460, $Bottom_Margin+360,460, $Bottom_Margin+100);
-$pdf->line(520, $Bottom_Margin+360,520, $Bottom_Margin+100);
-$pdf->line(580, $Bottom_Margin+360,580, $Bottom_Margin);
-$pdf->line(650, $Bottom_Margin+360,650, $Bottom_Margin+100);
-$pdf->line(720, $Bottom_Margin+360,720, $Bottom_Margin);
+$pdf->line(140, $Bottom_Margin+360,140, $Bottom_Margin+100);
+$pdf->line(295, $Bottom_Margin+360,295, $Bottom_Margin+100);
+$pdf->line(380, $Bottom_Margin+360,380, $Bottom_Margin+100);
+$pdf->line(440, $Bottom_Margin+360,440, $Bottom_Margin+100);
+$pdf->line(515, $Bottom_Margin+360,515, $Bottom_Margin+100);
+$pdf->line(570, $Bottom_Margin+360,570, $Bottom_Margin);
+$pdf->line(630, $Bottom_Margin+360,630, $Bottom_Margin+100);
+$pdf->line(710, $Bottom_Margin+360,710, $Bottom_Margin);
 /*put totals*/
 $SummaryYpos = $Bottom_Margin+80;
 
