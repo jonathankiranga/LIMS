@@ -50,7 +50,12 @@ $sql = "
     SELECT
         st.SampleID,
         COALESCE(st.sample_name, '') AS SampleName,
-        tp.ParameterName
+        tp.ParameterName,
+        COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
+        tr.MRL_Result,
+        tr.ResultStatus,
+        tr.RangeResult,
+        COALESCE(tr.User_name, '') AS UserName
     FROM sample_tests st
     INNER JOIN test_results tr
         ON tr.HeaderID = st.HeaderID
@@ -59,9 +64,11 @@ $sql = "
     INNER JOIN testparameters tp
         ON tp.ParameterID = tr.ParameterID
        AND tp.StandardID = tr.StandardID
+    LEFT JOIN baseparameters bp
+        ON bp.ParameterID = tp.BaseID
     WHERE st.HeaderID = ?
       AND LOWER(tp.Category) = ?
-    ORDER BY st.SampleID, tp.ParameterName
+    ORDER BY st.SampleID, tr.resultsID, tp.ParameterName
 ";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -130,23 +137,50 @@ $html = '
       <th width="19%">Sample ID</th>
       <th width="23%">Sample Name</th>
       <th width="30%">TEST Parameter</th>
-      <th width="28%">Comments</th>
+      <th width="14%">RESULTS</th>
+      <th width="14%">USER</th>
     </tr>
   </thead>
   <tbody>';
 
 if (!$rows) {
-    $html .= '<tr><td colspan="4" align="center">No test parameters are assigned to this department for this registration.</td></tr>';
+    $html .= '<tr><td colspan="5" align="center">No test parameters are assigned to this department for this registration.</td></tr>';
 } else {
+    // Print sample-level details once, spanning all parameter rows for that sample.
+    $sampleGroups = [];
     foreach ($rows as $row) {
-        // Each registered test parameter is printed as a normal body row.
-        // Do not print StandardName/sample-standard values as a separate sample-type heading.
-        $html .= '<tr>'
-            . '<td width="19%">' . $esc($row['SampleID']) . '</td>'
-            . '<td width="23%">' . $esc($row['SampleName']) . '</td>'
-            . '<td width="30%">' . $esc($row['ParameterName']) . '</td>'
-            . '<td width="28%">&nbsp;<br><br></td>'
-            . '</tr>';
+        $sampleKey = (string)$row['SampleID'];
+        if (!isset($sampleGroups[$sampleKey])) {
+            $sampleGroups[$sampleKey] = [
+                'SampleName' => $row['SampleName'],
+                'tests' => []
+            ];
+        }
+        $sampleGroups[$sampleKey]['tests'][] = $row;
+    }
+
+    foreach ($sampleGroups as $sampleId => $sampleGroup) {
+        $rowspan = count($sampleGroup['tests']);
+        foreach ($sampleGroup['tests'] as $index => $row) {
+            $resultType = $row['ResultType'] ?? 'quantitativeField';
+            if ($resultType === 'qualitativeField') {
+                $resultValue = $row['ResultStatus'] ?? '';
+            } elseif ($resultType === 'rangeField') {
+                $resultValue = $row['RangeResult'] ?? '';
+            } else {
+                $resultValue = $row['MRL_Result'] ?? '';
+            }
+
+            $html .= '<tr>';
+            if ($index === 0) {
+                $html .= '<td width="19%" rowspan="' . $rowspan . '">' . $esc($sampleId) . '</td>'
+                    . '<td width="23%" rowspan="' . $rowspan . '">' . $esc($sampleGroup['SampleName']) . '</td>';
+            }
+            $html .= '<td width="30%">' . $esc($row['ParameterName']) . '</td>'
+                . '<td width="14%">' . $esc($resultValue) . '</td>'
+                . '<td width="14%">' . $esc($row['UserName']) . '</td>'
+                . '</tr>';
+        }
     }
 }
 $html .= '</tbody></table>
