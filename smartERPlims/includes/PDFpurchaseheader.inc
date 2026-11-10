@@ -27,75 +27,75 @@ $pdf->addJpegFromFile($_SESSION['LogoFile'], 361, 470, 0, 100);
 
 // Print company info
 $XPos = 361;
-$YPos = 482;
+$HeaderYPos = 482;
 $FontSize=14;
 
 // Print 'Delivery To' info
 $XPos = 46;
-$YPos = 566;
+$HeaderYPos = 566;
 $FontSize=9;
-$pdf->addText($XPos, $YPos, $FontSize, _('Delivery To').':' );
-$pdf->addText($XPos, $YPos-15, $FontSize,htmlspecialcharsLocal_decode($_SESSION['CompanyRecord']['coyname']));
-$pdf->addText($XPos, $YPos-25, $FontSize,$_SESSION['CompanyRecord']['regoffice1']);
-$pdf->addText($XPos, $YPos-35, $FontSize,$_SESSION['CompanyRecord']['regoffice2'].' '.$_SESSION['CompanyRecord']['regoffice3'].' '.$_SESSION['CompanyRecord']['regoffice4']);
-$pdf->addText($XPos, $YPos-45, $FontSize, _('Ph') . ': ' . $_SESSION['CompanyRecord']['telephone'] . ' ' . _('Fax'). ': ' . $_SESSION['CompanyRecord']['fax']);
-$pdf->addText($XPos, $YPos-55, $FontSize, $_SESSION['CompanyRecord']['email']);
-$pdf->addText($XPos, $YPos-65, $FontSize,  _('VAT') . ': ' .$_SESSION['CompanyRecord']['vat']);
+$pdf->addText($XPos, $HeaderYPos, $FontSize, _('Delivery To').':' );
+$pdf->addText($XPos, $HeaderYPos-15, $FontSize,htmlspecialcharsLocal_decode($_SESSION['CompanyRecord']['coyname']));
+$pdf->addText($XPos, $HeaderYPos-25, $FontSize,$_SESSION['CompanyRecord']['regoffice1']);
+$pdf->addText($XPos, $HeaderYPos-35, $FontSize,$_SESSION['CompanyRecord']['regoffice2'].' '.$_SESSION['CompanyRecord']['regoffice3'].' '.$_SESSION['CompanyRecord']['regoffice4']);
+$pdf->addText($XPos, $HeaderYPos-45, $FontSize, _('Ph') . ': ' . $_SESSION['CompanyRecord']['telephone'] . ' ' . _('Fax'). ': ' . $_SESSION['CompanyRecord']['fax']);
+$pdf->addText($XPos, $HeaderYPos-55, $FontSize, $_SESSION['CompanyRecord']['email']);
+$pdf->addText($XPos, $HeaderYPos-65, $FontSize,  _('VAT') . ': ' .$_SESSION['CompanyRecord']['vat']);
 
 // Print 'Quotation For' info
-$YPos -= 80;
-$pdf->addText($XPos, $YPos, $FontSize, _($headerName.' TO').':');
-$pdf->addText($XPos, $YPos-15, $FontSize, htmlspecialcharsLocal_decode($myrow['vendorname']));
+$HeaderYPos -= 80;
+$pdf->addText($XPos, $HeaderYPos, $FontSize, _($headerName.' TO').':');
+$pdf->addText($XPos, $HeaderYPos-15, $FontSize, htmlspecialcharsLocal_decode($myrow['vendorname']));
 $supplierAddress = trim($myrow['supplier_city'].' '.$myrow['supplier_postcode'].' '.$myrow['supplier_country']);
-$pdf->addText($XPos, $YPos-30, $FontSize, $supplierAddress);
-$pdf->addText($XPos, $YPos-45, $FontSize, _('Phone').': '.$myrow['supplier_phone']);
+$pdf->addText($XPos, $HeaderYPos-30, $FontSize, $supplierAddress);
+$pdf->addText($XPos, $HeaderYPos-45, $FontSize, _('Phone').': '.$myrow['supplier_phone']);
 $supplierContact = trim($myrow['supplier_contact'].' '.$myrow['supplier_email']);
-$pdf->addText($XPos, $YPos-60, $FontSize, $supplierContact);
+$pdf->addText($XPos, $HeaderYPos-60, $FontSize, $supplierContact);
 
 // Draw a rectangle with rounded corners around 'Delivery To' info
 $XPos= 50;
-$YPos += 12;
-$pdf->RoundRectangle($XPos-10, $YPos+60+10, 225+10+10, 60+10+10, 10, 10);// Function RoundRectangle from includes/class.pdf.php
+$HeaderYPos += 12;
+$pdf->RoundRectangle($XPos-10, $HeaderYPos+60+10, 225+10+10, 60+10+10, 10, 10);// Function RoundRectangle from includes/class.pdf.php
 
 // Draw a rectangle with rounded corners around 'Quotation For' info
-$YPos -= 82;
-$pdf->RoundRectangle($XPos-10, $YPos+60+10, 225+10+10, 60+10+10, 10, 10);// Function RoundRectangle from includes/class.pdf.php
+$HeaderYPos -= 82;
+$pdf->RoundRectangle($XPos-10, $HeaderYPos+60+10, 225+10+10, 60+10+10, 10, 10);// Function RoundRectangle from includes/class.pdf.php
 
 // Print 'Quotation' title
-$pdf->addText(361,$YPos+30,16, $headerName );
+$pdf->addText(361,$HeaderYPos+30,16, $headerName );
 // Print the currency name
 $currencyCode = $myrow['currencycode'];
 $currencyName = isset($CurrencyName[$currencyCode]) ? $CurrencyName[$currencyCode] : $currencyCode;
-$pdf->addText($Page_Width/2-60, $YPos-5, $FontSize, _('Currency') . ' - ' . $currencyCode . ' ' . $currencyName);
+$pdf->addText($Page_Width/2-60, $HeaderYPos-5, $FontSize, _('Currency') . ' - ' . $currencyCode . ' ' . $currencyName);
 
 // Print table header
 $XPos = 40;
-$YPos -= 37;
+$HeaderYPos -= 37;
 $FontSize=10;
-$LeftOvers = $pdf->addTextWrap( 42, $YPos,95, $FontSize, _('Item Code'),'left');
+$LeftOvers = $pdf->addTextWrap( 42, $HeaderYPos,95, $FontSize, _('Item Code'),'left');
 	
         if (strlen($LeftOvers) > 0) { // If translated text is greater than 103, prints remainder
-		$LeftOvers = $pdf->addTextWrap(585,$YPos-$FontSize,65, $FontSize, $LeftOvers,'left');
+		$LeftOvers = $pdf->addTextWrap(585,$HeaderYPos-$FontSize,65, $FontSize, $LeftOvers,'left');
 	}
-$LeftOvers = $pdf->addTextWrap(145, $YPos,145, $FontSize, _('Item Description'),'left');
-$LeftOvers = $pdf->addTextWrap(300, $YPos, 75, $FontSize, _('UOM'),'right');
-$LeftOvers = $pdf->addTextWrap(380, $YPos, 55, $FontSize, _('Quantity'),'right');
-$LeftOvers = $pdf->addTextWrap(440, $YPos, 70, $FontSize, _('Price'),'right');
-$LeftOvers = $pdf->addTextWrap(515, $YPos, 50, $FontSize, _('Disc'),'right');
-$LeftOvers = $pdf->addTextWrap(570, $YPos, 55, $FontSize, _('VAT Rate (%)'),'right');
+$LeftOvers = $pdf->addTextWrap(145, $HeaderYPos,145, $FontSize, _('Item Description'),'left');
+$LeftOvers = $pdf->addTextWrap(300, $HeaderYPos, 75, $FontSize, _('UOM'),'right');
+$LeftOvers = $pdf->addTextWrap(380, $HeaderYPos, 55, $FontSize, _('Quantity'),'right');
+$LeftOvers = $pdf->addTextWrap(440, $HeaderYPos, 70, $FontSize, _('Price'),'right');
+$LeftOvers = $pdf->addTextWrap(515, $HeaderYPos, 50, $FontSize, _('Disc'),'right');
+$LeftOvers = $pdf->addTextWrap(570, $HeaderYPos, 55, $FontSize, _('VAT Rate (%)'),'right');
 
-$firstrowpos = $YPos-$line_height ;
+$firstrowpos = $HeaderYPos-$line_height ;
 $lastrow  = $Bottom_Margin+100;
 
 if (strlen($LeftOvers) > 0) { // If translated text is greater than 55, prints remainder
-    $LeftOvers = $pdf->addTextWrap(580,$YPos-$FontSize,55, $FontSize, $LeftOvers,'right');
+    $LeftOvers = $pdf->addTextWrap(580,$HeaderYPos-$FontSize,55, $FontSize, $LeftOvers,'right');
 }
 
-$LeftOvers = $pdf->addTextWrap(630, $YPos, 75, $FontSize, _('VAT Amount'),'right');
+$LeftOvers = $pdf->addTextWrap(630, $HeaderYPos, 75, $FontSize, _('VAT Amount'),'right');
 if (strlen($LeftOvers) > 0) { // If translated text is greater than 70, prints remainder
-    $LeftOvers = $pdf->addTextWrap(665, $YPos-$FontSize, 70, $FontSize, $LeftOvers,'right');
+    $LeftOvers = $pdf->addTextWrap(665, $HeaderYPos-$FontSize, 70, $FontSize, $LeftOvers,'right');
 }
-$LeftOvers = $pdf->addTextWrap(720, $YPos, 90, $FontSize, _('Gross Amount'),'right');
+$LeftOvers = $pdf->addTextWrap(720, $HeaderYPos, 90, $FontSize, _('Gross Amount'),'right');
 /*Column lines*/
 $pdf->line(140, $Bottom_Margin+360,140, $Bottom_Margin+100);
 $pdf->line(295, $Bottom_Margin+360,295, $Bottom_Margin+100);
@@ -141,5 +141,4 @@ $pdf->partEllipse($Page_Width-$Right_Margin-10, $Bottom_Margin+10,270,350,10,10)
 /*Finally join up to the top right corner where started */
 $pdf->line($Page_Width-$Right_Margin, $Bottom_Margin+10,$Page_Width-$Right_Margin, $Bottom_Margin+350);
 
-$YPos -= (2*$line_height);
 ?>
