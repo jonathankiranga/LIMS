@@ -49,7 +49,7 @@ if ($companyResult && ($companyRecord = $companyResult->fetch_assoc())) {
 $sql = "
     SELECT
         st.SampleID,
-        CAST(COALESCE(st.sample_name, '') AS CHAR) AS SampleName,
+        COALESCE(st.sample_name, '') AS SampleName,
         tp.ParameterName,
         COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
         tr.MRL_Result,
