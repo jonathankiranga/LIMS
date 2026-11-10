@@ -38,6 +38,20 @@
         <tr><td>System Administrator</td><td>Manage users, roles, permissions, page security, parameters, SMTP, and audit views.</td><td>Secure and stable ERP operation.</td></tr>
       </tbody>
     </table>
+
+    <h2>Inventory Serial Number Tracking</h2>
+    <p>Serial numbers are generated automatically when a Goods Received Note (GRN) is posted for a Stock Master item configured with <code>requireserial = 1</code>. They are not generated when a Purchase Order is created or approved.</p>
+    <ol>
+      <li>Open <b>Inventory → Maintenance → New Stock</b> and ensure serial tracking is enabled for the item (<code>stockmaster.requireserial = 1</code>).</li>
+      <li>Create and process the Purchase Order as usual.</li>
+      <li>Receive the goods through the Goods Received Note transaction.</li>
+      <li>Post the GRN. During stock posting, the system creates one serialised <code>StockRegister</code> receipt row per whole loose unit received.</li>
+      <li>Open <b>Purchases → Reports → Last Serial Numbers (Goods Received)</b> to review or print recently generated serial numbers.</li>
+    </ol>
+    <p><b>Unit conversion:</b> If the GRN line uses the full-unit UOM, the received quantity is multiplied by <code>stockmaster.partperunit</code> to obtain loose units. If it uses the loose-unit UOM, the entered quantity is used directly.</p>
+    <p><b>Serial format:</b> <code>[barcode or item code][two-digit year][four-digit yearly counter]</code>. The item barcode is used when available; otherwise the item code is used. The counter is shared across serialised items within the year.</p>
+    <p><b>Example:</b> Barcode <code>ABC</code>, year code <code>26</code>, and counter <code>0001</code> produce <code>ABC260001</code>.</p>
+    <p><b>Important:</b> Items without serial tracking enabled are received as normal stock quantities and do not receive individual serial numbers. The report only prints existing serial numbers; it does not create them.</p>
   </main>
 </body>
 </html>
