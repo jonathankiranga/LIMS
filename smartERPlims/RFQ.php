@@ -616,8 +616,10 @@ if (isset($_GET['compare'])) {
         if (!count($supplierLanes['submitted'])) { echo '<div class="rfq-supplier-chip text-muted">No quotations submitted yet</div>'; }
         echo '</section></div>';
 
-        $lines = DB_query("SELECT rl.*,u.descrip AS requested_unit_description
-            FROM rfq_lines rl LEFT JOIN unit u ON u.code=rl.requested_pack
+        $lines = DB_query("SELECT rl.*,sm.descrip AS inventory_name,u.descrip AS requested_unit_description
+            FROM rfq_lines rl
+            LEFT JOIN stockmaster sm ON sm.itemcode COLLATE utf8mb4_unicode_ci = rl.itemcode COLLATE utf8mb4_unicode_ci
+            LEFT JOIN unit u ON u.code=rl.requested_pack
             WHERE rl.rfq_id=" . $compareId . " ORDER BY rl.line_no", $db);
         $quotes = DB_query("SELECT q.*,c.customer FROM rfq_quotes q JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = q.supplier_code COLLATE utf8mb4_unicode_ci WHERE q.rfq_id=" . $compareId . " ORDER BY c.customer", $db);
         $quoteRows = array();
@@ -656,7 +658,11 @@ if (isset($_GET['compare'])) {
                         if ($lowestComparablePrice === null || $effectiveUnitPrice < $lowestComparablePrice) { $lowestComparablePrice = $effectiveUnitPrice; }
                     } else { $values[$quoteIndex] = null; }
                 }
-                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['requested_pack']) . '</small></th>';
+                $inventoryName = trim((string)$line['inventory_name']) !== '' ? $line['inventory_name'] : $line['description'];
+                $requestedDescription = trim((string)$line['description']);
+                echo '<tr><th>' . rfq_h($inventoryName) .
+                    ($requestedDescription !== '' && strcasecmp($requestedDescription, $inventoryName) !== 0 ? '<br><small>Requested description: ' . rfq_h($requestedDescription) . '</small>' : '') .
+                    '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['requested_pack']) . '</small></th>';
                 foreach ($quoteRows as $quoteIndex => $q) {
                     $v = $values[$quoteIndex];
                     if ($v !== null) {
