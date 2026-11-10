@@ -60,7 +60,7 @@ function addSampleRow() {
     paramsRow.id = `params_row_${irow}`;
     paramsRow.style.display = '';
     paramsRow.innerHTML = `
-      <td colspan="5">
+      <td colspan="1">
         <div id="params_container_${irow}"></div>
       </td>
     `;
