@@ -124,18 +124,9 @@ for ($i = 0; $i < $rowsposted; $i++) {
     $chilledDateExp = $_POST['chilled_date_exp'][$i] ?? null;
     $frozenDateExp = $_POST['frozen_date_exp'][$i] ?? null;
 
-    // file upload for this row (if provided)
+    // Individual sample images are uploaded in sample order and processed
+    // inside the sample_headers loop below.
     $uploadedFile = null;
-    if ($sampleFiles && isset($sampleFiles['name'][$i]) && $sampleFiles['error'][$i] === UPLOAD_ERR_OK) {
-        $originalFileName = $sampleFiles['name'][$i];
-        $fileExtension = pathinfo($originalFileName, PATHINFO_EXTENSION);
-        $tempName = GetTempBarcoderfNo(19, $i + 1);
-        $newFileName = $tempName . '.' . $fileExtension;
-        $destination = $uploadDir . $newFileName;
-        if (move_uploaded_file($sampleFiles['tmp_name'][$i], $destination)) {
-            $uploadedFile = $destination;
-        }
-    }
 
     // Determine parameters for this row
     $filteredParameters = [];
@@ -167,6 +158,17 @@ for ($i = 0; $i < $rowsposted; $i++) {
     if (isset($_POST['sample_headers'][$i]) && is_array($_POST['sample_headers'][$i])) {
         foreach ($_POST['sample_headers'][$i] as $hdrIndex => $hdr) {
             $imageNo = GetTempBarcoderfNo(19, $globalIndex + 1);
+            $headerUploadedFile = null;
+            if ($sampleFiles && isset($sampleFiles['name'][$globalIndex]) &&
+                $sampleFiles['error'][$globalIndex] === UPLOAD_ERR_OK) {
+                $originalFileName = $sampleFiles['name'][$globalIndex];
+                $fileExtension = pathinfo($originalFileName, PATHINFO_EXTENSION);
+                $newFileName = $imageNo . '.' . $fileExtension;
+                $destination = $uploadDir . $newFileName;
+                if (move_uploaded_file($sampleFiles['tmp_name'][$globalIndex], $destination)) {
+                    $headerUploadedFile = $destination;
+                }
+            }
             $hdrSku = $hdr['sku'] ?? $sku;
             $hdrBatch = $hdr['batchNo'] ?? $batchNo;
             $hdrSize = $hdr['batchSize'] ?? $batchSize;
@@ -184,7 +186,7 @@ for ($i = 0; $i < $rowsposted; $i++) {
                 'mandate' => $hdrMfg,
                 'expDate' => $hdrExp,
                 'externalSample' => $hdrExt,
-                'sampleFileKey' => $uploadedFile,
+                'sampleFileKey' => $headerUploadedFile,
                 'User_name' => $username,
                 'sample_name' => $hdr['sample_name'] ?? $sampleName,
                 'sample_method' => $hdr['sample_method'] ?? $sampleMethod,
