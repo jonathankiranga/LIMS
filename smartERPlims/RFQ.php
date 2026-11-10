@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                 $itemCode = isset($lineCodes[$i]) ? trim($lineCodes[$i]) : '';
                 $requestedUnit = isset($lineUnits[$i]) ? trim($lineUnits[$i]) : '';
                 if ($itemCode === '' || $requestedUnit === '') {
-                    $error = 'Select an inventory item and one of its configured Full Unit / Loose Unit options for RFQ line ' . ((int)$i + 1) . '.';
+                    $error = 'Select an inventory item and one of its configured Pack / Each options for RFQ line ' . ((int)$i + 1) . '.';
                     break;
                 }
                 $itemCheck = DB_query("SELECT itemcode,units,subunits,partperunit FROM stockmaster
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                 $fullUnit = trim((string)$itemMapping['units']);
                 $looseUnit = trim((string)$itemMapping['subunits']);
                 if ($requestedUnit !== $fullUnit && ($looseUnit === '' || $requestedUnit !== $looseUnit)) {
-                    $error = 'The selected unit is not configured as the Full Unit or Loose Unit for inventory item ' . $itemCode . '.';
+                    $error = 'The selected unit is not configured as the Pack or Each for inventory item ' . $itemCode . '.';
                     break;
                 }
                 $validLines[] = array(
@@ -528,7 +528,7 @@ echo '<div class="rfq-field"><label>Currency</label><select class="form-control"
 while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['currabrev']) . '">' . rfq_h($c['currency']) . ' (' . rfq_h($c['currabrev']) . ')</option>'; }
 echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
 echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
-echo '<h4>Requested products / reagents</h4><p class="text-muted">Select the inventory item, then choose only its configured Full Unit or Loose Unit. The conversion factor is taken directly from inventory; suppliers cannot change the requested unit or pack size.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Technical specifications / grade</th><th>Quantity</th><th>Requested unit (Full / Loose)</th><th></th></tr></thead><tbody>';
+echo '<h4>Requested products / reagents</h4><p class="text-muted">Select the inventory item, then choose only its configured Pack or Each. The conversion factor is taken directly from inventory; suppliers cannot change the requested unit or pack size.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Technical specifications / grade</th><th>Quantity</th><th>Requested unit (Full / Loose)</th><th></th></tr></thead><tbody>';
 echo '<tr><td><select class="form-control rfq-item-select" name="line_itemcode[]" required><option value="">Select inventory item</option>';
 foreach ($rfqStockItems as $st) {
     echo '<option value="' . rfq_h($st['itemcode']) . '" data-full-unit="' . rfq_h($st['units']) . '" data-full-label="' . rfq_h($st['full_unit_description']) . '" data-loose-unit="' . rfq_h($st['subunits']) . '" data-loose-label="' . rfq_h($st['loose_unit_description']) . '" data-factor="' . rfq_h($st['partperunit']) . '" data-description="' . rfq_h($st['descrip']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>';
@@ -655,7 +655,7 @@ if (isset($_GET['compare'])) {
                         if ($lowestComparablePrice === null || $effectiveUnitPrice < $lowestComparablePrice) { $lowestComparablePrice = $effectiveUnitPrice; }
                     } else { $values[$quoteIndex] = null; }
                 }
-                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' packs — ' . rfq_h($line['requested_pack']) . '</small></th>';
+                echo '<tr><th>' . rfq_h($line['description']) . '<br><small>Qty: ' . rfq_h($line['quantity']) . ' ' . rfq_h($line['requested_pack']) . '</small></th>';
                 foreach ($quoteRows as $quoteIndex => $q) {
                     $v = $values[$quoteIndex];
                     if ($v !== null) {
@@ -670,7 +670,7 @@ if (isset($_GET['compare'])) {
                 echo '<td><span class="rfq-price">' . rfq_h($head['currencycode']) . ' ' . number_format($quoteTotals[$quoteIndex], 2) . '</span><span class="rfq-cell-meta">' . (isset($q['delivery_days']) && $q['delivery_days'] !== null ? rfq_h($q['delivery_days']) . ' days delivery' : 'Delivery not specified') . '</span></td>';
             }
             echo '</tr></tbody></table></div>';
-            echo '<p class="rfq-legend"><span></span> Lowest comparable price per buyer-requested pack, including applicable tax.</p>';
+            echo '<p class="rfq-legend"><span></span> Lowest comparable price per requested unit, including applicable tax.</p>';
         }
 
         echo '<h4>Commercial terms comparison</h4><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Term</th>';
@@ -704,10 +704,10 @@ echo '</div>';
   var loose=selected.getAttribute('data-loose-unit')||'',looseLabel=selected.getAttribute('data-loose-label')||loose;
   var factor=parseFloat(selected.getAttribute('data-factor')||'1');
   unit.add(new Option('Select requested unit',''));
-  if(full){unit.add(new Option('Full Unit — '+fullLabel,full));}
-  if(loose&&loose!==full){unit.add(new Option('Loose Unit — '+looseLabel,loose));}
+  if(full){unit.add(new Option('Pack — '+fullLabel,full));}
+  if(loose&&loose!==full){unit.add(new Option('Each — '+looseLabel,loose));}
   unit.disabled=false;
-  if(factorLabel){factorLabel.textContent='1 Full Unit = '+(isFinite(factor)&&factor>0?factor:1)+' '+(looseLabel||fullLabel);}
+  if(factorLabel){factorLabel.textContent='1 Pack = '+(isFinite(factor)&&factor>0?factor:1)+' '+(looseLabel||fullLabel);}
  }
  function bindRfqItem(row){
   var item=row.querySelector('.rfq-item-select');
