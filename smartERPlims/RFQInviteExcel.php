@@ -130,7 +130,6 @@ foreach ($rfqLines as $line) {
     if ($requestedDescription !== '' && strcasecmp($requestedDescription, $label) !== 0) {
         $label .= ' | Requested description: ' . $requestedDescription;
     }
-    if ($line['itemcode'] !== '') { $label .= ' | Code: ' . $line['itemcode']; }
     $specification = trim((string)$line['specification']);
     $specification = preg_replace('/^Grade\\s*/i', '', $specification);
     if ($specification !== '') { $label .= ' | ' . $specification; }
