@@ -73,6 +73,15 @@ $pdf->Ln(4);
 $h = function($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 };
+$pdfCss = '<style>
+    table { border-collapse: collapse; }
+    th { background-color: #315f82; color: #ffffff; font-weight: bold; }
+    td, th { border: 1px solid #d7dee7; padding: 5px; }
+    .report-label { background-color: #edf2f7; color: #263445; font-weight: bold; }
+    .report-muted { color: #667085; }
+</style>';
+$pdf->writeHTML($pdfCss, true, false, true, false, '');
+
 $summaryHtml = '
 <table cellpadding="5" cellspacing="0" border="0">
 <tr>
