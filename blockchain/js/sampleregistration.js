@@ -51,37 +51,6 @@ function addSampleRow() {
         <label class="small text-muted" for="samples_${irow}">Number of Samples</label>
         <input type="number" id="samples_${irow}" name="samples[]" class="form-control form-control-sm" min="1" value="1" />
       </td>
-      <td>
-        <label class="small text-muted" for="standard_kit_units_${irow}">Standard Kit Units</label>
-        <input type="text" placeholder="Enter SKU units" id="standard_kit_units_${irow}" name="standard_kit_units[]" class="form-control form-control-sm mb-2"/>
-        <label class="small text-muted" for="product_batch_no_${irow}">Product Batch No</label>
-        <input type="text" id="product_batch_no_${irow}" name="product_batch_no[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="batch_size_${irow}">Batch Size</label>
-        <input type="number" id="batch_size_${irow}" name="batch_size[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <label class="small text-muted" for="date_of_manufacture_${irow}">Date of Manufacture</label>
-        <input type="date" id="date_of_manufacture_${irow}" name="date_of_manufacture[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="date_of_expiry_${irow}">Date of Expiry</label>
-        <input type="date" id="date_of_expiry_${irow}" name="date_of_expiry[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="chilled_date_of_expiry_${irow}">Chilled Date of Expiry</label>
-        <input type="date" id="chilled_date_of_expiry_${irow}" name="chilled_date_of_expiry[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="frozen_date_of_expiry_${irow}">Frozen Date of Expiry</label>
-        <input type="date" id="frozen_date_of_expiry_${irow}" name="frozen_date_of_expiry[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <label class="small text-muted" for="sample_source_${irow}">Sample Source</label>
-        <input type="text" id="sample_source_${irow}" name="sample_source[]" class="form-control form-control-sm mb-2" onkeyup="handleSampleSourceInput(event)" />
-        <label class="small text-muted" for="sample_name_${irow}">Sample Name</label>
-        <input type="text" id="sample_name_${irow}" name="sample_name[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="sample_method_${irow}">Sample Method</label>
-        <input type="text" id="sample_method_${irow}" name="sample_method[]" class="form-control form-control-sm mb-2" />
-        <label class="small text-muted" for="condition_of_sample_${irow}">Condition of Sample</label>
-        <input type="text" id="condition_of_sample_${irow}" name="condition_of_sample[]" class="form-control form-control-sm" />
-      </td>
-      <td>
-        <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/gif" name="sample_images[]" class="form-control form-control-sm" />
-      </td>
     `;
 
     document.getElementById('sampleRows').appendChild(row);
@@ -522,6 +491,7 @@ function reindexSampleRows() {
         const tdPic = document.createElement('td');
         const picInput = document.createElement('input');
         picInput.type = 'file';
+        picInput.name = 'sample_images[]';
         picInput.accept = 'image/jpeg,image/gif';
         picInput.className = 'form-control-file header-image';
         picInput.style.maxWidth = '100%';
@@ -1136,23 +1106,20 @@ $(document).ready(function() {
                         formData.append('standard_id[]', row.querySelector('[name="standard_id[]"]').value);
                         formData.append('matrix_id[]', row.querySelector('[name="matrix_id[]"]').value);
                         formData.append('samples[]', row.querySelector('[name="samples[]"]').value);
-                        formData.append('kit_units[]', row.querySelector('[name="standard_kit_units[]"]').value);
-                        formData.append('batch_no[]', row.querySelector('[name="product_batch_no[]"]').value);
-                        formData.append('batch_size[]', row.querySelector('[name="batch_size[]"]').value);
-                        formData.append('date_mfg[]', row.querySelector('[name="date_of_manufacture[]"]').value);
-                        formData.append('date_exp[]', row.querySelector('[name="date_of_expiry[]"]').value);
-                        formData.append('chilled_date_exp[]', row.querySelector('[name="chilled_date_of_expiry[]"]').value);
-                        formData.append('frozen_date_exp[]', row.querySelector('[name="frozen_date_of_expiry[]"]').value);
-                        formData.append('sample_source[]', row.querySelector('[name="sample_source[]"]').value);
-                        formData.append('sample_name[]', row.querySelector('[name="sample_name[]"]').value);
-                        formData.append('sample_method[]', row.querySelector('[name="sample_method[]"]').value);
-                        formData.append('condition_of_sample[]', row.querySelector('[name="condition_of_sample[]"]').value);
-
-                        // if files are present
-                        const fileInput = row.querySelector('[name="sample_images[]"]');
-                        if (fileInput && fileInput.files.length) {
-                            formData.append('sample_images[]', fileInput.files[0]);
-                        }
+                        // Keep legacy row-level fields present for the existing PHP handler.
+                        // Actual product, batch, date and sample details are submitted once per
+                        // individual sample through sample_headers[row][sample].
+                        formData.append('kit_units[]', '');
+                        formData.append('batch_no[]', '');
+                        formData.append('batch_size[]', '');
+                        formData.append('date_mfg[]', '');
+                        formData.append('date_exp[]', '');
+                        formData.append('chilled_date_exp[]', '');
+                        formData.append('frozen_date_exp[]', '');
+                        formData.append('sample_source[]', '');
+                        formData.append('sample_name[]', '');
+                        formData.append('sample_method[]', '');
+                        formData.append('condition_of_sample[]', '');
                     });
 
                     for (let i = 0; i < localStorage.length; i++) {
