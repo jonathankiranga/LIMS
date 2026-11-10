@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                       AND NOT EXISTS (
                           SELECT 1 FROM discounttable dt
                           WHERE dt.itemcode COLLATE utf8mb4_unicode_ci = sm.itemcode COLLATE utf8mb4_unicode_ci
-                      )
+                      )", $db);
                 if (DB_num_rows($itemCheck) !== 1) {
                     $error = 'The selected inventory item is not available for RFQ line ' . ((int)$i + 1) . '.';
                     break;
@@ -374,7 +374,7 @@ $stockItems = DB_query("SELECT sm.itemcode,sm.descrip,sm.units,sm.subunits,sm.pa
       AND NOT EXISTS (
           SELECT 1 FROM discounttable dt
           WHERE dt.itemcode COLLATE utf8mb4_unicode_ci = sm.itemcode COLLATE utf8mb4_unicode_ci
-      )
+      )", $db);
 $rfqStockItems = array();
 while ($stockItem = DB_fetch_array($stockItems)) { $rfqStockItems[] = $stockItem; }
 $rfqs = DB_query("SELECT h.*, (SELECT COUNT(*) FROM rfq_invites i WHERE i.rfq_id=h.id) AS invite_count,
