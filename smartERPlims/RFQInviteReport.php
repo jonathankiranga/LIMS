@@ -47,7 +47,8 @@ class RFQInviteSummaryPDF extends TCPDF {
     }
 }
 
-$pdf = new RFQInviteSummaryPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+$paperSize = count($invites) > 8 ? 'A2' : (count($invites) > 4 ? 'A3' : 'A4');
+$pdf = new RFQInviteSummaryPDF('L', 'mm', $paperSize, true, 'UTF-8', false);
 $pdf->SetCreator('SmartERPlims');
 $pdf->SetAuthor(isset($_SESSION['CompanyRecord']['coyname']) ? $_SESSION['CompanyRecord']['coyname'] : 'SmartERPlims');
 $pdf->SetTitle('RFQ Invitation Summary - ' . $rfq['rfq_no']);
@@ -112,6 +113,91 @@ $summaryHtml = '
 </table><br/>';
 $pdf->SetFont('helvetica', '', 9);
 $pdf->writeHTML($summaryHtml, true, false, true, false, '');
+
+
+/* Build the supplier-by-stock-item quotation comparison matrix. */
+$rfqLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.specification,rl.quantity,
+        rl.requested_pack,u.descrip AS requested_unit_description
+    FROM rfq_lines rl
+    LEFT JOIN unit u ON u.code=rl.requested_pack
+    WHERE rl.rfq_id=" . $rfqId . " ORDER BY rl.line_no", $db);
+$rfqLines = array();
+while ($rfqLine = DB_fetch_array($rfqLinesResult)) {
+    $rfqLines[] = $rfqLine;
+}
+
+$quoteLinesResult = DB_query("SELECT q.supplier_code,q.tax_inclusive,ql.rfq_line_id,ql.unit_price,
+        ql.tax_rate,ql.availability_notes
+    FROM rfq_quotes q
+    INNER JOIN rfq_quote_lines ql ON ql.quote_id=q.id
+    WHERE q.rfq_id=" . $rfqId, $db);
+$quoteMatrix = array();
+while ($quoteLine = DB_fetch_array($quoteLinesResult)) {
+    $quoteMatrix[$quoteLine['supplier_code']][(int)$quoteLine['rfq_line_id']] = $quoteLine;
+}
+
+$pdf->Ln(3);
+$pdf->SetFont('helvetica', 'B', 11);
+$pdf->SetTextColor(35, 55, 78);
+$pdf->Cell(0, 8, 'SUPPLIER QUOTATION COMPARISON', 0, 1, 'L');
+$pdf->SetFont('helvetica', '', 8);
+$pdf->SetTextColor(90, 100, 115);
+$pdf->MultiCell(0, 5, 'Rows show the RFQ stock items. Each supplier column shows the unit price submitted for that item. "Not submitted" means no quotation response was recorded.', 0, 'L');
+$pdf->Ln(2);
+
+$supplierCount = count($invites);
+$itemWidth = $supplierCount > 8 ? 24 : ($supplierCount > 4 ? 28 : 34);
+$supplierWidth = $supplierCount > 0 ? (100 - $itemWidth) / $supplierCount : 0;
+$matrixHtml = '<table border="1" cellpadding="4" cellspacing="0">';
+$matrixHtml .= '<thead><tr bgcolor="#315f82" color="#ffffff">';
+$matrixHtml .= '<th width="' . $itemWidth . '%"><b>Stock item / requested quantity</b></th>';
+foreach ($invites as $invite) {
+    $supplierName = $invite['customer'] ? $invite['customer'] : $invite['supplier_code'];
+    $matrixHtml .= '<th width="' . $supplierWidth . '%"><b>' . $h($supplierName) . '</b><br/><small>' .
+        $h($invite['supplier_code']) . '</small></th>';
+}
+$matrixHtml .= '</tr></thead><tbody>';
+
+if (!count($rfqLines)) {
+    $matrixHtml .= '<tr><td colspan="' . (count($invites) + 1) . '" align="center">No stock items are recorded on this RFQ.</td></tr>';
+} else {
+    foreach ($rfqLines as $rfqLine) {
+        $unitDescription = !empty($rfqLine['requested_unit_description']) ? $rfqLine['requested_unit_description'] : $rfqLine['requested_pack'];
+        $itemLabel = $h($rfqLine['description']);
+        if (!empty($rfqLine['itemcode'])) {
+            $itemLabel .= '<br/><small>Code: ' . $h($rfqLine['itemcode']) . '</small>';
+        }
+        if (!empty($rfqLine['specification'])) {
+            $itemLabel .= '<br/><small>' . nl2br($h($rfqLine['specification'])) . '</small>';
+        }
+        $itemLabel .= '<br/><b>Qty:</b> ' . $h($rfqLine['quantity'] . ' ' . $unitDescription);
+
+        $matrixHtml .= '<tr><td width="' . $itemWidth . '%" bgcolor="#f3f6fa">' . $itemLabel . '</td>';
+        foreach ($invites as $invite) {
+            $supplierCode = $invite['supplier_code'];
+            $lineId = (int)$rfqLine['id'];
+            if (isset($quoteMatrix[$supplierCode][$lineId])) {
+                $quoteLine = $quoteMatrix[$supplierCode][$lineId];
+                $price = number_format((float)$quoteLine['unit_price'], 2);
+                $taxRate = number_format((float)$quoteLine['tax_rate'], 2);
+                $taxLabel = ((int)$quoteLine['tax_inclusive'] === 1) ? 'Tax inclusive' : 'Tax exclusive';
+                $cell = '<b>' . $h($rfq['currencycode']) . ' ' . $price . '</b><br/><small>' .
+                    $taxLabel . ' · Tax ' . $taxRate . '%</small>';
+                if (trim((string)$quoteLine['availability_notes']) !== '') {
+                    $cell .= '<br/><small>' . $h($quoteLine['availability_notes']) . '</small>';
+                }
+                $matrixHtml .= '<td width="' . $supplierWidth . '%">' . $cell . '</td>';
+            } else {
+                $matrixHtml .= '<td width="' . $supplierWidth . '%" bgcolor="#f5f6f8" color="#7b8492"><i>Not submitted</i></td>';
+            }
+        }
+        $matrixHtml .= '</tr>';
+    }
+}
+$matrixHtml .= '</tbody></table>';
+$pdf->SetFont('helvetica', '', 8);
+$pdf->writeHTML($matrixHtml, true, false, true, false, '');
+$pdf->Ln(4);
 
 $table = '<table border="1" cellpadding="5" cellspacing="0">
 <thead>
