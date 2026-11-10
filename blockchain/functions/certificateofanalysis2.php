@@ -561,6 +561,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
           </tr>';
     }
 
+    $html .= '</tbody></table>';
     $html .= '<div style="text-align: center; margin-top: 10px;">*******End of Test Results*******</div>';
     $html .= '<div style="text-align: left; margin-top: 6px; font-size: 7px;">* Not Accredited &nbsp;&nbsp; ~ Subcontracted</div>'; // Add footer
     $html .= '<div style="text-align: left; margin-top: 10px;"><u>NOTES</u></div>';
