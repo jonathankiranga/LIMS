@@ -507,10 +507,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
         $html .= '<table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
     <tr style="background-color: #3498db; color: white; font-size: 10px;">
-        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 20%; white-space: nowrap;">Parameter</th>
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 25%; white-space: nowrap;">Parameter</th>
         <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 9%; white-space: nowrap;">Unit</th>
         <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 13%; white-space: nowrap;">Results</th>
-        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 20%; white-space: nowrap;">Method</th>
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: left; width: 15%; white-space: nowrap;">Method</th>
         <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">Low</th>
         <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">Opt</th>
         <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 3px; text-align: center; width: 6%; white-space: nowrap;">High</th>
@@ -527,10 +527,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
         $standard = htmlentities($validatedresults['standard'], ENT_QUOTES, 'UTF-8');
 
         $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 5px; width: 20%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 5px; width: 25%;">' . accreditationParameterName($sample) . '</td>
             <td style="border: 1px solid #ddd; padding: 4px; width: 9%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
             <td style="border: 1px solid #ddd; padding: 4px; width: 13%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 4px; width: 20%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 4px; width: 15%;">' . $sample['Method'] . '</td>
             <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'blue' ? 'background-color: #000000; color: white;' : '') . '"></td>
             <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'green' ? 'background-color: green; color: white;' : '') . '"></td>
             <td style="border: 1px solid #ddd; padding: 3px; width: 6%; ' . (($validatedresults['grade'] ?? '') === 'red' ? 'background-color: red; color: white;' : '') . '"></td>
