@@ -147,6 +147,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rfq'])) {
                 $itemMapping = DB_fetch_array($itemCheck);
                 $fullUnit = trim((string)$itemMapping['units']);
                 $looseUnit = trim((string)$itemMapping['subunits']);
+                $partsPerFullUnit = (float)$itemMapping['partperunit'];
+                if ($partsPerFullUnit <= 0) { $partsPerFullUnit = 1; }
+                if ($partsPerFullUnit < 1 || ($partsPerFullUnit > 1 && $looseUnit === '')) {
+                    $error = 'The inventory conversion is incomplete or invalid for ' . $itemCode . '. Configure the Full Unit, Loose Unit and partperunit in inventory configuration.';
+                    break;
+                }
                 if ($requestedUnit !== $fullUnit && ($looseUnit === '' || $requestedUnit !== $looseUnit)) {
                     $error = 'The selected unit is not configured as the Pack or Each for inventory item ' . $itemCode . '.';
                     break;
@@ -539,7 +545,7 @@ echo '<div class="rfq-field"><label>Currency</label><select class="form-control"
 while ($c = DB_fetch_array($currencies)) { echo '<option value="' . rfq_h($c['currabrev']) . '">' . rfq_h($c['currency']) . ' (' . rfq_h($c['currabrev']) . ')</option>'; }
 echo '</select></div><div class="rfq-field"><label>Quotation closing date/time</label><input class="form-control" type="datetime-local" name="closing_at" required></div>';
 echo '<div class="rfq-field"><label>Purpose / description</label><textarea class="form-control" name="description" rows="2"></textarea></div></div>';
-echo '<h4>Requested laboratory inventory items</h4><p class="text-muted">Select a purchasable laboratory stock item (for example, a reagent, chemical, consumable or equipment item), then choose its configured full or loose unit. Test parameters and laboratory standard/method records are excluded automatically. The unit conversion is taken from the inventory record; suppliers cannot change the requested unit or conversion.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Laboratory specification / grade</th><th>Quantity</th><th>Requested unit (Full / Loose)</th><th></th></tr></thead><tbody>';
+echo '<h4>Requested laboratory inventory items</h4><p class="text-muted">Select a purchasable laboratory stock item (for example, a reagent, chemical, consumable or equipment item), then choose its configured Full Unit or Loose Unit. The conversion shown is read directly from stockmaster.partperunit (for example, 1 Pack = 20 Litres). Enter the quantity in the unit you select; suppliers quote against that same unit. Test parameters and laboratory standard/method records are excluded automatically.</p><div class="table-responsive"><table class="table table-bordered table-sm rfq-lines" id="rfqLines"><thead><tr><th>Inventory item</th><th>Description</th><th>Laboratory specification / grade</th><th>Quantity</th><th>Requested unit and conversion</th><th></th></tr></thead><tbody>';
 echo '<tr><td><select class="form-control rfq-item-select" name="line_itemcode[]" required><option value="">Select inventory item</option>';
 foreach ($rfqStockItems as $st) {
     echo '<option value="' . rfq_h($st['itemcode']) . '" data-full-unit="' . rfq_h($st['units']) . '" data-full-label="' . rfq_h($st['full_unit_description']) . '" data-loose-unit="' . rfq_h($st['subunits']) . '" data-loose-label="' . rfq_h($st['loose_unit_description']) . '" data-factor="' . rfq_h($st['partperunit']) . '" data-description="' . rfq_h($st['descrip']) . '">' . rfq_h($st['itemcode'] . ' - ' . $st['descrip']) . '</option>';
@@ -722,8 +728,8 @@ echo '</div>';
   var loose=selected.getAttribute('data-loose-unit')||'',looseLabel=selected.getAttribute('data-loose-label')||loose;
   var factor=parseFloat(selected.getAttribute('data-factor')||'1');
   unit.add(new Option('Select requested unit',''));
-  if(full){unit.add(new Option('Pack — '+fullLabel,full));}
-  if(loose&&loose!==full){unit.add(new Option('Each — '+looseLabel,loose));}
+  if(full){unit.add(new Option('Full Unit — '+fullLabel,full));}
+  if(loose&&loose!==full){unit.add(new Option('Loose Unit — '+looseLabel,loose));}
   unit.disabled=false;
   if(factorLabel){factorLabel.textContent='1 Pack = '+(isFinite(factor)&&factor>0?factor:1)+' '+(looseLabel||fullLabel);}
  }
