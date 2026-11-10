@@ -551,7 +551,7 @@ if (!$totalRfqs) {
         echo '<div class="rfq-card-main"><div class="rfq-card-identity"><span class="rfq-number">' . rfq_h($h['rfq_no']) . '</span><h3>' . rfq_h($h['title']) . '</h3><span class="rfq-card-date">Closing ' . rfq_h($h['closing_at']) . '</span></div>';
         echo '<div class="rfq-card-status"><span class="rfq-status-pill ' . rfq_h($statusClass) . '">' . rfq_h(ucfirst($h['status'])) . '</span><div class="rfq-response-counts"><span><strong>' . (int)$h['invite_count'] . '</strong> invited</span><span><strong>' . (int)$h['quote_count'] . '</strong> quotes</span></div></div>';
         echo '<div class="rfq-card-actions">';
-        echo '<a class="rfq-btn rfq-btn-secondary" target="_blank" href="RFQInviteReport.php?rfq_id=' . (int)$h['id'] . '">Print invitation summary / PDF</a>';
+        echo '<a class="rfq-btn rfq-btn-secondary" target="_blank" href="RFQInviteExcel.php?rfq_id=' . (int)$h['id'] . '">Download invitation responses / Excel</a>';
         if ($h['status'] === 'draft') {
             echo '<button type="button" class="rfq-btn rfq-btn-primary" data-toggle="collapse" data-target="#issue' . (int)$h['id'] . '">Invite suppliers</button>';
         } else {
