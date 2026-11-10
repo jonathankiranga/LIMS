@@ -537,7 +537,9 @@ $receivedQuotes = 0;
 foreach ($rfqRows as $rfqRow) { $receivedQuotes += (int)$rfqRow['quote_count']; }
 
 echo '<div class="rfq-workspace">';
-echo '<header class="rfq-topbar"><div><div class="rfq-eyebrow">PROCUREMENT WORKSPACE</div><h1>Requests for Quotation</h1><p>Manage supplier invitations, track responses and compare submitted quotations.</p></div><div class="rfq-top-actions"><button type="button" class="rfq-btn rfq-btn-primary" onclick="document.getElementById(\'rfqCreatePanel\').open=true;document.getElementById(\'rfqCreatePanel\').scrollIntoView({behavior:\'smooth\',block:\'start\'});"><span class="glyphicon glyphicon-plus"></span> Create new RFQ</button></div></header>';
+$workspaceTitle = isset($_GET['awarded']) ? 'Awarded RFQs' : 'Requests for Quotation';
+$workspaceDescription = isset($_GET['awarded']) ? 'Review awarded supplier quotations and create their Purchase Orders.' : 'Manage supplier invitations, track responses and compare submitted quotations.';
+echo '<header class="rfq-topbar"><div><div class="rfq-eyebrow">PROCUREMENT WORKSPACE</div><h1>' . rfq_h($workspaceTitle) . '</h1><p>' . rfq_h($workspaceDescription) . '</p></div>' . (isset($_GET['awarded']) ? '' : '<div class="rfq-top-actions"><button type="button" class="rfq-btn rfq-btn-primary" onclick="document.getElementById(\'rfqCreatePanel\').open=true;document.getElementById(\'rfqCreatePanel\').scrollIntoView({behavior:\'smooth\',block:\'start\'});"><span class="glyphicon glyphicon-plus"></span> Create new RFQ</button></div>') . '</header>';
 if ($message !== '') { echo '<div class="alert alert-success">' . rfq_h($message) . '</div>'; }
 if ($error !== '') { echo '<div class="alert alert-warning">' . rfq_h($error) . '</div>'; }
 
@@ -553,8 +555,10 @@ if (isset($_GET['awarded'])) {
         h.awarded_quote_id,h.po_documentno,h.created_at,c.customer,
         (SELECT COUNT(*) FROM rfq_lines rl WHERE rl.rfq_id=h.id) AS line_count,
         (SELECT COUNT(*) FROM rfq_quote_lines ql WHERE ql.quote_id=h.awarded_quote_id) AS quoted_line_count,
-        (SELECT SUM(ql.unit_price * rl.quantity) FROM rfq_quote_lines ql
+        (SELECT SUM(ql.unit_price * rl.quantity * CASE WHEN q.tax_inclusive=1 THEN 1 ELSE 1 + (ql.tax_rate / 100) END)
+            FROM rfq_quote_lines ql
             JOIN rfq_lines rl ON rl.id=ql.rfq_line_id
+            JOIN rfq_quotes q ON q.id=ql.quote_id
             WHERE ql.quote_id=h.awarded_quote_id) AS quotation_total
         FROM rfq_header h
         LEFT JOIN creditors c ON c.itemcode COLLATE utf8mb4_unicode_ci = h.awarded_supplier_code COLLATE utf8mb4_unicode_ci
