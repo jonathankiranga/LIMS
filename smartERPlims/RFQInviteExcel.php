@@ -39,8 +39,9 @@ while ($invite = DB_fetch_array($inviteResult)) {
 }
 
 $linesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.specification,rl.quantity,
-        rl.requested_pack,u.descrip AS requested_unit_description
+        rl.requested_pack,sm.descrip AS inventory_name,u.descrip AS requested_unit_description
     FROM rfq_lines rl
+    LEFT JOIN stockmaster sm ON sm.itemcode COLLATE utf8mb4_unicode_ci = rl.itemcode COLLATE utf8mb4_unicode_ci
     LEFT JOIN unit u ON u.code=rl.requested_pack
     WHERE rl.rfq_id=" . $rfqId . " ORDER BY rl.line_no", $db);
 $rfqLines = array();
@@ -123,9 +124,14 @@ foreach ($invites as $invite) {
 $matrixRows[] = $header;
 foreach ($rfqLines as $line) {
     $unitDescription = !empty($line['requested_unit_description']) ? $line['requested_unit_description'] : $line['requested_pack'];
-    $label = $line['description'];
+    $inventoryName = trim((string)$line['inventory_name']);
+    $label = $inventoryName !== '' ? $inventoryName : trim((string)$line['description']);
+    $requestedDescription = trim((string)$line['description']);
+    if ($requestedDescription !== '' && strcasecmp($requestedDescription, $label) !== 0) {
+        $label .= ' | Requested description: ' . $requestedDescription;
+    }
     if ($line['itemcode'] !== '') { $label .= ' | Code: ' . $line['itemcode']; }
-    if ($line['specification'] !== '') { $label .= ' | Specification: ' . $line['specification']; }
+    if (trim((string)$line['specification']) !== '') { $label .= ' | Laboratory specification / grade: ' . $line['specification']; }
     $label .= ' | Qty: ' . $line['quantity'] . ' ' . $unitDescription;
     $row = array(array($label, 2));
     foreach ($invites as $invite) {
@@ -155,7 +161,7 @@ foreach ($rfqLines as $line) {
         $quote = $quoteMatrix[$supplierCode][$lineId];
         $supplierName = trim((string)$invite['customer']) !== '' ? $invite['customer'] : $supplierCode;
         $quoteDetailRows[] = array(
-            array($line['description']), array($line['itemcode']), array($supplierName), array($supplierCode),
+            array(trim((string)$line['inventory_name']) !== '' ? $line['inventory_name'] : $line['description']), array($line['itemcode']), array($supplierName), array($supplierCode),
             array((float)$quote['unit_price']), array($rfq['currencycode']),
             array(((int)$quote['tax_inclusive'] === 1) ? 'Tax inclusive' : 'Tax exclusive'),
             array((float)$quote['tax_rate']), array($quote['availability_notes'])
