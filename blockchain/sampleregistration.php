@@ -149,7 +149,7 @@
                 <table class="table table-bordered table-hover table-sm align-middle table-responsive" id="sampleTable">
                     <thead class="table-light">
                         <tr>
-                            <th colspan="5">Standard / Sample Count</th>
+                            <th>Standard / Sample Count</th>
                         </tr>
                     </thead>
                     <tbody id="sampleRows"></tbody>
