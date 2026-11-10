@@ -63,6 +63,10 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
             $requestedUnitRole = trim((string)$quoteLine['requested_pack']);
             $partsPerFullUnit = (float)$quoteLine['partperunit'];
             if ($partsPerFullUnit <= 0) {
+                if ($looseUnit !== '') {
+                    $lineError = 'The inventory conversion is missing for ' . $quoteLine['description'] . '. stockmaster.partperunit must be configured to 1 or greater when a Loose Unit is configured.';
+                    break;
+                }
                 $partsPerFullUnit = 1;
             }
             if ($partsPerFullUnit < 1) {
