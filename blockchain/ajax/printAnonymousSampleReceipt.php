@@ -49,13 +49,12 @@ if ($companyResult && ($companyRecord = $companyResult->fetch_assoc())) {
 $sql = "
     SELECT
         st.SampleID,
-        COALESCE(st.sample_name, '') AS SampleName,
+        CAST(COALESCE(st.sample_name, '') AS CHAR) AS SampleName,
         tp.ParameterName,
         COALESCE(bp.ResultType, tp.ResultType, 'quantitativeField') AS ResultType,
         tr.MRL_Result,
         tr.ResultStatus,
-        tr.RangeResult,
-        COALESCE(tr.User_name, '') AS UserName
+        tr.RangeResult
     FROM sample_tests st
     INNER JOIN test_results tr
         ON tr.HeaderID = st.HeaderID
@@ -178,7 +177,7 @@ if (!$rows) {
             }
             $html .= '<td width="30%">' . $esc($row['ParameterName']) . '</td>'
                 . '<td width="14%">' . $esc($resultValue) . '</td>'
-                . '<td width="14%">' . $esc($row['UserName']) . '</td>'
+                . '<td width="14%">&nbsp;</td>'
                 . '</tr>';
         }
     }
