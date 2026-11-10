@@ -288,6 +288,30 @@ On confirmation, system:
 - Fixed asset GRN history
 - Purchases VAT and credit note reports
 
+### Automatic Serial Number Generation
+
+Serial numbers are generated during Goods Received Note posting for stock items configured for serial tracking. The item must have `stockmaster.requireserial = 1` in Stock Master. Creating or approving the Purchase Order does not generate serial numbers.
+
+When the GRN is posted, `PostStockRegister()` in `includes/PostStockCost.inc` checks the item's `requireserial` setting. For a serial-tracked item, the received quantity is converted to loose units: a purchase line entered in the full-unit UOM is multiplied by `stockmaster.partperunit`; a line entered in the loose-unit UOM is used as entered. The code creates one `StockRegister` receipt row with `StockIn = 1` and a serial number for each whole unit in that converted quantity. Items not configured for serial tracking are posted as a normal quantity row without an individual serial number.
+
+The serial format is:
+
+```
+[Stock barcode or item code][two-digit year][four-digit yearly counter]
+```
+
+The barcode is used when present; otherwise the item code is used. The counter is maintained in `serialnumber_counter` and increments across serialised items for that year. For example, a barcode `ABC`, year code `26`, and counter `0001` produce `ABC260001`.
+
+After posting, use the **Last Serial Numbers (Goods Received)** report under **Purchases → Reports** to print the recent serial numbers. The report is a listing/print facility; it does not generate the serials.
+
+Operational checks:
+
+1. Before receiving, confirm serial tracking is enabled for the relevant Stock Master item.
+2. Confirm `partperunit` is correct where the PO/GRN quantity is entered in full units.
+3. Post the GRN; serial numbers are generated as part of stock receipt posting.
+4. Use the serial-number report to review or print the generated numbers.
+5. Do not expect serials to be generated for items with `requireserial` disabled.
+
 ### Should Do (Control)
 
 1. Require approved PO before supplier invoice entry.
@@ -692,7 +716,7 @@ Frequently touched tables in current flows:
 - `debtorsledger`, `creditorsledger`
 - `Generalledger`
 - `BankTransactions`, `BankAccounts`
-- `stockledger`, `stockmaster`, `Stores`
+- `stockledger`, `StockRegister`, `stockmaster`, `serialnumber_counter`, `Stores`
 - `ProductionMaster`, `LabPostingDetail`, `LaboratoryStandards`
 - `fixedassets`, `fixedassettrans`, `fixedassetcategories`
 - `www_users`, `securityroles`, `securitytokens`, `securitygroups`, `scripts`
