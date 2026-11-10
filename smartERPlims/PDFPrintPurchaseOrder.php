@@ -5,32 +5,39 @@ $Title = _('Print Purchase Order');
 
 if(isset($_GET['No'])){
     
-$SQL="Select
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid`
-      ,`creditors`.email
-      ,`creditors`.city
-      ,`creditors`.postcode
-      ,`creditors`.country
-      ,`creditors`.phone
-      ,`creditors`.contact
-      ,`PurchaseHeader`.`yourreference`
-      ,`PurchaseHeader`.`printed`
-      from `PurchaseHeader` join PurchaseLine on 
-      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno`
-       and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
-      join creditors on `PurchaseHeader`.`vendorcode`=creditors.itemcode
-      where (`PurchaseHeader`.`documenttype`='18'   or `PurchaseHeader`.`documenttype`='41')
-      and `PurchaseHeader`.`documentno`='".$_GET['No']."'";
+$DocumentNo = DB_escape_string($_GET['No']);
+$SQL = "SELECT
+       PurchaseHeader.documentno
+      ,PurchaseHeader.docdate
+      ,PurchaseHeader.oderdate
+      ,PurchaseHeader.duedate
+      ,PurchaseHeader.vendorcode
+      ,PurchaseHeader.vendorname
+      ,PurchaseHeader.currencycode
+      ,PurchaseHeader.status
+      ,PurchaseHeader.userid
+      ,creditors.email AS supplier_email
+      ,creditors.city AS supplier_city
+      ,creditors.postcode AS supplier_postcode
+      ,creditors.country AS supplier_country
+      ,creditors.phone AS supplier_phone
+      ,creditors.contact AS supplier_contact
+      ,PurchaseHeader.yourreference
+      ,PurchaseHeader.printed
+      ,PurchaseHeader.documenttype
+      FROM PurchaseHeader
+      LEFT JOIN creditors ON PurchaseHeader.vendorcode=creditors.itemcode
+      WHERE PurchaseHeader.documenttype IN ('18','41')
+        AND PurchaseHeader.documentno='".$DocumentNo."'";
+
     $Result=DB_query($SQL,$db);
-    $myrow=DB_fetch_row($Result);
+    $myrow=DB_fetch_array($Result);
+    if (!$myrow) {
+        prnMsg(_('The requested purchase order could not be found.'), 'warn');
+        include('includes/header.inc');
+        include('includes/footer.inc');
+        exit;
+    }
     
     
     $PaperSize='A4_Landscape';
@@ -48,69 +55,78 @@ $SQL="Select
      include('includes/PDFpurchaseheader.inc');
      
      
-     $SQL=Sprintf("SELECT 
-       stockmaster.barcode
-      ,Container.`descrip` as containername
-      ,PurchaseHeader.docdate
-      ,PurchaseLine.`description` 
+     $SQL = "SELECT
+       COALESCE(NULLIF(stockmaster.barcode,''), PurchaseLine.code) AS barcode
+      ,PurchaseLine.description
       ,PurchaseLine.Quantity
-      ,`PurchaseLine`.PartPerUnit
-      ,PurchaseLine.UnitPrice as Sp 
-      ,PurchaseLine.discount as Discount 
-      ,PurchaseLine.`unitofmeasure` as UOMDesc
-      ,PurchaseHeader.`documentno`
-      ,PurchaseHeader.`vendorcode`
+      ,PurchaseLine.PartPerUnit
+      ,PurchaseLine.UnitPrice AS Sp
+      ,PurchaseLine.discount AS Discount
+      ,PurchaseLine.unitofmeasure AS UOMDesc
       ,PurchaseLine.invoiceamount
-      ,PurchaseHeader.`currencycode`
       ,PurchaseLine.vatamount
-      ,(PurchaseLine.invoiceamount - PurchaseLine.vatamount) as netamt
-      ,PurchaseHeader.`documenttype`
+      ,(PurchaseLine.invoiceamount - PurchaseLine.vatamount) AS netamt
       ,PurchaseLine.vatrate
-  FROM `PurchaseHeader` join PurchaseLine on PurchaseHeader.documentno=PurchaseLine.documentno 
-        and PurchaseHeader.documenttype=PurchaseLine.documenttype and PurchaseHeader.documenttype=18
-        join stockmaster on stockmaster.itemcode=PurchaseLine.code
-        left join stockmaster Container on Container.itemcode=PurchaseLine.containercode
-        where PurchaseHeader.documentno='%s' ",$_GET['No']);
+      FROM PurchaseHeader
+      INNER JOIN PurchaseLine
+        ON PurchaseHeader.documentno=PurchaseLine.documentno
+       AND PurchaseHeader.documenttype=PurchaseLine.documenttype
+      LEFT JOIN stockmaster
+        ON stockmaster.itemcode=PurchaseLine.code
+      WHERE PurchaseHeader.documenttype='".DB_escape_string($myrow['documenttype'])."'
+        AND PurchaseHeader.documentno='".$DocumentNo."'
+      ORDER BY PurchaseLine.code";
+
      
      $FontSize = 12;
      $YPos=$firstrowpos-20;
-     $R1=0;
-     $R2=0;
-     $R3=0;
-     $R4=0;
+     $R1=0; // VAT amount
+     $R2=0; // Subtotal before discount
+     $R3=0; // Total invoice amount
+     $R4=0; // Discount amount
      
      $Results=DB_query($SQL,$db);
      while($rows = DB_fetch_array($Results)){
-         $R1 +=$rows['vatamount'];
-         $R2 +=$rows['netamt'];
-         $R3 +=$rows['invoiceamount'];
-         $R4 +=$rows['Discount'];
+         $lineQuantity = (float)$rows['Quantity'];
+         $linePackage = (float)$rows['PartPerUnit'];
+         $lineUnitPrice = (float)$rows['Sp'];
+         $discountRate = (float)$rows['Discount'];
+         $lineBaseAmount = $lineUnitPrice * $lineQuantity * $linePackage;
+         $discountAmount = $lineBaseAmount * ($discountRate / 100);
+         $lineNetAmount = (float)$rows['netamt'];
+         $lineVatAmount = (float)$rows['vatamount'];
+         $lineInvoiceAmount = (float)$rows['invoiceamount'];
+
+         $R1 += $lineVatAmount;
+         $R2 += ($lineNetAmount + $discountAmount);
+         $R3 += $lineInvoiceAmount;
+         $R4 += $discountAmount;
          
-         if($rows['PartPerUnit']>1){
-           $units = '(1X'.(int)$rows['PartPerUnit'].') '.$rows['UOMDesc'];
-           $PRICE = $rows['Sp']* $rows['PartPerUnit'];
+         if($linePackage>1){
+           $packageLabel = rtrim(rtrim(number_format($linePackage,4,'.',''), '0'), '.');
+           $units = '(1X'.$packageLabel.') '.$rows['UOMDesc'];
+           $PRICE = $lineUnitPrice * $linePackage;
          }else{
             $units=$rows['UOMDesc'];
-            $PRICE = $rows['Sp'];
+            $PRICE = $lineUnitPrice;
          }
-         
-         $QTY=(int)$rows['Quantity'];
+
+         $QTY = rtrim(rtrim(number_format($lineQuantity,4,'.',','), '0'), '.');
          
           $LeftOvers = $pdf->addTextWrap(42, $YPos,103, $FontSize, $rows['barcode'],'left');
           $LeftOvers = $pdf->addTextWrap(145, $YPos,250, $FontSize, $rows['description'],'left');
           $LeftOvers = $pdf->addTextWrap(300, $YPos, 85, $FontSize, $units,'right');
           $LeftOvers = $pdf->addTextWrap(362, $YPos, 85, $FontSize, $QTY,'right');
           $LeftOvers = $pdf->addTextWrap(420, $YPos, 85, $FontSize, number_format($PRICE,2),'right');
-          $LeftOvers = $pdf->addTextWrap(492, $YPos, 85, $FontSize, number_format($rows['Discount'],2),'right');
+          $LeftOvers = $pdf->addTextWrap(492, $YPos, 85, $FontSize, number_format($discountRate,2).'%','right');
           $LeftOvers = $pdf->addTextWrap(590, $YPos, 55, $FontSize, number_format($rows['vatrate'],0),'right');
           $LeftOvers = $pdf->addTextWrap(650, $YPos, 70, $FontSize, number_format($rows['vatamount'],2),'right');
-          $LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100,$YPos,90,$FontSize,number_format($rows['netamt'],2),'right');
+          $LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100,$YPos,90,$FontSize,number_format($lineInvoiceAmount,2),'right');
 
          $YPos -= $line_height * 2;
          if($YPos < $lastrow){
-             $PageNumber++;
              include('includes/PDFpurchaseheader.inc');
-              $YPos=$firstrowpos;
+             $YPos=$firstrowpos-20;
          }
                
         }
@@ -142,7 +158,10 @@ $SQL="Select
     $pdf->OutputD($_SESSION['DatabaseName'] . '_Purchase_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    DB_query("Update `PurchaseHeader` set printed=1 where PurchaseHeader.documenttype=18  and PurchaseHeader.documentno='".$_GET['No']."'", $db);
+    DB_query("UPDATE PurchaseHeader
+              SET printed=1
+              WHERE documenttype='".DB_escape_string($myrow['documenttype'])."'
+                AND documentno='".$DocumentNo."'", $db);
 }else{
 
 include('includes/header.inc');
