@@ -131,7 +131,9 @@ foreach ($rfqLines as $line) {
         $label .= ' | Requested description: ' . $requestedDescription;
     }
     if ($line['itemcode'] !== '') { $label .= ' | Code: ' . $line['itemcode']; }
-    if (trim((string)$line['specification']) !== '') { $label .= ' | Laboratory specification / grade: ' . $line['specification']; }
+    $specification = trim((string)$line['specification']);
+    $specification = preg_replace('/^Grade\\s*/i', '', $specification);
+    if ($specification !== '') { $label .= ' | ' . $specification; }
     $label .= ' | Qty: ' . $line['quantity'] . ' ' . $unitDescription;
     $row = array(array($label, 2));
     foreach ($invites as $invite) {
