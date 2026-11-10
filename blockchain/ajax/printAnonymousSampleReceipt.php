@@ -87,7 +87,7 @@ while ($result && ($row = $result->fetch_assoc())) {
 $stmt->close();
 $conn->close();
 
-$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 $pdf->SetCreator('LIMS');
 $pdf->SetAuthor('Laboratory');
 $pdf->SetTitle('Anonymous Sample Registration Receipt');
