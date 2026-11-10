@@ -239,6 +239,7 @@ $MenuItems['AccountsReceivable']['Maintenance']['URL'] = array('/CustomersPostin
 
 /***********************************************/
 $MenuItems['Purchases']['Transactions']['Caption'] = array(_('Request for Quotation (RFQ)'),
+                                                           _('Awarded RFQs'),
                                                            _('Purchase\'s Order'),
                                                            _('Goods Received Note'),
                                                            _('Supplier\'s Purchase Invoice'),
@@ -250,6 +251,7 @@ $MenuItems['Purchases']['Transactions']['Caption'] = array(_('Request for Quotat
 
 
 $MenuItems['Purchases']['Transactions']['URL'] = array('/RFQ.php',
+                                                       '/RFQ.php?awarded=1',
                                                        '/PurchaseOder.php?new=YES',
                                                        '/PurchaseOrderList.php',
                                                        '/GoodsReceivedNote.php',
