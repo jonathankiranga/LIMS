@@ -76,6 +76,18 @@ for ($i = 0; $i < count($ModuleLink); $i++) {
         }
     }
 
+    // Awarded RFQs is a dedicated Purchases transaction entry.
+    // Keep it subject to the same RFQ.php page-security check as the main RFQ page.
+    if ($Module === 'Purchases') {
+        $rfqPageSecurity = isset($_SESSION['PageSecurityArray']['RFQ.php'])
+            ? $_SESSION['PageSecurityArray']['RFQ.php']
+            : null;
+
+        if (in_array($rfqPageSecurity, $_SESSION['AllowedPageSecurityTokens']) || !isset($rfqPageSecurity)) {
+            echo "menuItems.push(['||Awarded RFQs', 'RFQ.php?awarded=1', 'fa-file-alt']);\\n";
+        }
+    }
+
     // Add Reports
     if (isset($MenuItems[$Module]['Reports']['Caption'])) {
         echo "menuItems.push(['|Reports & Inquiries', '', 'fa-arrow-right']);\n";
