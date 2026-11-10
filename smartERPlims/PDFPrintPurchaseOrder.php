@@ -44,8 +44,8 @@ $SQL = "SELECT
     include('includes/PDFStarter.php');
     $headerName="Purchase Order";
     
-    $pdf->addInfo('Title',_('Purchase Invoice'));
-    $pdf->addInfo('Subject',_('Purchase Invoice'));
+    $pdf->addInfo('Title',_('Purchase Order'));
+    $pdf->addInfo('Subject',_('Purchase Order'));
     $pdf->addInfo('Creator',_('SmartERP'));
      
     $FontSize = 12;
