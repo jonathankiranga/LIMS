@@ -156,3 +156,8 @@ CREATE TABLE IF NOT EXISTS rfq_email_log (
   KEY idx_rfq_email_log_attempted (attempted_at),
   CONSTRAINT fk_rfq_email_log_header FOREIGN KEY (rfq_id) REFERENCES rfq_header(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Register the supplier-response Excel export in the page-security catalogue.
+-- It uses the same access level as RFQ.php; the export is an RFQ management function.
+INSERT IGNORE INTO scripts (script, pagesecurity, description)
+VALUES ('RFQInviteExcel.php', 0, 'Download RFQ Supplier Responses (Excel)');
