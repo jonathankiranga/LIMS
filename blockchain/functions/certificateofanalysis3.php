@@ -487,11 +487,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
     $html .= '<div style="font-family: montserrat, sans-serif; font-size: 9px; font-weight: bold; margin-bottom: 3px;">' . htmlspecialchars((string)($samples[0]['StandardName'] ?? ''), ENT_QUOTES, 'UTF-8') . '</div>';
             $html .= '<table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #ddd;">
                 <thead>
-    <tr style="background-color: #3498db; color: white; font-size: 8px;">
-        <th nobr="true" style="border: 1px solid #ddd; padding: 4px; text-align: left; width: 45%; white-space: nowrap;">Parameter</th>
-        <th nobr="true" style="border: 1px solid #ddd; padding: 4px; text-align: left; width: 15%; white-space: nowrap;">Unit</th>
-        <th nobr="true" style="border: 1px solid #ddd; padding: 4px; text-align: left; width: 15%; white-space: nowrap;">Results</th>
-        <th nobr="true" style="border: 1px solid #ddd; padding: 4px; text-align: left; width: 25%; white-space: nowrap;">Method</th>
+    <tr style="background-color: #3498db; color: white; font-size: 10px;">
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 4px; text-align: left; width: 30%; white-space: nowrap;">Parameter</th>
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 4px; text-align: left; width: 15%; white-space: nowrap;">Unit</th>
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 4px; text-align: left; width: 20%; white-space: nowrap;">Results</th>
+        <th nobr="true" style="font-family: montserrat; font-size: 10px; font-weight: bold; border: 1px solid #ddd; padding: 4px; text-align: left; width: 35%; white-space: nowrap;">Method</th>
     </tr>
 </thead><tbody>';
      // Generate table rows dynamically
@@ -503,10 +503,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_REQUEST['preview'])) {
             : htmlentities($validatedresults['results'], ENT_QUOTES, 'UTF-8');
 
         $html .= '<tr>
-            <td style="border: 1px solid #ddd; padding: 17px; width: 45%;">' . accreditationParameterName($sample) . '</td>
+            <td style="border: 1px solid #ddd; padding: 17px; width: 30%;">' . accreditationParameterName($sample) . '</td>
             <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . htmlspecialchars((string)($sample['UnitOfMeasure'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 15%;">' . $resutlts . '</td>
-            <td style="border: 1px solid #ddd; padding: 8px; width: 25%;">' . $sample['Method'] . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 20%;">' . $resutlts . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; width: 35%;">' . $sample['Method'] . '</td>
           </tr>';
     }
 
