@@ -42,6 +42,9 @@ $SQL = "SELECT
     
     $PaperSize='A4_Landscape';
     include('includes/PDFStarter.php');
+    // This report uses explicit top-origin PDF coordinates and manual row pagination.
+    // Prevent TCPDF Cell() calls in addTextWrap() from inserting automatic page breaks.
+    $pdf->SetAutoPageBreak(false, 0);
     $headerName="Purchase Order";
     
     $pdf->addInfo('Title',_('Purchase Order'));
