@@ -731,11 +731,28 @@ echo '</div>';
   if(full){unit.add(new Option('Full Unit — '+fullLabel,full));}
   if(loose&&loose!==full){unit.add(new Option('Loose Unit — '+looseLabel,loose));}
   unit.disabled=false;
-  if(factorLabel){factorLabel.textContent='1 Pack = '+(isFinite(factor)&&factor>0?factor:1)+' '+(looseLabel||fullLabel);}
+  if(factorLabel){
+   var validFactor=isFinite(factor)&&factor>=1?factor:1;
+   factorLabel.textContent='1 '+fullLabel+' = '+validFactor+' '+(looseLabel||fullLabel)+'. Select a unit to see the PO conversion.';
+  }
+  updateRfqUnitExplanation(row);
+ }
+ function updateRfqUnitExplanation(row){
+  var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select'),factorLabel=row.querySelector('.rfq-unit-factor');
+  if(!item||!unit||!factorLabel||!unit.value){return;}
+  var opt=item.options[item.selectedIndex],fullLabel=opt.getAttribute('data-full-label')||'Full Unit';
+  var looseLabel=opt.getAttribute('data-loose-label')||'Loose Unit';
+  var factor=parseFloat(opt.getAttribute('data-factor')||'1');if(!isFinite(factor)||factor<1){factor=1;}
+  if(unit.value===(opt.getAttribute('data-loose-unit')||'')&&unit.value!==(opt.getAttribute('data-full-unit')||'')){
+   factorLabel.textContent='Quantity entered in '+looseLabel+'. '+factor+' '+looseLabel+' = 1 '+fullLabel+'. Supplier quotes per '+looseLabel+'; PO quantity is converted to '+fullLabel+'.';
+  }else{
+   factorLabel.textContent='Quantity entered in '+fullLabel+'. 1 '+fullLabel+' = '+factor+' '+looseLabel+'. Supplier quotes per '+fullLabel+'.';
+  }
  }
  function bindRfqItem(row){
-  var item=row.querySelector('.rfq-item-select');
+  var item=row.querySelector('.rfq-item-select'),unit=row.querySelector('.rfq-unit-select');
   if(item){item.addEventListener('change',function(){configureRfqUnit(row);var opt=item.options[item.selectedIndex],desc=row.querySelector('.rfq-description');if(opt&&opt.value&&desc){desc.value=opt.getAttribute('data-description')||desc.value;}});}
+  if(unit){unit.addEventListener('change',function(){updateRfqUnitExplanation(row);});}
  }
  document.querySelectorAll('#rfqLines tbody tr').forEach(bindRfqItem);
  var add=document.getElementById('addRfqLine');
