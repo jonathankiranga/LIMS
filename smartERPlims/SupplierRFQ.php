@@ -55,7 +55,7 @@ if ($invitation['rfq_status'] !== 'issued' || strtotime($invitation['closing_at'
 $lineResult = DB_query("SELECT rl.*,sm.descrip AS inventory_name,u.descrip AS requested_unit_description
     FROM rfq_lines rl
     LEFT JOIN stockmaster sm ON sm.itemcode COLLATE utf8mb4_unicode_ci = rl.itemcode COLLATE utf8mb4_unicode_ci
-    LEFT JOIN unit u ON u.code=rl.requested_pack
+    LEFT JOIN unit u ON u.code=CASE rl.requested_pack WHEN 'units' THEN sm.units WHEN 'subunits' THEN sm.subunits ELSE rl.requested_pack END
     WHERE rl.rfq_id=" . (int)$invitation['rfq_id'] . " ORDER BY rl.line_no", $db);
 $lines = array();
 while ($line = DB_fetch_array($lineResult)) { $lines[] = $line; }
