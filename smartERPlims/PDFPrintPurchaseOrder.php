@@ -81,7 +81,7 @@ $SQL = "SELECT
       ORDER BY PurchaseLine.code";
 
      
-     $FontSize = 12;
+     $FontSize = ((string)$myrow['documenttype'] === '18') ? 9 : 12;
      $YPos=$firstrowpos-20;
      $R1=0; // VAT amount
      $R2=0; // Subtotal before discount
@@ -89,6 +89,7 @@ $SQL = "SELECT
      $R4=0; // Discount amount
      
      $Results=DB_query($SQL,$db);
+     $purchaseRowIndex = 0;
      while($rows = DB_fetch_array($Results)){
          if($YPos < $lastrow){
              include('includes/PDFpurchaseheader.inc');
@@ -120,7 +121,17 @@ $SQL = "SELECT
          }
 
          $QTY = rtrim(rtrim(number_format($lineQuantity,4,'.',','), '0'), '.');
-         
+
+         // Subtle alternating row shading and separators for the modern LPO.
+         if ((string)$myrow['documenttype'] === '18') {
+             if (($purchaseRowIndex % 2) === 1) {
+                 $pdf->SetFillColor(247, 249, 252);
+                 $pdf->Rect(42, $pdf->h - $YPos - 17, 758, 21, 'F');
+             }
+             $pdf->SetTextColor(55, 65, 81);
+             $pdf->SetFont('helvetica', '', 9);
+         }
+
           $LeftOvers = $pdf->addTextWrap(42, $YPos,95, $FontSize, $rows['barcode'],'left');
           $LeftOvers = $pdf->addTextWrap(145, $YPos,145, $FontSize, $rows['description'],'left');
           $LeftOvers = $pdf->addTextWrap(300, $YPos, 75, $FontSize, $units,'right');
@@ -131,12 +142,23 @@ $SQL = "SELECT
           $LeftOvers = $pdf->addTextWrap(630, $YPos, 75, $FontSize, number_format($rows['vatamount'],2),'right');
           $LeftOvers = $pdf->addTextWrap(720,$YPos,90,$FontSize,number_format($lineInvoiceAmount,2),'right');
 
+         if ((string)$myrow['documenttype'] === '18') {
+             $pdf->SetDrawColor(225, 230, 237);
+             $pdf->SetLineWidth(0.35);
+             $pdf->line(42, $YPos - 6, 800, $YPos - 6);
+         }
+         $purchaseRowIndex++;
          $YPos -= $line_height * 2;
                
         }
      
            
     $zYpos = $Bottom_Margin+80;
+    if ((string)$myrow['documenttype'] === '18') {
+        $pdf->SetTextColor(55, 65, 81);
+        $pdf->SetFont('helvetica', '', 9);
+        $FontSize = 9;
+    }
     $LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100,$zYpos,90,$FontSize, number_format($R2,2),'right');
     
     $zYpos -= $line_height *2;
