@@ -69,6 +69,7 @@ if (isset($_SESSION['StockID'])) {
                          FROM stockmaster sm
                          LEFT JOIN unit unitfull ON sm.units = unitfull.code
                          LEFT JOIN stockcategory sc ON sc.categoryid = sm.category
+                         WHERE (sm.labid IS NULL OR TRIM(CAST(sm.labid AS CHAR)) = '')
                          ORDER BY sm.inactive, sm.descrip ASC", $db);
 
     while ($row = DB_fetch_array($results)) {
@@ -149,13 +150,9 @@ if (isset($_SESSION['StockID'])) {
 </div>
 
 <div style="margin-bottom:10px;">
-    <label for="catFilter"><b>Filter by Category:</b></label>
-    <select id="catFilter" style="padding:4px 8px; font-size:13px;">
-        <option value="">All Categories</option>
-        <?php foreach ($categories as $c): ?>
-            <option value="<?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($c['name'], ENT_QUOTES); ?></option>
-        <?php endforeach; ?>
-    </select>
+    <label for="stockNameFilter"><b>Search Stock Name:</b></label>
+    <input type="search" id="stockNameFilter" placeholder="Type an inventory name..."
+           style="padding:5px 8px; font-size:13px; width:280px; max-width:100%;">
     <span id="rowCount" style="margin-left:15px; color:#666;"></span>
 </div>
 
@@ -239,15 +236,16 @@ if (isset($_SESSION['StockID'])) {
         }
     });
 
-    // Category dropdown filter
-    document.getElementById('catFilter').addEventListener('change', function(){
-        var val = this.value;
+    // Search inventory by stock name; category remains visible in the grid.
+    document.getElementById('stockNameFilter').addEventListener('input', function(){
+        var val = this.value.trim().toLowerCase();
         if (!val) {
-            table.clearHeaderFilter();
             table.setData(allData);
-        } else {
-            table.setData(allData.filter(function(r){ return r.category === val; }));
+            return;
         }
+        table.setData(allData.filter(function(r){
+            return (r.descrip || '').toLowerCase().indexOf(val) !== -1;
+        }));
     });
 
     // Action panel
