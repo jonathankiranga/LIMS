@@ -129,7 +129,7 @@ $SQL = "SELECT
                  $pdf->Rect(42, $pdf->h - $YPos - 17, 758, 21, 'F');
              }
              $pdf->SetTextColor(55, 65, 81);
-             $pdf->SetFont('helvetica', '', 9);
+             $pdf->SetFont('', '', 9);
          }
 
           $LeftOvers = $pdf->addTextWrap(42, $YPos,95, $FontSize, $rows['barcode'],'left');
@@ -156,7 +156,7 @@ $SQL = "SELECT
     $zYpos = $Bottom_Margin+80;
     if ((string)$myrow['documenttype'] === '18') {
         $pdf->SetTextColor(55, 65, 81);
-        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetFont('', '', 9);
         $FontSize = 9;
     }
     $LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-100,$zYpos,90,$FontSize, number_format($R2,2),'right');
