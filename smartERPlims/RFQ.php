@@ -582,6 +582,9 @@ echo '</div>';
 if (isset($_GET['awarded'])) {
     $awardedRows = DB_query("SELECT h.id,h.rfq_no,h.title,h.currencycode,h.awarded_supplier_code,
         h.awarded_quote_id,h.po_documentno,h.created_at,c.customer,
+        (SELECT COUNT(*) FROM PurchaseHeader ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_count,
+        (SELECT GROUP_CONCAT(ph.documentno ORDER BY ph.documentno DESC SEPARATOR ', ')
+            FROM PurchaseHeader ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_numbers,
         (SELECT COUNT(*) FROM rfq_lines rl WHERE rl.rfq_id=h.id) AS line_count,
         (SELECT COUNT(*) FROM rfq_quote_lines ql WHERE ql.quote_id=h.awarded_quote_id) AS quoted_line_count,
         (SELECT SUM(ql.unit_price * rl.quantity * CASE WHEN q.tax_inclusive=1 THEN 1 ELSE 1 + (ql.tax_rate / 100) END)
@@ -600,17 +603,15 @@ if (isset($_GET['awarded'])) {
         echo '<div class="table-responsive"><table class="table table-bordered rfq-register"><thead><tr><th>RFQ No.</th><th>Request</th><th>Awarded Supplier</th><th>Quotation Total</th><th>Lines</th><th>Purchase Order</th><th>Action</th></tr></thead><tbody>';
         while ($awarded = DB_fetch_array($awardedRows)) {
             $supplierName = trim((string)$awarded['customer']) !== '' ? $awarded['customer'] : $awarded['awarded_supplier_code'];
-            $poCreated = trim((string)$awarded['po_documentno']) !== '';
+            $poCount = (int)$awarded['po_count'];
+            $poNumbers = trim((string)$awarded['po_numbers']);
             echo '<tr><td><strong>' . rfq_h($awarded['rfq_no']) . '</strong></td>';
             echo '<td>' . rfq_h($awarded['title']) . '</td>';
             echo '<td>' . rfq_h($supplierName) . '<br><small>' . rfq_h($awarded['awarded_supplier_code']) . '</small></td>';
             echo '<td>' . rfq_h($awarded['currencycode']) . ' ' . number_format((float)$awarded['quotation_total'], 2) . '</td>';
             echo '<td>' . (int)$awarded['quoted_line_count'] . ' / ' . (int)$awarded['line_count'] . '</td>';
-            if ($poCreated) {
-                echo '<td><strong>' . rfq_h($awarded['po_documentno']) . '</strong></td><td><span class="label label-success">PO created</span></td>';
-            } else {
-                echo '<td><span class="text-muted">Not created</span></td><td><a class="btn btn-primary btn-sm" href="PurchaseOder.php?rfq_quote_id=' . (int)$awarded['awarded_quote_id'] . '">Create Purchase Order</a></td>';
-            }
+            echo '<td>' . ($poCount > 0 ? '<strong>' . rfq_h($poNumbers) . '</strong><br><small>' . $poCount . ' LPO(s) created</small>' : '<span class="text-muted">No LPO created</span>') . '</td>';
+            echo '<td><a class="btn btn-primary btn-sm" href="PurchaseOder.php?rfq_quote_id=' . (int)$awarded['awarded_quote_id'] . '">' . ($poCount > 0 ? 'Create Another LPO' : 'Create LPO') . '</a></td>';
             echo '</tr>';
         }
         echo '</tbody></table></div>';
@@ -681,10 +682,16 @@ if (isset($_GET['compare'])) {
         $head = DB_fetch_array($hr);
         if ($head['status'] === 'awarded') {
             echo '<div class="alert alert-success">Awarded to supplier ' . rfq_h($head['awarded_supplier_code']) . '. Selected quotation ID: ' . (int)$head['awarded_quote_id'] . '.</div>';
-            if (empty($head['po_documentno'])) {
-                echo '<p><a class="btn btn-primary" href="PurchaseOder.php?rfq_quote_id=' . (int)$head['awarded_quote_id'] . '">Create Purchase Order from awarded quotation</a></p>';
-            } else {
-                echo '<p class="alert alert-info">Purchase Order created: ' . rfq_h($head['po_documentno']) . '</p>';
+            $relatedPos = DB_query("SELECT documentno FROM PurchaseHeader WHERE documenttype=18 AND rfq_quote_id=" .
+                (int)$head['awarded_quote_id'] . " ORDER BY documentno DESC", $db);
+            $relatedPoNumbers = array();
+            while ($relatedPo = DB_fetch_array($relatedPos)) {
+                $relatedPoNumbers[] = $relatedPo['documentno'];
+            }
+            echo '<p><a class="btn btn-primary" href="PurchaseOder.php?rfq_quote_id=' . (int)$head['awarded_quote_id'] . '">' .
+                (count($relatedPoNumbers) > 0 ? 'Create Another LPO' : 'Create LPO from awarded quotation') . '</a></p>';
+            if (count($relatedPoNumbers) > 0) {
+                echo '<p class="alert alert-info">LPOs created from this award: ' . rfq_h(implode(', ', $relatedPoNumbers)) . '</p>';
             }
         }
         echo '<div class="rfq-compare-head"><div><h2 class="rfq-compare-title">Request ' . rfq_h($head['rfq_no']) . '</h2><p class="rfq-compare-subtitle">' . rfq_h($head['title']) . ' &nbsp;·&nbsp; Closing ' . rfq_h($head['closing_at']) . '</p></div><div class="rfq-actions"><span class="rfq-status">' . rfq_h($head['status']) . '</span><a class="btn btn-default" href="RFQ.php">Back to RFQ Register</a></div></div>';
