@@ -29,9 +29,9 @@ if (isset($_GET['rfq_quote_id']) && ctype_digit((string)$_GET['rfq_quote_id'])) 
         JOIN rfq_header h ON h.id=q.rfq_id
         JOIN creditors c ON c.itemcode=q.supplier_code
         WHERE q.id=" . $rfqQuoteId . " AND h.awarded_quote_id=q.id
-          AND h.status='awarded' AND h.po_documentno IS NULL", $db);
+          AND h.status='awarded'", $db);
     if (DB_num_rows($quoteResult) !== 1) {
-        $rfqPrefillError = 'This RFQ quotation has not been awarded, or a Purchase Order has already been created from it.';
+        $rfqPrefillError = 'This RFQ quotation has not been awarded or is no longer available for Purchase Order creation.';
     } else {
         $rfqQuote = DB_fetch_array($quoteResult);
         $quoteLinesResult = DB_query("SELECT rl.id,rl.itemcode,rl.description,rl.quantity,rl.requested_pack,
@@ -183,9 +183,10 @@ If($_SESSION['SINGLEUSER']=='Singleuser'){
         DB_query("Delete from `PurchaseLine` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
         DB_query("delete from `PurchaseHeader` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
         if (isset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'])) {
-            DB_query("UPDATE rfq_header SET po_documentno=NULL WHERE id=" . (int)$_SESSION['RFQHeaderID'] .
-                " AND awarded_quote_id=" . (int)$_SESSION['RFQQuoteID'] . " AND po_documentno='" .
-                DB_escape_string($_SESSION['CompleteDocument']) . "'", $db);
+            DB_query("UPDATE rfq_header SET po_documentno=(SELECT documentno FROM PurchaseHeader
+                WHERE documenttype=18 AND rfq_quote_id=" . (int)$_SESSION['RFQQuoteID'] .
+                " ORDER BY documentno DESC LIMIT 1) WHERE id=" . (int)$_SESSION['RFQHeaderID'] .
+                " AND awarded_quote_id=" . (int)$_SESSION['RFQQuoteID'], $db);
         }
         unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
         prnMsg('Purchase order :'.$_SESSION['CompleteDocument'].' has been Deleted.');
