@@ -278,6 +278,7 @@ $pdf->__destruct();
                     LEFT JOIN unit uf ON sm.units=uf.code
                     WHERE (sm.isstock_3=0 OR sm.isstock_3 IS NULL)
                       AND (sm.inactive=0 OR sm.inactive IS NULL)
+                      AND (sm.labid IS NULL OR TRIM(sm.labid) = '')
                   ) i
                   ORDER BY i.stockname";
 
