@@ -73,7 +73,7 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
     // Item table heading.
     $HeaderYPos = 340;
     $pdf->SetFillColor($navy[0], $navy[1], $navy[2]);
-    $pdf->Rect(42, $pdf->h - $HeaderYPos - 25, 758, 25, 'F');
+    $pdf->Rect(42, $pdf->getPageHeight() - $HeaderYPos - 25, 758, 25, 'F');
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('', 'B', 8);
     $pdf->addTextWrap(48, 323, 85, 8, _('ITEM CODE'), 'left');
