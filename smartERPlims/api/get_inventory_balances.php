@@ -58,6 +58,8 @@ LEFT JOIN unit u ON u.code = sm.units
 WHERE (sm.isstock_1 = 1 OR sm.isstock_2 = 1 OR sm.isstock_4 = 1 OR sm.isstock_5 = 1 OR sm.isstock_6 = 1)
   AND (sm.inactive IS NULL OR sm.inactive = 0)
   AND (sm.labid IS NULL OR TRIM(sm.labid) = '')
+  AND COALESCE(sm.is_test_parameter,0)=0
+  AND COALESCE(sm.is_standard_method,0)=0
 GROUP BY sm.itemcode, sm.descrip, sm.category, category_name, sl.store, store_name, unit_code, unit_name, sm.partperunit, sm.averagestock
 ORDER BY sm.descrip ASC, store_name ASC";
 
