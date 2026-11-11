@@ -356,7 +356,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
     $selectedQuoteIds = isset($_POST['quote_choice']) && is_array($_POST['quote_choice'])
         ? array_values(array_unique(array_map('intval', $_POST['quote_choice']))) : array();
     $quoteId = count($selectedQuoteIds) === 1 ? $selectedQuoteIds[0] : 0;
-    $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,h.status FROM rfq_quotes q
+    $qr = DB_query("SELECT q.id,q.supplier_code,q.rfq_id,q.tax_inclusive,h.status FROM rfq_quotes q
         JOIN rfq_header h ON h.id=q.rfq_id WHERE q.id=" . $quoteId . " AND q.rfq_id=" . $rfqId, $db);
     if ($error !== '' || count($selectedQuoteIds) !== 1 || $quoteId < 1 || DB_num_rows($qr) !== 1) {
         $error = 'Select exactly one supplier quotation belonging to this RFQ.';
@@ -365,12 +365,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['award_quote'])) {
         if (!in_array($selectedQuote['status'], array('issued','closed'), true)) {
             $error = 'This RFQ cannot be awarded in its current status.';
         } else {
+            DB_Txn_Begin($db);
             DB_query("UPDATE rfq_header SET status='awarded',awarded_supplier_code='" .
                 DB_escape_string($selectedQuote['supplier_code']) . "',awarded_quote_id=" . $quoteId .
                 " WHERE id=" . $rfqId . " AND status IN ('issued','closed')", $db);
             if (mysqli_affected_rows($db) === 1) {
-                $message = 'Quotation awarded to supplier ' . $selectedQuote['supplier_code'] . '. It is now available in Purchases > Suppliers > Awarded RFQs for Purchase Order creation.';
+                DB_query("UPDATE creditors SET VATinclusive=" . (int)$selectedQuote['tax_inclusive'] .
+                    " WHERE itemcode='" . DB_escape_string($selectedQuote['supplier_code']) . "'", $db);
+                if (DB_error_no($db) > 0) {
+                    DB_Txn_Rollback($db);
+                    $error = 'The quotation could not be awarded because the supplier VAT setting could not be updated. No award was saved.';
+                } else {
+                    DB_Txn_Commit($db);
+                    $message = 'Quotation awarded to supplier ' . $selectedQuote['supplier_code'] .
+                        '. The supplier VAT-inclusive setting has also been updated. It is now available in Purchases > Suppliers > Awarded RFQs for Purchase Order creation.';
+                }
             } else {
+                DB_Txn_Rollback($db);
                 $error = 'The RFQ has already been awarded or its status changed. Refresh and review it.';
             }
         }
