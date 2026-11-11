@@ -43,6 +43,8 @@ $r = mysqli_query($db, "SELECT sm.itemcode, sm.descrip, IFNULL(sm.category,'') A
   WHERE (sm.isstock_1 = 1 OR sm.isstock_2 = 1 OR sm.isstock_4 = 1 OR sm.isstock_5 = 1 OR sm.isstock_6 = 1)
     AND (sm.inactive IS NULL OR sm.inactive = 0)
     AND (sm.labid IS NULL OR TRIM(sm.labid) = '')
+    AND COALESCE(sm.is_test_parameter,0)=0
+    AND COALESCE(sm.is_standard_method,0)=0
   ORDER BY sm.descrip");
 while ($row = mysqli_fetch_assoc($r)) {
   $items[] = $row;
@@ -80,7 +82,9 @@ $storeMap = [];
 $r = mysqli_query($db, "SELECT DISTINCT sl.itemcode, COALESCE(sl.store,'') AS store, COALESCE(st.Storename,'') AS store_name
   FROM stockledger sl
   LEFT JOIN stores st ON st.code = sl.store
-  WHERE sl.itemcode IN (SELECT itemcode FROM stockmaster WHERE (isstock_1=1 OR isstock_2=1 OR isstock_4=1 OR isstock_5=1 OR isstock_6=1) AND (inactive IS NULL OR inactive=0) AND (labid IS NULL OR TRIM(labid)=''))");
+  WHERE sl.itemcode IN (SELECT itemcode FROM stockmaster WHERE (isstock_1=1 OR isstock_2=1 OR isstock_4=1 OR isstock_5=1 OR isstock_6=1) AND (inactive IS NULL OR inactive=0) AND (labid IS NULL OR TRIM(labid)='')
+      AND COALESCE(is_test_parameter,0)=0
+      AND COALESCE(is_standard_method,0)=0)");
 while ($row = mysqli_fetch_assoc($r)) {
   $storeMap[$row['itemcode']][$row['store']] = $row['store_name'];
 }
