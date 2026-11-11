@@ -57,6 +57,7 @@ LEFT JOIN stores st ON st.code = sl.store
 LEFT JOIN unit u ON u.code = sm.units
 WHERE (sm.isstock_1 = 1 OR sm.isstock_2 = 1 OR sm.isstock_4 = 1 OR sm.isstock_5 = 1 OR sm.isstock_6 = 1)
   AND (sm.inactive IS NULL OR sm.inactive = 0)
+  AND (sm.labid IS NULL OR TRIM(sm.labid) = '')
 GROUP BY sm.itemcode, sm.descrip, sm.category, category_name, sl.store, store_name, unit_code, unit_name, sm.partperunit, sm.averagestock
 ORDER BY sm.descrip ASC, store_name ASC";
 
