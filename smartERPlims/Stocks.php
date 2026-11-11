@@ -23,9 +23,9 @@ if(isset($_POST['submit'])){
            $sql=sprintf("INSERT INTO `stockmaster`
            (`itemcode` ,`isstock`,isstock_1 ,isstock_2 ,isstock_3 ,isstock_4 ,isstock_5 ,isstock_6 ,
            `barcode`,`descrip` ,`postinggroup` ,`averagestock`,`reorderlevel`,`eoq` ,
-           `category` ,`units` ,`inactive`,`nextserialno` ,`container`,`sellingprice`,production,requireserial,is_test_parameter,is_standard_method)
+           `category` ,`units` ,`inactive`,`nextserialno` ,`container`,`sellingprice`,production,requireserial)
      VALUES
-           ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',0,%f ,%f,'%s','%s','%s',1,'%s',%f,'%s','%s','%s','%s')",
+           ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',0,%f ,%f,'%s','%s','%s',1,'%s',%f,'%s','%s''%s')",
                $itemcode,$_POST['isstock'] ?? 0,
                 $_POST['isstock_1'] ?? 0,
                $_POST['isstock_2'] ?? 0,
@@ -45,8 +45,7 @@ if(isset($_POST['submit'])){
             ,$_POST['sellingprice']
             ,$_POST['ProductionCategory']
             ,$_POST['requireserial'] ?? 0
-            ,$_POST['is_test_parameter'] ?? 0
-            ,$_POST['is_standard_method'] ?? 0);
+             );
        
         }else{
              $sql="select nothing";
@@ -73,8 +72,6 @@ if(isset($_POST['submit'])){
             ,`sellingprice`= %f
             ,production='%s'
             ,requireserial='%s'
-            ,is_test_parameter='%s'
-            ,is_standard_method='%s'
         WHERE `itemcode` = '%s' ",
                $_POST['isstock'] ?? 0 ,$_POST['isstock_1'] ?? 0,
          $_POST['isstock_2'] ?? 0,
@@ -90,8 +87,6 @@ if(isset($_POST['submit'])){
               ,$_POST['container'],$_POST['sellingprice']
               ,$_POST['ProductionCategory']
               ,$_POST['requireserial'] ?? 0
-              ,$_POST['is_test_parameter'] ?? 0
-              ,$_POST['is_standard_method'] ?? 0
               ,$_POST['StockID']);
    }
    
@@ -257,10 +252,7 @@ echo '<tr><td>' . _('Stock Classification').'</td><td>';
 
 <?php
 echo  '</td></tr>';
-echo '<tr><td><strong>Laboratory record classification</strong><br><small>Internal LIMS classification. These records are not purchasable inventory and are excluded from RFQ item selection.</small></td><td>';
-echo '<div class="form-check"><input class="form-check-input" type="checkbox" name="is_test_parameter" value="1" id="isTestParameter" ' . (!empty($_POST['is_test_parameter']) ? 'checked' : '') . '><label class="form-check-label" for="isTestParameter">Test parameter — exclude from RFQs</label></div>';
-echo '<div class="form-check"><input class="form-check-input" type="checkbox" name="is_standard_method" value="1" id="isStandardMethod" ' . (!empty($_POST['is_standard_method']) ? 'checked' : '') . '><label class="form-check-label" for="isStandardMethod">Laboratory standard / method record — exclude from RFQs</label></div>';
-echo '</td></tr>';
+
  
     if(isset($_GET['StockID'])) {
        ?>
