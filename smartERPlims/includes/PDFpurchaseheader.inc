@@ -18,9 +18,9 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
     if (!empty($_SESSION['LogoFile']) && file_exists($_SESSION['LogoFile'])) {
         $pdf->addJpegFromFile($_SESSION['LogoFile'], 42, 510, 0, 58);
     }
-    $pdf->SetFont('helvetica', 'B', 22);
+    $pdf->SetFont('', 'B', 22);
     $pdf->addText(570, 535, 22, _('PURCHASE ORDER'));
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('', '', 9);
     $pdf->SetTextColor($muted[0], $muted[1], $muted[2]);
     $pdf->addTextWrap(570, 515, 230, 9, _('LPO No.').' '.$myrow['documentno'], 'right');
     $pdf->addTextWrap(570, 500, 230, 9, _('Order Date').': '.ConvertSQLDate($myrow['docdate']), 'right');
@@ -31,10 +31,10 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
 
     // Company and supplier panels.
     $pdf->SetTextColor($navy[0], $navy[1], $navy[2]);
-    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetFont('', 'B', 9);
     $pdf->addText(48, 445, 9, _('DELIVER TO'));
     $pdf->addText(438, 445, 9, _('SUPPLIER'));
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('', '', 9);
     $pdf->SetTextColor(55, 65, 81);
     $companyLines = array(
         htmlspecialcharsLocal_decode($_SESSION['CompanyRecord']['coyname']),
@@ -67,15 +67,15 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
         }
     }
     $pdf->line(42, 450, 800, 450);
-    $pdf->line(420, 450, 420, 365);
-    $pdf->line(42, 365, 800, 365);
+    $pdf->line(420, 450, 420, 355);
+    $pdf->line(42, 355, 800, 355);
 
     // Item table heading.
     $HeaderYPos = 340;
     $pdf->SetFillColor($navy[0], $navy[1], $navy[2]);
     $pdf->Rect(42, $pdf->h - $HeaderYPos - 25, 758, 25, 'F');
     $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetFont('', 'B', 8);
     $pdf->addTextWrap(48, 323, 85, 8, _('ITEM CODE'), 'left');
     $pdf->addTextWrap(145, 323, 145, 8, _('DESCRIPTION'), 'left');
     $pdf->addTextWrap(300, 323, 75, 8, _('UNIT'), 'right');
@@ -89,13 +89,13 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
     $firstrowpos = 305;
     $lastrow = $Bottom_Margin + 150;
     $pdf->SetTextColor(55, 65, 81);
-    $pdf->SetFont('helvetica', '', 8.5);
+    $pdf->SetFont('', '', 8.5);
     $line_height = 13;
     $SummaryYpos = $Bottom_Margin + 112;
 
     // Financial summary labels, aligned with the amounts printed by the LPO.
     $pdf->SetTextColor($muted[0], $muted[1], $muted[2]);
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('', '', 9);
     $summaryLabelY = $Bottom_Margin + 80;
     foreach (array(_('SUBTOTAL'), _('DISCOUNT'), _('VAT'), _('TOTAL')) as $summaryLabel) {
         $pdf->addTextWrap(500, $summaryLabelY, 200, 9, $summaryLabel, 'right');
