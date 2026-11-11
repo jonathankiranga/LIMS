@@ -92,6 +92,19 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
     $pdf->SetFont('helvetica', '', 8.5);
     $line_height = 13;
     $SummaryYpos = $Bottom_Margin + 112;
+
+    // Financial summary labels, aligned with the amounts printed by the LPO.
+    $pdf->SetTextColor($muted[0], $muted[1], $muted[2]);
+    $pdf->SetFont('helvetica', '', 9);
+    $summaryLabelY = $Bottom_Margin + 80;
+    foreach (array(_('SUBTOTAL'), _('DISCOUNT'), _('VAT'), _('TOTAL')) as $summaryLabel) {
+        $pdf->addTextWrap(500, $summaryLabelY, 200, 9, $summaryLabel, 'right');
+        $summaryLabelY -= $line_height * 2;
+    }
+    $pdf->line(580, $Bottom_Margin + 100, $Page_Width - $Right_Margin, $Bottom_Margin + 100);
+    $pdf->line(580, $Bottom_Margin + 75, $Page_Width - $Right_Margin, $Bottom_Margin + 75);
+    $pdf->line(580, $Bottom_Margin + 50, $Page_Width - $Right_Margin, $Bottom_Margin + 50);
+    $pdf->line(580, $Bottom_Margin + 25, $Page_Width - $Right_Margin, $Bottom_Margin + 25);
 } else {
 /* $Id: PDFQuotationPageHeader.inc 6540 2014-01-15 02:18:07Z rchacon $*/
 /* pdf-php by R&OS code to set up a new sales order page */
@@ -235,6 +248,6 @@ $pdf->partEllipse($Page_Width-$Right_Margin-10, $Bottom_Margin+10,270,350,10,10)
 /*Finally join up to the top right corner where started */
 $pdf->line($Page_Width-$Right_Margin, $Bottom_Margin+10,$Page_Width-$Right_Margin, $Bottom_Margin+350);
 
+}
 ?>
 
-}
