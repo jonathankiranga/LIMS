@@ -25,7 +25,7 @@ if(isset($_POST['submit'])){
            `barcode`,`descrip` ,`postinggroup` ,`averagestock`,`reorderlevel`,`eoq` ,
            `category` ,`units` ,`inactive`,`nextserialno` ,`container`,`sellingprice`,production,requireserial)
      VALUES
-           ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',0,%f ,%f,'%s','%s','%s',1,'%s',%f,'%s','%s''%s')",
+           ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',0,%f ,%f,'%s','%s','%s',1,'%s',%f,'%s','%s')",
                $itemcode,$_POST['isstock'] ?? 0,
                 $_POST['isstock_1'] ?? 0,
                $_POST['isstock_2'] ?? 0,
