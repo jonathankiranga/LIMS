@@ -279,6 +279,8 @@ $pdf->__destruct();
                     WHERE (sm.isstock_3=0 OR sm.isstock_3 IS NULL)
                       AND (sm.inactive=0 OR sm.inactive IS NULL)
                       AND (sm.labid IS NULL OR TRIM(sm.labid) = '')
+                      AND COALESCE(sm.is_test_parameter,0)=0
+                      AND COALESCE(sm.is_standard_method,0)=0
                   ) i
                   ORDER BY i.stockname";
 
