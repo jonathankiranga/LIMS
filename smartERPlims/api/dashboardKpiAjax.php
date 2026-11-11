@@ -53,10 +53,10 @@ function getModuleKpis($mod) {
             break;
 
         case 'Inventory':
-            $kpis[] = array('label'=>'Total SKUs','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE inactive=0 AND (labid IS NULL OR TRIM(labid)='')"),'icon'=>'fa-boxes','color'=>'blue');
-            $kpis[] = array('label'=>'Lab Items','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE category='LAB' AND inactive=0 AND (labid IS NULL OR TRIM(labid)='')"),'icon'=>'fa-flask','color'=>'purple');
-            $kpis[] = array('label'=>'Categories','value'=>scalar("SELECT COUNT(DISTINCT category) FROM stockmaster WHERE inactive=0 AND (labid IS NULL OR TRIM(labid)='') AND category IS NOT NULL AND category!=''"),'icon'=>'fa-tags','color'=>'green');
-            $kpis[] = array('label'=>'Inactive Items','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE inactive=1 AND (labid IS NULL OR TRIM(labid)='')"),'icon'=>'fa-ban','color'=>'red');
+            $kpis[] = array('label'=>'Total SKUs','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE inactive=0 AND (labid IS NULL OR TRIM(labid)='') AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0"),'icon'=>'fa-boxes','color'=>'blue');
+            $kpis[] = array('label'=>'Lab Items','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE category='LAB' AND inactive=0 AND (labid IS NULL OR TRIM(labid)='') AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0"),'icon'=>'fa-flask','color'=>'purple');
+            $kpis[] = array('label'=>'Categories','value'=>scalar("SELECT COUNT(DISTINCT category) FROM stockmaster WHERE inactive=0 AND (labid IS NULL OR TRIM(labid)='') AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0 AND category IS NOT NULL AND category!=''"),'icon'=>'fa-tags','color'=>'green');
+            $kpis[] = array('label'=>'Inactive Items','value'=>scalar("SELECT COUNT(*) FROM stockmaster WHERE inactive=1 AND (labid IS NULL OR TRIM(labid)='') AND COALESCE(is_test_parameter,0)=0 AND COALESCE(is_standard_method,0)=0"),'icon'=>'fa-ban','color'=>'red');
             break;
 
         case 'cRM':
