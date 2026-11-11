@@ -126,7 +126,7 @@ $SQL = "SELECT
          if ((string)$myrow['documenttype'] === '18') {
              if (($purchaseRowIndex % 2) === 1) {
                  $pdf->SetFillColor(247, 249, 252);
-                 $pdf->Rect(42, $pdf->h - $YPos - 17, 758, 21, 'F');
+                 $pdf->Rect(42, $pdf->getPageHeight() - $YPos - 17, 758, 21, 'F');
              }
              $pdf->SetTextColor(55, 65, 81);
              $pdf->SetFont('', '', 9);
