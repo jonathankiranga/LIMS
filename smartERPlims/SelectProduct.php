@@ -70,6 +70,8 @@ if (isset($_SESSION['StockID'])) {
                          LEFT JOIN unit unitfull ON sm.units = unitfull.code
                          LEFT JOIN stockcategory sc ON sc.categoryid = sm.category
                          WHERE (sm.labid IS NULL OR TRIM(CAST(sm.labid AS CHAR)) = '')
+                           AND COALESCE(sm.is_test_parameter,0)=0
+                           AND COALESCE(sm.is_standard_method,0)=0
                          ORDER BY sm.inactive, sm.descrip ASC", $db);
 
     while ($row = DB_fetch_array($results)) {
