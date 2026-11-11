@@ -167,7 +167,7 @@ $transstart = DB_Txn_Begin($db);
     if (isset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'])) {
         $linkSQL = "UPDATE rfq_header SET po_documentno='" . DB_escape_string($_POST['documentno']) .
             "' WHERE id=" . (int)$_SESSION['RFQHeaderID'] . " AND awarded_quote_id=" .
-            (int)$_SESSION['RFQQuoteID'] . " AND status='awarded' AND po_documentno IS NULL";
+            (int)$_SESSION['RFQQuoteID'] . " AND status='awarded'";
         $linkResult = $db->query($linkSQL);
         if (!$linkResult || $db->affected_rows !== 1) {
             $rfqLinkFailed = true;
