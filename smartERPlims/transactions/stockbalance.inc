@@ -6,6 +6,8 @@
     $ResultIndex=DB_query("select itemcode,descrip FROM stockmaster "
     . " where inactive=0 "
     . "and (labid IS NULL OR TRIM(labid)='') "
+     . "and COALESCE(is_test_parameter,0)=0 "
+     . "and COALESCE(is_standard_method,0)=0 "
     . "and (isstock_1=1 or isstock_2=1 or isstock_4=1 or isstock_5=1) Order by descrip", $db);
     while($value=DB_fetch_array($ResultIndex)){
         if($_POST['Prod_itemcode']==trim($value['itemcode'])){
