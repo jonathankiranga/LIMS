@@ -19,7 +19,7 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
         $pdf->addJpegFromFile($_SESSION['LogoFile'], 42, 510, 0, 58);
     }
     $pdf->SetFont('', 'B', 22);
-    $pdf->addText(570, 535, 22, _('PURCHASE ORDER'));
+    $pdf->addTextWrap(570, 550, 230, 18, _('PURCHASE ORDER'), 'right');
     $pdf->SetFont('', '', 9);
     $pdf->SetTextColor($muted[0], $muted[1], $muted[2]);
     $pdf->addTextWrap(570, 515, 230, 9, _('LPO No.').' '.$myrow['documentno'], 'right');
@@ -71,20 +71,20 @@ if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
     $pdf->line(42, 355, 800, 355);
 
     // Item table heading.
-    $HeaderYPos = 340;
+    $HeaderYPos = 315;
     $pdf->SetFillColor($navy[0], $navy[1], $navy[2]);
     $pdf->Rect(42, $pdf->getPageHeight() - $HeaderYPos - 25, 758, 25, 'F');
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('', 'B', 8);
-    $pdf->addTextWrap(48, 323, 85, 8, _('ITEM CODE'), 'left');
-    $pdf->addTextWrap(145, 323, 145, 8, _('DESCRIPTION'), 'left');
-    $pdf->addTextWrap(300, 323, 75, 8, _('UNIT'), 'right');
-    $pdf->addTextWrap(380, 323, 55, 8, _('QTY'), 'right');
-    $pdf->addTextWrap(440, 323, 70, 8, _('UNIT PRICE'), 'right');
-    $pdf->addTextWrap(515, 323, 50, 8, _('DISC.'), 'right');
-    $pdf->addTextWrap(570, 323, 55, 8, _('VAT %'), 'right');
-    $pdf->addTextWrap(630, 323, 75, 8, _('VAT AMOUNT'), 'right');
-    $pdf->addTextWrap(720, 323, 80, 8, _('LINE TOTAL'), 'right');
+    $pdf->addTextWrap(48, 324, 85, 8, _('ITEM CODE'), 'left');
+    $pdf->addTextWrap(145, 324, 145, 8, _('DESCRIPTION'), 'left');
+    $pdf->addTextWrap(300, 324, 75, 8, _('UNIT'), 'right');
+    $pdf->addTextWrap(380, 324, 55, 8, _('QTY'), 'right');
+    $pdf->addTextWrap(440, 324, 70, 8, _('UNIT PRICE'), 'right');
+    $pdf->addTextWrap(515, 324, 50, 8, _('DISC.'), 'right');
+    $pdf->addTextWrap(570, 324, 55, 8, _('VAT %'), 'right');
+    $pdf->addTextWrap(630, 324, 75, 8, _('VAT AMOUNT'), 'right');
+    $pdf->addTextWrap(720, 324, 80, 8, _('LINE TOTAL'), 'right');
 
     $firstrowpos = 305;
     $lastrow = $Bottom_Margin + 150;
