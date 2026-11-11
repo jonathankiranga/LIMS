@@ -1,4 +1,98 @@
 <?php
+if (isset($myrow['documenttype']) && (string)$myrow['documenttype'] === '18') {
+    // Modern layout for standard inventory purchase orders only.
+    // Asset purchase orders continue using the legacy shared header below.
+    $PageNumber++;
+    if ($PageNumber > 1) {
+        $pdf->newPage();
+    }
+
+    $navy = array(31, 55, 82);
+    $muted = array(103, 116, 132);
+    $rule = array(218, 225, 233);
+    $pdf->SetDrawColor($rule[0], $rule[1], $rule[2]);
+    $pdf->SetLineWidth(0.7);
+    $pdf->SetTextColor($navy[0], $navy[1], $navy[2]);
+
+    // Company identity and document title.
+    if (!empty($_SESSION['LogoFile']) && file_exists($_SESSION['LogoFile'])) {
+        $pdf->addJpegFromFile($_SESSION['LogoFile'], 42, 510, 0, 58);
+    }
+    $pdf->SetFont('helvetica', 'B', 22);
+    $pdf->addText(570, 535, 22, _('PURCHASE ORDER'));
+    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetTextColor($muted[0], $muted[1], $muted[2]);
+    $pdf->addTextWrap(570, 515, 230, 9, _('LPO No.').' '.$myrow['documentno'], 'right');
+    $pdf->addTextWrap(570, 500, 230, 9, _('Order Date').': '.ConvertSQLDate($myrow['docdate']), 'right');
+    if (!empty($myrow['duedate'])) {
+        $pdf->addTextWrap(570, 485, 230, 9, _('Required By').': '.ConvertSQLDate($myrow['duedate']), 'right');
+    }
+    $pdf->addTextWrap(570, 470, 230, 9, _('Reference').': '.$myrow['yourreference'], 'right');
+
+    // Company and supplier panels.
+    $pdf->SetTextColor($navy[0], $navy[1], $navy[2]);
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->addText(48, 445, 9, _('DELIVER TO'));
+    $pdf->addText(438, 445, 9, _('SUPPLIER'));
+    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetTextColor(55, 65, 81);
+    $companyLines = array(
+        htmlspecialcharsLocal_decode($_SESSION['CompanyRecord']['coyname']),
+        $_SESSION['CompanyRecord']['regoffice1'],
+        trim($_SESSION['CompanyRecord']['regoffice2'].' '.$_SESSION['CompanyRecord']['regoffice3'].' '.$_SESSION['CompanyRecord']['regoffice4']),
+        _('Phone').': '.$_SESSION['CompanyRecord']['telephone'],
+        $_SESSION['CompanyRecord']['email'],
+        _('VAT').': '.$_SESSION['CompanyRecord']['vat']
+    );
+    $supplierLines = array(
+        htmlspecialcharsLocal_decode($myrow['vendorname']),
+        trim($myrow['supplier_city'].' '.$myrow['supplier_postcode']),
+        $myrow['supplier_country'],
+        _('Contact').': '.$myrow['supplier_contact'],
+        _('Phone').': '.$myrow['supplier_phone'],
+        $myrow['supplier_email']
+    );
+    $lineY = 428;
+    foreach ($companyLines as $companyLine) {
+        if ($companyLine !== '') {
+            $pdf->addTextWrap(48, $lineY, 330, 9, $companyLine, 'left');
+            $lineY -= 13;
+        }
+    }
+    $lineY = 428;
+    foreach ($supplierLines as $supplierLine) {
+        if ($supplierLine !== '') {
+            $pdf->addTextWrap(438, $lineY, 350, 9, $supplierLine, 'left');
+            $lineY -= 13;
+        }
+    }
+    $pdf->line(42, 450, 800, 450);
+    $pdf->line(420, 450, 420, 365);
+    $pdf->line(42, 365, 800, 365);
+
+    // Item table heading.
+    $HeaderYPos = 340;
+    $pdf->SetFillColor($navy[0], $navy[1], $navy[2]);
+    $pdf->Rect(42, $pdf->h - $HeaderYPos - 25, 758, 25, 'F');
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->addTextWrap(48, 323, 85, 8, _('ITEM CODE'), 'left');
+    $pdf->addTextWrap(145, 323, 145, 8, _('DESCRIPTION'), 'left');
+    $pdf->addTextWrap(300, 323, 75, 8, _('UNIT'), 'right');
+    $pdf->addTextWrap(380, 323, 55, 8, _('QTY'), 'right');
+    $pdf->addTextWrap(440, 323, 70, 8, _('UNIT PRICE'), 'right');
+    $pdf->addTextWrap(515, 323, 50, 8, _('DISC.'), 'right');
+    $pdf->addTextWrap(570, 323, 55, 8, _('VAT %'), 'right');
+    $pdf->addTextWrap(630, 323, 75, 8, _('VAT AMOUNT'), 'right');
+    $pdf->addTextWrap(720, 323, 80, 8, _('LINE TOTAL'), 'right');
+
+    $firstrowpos = 305;
+    $lastrow = $Bottom_Margin + 150;
+    $pdf->SetTextColor(55, 65, 81);
+    $pdf->SetFont('helvetica', '', 8.5);
+    $line_height = 13;
+    $SummaryYpos = $Bottom_Margin + 112;
+} else {
 /* $Id: PDFQuotationPageHeader.inc 6540 2014-01-15 02:18:07Z rchacon $*/
 /* pdf-php by R&OS code to set up a new sales order page */
 
@@ -142,3 +236,5 @@ $pdf->partEllipse($Page_Width-$Right_Margin-10, $Bottom_Margin+10,270,350,10,10)
 $pdf->line($Page_Width-$Right_Margin, $Bottom_Margin+10,$Page_Width-$Right_Margin, $Bottom_Margin+350);
 
 ?>
+
+}
