@@ -58,7 +58,7 @@ include('includes/header.inc');
      if($_POST['submit']=='Save Item Request'){
         If($_SESSION['SINGLEUSER']=='Singleuser'){
             include('transactions/postStockIssues.inc');  
-            DB_query("UPDATE `salesheader`` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
+            DB_query("UPDATE `salesheader``` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
             include('transactions/SaveStockIssues.inc'); 
              unset($_POST);
          }else{
@@ -232,8 +232,8 @@ echo '<tr><td>Employee ID</td>'
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='40'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("Delete from `salesline`` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='40'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }
