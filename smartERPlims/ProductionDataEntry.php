@@ -44,7 +44,7 @@ if(!isset($_SESSION['Stores'])){
     $REsults=DB_query('SELECT '
             . '`code`,'
             . '`Storename` '
-            . 'FROM `Stores`', $db);
+            . 'FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -103,7 +103,7 @@ function getstocklist(){
       ,`www_users`.`realname`
       ,`ProductionMaster`.`itemcode`
       ,stockmaster.descrip
-  FROM `ProductionMaster`
+  FROM `productionmaster``
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       left join `www_users` on `ProductionMaster`.`userid`=`www_users`.`userid`
       where (modified is  null) or (modified=0) order by date desc";

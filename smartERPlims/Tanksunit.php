@@ -12,7 +12,7 @@ if(isset($_POST['submit'])){
 
 if(mb_strlen($_POST['CapacityUOM'])>0){
     if(!isset($_POST['editline'])){
-      $sql=sprintf("INSERT INTO `ProductionUnit`
+      $sql=sprintf("INSERT INTO `productionunit``
            (`itemcode`
            ,`capacity`
            ,`tankname`
@@ -57,7 +57,7 @@ if(isset($_GET['edit'])){
     echo '<input type="hidden" name="editline" value="' .$_GET['edit']. '" />';
 
     $results = DB_query("SELECT `itemcode`,`capacity`,`tankname`,`CapacityUOM`,`status` "
-            . "FROM `ProductionUnit` where `tankname`=".$_GET['edit'],$db);
+            . "FROM `productionunit`` where `tankname`=".$_GET['edit'],$db);
     
     $rows=DB_fetch_row($results);
     $_POST['itemcode']=$rows[0];
