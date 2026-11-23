@@ -200,7 +200,7 @@
                             <th>Qualitative Result</th>
                             <th>Quantitative Status</th>
                             <th>Range Result</th>
-                            <th>Analyst</th>
+                            <th>User Name</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
