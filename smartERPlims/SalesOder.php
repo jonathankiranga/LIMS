@@ -28,7 +28,7 @@ function decodeHtmlEntities($string) {
        }
  
 if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `SalesHeader` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
@@ -66,7 +66,7 @@ order by stockmaster.descrip";
 
    
  if(!isset($_SESSION['Stores'])){
-    $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -272,7 +272,7 @@ echo '<table class="table-bordered table-condensed">'
 $POSclass->Getitems($_POST['stockitemcode'], $_POST['qty'],$_POST['units'],$_POST['packzize'],$_POST['unitprice'], '', ($_POST['LineDiscountPercent'] ?? 0));
         
 echo '</table><table>';
-$SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `BankAccounts` where currency='".$_POST['currencycode']."'";
+$SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `bankaccounts`` where currency='".$_POST['currencycode']."'";
         echo '<tr><td>Select Bank to Deposit (Proforma Invoince) :</td><td><Select name="Bank_Code"><option></option>';
                  
         $resultindex=DB_query($SQLstment, $db);
