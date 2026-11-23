@@ -8,8 +8,8 @@ header('Content-Type: application/json');
 $sql = "
     SELECT DISTINCT st.SampleID, sh.DocumentNo, sh.CustomerName, sh.Date
     FROM test_results tr
-    JOIN Sample_Tests st ON tr.TestID = st.TestID
-    JOIN Sample_Header sh ON tr.HeaderID = sh.HeaderID
+    JOIN sample_tests st ON tr.TestID = st.TestID
+    JOIN sample_header sh ON tr.HeaderID = sh.HeaderID
     JOIN teststandards ts ON tr.StandardID = ts.StandardID
     JOIN testparameters tp ON tp.ParameterID = tr.ParameterID AND tp.StandardID = tr.StandardID
     JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
