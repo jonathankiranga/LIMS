@@ -16,7 +16,7 @@ if ($PeriodID > 0) {
         SUM(car.allocated_amount) as amount,
         SUM(car.tests_count) as tests_count,
         GROUP_CONCAT(DISTINCT car.gl_account ORDER BY car.gl_account SEPARATOR ', ') as gl_accounts,
-        (SELECT price FROM PriceList WHERE stockcode = sm.itemcode AND approved = 1 LIMIT 1) as sales_price
+        (SELECT price FROM `pricelist` WHERE stockcode = sm.itemcode AND approved = 1 LIMIT 1) as sales_price
     FROM cost_allocation_results car
     JOIN stockmaster sm ON sm.itemcode = car.test_itemcode
     WHERE car.period_id = $PeriodID
@@ -30,7 +30,7 @@ if ($PeriodID > 0) {
         SUM(car.allocated_amount) as amount,
         SUM(car.tests_count) as tests_count,
         GROUP_CONCAT(DISTINCT car.gl_account ORDER BY car.gl_account SEPARATOR ', ') as gl_accounts,
-        (SELECT price FROM PriceList WHERE stockcode = sm.itemcode AND approved = 1 LIMIT 1) as sales_price
+        (SELECT price FROM `pricelist` WHERE stockcode = sm.itemcode AND approved = 1 LIMIT 1) as sales_price
     FROM cost_allocation_results car
     JOIN stockmaster sm ON sm.itemcode = car.test_itemcode
     JOIN cost_allocation_periods cap ON cap.id = car.period_id

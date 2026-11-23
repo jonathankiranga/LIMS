@@ -41,7 +41,7 @@ if (isset($qMonths[$month])) {
 $sql = "SELECT gl.Docdate, gl.DocumentNo, gl.DocumentType, gl.narration, gl.currencycode,
   gl.amount * gl.ExchangeRate AS value,
   CASE WHEN gl.accountcode = '$accountCode' THEN 'Debit' ELSE 'Credit' END AS side
-  FROM Generalledger gl
+  FROM `generalledger` gl
   WHERE (gl.accountcode = '$accountCode' OR gl.balaccountcode = '$accountCode')
     AND $whereMonth
     AND gl.Docdate BETWEEN '$cs' AND '$ce'

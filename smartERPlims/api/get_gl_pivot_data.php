@@ -47,10 +47,10 @@ $monthNets = [];
 $r = mysqli_query($db, "
   SELECT t.accno, t.month_name, SUM(t.val) AS net FROM (
     SELECT gl.accountcode AS accno, MONTHNAME(gl.Docdate) AS month_name, gl.amount * gl.ExchangeRate AS val
-    FROM Generalledger gl WHERE gl.Docdate BETWEEN '$cs' AND '$ce'
+    FROM `generalledger` gl WHERE gl.Docdate BETWEEN '$cs' AND '$ce'
     UNION ALL
     SELECT gl.balaccountcode AS accno, MONTHNAME(gl.Docdate) AS month_name, -gl.amount * gl.ExchangeRate AS val
-    FROM Generalledger gl WHERE gl.Docdate BETWEEN '$cs' AND '$ce'
+    FROM `generalledger` gl WHERE gl.Docdate BETWEEN '$cs' AND '$ce'
   ) t GROUP BY t.accno, t.month_name
 ");
 while ($row = mysqli_fetch_assoc($r)) {
@@ -62,10 +62,10 @@ $openings = [];
 $r = mysqli_query($db, "
   SELECT t.accno, SUM(t.val) AS opening FROM (
     SELECT gl.accountcode AS accno, gl.amount * gl.ExchangeRate AS val
-    FROM Generalledger gl WHERE gl.Docdate < '$cs'
+    FROM `generalledger` gl WHERE gl.Docdate < '$cs'
     UNION ALL
     SELECT gl.balaccountcode AS accno, -gl.amount * gl.ExchangeRate AS val
-    FROM Generalledger gl WHERE gl.Docdate < '$cs'
+    FROM `generalledger` gl WHERE gl.Docdate < '$cs'
   ) t GROUP BY t.accno
 ");
 while ($row = mysqli_fetch_assoc($r)) {

@@ -44,27 +44,27 @@ $sql = "SELECT a.accno, a.reportcode, a.accdesc, a.balance_income,
                COALESCE(a.accgrp, '') AS accgrp,
                COALESCE(a.currency, 'KES') AS currency,
                CASE a.balance_income
-                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.accountcode = a.accno AND gl.Docdate <= '$ce')
-                   WHEN 1 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 1 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.accountcode = a.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
                END AS debit,
                CASE a.balance_income
-                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.balaccountcode = a.accno AND gl.Docdate <= '$ce')
-                   WHEN 1 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 1 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.balaccountcode = a.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
                END AS credit,
                CASE a.balance_income
-                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.accountcode = a.accno AND gl.Docdate < '$cs')
-                   ELSE         (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   ELSE         (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.accountcode = a.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
                END AS debit_last,
                CASE a.balance_income
-                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   WHEN 0 THEN (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.balaccountcode = a.accno AND gl.Docdate < '$cs')
-                   ELSE         (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM Generalledger gl
+                   ELSE         (SELECT COALESCE(SUM(gl.amount * gl.ExchangeRate),0) FROM `generalledger` gl
                                 WHERE gl.balaccountcode = a.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
                END AS credit_last
         FROM acct a

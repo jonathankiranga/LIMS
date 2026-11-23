@@ -44,7 +44,7 @@ $openSql = "SELECT gl.Docdate, gl.DocumentNo, gl.narration, gl.accountcode, gl.b
   gl.amount * gl.ExchangeRate AS amount, gl.currencycode,
   CASE WHEN gl.accountcode IN ($inClause) THEN gl.amount * gl.ExchangeRate ELSE 0 END AS debit,
   CASE WHEN gl.balaccountcode IN ($inClause) THEN gl.amount * gl.ExchangeRate ELSE 0 END AS credit
-  FROM Generalledger gl
+  FROM `generalledger` gl
   WHERE (gl.accountcode IN ($inClause) OR gl.balaccountcode IN ($inClause))
   AND gl.Docdate < '$cs'
   ORDER BY gl.Docdate, gl.DocumentNo";
@@ -54,7 +54,7 @@ $curSql = "SELECT gl.Docdate, gl.DocumentNo, gl.narration, gl.accountcode, gl.ba
   gl.amount * gl.ExchangeRate AS amount, gl.currencycode,
   CASE WHEN gl.accountcode IN ($inClause) THEN gl.amount * gl.ExchangeRate ELSE 0 END AS debit,
   CASE WHEN gl.balaccountcode IN ($inClause) THEN gl.amount * gl.ExchangeRate ELSE 0 END AS credit
-  FROM Generalledger gl
+  FROM `generalledger` gl
   WHERE (gl.accountcode IN ($inClause) OR gl.balaccountcode IN ($inClause))
   AND gl.Docdate BETWEEN '$cs' AND '$ce'
   ORDER BY gl.Docdate, gl.DocumentNo";
