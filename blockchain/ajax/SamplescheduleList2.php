@@ -20,9 +20,9 @@ $query = "SELECT distinct
     SH.Date,
     ST.HeaderID
 FROM sample_tests ST
-JOIN Sample_Header SH 
+JOIN sample_header SH 
     ON ST.HeaderID = SH.HeaderID
-JOIN TestStandards ts 
+JOIN teststandards ts 
     ON ST.StandardID = ts.StandardID
 join test_results TRR
     ON ST.HeaderID = TRR.HeaderID
