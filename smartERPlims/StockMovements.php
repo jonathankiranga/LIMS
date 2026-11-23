@@ -249,14 +249,14 @@ Function Formatdata($row){
 
 Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from `ProductionUnit` where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
         
        if($Stores[0]==0){
           $tankStore="S";
        }else{
-             $ResultIndex=DB_query(sprintf("select tankname from `ProductionUnit` where itemcode='%s'",$ItemCode), $db);
+             $ResultIndex=DB_query(sprintf("select tankname from `productionunit`` where itemcode='%s'",$ItemCode), $db);
              $Tanks = DB_fetch_row($ResultIndex);
              $tankStore=$Tanks[0];
        }

@@ -4,7 +4,7 @@ $Title = _('Stores');
 include('includes/header.inc');
 
 if(isset($_GET['code'])){
-    $sql="SELECT `code`,`Storename` FROM `Stores` where `code`='".$_GET['code']."'";
+    $sql="SELECT `code`,`Storename` FROM `stores`` where `code`='".$_GET['code']."'";
     
         $results=DB_query($sql,$db);
         $rowse=DB_fetch_row($results);
@@ -13,13 +13,13 @@ if(isset($_GET['code'])){
 }
 
 if(isset($_POST['save'])){
-    DB_query(sprintf("Insert into `Stores` (`code`,`Storename`) values ('%s','%s')",
+    DB_query(sprintf("Insert into `stores`` (`code`,`Storename`) values ('%s','%s')",
             $_POST['categoryid'],$_POST['categorydescription']), $db);
 }
 
 if(isset($_POST['edit'])){
     if($_POST['edit']=='Edit'){
-        DB_query(sprintf("update `Stores` set `Storename`='%s' where `code`='%s' ",
+        DB_query(sprintf("update `stores`` set `Storename`='%s' where `code`='%s' ",
                 $_POST['categorydescription'],$_POST['editcode']), $db);
     }
     
@@ -27,7 +27,7 @@ if(isset($_POST['edit'])){
         $sql="Select * from `stockledger` where `store`='".$_POST['editcode']."'";
         $Result=DB_query($sql,$db);
         if(DB_num_rows($Result)==0){
-            DB_query("Delete from `Stores` where `code`='".$_POST['editcode']."'", $db);
+            DB_query("Delete from `stores`` where `code`='".$_POST['editcode']."'", $db);
         }else{
             prnMsg('This Store can not be deleted because its in use');
         }
@@ -60,7 +60,7 @@ if(isset($_GET['code'])){
 
 echo '</div></form>' ;
 
-$sql="SELECT `code`,`Storename` FROM `Stores`";
+$sql="SELECT `code`,`Storename` FROM `stores``";
 $results=DB_query($sql,$db);
 
 echo '<br /><table class="table table-bordered"><tr><th>Code</th><th>STORE</th></tr>';

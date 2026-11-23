@@ -23,7 +23,7 @@ $SQL="select
       ,`debtors`.phone
       ,`debtors`.contact
       ,`SalesHeader`.`yourreference`
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documenttype`='32' 
@@ -68,7 +68,7 @@ $SQL="select
       ,SalesHeader.`documenttype`
       ,SalesLine.vatrate
       ,SalesLine.`totalchargedcontainers`
-  FROM `SalesHeader` join SalesLine 
+  FROM `salesheader`` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=32
         join stockmaster on stockmaster.itemcode=SalesLine.code
@@ -138,7 +138,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(SalesLine.`invoiceamount`) as OrderValue
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='32' 
        group by 
