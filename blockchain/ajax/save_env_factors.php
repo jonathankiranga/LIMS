@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("dds", $temperature, $humidity, $notes);
         if ($stmt->execute()) {
             $envId = $conn->insert_id;
-         // Update the Sample_Tests table with the new environmental_id
-            $updateStmt = $conn->prepare("UPDATE Sample_Tests ST SET environmental_id = ? "
+         // Update the sample_tests table with the new environmental_id
+            $updateStmt = $conn->prepare("UPDATE sample_tests ST SET environmental_id = ? "
                     . " join test_results TR on ST.TestID=TR.TestID WHERE TR.StatusID = 1 ");
             $updateStmt->bind_param('i', $envId);
          // Execute and respond
