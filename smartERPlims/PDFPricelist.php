@@ -12,7 +12,7 @@ $sqlstmt="SELECT
     quantity as partperunit,
     price as sellingprice,
     categorydescription as `Groups`
-FROM PriceList 
+FROM `pricelist` 
 left join stockmaster on stockmaster.itemcode = PriceList.stockcode 
 left join unit on `stockmaster`.`units` = unit.code 
 left join stockcategory on stockcategory.`categoryid` = stockmaster.`category` 
