@@ -320,7 +320,7 @@ class FundsFlowForYear {
         global $db;
         $periodNo = (int)$periodNo;
         $sql = "SELECT MIN(`start_date`) AS date_from, MAX(`end_date`) AS date_to
-                FROM `FinancialPeriods`
+                FROM `financialperiods``
                 WHERE `periodno`=" . $periodNo;
         $result = DB_query($sql,$db);
         $row = DB_fetch_array($result);
@@ -333,7 +333,7 @@ class FundsFlowForYear {
         $lastPeriod = $yearPeriod - 12;
 
         $setupSql = "SELECT `".$fromField."` AS code_from, `".$toField."` AS code_to
-                     FROM `Accountsetup`
+                     FROM `accountsetup``
                      LIMIT 1";
         $setupResult = DB_query($setupSql,$db);
         $setupRow = DB_fetch_array($setupResult);
@@ -356,31 +356,31 @@ class FundsFlowForYear {
                     acct.`Sale_Purchase_Neither`,
                     acct.`accno`,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate <= '".$toDate."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate BETWEEN '".$fromDate."' AND '".$toDate."')
                     END AS debit,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate <= '".$toDate."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate BETWEEN '".$fromDate."' AND '".$toDate."')
                     END AS credit,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate <= '".$lastTo."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate BETWEEN '".$lastFrom."' AND '".$lastTo."')
                     END AS debit_last,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate <= '".$lastTo."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `Generalledger` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate BETWEEN '".$lastFrom."' AND '".$lastTo."')
                     END AS credit_last,
                     acct.`Calculation`
