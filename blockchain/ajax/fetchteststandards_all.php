@@ -3,7 +3,7 @@ require '../db_connection.php';
 header('Content-Type: application/json');
 
 $query = "SELECT ts.*, sm.standard_method  
-          FROM TestStandards ts  
+          FROM teststandards ts  
           LEFT JOIN standard_methods sm ON ts.sm = sm.MethodID 
           ORDER BY ts.StandardID ASC";
 $result = $conn->query($query);
