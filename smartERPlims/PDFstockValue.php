@@ -54,7 +54,7 @@ if(isset($_POST['trailbalance'])){
           
  $rowtanks = DB_query("SELECT `ProductionUnit`.`itemcode`,`capacity`,`tankname`,`UOM`,`CapacityUOM` ,
         `ProductionUnit`.`units`,`balance`,`stockmaster`.`descrip`,`stockmaster`.`averagestock`
-        FROM `ProductionUnit` join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode
+        FROM `productionunit`` join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode
         where `ProductionUnit`.`status`=1", $db);
      
     if(DB_num_rows($rowtanks)>0){
@@ -74,7 +74,7 @@ if(isset($_POST['trailbalance'])){
     $DateEntry = FormatDateForSQL($_POST['todate']);
     $rowtanks = DB_query("SELECT `ProductionUnit`.`itemcode`,`capacity`,`tankname`,`UOM`,`CapacityUOM` ,
         `ProductionUnit`.`units`,`balance`,`stockmaster`.`descrip`,`stockmaster`.`averagestock`
-        FROM `ProductionUnit` join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode
+        FROM `productionunit`` join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode
         where `ProductionUnit`.`status`=1", $db);
    while($rows = DB_fetch_array($rowtanks)){
          $YPos -= $line_height ;
@@ -122,7 +122,7 @@ $pdf->__destruct();
        <td>To Date</td><td><input tabindex="2" type="text" class="date" alt="'.$_SESSION['DefaultDateFormat'].'" name="todate" size="11" maxlength="10" readonly="readonly" value="' .$_POST['todate']. '" onchange="isDate(this, this.value, '."'".$_SESSION['DefaultDateFormat']."'".')"/></td></tr>';
  echo '<tr><td>Select Store</td><td><select name="store"><option value="AllStores">All</option>';
  
-   $sql="SELECT `code`,`Storename` FROM `Stores`";
+   $sql="SELECT `code`,`Storename` FROM `stores``";
    $ResultsP = DB_query($sql,$db);
     while($rows = DB_fetch_array($ResultsP)){
           echo '<option value="'.$rows['code'].'">'.$rows['Storename'].'</option>' ;

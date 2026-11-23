@@ -46,7 +46,7 @@ $filter="SELECT
            ,`postinggroup`
            ,`currencycode`
            ,`vatinclusive`
-       FROM `AssetsHeader` 
+       FROM `assetsheader`` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -141,7 +141,7 @@ $SQL="SELECT
       ,`vatrate`
       ,`inclusive`
       ,UOM
-  FROM `FixedAssetsLine`   where `documentno`='".$_POST['documentno']."'";
+  FROM `fixedassetsline``   where `documentno`='".$_POST['documentno']."'";
 
 
 $ResultIndex = DB_query($SQL, $db);

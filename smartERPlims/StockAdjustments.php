@@ -14,7 +14,7 @@ $thispage = htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');
 }
     
 $StoreArray=array();
-$REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+$REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
 while($rows=  DB_fetch_array($REsults)){
     $StoreArray[]=$rows;
 }
@@ -79,7 +79,7 @@ if(IsTankOrStore(trim($StockID))=="S"){
             (`date`,`stname`,`doctyp`,`itemcode`,`invref`,`fulqty`,`loosqty`,`price`,`store`,`journal`,`period`,partperunit)
           VALUES ('".$date ."','Stock Adjust','17','".$StockID ."','".$_POST['DocNo']."',0,'".$Adjustby."',".$Cost.",'".$_POST['location']."','".$journalno."','".$Periodno."',1)";
          
-         $SQL[]="INSERT INTO StockRegister (itemcode, StockIn, StockOut, cost, journal, GRN)
+         $SQL[]="INSERT INTO `stockregister` (itemcode, StockIn, StockOut, cost, journal, GRN)
             VALUES ('$StockID', " . ($Adjustby > 0 ? $Adjustby : 0) . ", " . ($Adjustby < 0 ? abs($Adjustby) : 0) . ", $Cost, '$journalno', '" . $_POST['DocNo'] . "')";
          
        }else{
@@ -93,7 +93,7 @@ $sql="SELECT IFNULL(sum(fulqty * partperunit),0) + IFNULL(sum(loosqty),0) as loo
                $SQL[]="INSERT INTO `stockledger` (`date`,`stname`,`doctyp`,`itemcode`,`invref`,`fulqty`,`loosqty`,`price`,`store`,`journal`,`period`,partperunit)
                  VALUES ('".$date ."','Stock Adjust','17','".$StockID ."','".$_POST['DocNo']."',0,'".($StockinStore[0] * -1)."',".$Cost.",'".$StoreArray[0]['code']."','".$journalno."','".$Periodno."',1)";
                
-               $SQL[]="INSERT INTO StockRegister (itemcode, StockIn, StockOut, cost, journal, GRN)
+               $SQL[]="INSERT INTO `stockregister` (itemcode, StockIn, StockOut, cost, journal, GRN)
                   VALUES ('$StockID', 0, " . abs($StockinStore[0]) . ", $Cost, '$journalno', '" . $_POST['DocNo'] . "')";
                
                $_POST['stockbalance']=(isset($StockinStore[0])?$_POST['stockbalance']+$StockinStore[0]:$_POST['stockbalance']);
@@ -194,7 +194,7 @@ if(isset($StockID)){
     if(IsTankOrStore(trim($StockID))=="S"){
         $StockBalanceInloose = getbalanceBYDATE(trim($StockID),$Location,$date,'loosqty');
        
-       $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+       $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
        $STOREline ='<select name="location" required="required" onchange="ReloadForm(inventory.refresh)"><option></option>';
        while($rows=DB_fetch_array($REsults)){
           $CODE = trim($rows['code']);
@@ -317,7 +317,7 @@ Function getlaststco($code){
         `PurchaseLine`.`UnitPrice`*(`PurchaseLine`.`vatrate`+100)/100,
         `PurchaseLine`.`UOM`,
         `PurchaseLine`.`partperunit`
-FROM  PurchaseLine Where `PurchaseLine`.`code` ='".$code."' and `PurchaseLine`.`documenttype`='18' 
+FROM `purchaseline` Where `PurchaseLine`.`code` ='".$code."' and `PurchaseLine`.`documenttype`='18' 
    order by `PurchaseLine`.`docdate` desc limit 1";
  $ResultIndex = DB_query($Slaqry,$db);
         $Stores = DB_fetch_row($ResultIndex);

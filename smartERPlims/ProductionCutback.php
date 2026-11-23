@@ -47,7 +47,7 @@ if(!isset($_SESSION['Stores'])){
     $REsults=DB_query('SELECT '
             . '`code`,'
             . '`Storename` '
-            . 'FROM `Stores`', $db);
+            . 'FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
