@@ -22,7 +22,7 @@ if(isset($_GET['new'])){
 if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
     $loadDocNo = mysqli_real_escape_string($db, $_POST['loadOrderNo']);
     $hdrSql = "SELECT docdate, customercode, customername, yourreference, currencycode, salespersoncode, QtyDiscount, locationcode
-               FROM SalesHeader WHERE documenttype=1 AND documentno='$loadDocNo' LIMIT 1";
+               FROM `salesheader` WHERE documenttype=1 AND documentno='$loadDocNo' LIMIT 1";
     $hdrResult = DB_query($hdrSql, $db);
     if ($hdrRow = DB_fetch_array($hdrResult)) {
         $_POST['documentno'] = $loadDocNo;
@@ -37,7 +37,7 @@ if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
 
         $_SESSION['sales_orders'] = array();
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, sampleID
-                    FROM SalesLine WHERE documenttype=1 AND documentno='$loadDocNo' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline` WHERE documenttype=1 AND documentno='$loadDocNo' AND code IS NOT NULL AND code != ''";
         $lineResult = DB_query($lineSql, $db);
         while ($line = DB_fetch_array($lineResult)) {
             $code = trim($line['code']);
@@ -80,7 +80,7 @@ if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
 if (isset($_POST['loadQuoteNo']) && !empty($_POST['loadQuoteNo'])) {
     $loadQuote = mysqli_real_escape_string($db, trim($_POST['loadQuoteNo']));
     $hdrSql = "SELECT docdate, customercode, customername, yourreference, currencycode, salespersoncode, QtyDiscount, locationcode
-               FROM SalesHeader WHERE documenttype=54 AND documentno='$loadQuote' LIMIT 1";
+               FROM `salesheader` WHERE documenttype=54 AND documentno='$loadQuote' LIMIT 1";
     $hdrResult = DB_query($hdrSql, $db);
     if ($hdrRow = DB_fetch_array($hdrResult)) {
         $_POST['date'] = ConvertSQLDate($hdrRow['docdate']);
@@ -96,7 +96,7 @@ if (isset($_POST['loadQuoteNo']) && !empty($_POST['loadQuoteNo'])) {
 
         $_SESSION['sales_orders'] = array();
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, Partperunit
-                    FROM SalesLine WHERE documenttype=54 AND documentno='$loadQuote' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline` WHERE documenttype=54 AND documentno='$loadQuote' AND code IS NOT NULL AND code != ''";
         $lineResult = DB_query($lineSql, $db);
         while ($line = DB_fetch_array($lineResult)) {
             $code = trim($line['code']);
@@ -150,7 +150,7 @@ if(!isset($_SESSION['units'])){
             }
        }
 if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `SalesHeader` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
@@ -191,7 +191,7 @@ order by stockmaster.descrip";
 
 
  if(!isset($_SESSION['Stores'])){
-    $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -348,7 +348,7 @@ echo '<div id="labTotalsRow"><span>' . _('Total Order') . '</span>'
      . '<span class="l-tgross">0.00</span></div>';
 
 echo '<table>';
-$SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `BankAccounts` where currency='".$_POST['currencycode']."'";
+$SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `bankaccounts`` where currency='".$_POST['currencycode']."'";
         echo '<tr><td>Select Bank to Deposit (Proforma Invoince) :</td><td><Select name="Bank_Code"><option></option>';
                  
         $resultindex=DB_query($SQLstment, $db);

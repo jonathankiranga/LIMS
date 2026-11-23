@@ -25,8 +25,8 @@ if($_POST['submit']=="Enter Delivery Details and Confirm Order"){
 }
     
 if(isset($_POST['confirm'])){
-    DB_query("UPDATE `AssetsHeader` SET `released` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
-    DB_query("UPDATE `FixedAssetsLine` SET `completed` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `assetsheader`` SET `released` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `fixedassetsline`` SET `completed` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     prnMsg('Equipment Request :'.$_SESSION['CompleteDocument'].' has been saved.'
          . ' Click Here to Print'.'<a href="HireOutAssetsList.php?No='.$_SESSION['CompleteDocument'].'">Print Request Note '.$_SESSION['CompleteDocument'].'</a>');
     unset($_POST);

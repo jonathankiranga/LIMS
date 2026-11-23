@@ -42,7 +42,7 @@ $filter="SELECT
            ,`postinggroup`
            ,`currencycode`
            ,`vatinclusive`
-       FROM `PurchaseHeader` 
+       FROM `purchaseheader`` 
        where `documenttype`=18 and `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -129,7 +129,7 @@ $SQL="SELECT `entryno`
       ,packzizegrn
       ,containercode
       ,`discount`
-  FROM `PurchaseLine` 
+  FROM `purchaseline`` 
  where `documenttype`=18 and `documentno`='".$_POST['documentno']."'";
 
  
