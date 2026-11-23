@@ -6,26 +6,26 @@ $Title = _('Print Picking List');
 if(isset($_GET['No'])){
     
 $SQL="select 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid`
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid`
       ,`creditors`.`email`
       ,`creditors`.`city`
       ,`creditors`.`postcode`
       ,`creditors`.`country`
       ,`creditors`.`phone`
       ,`creditors`.`contact`
-      ,PurchaseHeader.`externaldocumentno`
-     from `PurchaseHeader` 
-     join PurchaseLine on `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
-     join `creditors` on `PurchaseHeader`.`vendorcode`=`creditors`.`itemcode`
-     where `PurchaseHeader`.`documentno`='".$_GET['No']."'";
+      ,purchaseheader.`externaldocumentno`
+     from `purchaseheader` 
+     join purchaseline on `purchaseheader`.`documentno`=purchaseline.`documentno` 
+     join `creditors` on `purchaseheader`.`vendorcode`=`creditors`.`itemcode`
+     where `purchaseheader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_row($Result);
     
@@ -47,19 +47,19 @@ $SQL="select
      
      $SQL=Sprintf("SELECT 
          stockmaster.barcode ,
-         PurchaseHeader.docdate ,
-         PurchaseLine.`description` ,
-        `PurchaseLine`.Quantity,
-        `PurchaseLine`.partperunit,
-        (PurchaseLine.UnitPrice * `PurchaseLine`.partperunit)  as Sp , 
-        `PurchaseLine`.unitofmeasure as UOMDesc ,
-        PurchaseHeader.`documentno` ,
-        PurchaseHeader.`vendorcode` ,
-        PurchaseHeader.`externaldocumentno` 
-        FROM `PurchaseHeader` 
-        join PurchaseLine on PurchaseHeader.documentno=PurchaseLine.documentno 
-        join stockmaster on stockmaster.itemcode=PurchaseLine.code
-        where PurchaseHeader.`documentno`='%s' and PurchaseHeader.`documenttype`='21' ",$_GET['No']);
+         purchaseheader.docdate ,
+         purchaseline.`description` ,
+        `purchaseline`.Quantity,
+        `purchaseline`.partperunit,
+        (purchaseline.UnitPrice * `purchaseline`.partperunit)  as Sp , 
+        `purchaseline`.unitofmeasure as UOMDesc ,
+        purchaseheader.`documentno` ,
+        purchaseheader.`vendorcode` ,
+        purchaseheader.`externaldocumentno` 
+        FROM `purchaseheader` 
+        join purchaseline on purchaseheader.documentno=purchaseline.documentno 
+        join stockmaster on stockmaster.itemcode=purchaseline.code
+        where purchaseheader.`documentno`='%s' and purchaseheader.`documenttype`='21' ",$_GET['No']);
      
      $FontSize = 12;
      $YPos=$firstrowpos-20;
@@ -109,20 +109,20 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 
 $SQL="Select 
        stockledger.jobcard
-      ,`PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-     ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      from stockledger join PurchaseLine on 
-      stockledger.invref=PurchaseLine.`documentno` 
-      join `PurchaseHeader` on `PurchaseHeader`.documentno=PurchaseLine.`documentno` 
-      where `PurchaseHeader`.`documenttype`='20' 
-      order by `PurchaseHeader`.`docdate` desc limit  ". $_SESSION['DefaultDisplayRecordsMax'] ."";
+      ,`purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+     ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      from stockledger join purchaseline on 
+      stockledger.invref=purchaseline.`documentno` 
+      join `purchaseheader` on `purchaseheader`.documentno=purchaseline.`documentno` 
+      where `purchaseheader`.`documenttype`='20' 
+      order by `purchaseheader`.`docdate` desc limit  ". $_SESSION['DefaultDisplayRecordsMax'] ."";
     $Result=DB_query($SQL,$db);
        
     Echo '<Table class="table table-bordered"><tr>'
