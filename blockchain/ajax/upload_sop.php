@@ -46,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['files']) && isset($_
 
             // Move the uploaded file to the desired directory
             if (move_uploaded_file($fileTmpName, $destination)) {
-                // Insert the SOP record into the SOPs table
-                $stmt = $conn->prepare("INSERT INTO SOPs (title, description, document_url, version_number) VALUES (?, ?, ?, ?)");
+                // Insert the SOP record into the sops table
+                $stmt = $conn->prepare("INSERT INTO sops (title, description, document_url, version_number) VALUES (?, ?, ?, ?)");
                 if (!$stmt) {
                     $response[] = [
                        'message' => "Database error: " . $conn->error
@@ -60,9 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['files']) && isset($_
                 if ($stmt->execute()) {
                     $sop_id = $stmt->insert_id; // Get the inserted SOP ID
 
-                    // Log the SOP upload in the SOP_Access_Log table (for audit purposes)
+                    // Log the SOP upload in the sop_access_log table (for audit purposes)
                     $action = 'uploaded';
-                    $logStmt = $conn->prepare("INSERT INTO SOP_Access_Log (sop_id, user_id, action) VALUES (?, ?, ?)");
+                    $logStmt = $conn->prepare("INSERT INTO sop_access_log (sop_id, user_id, action) VALUES (?, ?, ?)");
                     $logStmt->bind_param("iis", $sop_id, $user_id, $action);
                     $logStmt->execute();
 
