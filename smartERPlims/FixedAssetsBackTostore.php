@@ -14,7 +14,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/s
 
 
 if(isset($_POST['RemoveFromList'])){
-   DB_query("Update AssetsHeader set `released`=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
+   DB_query("Update `assetsheader` set `released`=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
 }
 
 
@@ -44,7 +44,7 @@ $filter="SELECT
            ,`postinggroup`
            ,`currencycode`
            ,`vatinclusive`
-       FROM `assetsheader`` 
+       FROM `assetsheader``` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -133,7 +133,7 @@ $SQL="SELECT
       ,`vatrate`
       ,`inclusive`
       ,UOM
-  FROM `fixedassetsline``  
+  FROM `fixedassetsline```  
   where `documentno`='".$_POST['documentno']."'";
 
 
