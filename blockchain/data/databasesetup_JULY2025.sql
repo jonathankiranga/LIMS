@@ -73,7 +73,7 @@ CREATE TABLE `users` (
 
 
 -- Password Reset Table (Stores password reset tokens)
-CREATE TABLE Password_Reset (
+CREATE TABLE password_reset (
     reset_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     reset_token VARCHAR(255) NOT NULL UNIQUE,
@@ -387,7 +387,7 @@ CHANGE COLUMN `StandardLimit_Result` `StandardLimit_Result` VARCHAR(20) NULL DEF
 
 
 -- SOP Table
-CREATE TABLE SOPs (
+CREATE TABLE sops (
     sop_id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255),
     description TEXT,
@@ -398,13 +398,13 @@ CREATE TABLE SOPs (
 );
 
 -- SOP Access Log Table (for audit and tracking)
-CREATE TABLE SOP_Access_Log (
+CREATE TABLE sop_access_log (
     log_id INT PRIMARY KEY AUTO_INCREMENT,
     sop_id INT,
     user_id INT,
     action VARCHAR(50),  -- 'viewed', 'updated', 'approved'
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sop_id) REFERENCES SOPs(sop_id)
+    FOREIGN KEY (sop_id) REFERENCES sops(sop_id)
 );
 
 -- alert templates 15/01/2025
