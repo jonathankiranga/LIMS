@@ -7,28 +7,28 @@ if(isset($_GET['No'])){
     
 $DocumentNo = DB_escape_string($_GET['No']);
 $SQL = "SELECT
-       PurchaseHeader.documentno
-      ,PurchaseHeader.docdate
-      ,PurchaseHeader.oderdate
-      ,PurchaseHeader.duedate
-      ,PurchaseHeader.vendorcode
-      ,PurchaseHeader.vendorname
-      ,PurchaseHeader.currencycode
-      ,PurchaseHeader.status
-      ,PurchaseHeader.userid
+       purchaseheader.documentno
+      ,purchaseheader.docdate
+      ,purchaseheader.oderdate
+      ,purchaseheader.duedate
+      ,purchaseheader.vendorcode
+      ,purchaseheader.vendorname
+      ,purchaseheader.currencycode
+      ,purchaseheader.status
+      ,purchaseheader.userid
       ,creditors.email AS supplier_email
       ,creditors.city AS supplier_city
       ,creditors.postcode AS supplier_postcode
       ,creditors.country AS supplier_country
       ,creditors.phone AS supplier_phone
       ,creditors.contact AS supplier_contact
-      ,PurchaseHeader.yourreference
-      ,PurchaseHeader.printed
-      ,PurchaseHeader.documenttype
-      FROM PurchaseHeader
-      LEFT JOIN creditors ON PurchaseHeader.vendorcode=creditors.itemcode
-      WHERE PurchaseHeader.documenttype IN ('18','41')
-        AND PurchaseHeader.documentno='".$DocumentNo."'";
+      ,purchaseheader.yourreference
+      ,purchaseheader.printed
+      ,purchaseheader.documenttype
+      FROM purchaseheader
+      LEFT JOIN creditors ON purchaseheader.vendorcode=creditors.itemcode
+      WHERE purchaseheader.documenttype IN ('18','41')
+        AND purchaseheader.documentno='".$DocumentNo."'";
 
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_array($Result);
@@ -59,26 +59,26 @@ $SQL = "SELECT
      
      
      $SQL = "SELECT
-       COALESCE(NULLIF(stockmaster.barcode,''), PurchaseLine.code) AS barcode
-      ,PurchaseLine.description
-      ,PurchaseLine.Quantity
-      ,PurchaseLine.PartPerUnit
-      ,PurchaseLine.UnitPrice AS Sp
-      ,PurchaseLine.discount AS Discount
-      ,PurchaseLine.unitofmeasure AS UOMDesc
-      ,PurchaseLine.invoiceamount
-      ,PurchaseLine.vatamount
-      ,(PurchaseLine.invoiceamount - PurchaseLine.vatamount) AS netamt
-      ,PurchaseLine.vatrate
-      FROM PurchaseHeader
-      INNER JOIN PurchaseLine
-        ON PurchaseHeader.documentno=PurchaseLine.documentno
-       AND PurchaseHeader.documenttype=PurchaseLine.documenttype
+       COALESCE(NULLIF(stockmaster.barcode,''), purchaseline.code) AS barcode
+      ,purchaseline.description
+      ,purchaseline.Quantity
+      ,purchaseline.PartPerUnit
+      ,purchaseline.UnitPrice AS Sp
+      ,purchaseline.discount AS Discount
+      ,purchaseline.unitofmeasure AS UOMDesc
+      ,purchaseline.invoiceamount
+      ,purchaseline.vatamount
+      ,(purchaseline.invoiceamount - purchaseline.vatamount) AS netamt
+      ,purchaseline.vatrate
+      FROM purchaseheader
+      INNER JOIN purchaseline
+        ON purchaseheader.documentno=purchaseline.documentno
+       AND purchaseheader.documenttype=purchaseline.documenttype
       LEFT JOIN stockmaster
-        ON stockmaster.itemcode=PurchaseLine.code
-      WHERE PurchaseHeader.documenttype='".DB_escape_string($myrow['documenttype'])."'
-        AND PurchaseHeader.documentno='".$DocumentNo."'
-      ORDER BY PurchaseLine.code";
+        ON stockmaster.itemcode=purchaseline.code
+      WHERE purchaseheader.documenttype='".DB_escape_string($myrow['documenttype'])."'
+        AND purchaseheader.documentno='".$DocumentNo."'
+      ORDER BY purchaseline.code";
 
      
      $FontSize = ((string)$myrow['documenttype'] === '18') ? 9 : 12;
@@ -184,7 +184,7 @@ $SQL = "SELECT
     $pdf->OutputD($_SESSION['DatabaseName'] . '_Purchase_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    DB_query("UPDATE PurchaseHeader
+    DB_query("UPDATE purchaseheader
               SET printed=1
               WHERE documenttype='".DB_escape_string($myrow['documenttype'])."'
                 AND documentno='".$DocumentNo."'", $db);
@@ -206,35 +206,35 @@ echo '<div class="container"><table class="table table-bordered"><tr>'
     . '<input type="submit" value="GO"/></td></tr></table></div>';
 
 $SQL="select 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      ,sum(PurchaseLine.`invoiceamount`) as OrderValue
-      ,`PurchaseHeader`.printed
-      from `PurchaseHeader` join PurchaseLine on 
-      `PurchaseHeader`.`documentno`=PurchaseLine.`documentno`
-       and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
-       and PurchaseLine.documenttype=18
-      where `PurchaseHeader`.`documenttype`='18' ".
-        (isset($_POST['VendorID'])?" and `PurchaseHeader`.`vendorcode`='".$_POST['VendorID']."'":'')."
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      ,sum(purchaseline.`invoiceamount`) as OrderValue
+      ,`purchaseheader`.printed
+      from `purchaseheader` join purchaseline on 
+      `purchaseheader`.`documentno`=purchaseline.`documentno`
+       and `purchaseheader`.`documenttype`=purchaseline.`documenttype`
+       and purchaseline.documenttype=18
+      where `purchaseheader`.`documenttype`='18' ".
+        (isset($_POST['VendorID'])?" and `purchaseheader`.`vendorcode`='".$_POST['VendorID']."'":'')."
        group by 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid`  
-      ,`PurchaseHeader`.printed 
-      order by `PurchaseHeader`.`docdate` desc
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid`  
+      ,`purchaseheader`.printed 
+      order by `purchaseheader`.`docdate` desc
      limit ". $_SESSION['DefaultDisplayRecordsMax'] ." ";
     $Result=DB_query($SQL,$db);
        
