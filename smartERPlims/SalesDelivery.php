@@ -34,8 +34,8 @@ $SQL="SELECT
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
       ,sum(SalesLine.`invoiceamount`) as OrderValue
-      from `SalesHeader` 
-      join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      from `salesheader`` 
+      join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='1' ". (isset($_POST['CustomerID'])?" "
         . " and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":' and `SalesHeader`.`released`=1')."
       group by 
