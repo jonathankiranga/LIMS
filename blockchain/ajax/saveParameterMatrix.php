@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // --- Uniqueness Check (for both CREATE and UPDATE) ---
         // This query checks if the name exists on any record other than the one being updated.
         // For a CREATE operation, $ParameterID is null, so the WHERE clause effectively checks all records.
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM ParameterMatrix WHERE ParameterName = ?");
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM parametermatrix WHERE ParameterName = ?");
         $stmt->bind_param("s", $name);
         $stmt->execute();
         $stmt->bind_result($totalRecords);
@@ -44,14 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // --- UPDATE Operation ---
                 if ($ParentID === null) {
                     // Use a query that explicitly sets ParentID to NULL
-                    $query = "UPDATE ParameterMatrix SET ParameterName = ?, ParentID = NULL, UpdatedAt = NOW() WHERE ParameterID = ?";
+                    $query = "UPDATE parametermatrix SET ParameterName = ?, ParentID = NULL, UpdatedAt = NOW() WHERE ParameterID = ?";
                     $stmt = $conn->prepare($query);
                     if ($stmt) {
                         $stmt->bind_param("si", $name, $ParameterID); // 's' for name, 'i' for ParameterID
                     }
                 } else {
                     // Use a query with a placeholder for ParentID
-                    $query = "UPDATE ParameterMatrix SET ParameterName = ?, ParentID = ?, UpdatedAt = NOW() WHERE ParameterID = ?";
+                    $query = "UPDATE parametermatrix SET ParameterName = ?, ParentID = ?, UpdatedAt = NOW() WHERE ParameterID = ?";
                     $stmt = $conn->prepare($query);
                     if ($stmt) {
                         $stmt->bind_param("sii", $name, $ParentID, $ParameterID);
@@ -73,14 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // --- CREATE Operation ---
                 if ($ParentID === null) {
                     // Use a query that explicitly sets ParentID to NULL
-                    $query = "INSERT INTO ParameterMatrix (ParameterName, ParentID) VALUES (?, NULL)";
+                    $query = "INSERT INTO parametermatrix (ParameterName, ParentID) VALUES (?, NULL)";
                     $stmt = $conn->prepare($query);
                     if ($stmt) {
                         $stmt->bind_param("s", $name);
                     }
                 } else {
                     // Use a query with a placeholder for ParentID
-                    $query = "INSERT INTO ParameterMatrix (ParameterName, ParentID) VALUES (?, ?)";
+                    $query = "INSERT INTO parametermatrix (ParameterName, ParentID) VALUES (?, ?)";
                     $stmt = $conn->prepare($query);
                     if ($stmt) {
                         $stmt->bind_param("si", $name, $ParentID);
