@@ -13,7 +13,7 @@ class DimensionsBudget {
         $this->ResultsBudget['Budget']=0;
         
         $ResultIndex=DB_query("select Min(start_date),max(end_date),`periodno` "
-                . "from FinancialPeriods where closed=0 Group by `periodno`",$db);
+                . "from `financialperiods` where closed=0 Group by `periodno`",$db);
         $Rows=DB_fetch_row($ResultIndex);
         
         $this->StartDate = $Rows[0];
@@ -51,7 +51,7 @@ class DimensionsBudget {
         
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount) as amount
-              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join `purchaseline` on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_1='".$dim1."'
@@ -68,7 +68,7 @@ class DimensionsBudget {
         
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount)as  amount
-              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join `purchaseline` on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_1='".$dim1."')";
@@ -84,7 +84,7 @@ class DimensionsBudget {
       
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount) as  amount
-              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join `purchaseline` on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_2='".$dim2."')";
@@ -97,7 +97,7 @@ class DimensionsBudget {
         
     function GetExpenses1($dime1=''){
         Global $db;
-         $SQL="SELECT sum(`amount`) FROM `generalledger`` "
+         $SQL="SELECT sum(`amount`) FROM `generalledger``` "
             . " where docdate between '".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension`='".$dime1."' ";
           
@@ -109,7 +109,7 @@ class DimensionsBudget {
        
     function GetExpenses2($dime2=''){
         Global $db;
-          $SQL="SELECT sum(`amount`) FROM `generalledger`` "
+          $SQL="SELECT sum(`amount`) FROM `generalledger``` "
              . " where docdate between '".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension2`='".$dime2."'";
           
@@ -123,7 +123,7 @@ class DimensionsBudget {
     function GetExpensesBoth($dime1='',$dime2=''){
         Global $db;
         
-         $SQL="SELECT sum(`amount`) FROM `generalledger`` "
+         $SQL="SELECT sum(`amount`) FROM `generalledger``` "
                 . " where docdate between'".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension`='".$dime1."' "
                  . " and `dimension2`='".$dime2."'";
