@@ -2,7 +2,7 @@
 /**
  * Smart Suite launcher dashboard (ERP + LIMS + Payroll)
  * Place this file in the web root alongside smartERPlims/, blockchain/, webPayroll/.
- * Clicking a tile loads the selected app inside the embedded viewport without leaving the page.
+ * Clicking an application tile opens that application in a new browser tab.
  */
 
 $apps = [
@@ -74,17 +74,14 @@ $apps = [
         }
         .page {
             display: grid;
-            grid-template-columns: 1.05fr 1.6fr;
-            grid-template-rows: minmax(0, 1fr);
+            grid-template-columns: 1fr;
             gap: 22px;
             padding: 22px;
-            height: 100vh;
             min-height: 100vh;
             align-items: stretch;
         }
         @media (max-width: 1180px) {
-            .page { grid-template-columns: 1fr; height: auto; }
-            .viewer { min-height: 70vh; }
+            .page { grid-template-columns: 1fr; }
         }
         header {
             display: flex;
@@ -249,6 +246,20 @@ $apps = [
             min-height: 0;
             background: #0a0f1f;
         }
+        .site-footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 18px 12px;
+            margin-top: 24px;
+            color: var(--muted);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .site-footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        .site-footer a:hover { text-decoration: underline; }
         .placeholder {
             display: grid;
             place-items: center;
@@ -266,10 +277,7 @@ $apps = [
             <header>
                 <div class="title">
                     <h1>Smart Suite Dashboard</h1>
-                    <span>Pick a workspace to launch it inside this window.</span>
-                </div>
-                <div class="cta">
-                    <div class="pill" id="rememberToggle">Remember last opened</div>
+                    <span>Select an application to open it in a new browser tab.</span>
                 </div>
             </header>
 
@@ -292,130 +300,26 @@ $apps = [
             </div>
         </div>
 
-        <section class="viewer">
-            <div class="viewer-head">
-                <div class="left">
-                    <strong id="viewerTitle">No app loaded</strong>
-                    <small id="viewerSub">Select a tile to open ERP, LIMS, or Payroll.</small>
-                    <div class="breadcrumbs" id="breadcrumbs">
-                        <span class="crumb">No path</span>
-                    </div>
-                </div>
-                <div class="viewer-actions">
-                    <button class="btn" id="openNewTab" disabled>Open in new tab</button>
-                    <button class="btn" id="refreshFrame" disabled>Reload</button>
-                </div>
-            </div>
-            <iframe id="appFrame" title="Application viewport"></iframe>
-            <div class="placeholder" id="emptyState">Choose an application card to start.</div>
-        </section>
+        <footer class="site-footer">
+            <p>© <?php echo date('Y'); ?> Smart Suite. Developed by
+                <a href="https://smarternowhosting.co.ke/" target="_blank" rel="noopener noreferrer">SmarterNow Data Venture</a>.
+            </p>
+        </footer>
     </div>
 
     <script>
         (function() {
             const grid = document.getElementById('appGrid');
-            const frame = document.getElementById('appFrame');
-            const viewerTitle = document.getElementById('viewerTitle');
-            const viewerSub = document.getElementById('viewerSub');
-            const emptyState = document.getElementById('emptyState');
-            const openNewTab = document.getElementById('openNewTab');
-            const refreshFrame = document.getElementById('refreshFrame');
-            const rememberToggle = document.getElementById('rememberToggle');
-            const breadcrumbs = document.getElementById('breadcrumbs');
-            const rememberKey = 'smartsuite.lastApp';
-            let currentAppName = null;
 
-            function setActive(card) {
-                document.querySelectorAll('.tile').forEach(el => el.classList.remove('active'));
-                if (card) card.classList.add('active');
-            }
-
-            function renderBreadcrumbs(urlStr) {
-                let items = [];
-                try {
-                    const u = new URL(urlStr, window.location.origin);
-                    const segments = u.pathname.replace(/^\/+/,'').split('/').filter(Boolean);
-                    const base = currentAppName ? currentAppName : 'App';
-                    items.push({ label: base, href: u.origin + '/' + (segments[0] || '') });
-                    let acc = '';
-                    segments.forEach((seg, idx) => {
-                        acc += (acc ? '/' : '') + seg;
-                        items.push({ label: seg, href: u.origin + '/' + acc });
-                    });
-                } catch (e) {
-                    items = [{ label: 'Navigation unavailable', href: null }];
-                }
-
-                breadcrumbs.innerHTML = '';
-                if (!items.length) {
-                    breadcrumbs.innerHTML = '<span class="crumb">No path</span>';
-                    return;
-                }
-                items.forEach((item, idx) => {
-                    const span = document.createElement('span');
-                    span.className = 'crumb' + (idx === items.length - 1 ? ' active' : '');
-                    span.textContent = item.label || '/';
-                    breadcrumbs.appendChild(span);
-                    if (idx !== items.length - 1) {
-                        const sep = document.createElement('span');
-                        sep.className = 'crumb-sep';
-                        sep.textContent = '>';
-                        breadcrumbs.appendChild(sep);
-                    }
-                });
-            }
-
-            function loadApp(card) {
+            grid.addEventListener('click', function(event) {
+                const card = event.target.closest('.tile');
                 if (!card) return;
+
                 const url = card.dataset.url;
-                const name = card.dataset.name;
-                frame.src = url;
-                viewerTitle.textContent = name;
-                viewerSub.textContent = url;
-                currentAppName = name;
-                emptyState.style.display = 'none';
-                openNewTab.disabled = false;
-                refreshFrame.disabled = false;
-                openNewTab.onclick = () => window.open(url, '_blank');
-                refreshFrame.onclick = () => frame.contentWindow ? frame.contentWindow.location.reload() : frame.src = url;
-                setActive(card);
-                if (rememberToggle.classList.contains('on')) {
-                    localStorage.setItem(rememberKey, url);
-                }
-                renderBreadcrumbs(url);
-            }
-
-            frame.addEventListener('load', () => {
-                try {
-                    const href = frame.contentWindow.location.href;
-                    renderBreadcrumbs(href);
-                    viewerSub.textContent = href;
-                } catch (e) {
-                    breadcrumbs.innerHTML = '<span class=\"crumb\">Path hidden (cross-origin)</span>';
+                if (url) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
                 }
             });
-
-            grid.addEventListener('click', (e) => {
-                const card = e.target.closest('.tile');
-                if (card) {
-                    e.preventDefault();
-                    loadApp(card);
-                }
-            });
-
-            rememberToggle.addEventListener('click', () => {
-                rememberToggle.classList.toggle('on');
-                const on = rememberToggle.classList.contains('on');
-                rememberToggle.style.borderColor = on ? 'rgba(56,189,248,0.8)' : 'var(--border)';
-                if (!on) localStorage.removeItem(rememberKey);
-            });
-
-            const saved = localStorage.getItem(rememberKey);
-            if (saved) {
-                rememberToggle.classList.add('on');
-                const card = Array.from(document.querySelectorAll('.tile')).find(c => c.dataset.url === saved);
-                if (card) loadApp(card);
-            }
         })();
     </script>
 </body>
