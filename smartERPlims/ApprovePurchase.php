@@ -250,7 +250,7 @@ $id1 = $DimensionRow[2];
 $id2 = $DimensionRow[3];
 $Dimesion_one="Not selected";
 
-    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `Dimensions` where `id`='".$id1."'  and code='".$budget."' order by Dimension", $db);
+    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions`` where `id`='".$id1."'  and code='".$budget."' order by Dimension", $db);
     while($row = DB_fetch_array($DRows)){
         $Dimesion_one=$row['Dimension'];
     }
@@ -277,7 +277,7 @@ $id2 = $DimensionRow[3];
 
 $Dimesion_one="Not selected";
 
-    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `Dimensions` where `id`='".$id2."'  and code='".$budget."' order by Dimension", $db);
+    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions`` where `id`='".$id2."'  and code='".$budget."' order by Dimension", $db);
     while($row = DB_fetch_array($DRows)){
         $Dimesion_one=$row['Dimension'];
     }

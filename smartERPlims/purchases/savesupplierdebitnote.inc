@@ -67,7 +67,7 @@ if($_SESSION['DocumentPosted']==true){
     $grossamount = $_POST['grossamount'][$key];
 
   
-    $sql[] =  sprintf("INSERT INTO PurchaseLine
+    $sql[] =  sprintf("INSERT INTO `purchaseline`
            (documenttype,docdate,documentno
            ,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount
@@ -159,7 +159,7 @@ function PostCreditors($period,$journal,$doc){
       ,PurchaseHeader.documenttype
       ,PurchaseHeader.postinggroup
       ,'%s'
-  FROM PurchaseHeader join PurchaseLine 
+  FROM `purchaseheader` join PurchaseLine 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype 
         where PurchaseHeader.documentno='%s' 
@@ -269,7 +269,7 @@ function VATPostGL($period,$journal,$doc){
 }
 
 Function SupplierStatemet($journal,$doc){
-    $sql=sprintf("INSERT INTO SupplierStatement
+    $sql=sprintf("INSERT INTO `supplierstatement`
            (Date
            ,Documentno
            ,Documenttype
