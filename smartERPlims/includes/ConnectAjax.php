@@ -184,8 +184,8 @@ function vatrefresh($CustomerID)
                 sh.status,
                 sh.userid,
                 SUM(sl.invoiceamount) AS OrderValue
-            FROM SalesHeader sh
-            JOIN SalesLine sl ON sh.documentno = sl.documentno
+            FROM `salesheader` sh
+            JOIN `salesline` sl ON sh.documentno = sl.documentno
             WHERE sh.documenttype = '10'
               AND sh.customercode = '$CustomerID'
             GROUP BY
@@ -321,7 +321,7 @@ function Chartfind($offset, $height, $value)
         $ResultIndex = DB_query(
             "SELECT a.accno, a.accdesc, a.ReportCode, a.ReportStyle, a.balance_income
              FROM acct a
-             JOIN GLpostinggroup g ON g.code = a.postinggroup
+             JOIN `glpostinggroup` g ON g.code = a.postinggroup
              ORDER BY a.ReportCode, a.accdesc",
             $db
         );
@@ -662,7 +662,7 @@ function Checkwhenpaid()
     global $db;
 
     $ResultIndex = DB_query(
-        "SELECT Accountno, JournalNo FROM CustomerStatement",
+        "SELECT Accountno, JournalNo FROM `customerstatement`",
         $db
     );
 
@@ -700,7 +700,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
     // Step 1 â€” sum of receipt allocations for this invoice (negative values reduce balance)
     $row = DB_fetch_array(DB_query(
         "SELECT IFNULL(SUM(amount), 0) AS balance
-         FROM ReceiptsAllocation
+         FROM `receiptsallocation`
          WHERE itemcode  = '$accountno'
            AND journalno = '$journalno'",
         $db
@@ -710,7 +710,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
     // Step 2 â€” gross invoice amount(s) on the statement
     $row = DB_fetch_array(DB_query(
         "SELECT IFNULL(SUM(grossamount), 0) AS grossamount
-         FROM CustomerStatement
+         FROM `customerstatement`
          WHERE Accountno = '$accountno'
            AND JournalNo = '$journalno'",
         $db
@@ -723,7 +723,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
         // Latest receipt date for this journal
         $row = DB_fetch_array(DB_query(
             "SELECT date AS datepaid
-             FROM ReceiptsAllocation
+             FROM `receiptsallocation`
              WHERE journalno = '$journalno'
                AND itemcode  = '$accountno'
              ORDER BY date DESC
@@ -738,7 +738,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
             // Set Datewhenpaid = GREATEST(invoice date, receipt date)
             // mirrors the original CASE WHEN Date > @datepaid THEN Date ELSE @datepaid END
             DB_query(
-                "UPDATE CustomerStatement
+                "UPDATE `customerstatement`
                  SET    Datewhenpaid = GREATEST(`Date`, '$datepaid')
                  WHERE  JournalNo = '$journalno'
                    AND  Accountno = '$accountno'",

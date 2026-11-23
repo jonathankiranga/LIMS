@@ -120,7 +120,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                 and entryno=%s", $qty_ordered,$qty,$emptyunits,$salesoderno,'10',$key);
                     
                     
-                $sql[] = sprintf("INSERT INTO SalesLine 
+                $sql[] = sprintf("INSERT INTO `salesline` 
                     (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,partperunit) 
                   (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,partperunit from SalesLine where entryno='%s')"
                    ,'11',FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$salesprice,$vatamount,$grossamount,$key);
@@ -134,7 +134,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                                    ,'11',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                                    , 0 as fulqty,".$looseUnits." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
-                                 FROM SalesLine 
+                                 FROM `salesline` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
                         }elseif($_SESSION['productionTankStore'][$stcode]=="T"){
                                  $sql[] = sprintf("INSERT INTO tanktrans (tankname,units,uom,date,batchno,doctype,itemcode)
@@ -220,7 +220,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                        ,'".$PeriodNo."'
                        ,'".$INVOICENO ."'
                        ,1 
-                FROM SalesLine 
+                FROM `salesline` 
                 where entryno='".$key."' and code='".$emptycode."')";
                 
                 $sql[]=SPRINTF("Insert into Generalledger
