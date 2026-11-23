@@ -7,8 +7,8 @@ SELECT
     DISTINCT ST.*, ta.*, sc.*
 FROM sample_tests ST
 JOIN test_results TR ON ST.TestID = TR.TestID
-JOIN TestStandards ts ON TR.StandardID = ts.StandardID
-JOIN TestParameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
+JOIN teststandards ts ON TR.StandardID = ts.StandardID
+JOIN testparameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
 JOIN test_assignments ta ON TR.resultsID = ta.resultsID  
 JOIN subcontractors sc ON ta.subcontractor = sc.id  
 WHERE TR.StatusID = 1
