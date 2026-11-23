@@ -6,8 +6,8 @@ $departmentID = $_GET['department'];
 $stmt = $conn->prepare("SELECT 
     DISTINCT st.*, sp.*, tr.*, tp.*, ts.*, bp.ResultType AS BaseResultType
     FROM test_results tr 
-    JOIN Sample_Tests st ON tr.TestID = st.TestID
-    JOIN Sample_Header sp ON tr.HeaderID = sp.HeaderID
+    JOIN sample_tests st ON tr.TestID = st.TestID
+    JOIN sample_header sp ON tr.HeaderID = sp.HeaderID
     JOIN testparameters tp ON tp.ParameterID = tr.ParameterID AND tp.StandardID = tr.StandardID
     JOIN teststandards ts ON ts.StandardID = tr.StandardID
     LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
