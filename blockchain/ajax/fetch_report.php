@@ -22,13 +22,13 @@ $sql = "SELECT
             sp.*,
             tp.*
         FROM 
-            Test_Results tr
+            test_results tr
         JOIN 
-            Sample_Tests st ON tr.TestID = st.TestID
+            sample_tests st ON tr.TestID = st.TestID
         JOIN 
-            Sample_Header sp ON tr.HeaderID = sp.HeaderID
+            sample_header sp ON tr.HeaderID = sp.HeaderID
         JOIN 
-            TestParameters tp ON tr.`StandardID`=tp.StandardID AND tr.ParameterID=tp.ParameterID
+            testparameters tp ON tr.`StandardID`=tp.StandardID AND tr.ParameterID=tp.ParameterID
         WHERE 
             tr.HeaderID LIKE '%$searchTerm%' and (tr.MRL_Result IS NOT NULL 
     or tr.ResultStatus IS NOT NULL  or tr.RangeResult IS NOT NULL)
