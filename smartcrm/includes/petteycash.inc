@@ -107,11 +107,11 @@ class Petteycash{
               accno,
               accdesc,
               postinggroup,
-              GLpostinggroup.defaultgl_vat,
+              glpostinggroup.defaultgl_vat,
               vatcategory.vat
             FROM acct 
-            join GLpostinggroup on acct.postinggroup=GLpostinggroup.code
-            left join vatcategory on GLpostinggroup.vatcategory=vatcategory.vatc
+            join glpostinggroup on acct.postinggroup=glpostinggroup.code
+            left join vatcategory on glpostinggroup.vatcategory=vatcategory.vatc
             where acct.accno='".$this->Form['acctno']."'";
           
             $results = DB_query($SQL, $db);
@@ -134,11 +134,11 @@ class Petteycash{
               accno,
               accdesc,
               postinggroup,
-              GLpostinggroup.defaultgl_vat,
+              glpostinggroup.defaultgl_vat,
               vatcategory.vat
             FROM acct 
-            join GLpostinggroup on acct.postinggroup=GLpostinggroup.code
-            left join vatcategory on GLpostinggroup.vatcategory=vatcategory.vatc
+            join glpostinggroup on acct.postinggroup=glpostinggroup.code
+            left join vatcategory on glpostinggroup.vatcategory=vatcategory.vatc
             where acct.accno='".$this->Form['acctno']."'";
           
             $results = DB_query($SQL, $db);
@@ -161,7 +161,7 @@ class Petteycash{
        
          $translatedamount = ($this->Form['Grossamount']) * $this->getrates($this->SuppCurrency,$this->Form['currencycode']);
                       
-          $this->SQLARRAY[]="INSERT INTO SupplierStatement (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
+          $this->SQLARRAY[]="INSERT INTO supplierstatement (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
            VALUES ('".FormatDateForSQL($this->Form['date']) ."','". $this->Form['documentno'] ."',2,'". $this->Form['itemcode']."',".
                   $translatedamount .",'".$JourNal."','".$this->Form['currencycode']."' )";
                     
