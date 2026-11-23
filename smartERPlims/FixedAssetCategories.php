@@ -48,7 +48,7 @@ if (isset($_POST['submit'])) {
 
 	
 	/*Make an array of the defined bank accounts */
-	$SQL = "SELECT `PostingGroup`,`Makeinactive`,`Fluctuation` FROM `BankAccounts`";
+	$SQL = "SELECT `PostingGroup`,`Makeinactive`,`Fluctuation` FROM `bankaccounts``";
 	$result = DB_query($SQL,$db);
 	$BankAccounts = array();
 	$i=0;
