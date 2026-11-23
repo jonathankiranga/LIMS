@@ -184,8 +184,8 @@ function vatrefresh($CustomerID)
                 sh.status,
                 sh.userid,
                 SUM(sl.invoiceamount) AS OrderValue
-            FROM SalesHeader sh
-            JOIN SalesLine sl ON sh.documentno = sl.documentno
+            FROM salesheader sh
+            JOIN salesline sl ON sh.documentno = sl.documentno
             WHERE sh.documenttype = '10'
               AND sh.customercode = '$CustomerID'
             GROUP BY
@@ -321,7 +321,7 @@ function Chartfind($offset, $height, $value)
         $ResultIndex = DB_query(
             "SELECT a.accno, a.accdesc, a.ReportCode, a.ReportStyle, a.balance_income
              FROM acct a
-             JOIN GLpostinggroup g ON g.code = a.postinggroup
+             JOIN glpostinggroup g ON g.code = a.postinggroup
              ORDER BY a.ReportCode, a.accdesc",
             $db
         );
@@ -617,7 +617,7 @@ function EmployeeNamefind($offset, $height, $value)
     global $db;
 
     $ResultIndex = DB_query(
-        "SELECT code, salesman FROM productionEmployee",
+        "SELECT code, salesman FROM productionemployee",
         $db
     );
 
@@ -646,7 +646,7 @@ function EmployeeNamefind($offset, $height, $value)
 }
 
 // ---------------------------------------------------------------------------
-// Checkwhenpaid â€” run checkInvoiceWhenpaid for all CustomerStatement rows
+// Checkwhenpaid â€” run checkInvoiceWhenpaid for all customerstatement rows
 // The original called a MS-SQL stored procedure; replaced with a MySQL CALL.
 // ---------------------------------------------------------------------------
 if (isset($_GET['Checkwhenpaid']) || isset($_POST['Checkwhenpaid'])) {
@@ -654,7 +654,7 @@ if (isset($_GET['Checkwhenpaid']) || isset($_POST['Checkwhenpaid'])) {
 }
 
 /**
- * Iterate every row in CustomerStatement and mark each invoice
+ * Iterate every row in customerstatement and mark each invoice
  * with the date it was fully paid via checkInvoiceWhenpaid().
  */
 function Checkwhenpaid()
@@ -662,7 +662,7 @@ function Checkwhenpaid()
     global $db;
 
     $ResultIndex = DB_query(
-        "SELECT Accountno, JournalNo FROM CustomerStatement",
+        "SELECT Accountno, JournalNo FROM customerstatement",
         $db
     );
 
@@ -674,17 +674,17 @@ function Checkwhenpaid()
 }
 
 /**
- * Mark an invoice as paid (sets CustomerStatement.Datewhenpaid) once
+ * Mark an invoice as paid (sets customerstatement.Datewhenpaid) once
  * the sum of all receipt allocations covers the gross invoice amount.
  *
  * Logic ported from MS-SQL stored procedure dbo.CheckInvoiceWhenpaid:
  *
- *  1. Sum all ReceiptsAllocation.amount for this account + journal  â†’ $balance
- *  2. Sum all CustomerStatement.grossamount for this account + journal â†’ $grossAmount
+ *  1. Sum all receiptsallocation.amount for this account + journal  â†’ $balance
+ *  2. Sum all customerstatement.grossamount for this account + journal â†’ $grossAmount
  *  3. If ($grossAmount + $balance) <= 1  (i.e. fully settled within rounding):
  *       - Find the latest receipt date for this journal
- *       - Update CustomerStatement.Datewhenpaid to whichever is later:
- *           the invoice date (CustomerStatement.Date) or the receipt date
+ *       - Update customerstatement.Datewhenpaid to whichever is later:
+ *           the invoice date (customerstatement.Date) or the receipt date
  *
  * @param  string $accountno   Debtor account code
  * @param  string $journalno   Journal / invoice reference
@@ -700,7 +700,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
     // Step 1 â€” sum of receipt allocations for this invoice (negative values reduce balance)
     $row = DB_fetch_array(DB_query(
         "SELECT IFNULL(SUM(amount), 0) AS balance
-         FROM ReceiptsAllocation
+         FROM receiptsallocation
          WHERE itemcode  = '$accountno'
            AND journalno = '$journalno'",
         $db
@@ -710,7 +710,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
     // Step 2 â€” gross invoice amount(s) on the statement
     $row = DB_fetch_array(DB_query(
         "SELECT IFNULL(SUM(grossamount), 0) AS grossamount
-         FROM CustomerStatement
+         FROM customerstatement
          WHERE Accountno = '$accountno'
            AND JournalNo = '$journalno'",
         $db
@@ -723,7 +723,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
         // Latest receipt date for this journal
         $row = DB_fetch_array(DB_query(
             "SELECT date AS datepaid
-             FROM ReceiptsAllocation
+             FROM receiptsallocation
              WHERE journalno = '$journalno'
                AND itemcode  = '$accountno'
              ORDER BY date DESC
@@ -738,7 +738,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
             // Set Datewhenpaid = GREATEST(invoice date, receipt date)
             // mirrors the original CASE WHEN Date > @datepaid THEN Date ELSE @datepaid END
             DB_query(
-                "UPDATE CustomerStatement
+                "UPDATE customerstatement
                  SET    Datewhenpaid = GREATEST(`Date`, '$datepaid')
                  WHERE  JournalNo = '$journalno'
                    AND  Accountno = '$accountno'",
