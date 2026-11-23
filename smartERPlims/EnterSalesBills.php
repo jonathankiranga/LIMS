@@ -255,7 +255,7 @@ class journalentries {
         $array= array();
         
         $sql="SELECT `accno`,`accdesc`,`defaultgl_vat`,`VAT` FROM `acct` 
-              left join GLpostinggroup on acct.postinggroup=GLpostinggroup.code 
+              left join `glpostinggroup` on acct.postinggroup=GLpostinggroup.code 
               left join vatcategory on GLpostinggroup.vatcategory=vatcategory.vatc 
               where `accno`='".$account."'";
         

@@ -8,7 +8,7 @@ include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 include('includes/AccountBalance.inc');
 
-$REsults = DB_query('Select periodno from `FinancialPeriods` B where B.closed=0 Group by periodno',$db);
+$REsults = DB_query('Select periodno from `financialperiods`` B where B.closed=0 Group by periodno',$db);
 $financialPeriods = DB_fetch_row($REsults);
 $YearPeriod = is_null($financialPeriods[0])?0:$financialPeriods[0];
 
@@ -52,7 +52,7 @@ If(isset($_POST['CloseMonth'])){
     
     DB_query("UPDATE companies set `PeriodRollover`=DATE_ADD(`PeriodRollover`, INTERVAL 1 MONTH) WHERE coycode=1",$db);
 
-    DB_query("UPDATE `financialperiods`` set `closed`=1 where `end_date` <=(select `PeriodRollover`"
+    DB_query("UPDATE `financialperiods``` set `closed`=1 where `end_date` <=(select `PeriodRollover`"
             . " from companies WHERE coycode=1)",$db);
 }
 
@@ -65,7 +65,7 @@ $ForceConfigReload = False;
   echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
   
   $ResultIndex=DB_query("SELECT `start_date`,`end_date`,`Name`,`newyear`,`closed`,`periodno`  
- FROM `financialperiods`` order by start_date desc limit 12", $db);
+ FROM `financialperiods``` order by start_date desc limit 12", $db);
  
   
   echo '<table class="table table-bordered">'
