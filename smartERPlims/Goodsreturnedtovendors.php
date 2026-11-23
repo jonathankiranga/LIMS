@@ -44,7 +44,7 @@ $filter="SELECT
            ,`postinggroup`
            ,`currencycode`
            ,`vatinclusive`
-       FROM `PurchaseHeader` 
+       FROM `purchaseheader`` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -130,7 +130,7 @@ $SQL="SELECT `entryno`
       ,`inclusive`
       ,PurchaseLine.partperunit
       ,stockmaster.averagestock
-  FROM `PurchaseLine` 
+  FROM `purchaseline`` 
   join `stockmaster`  on `PurchaseLine`.code=`stockmaster`.itemcode where `documentno`='".$_POST['documentno']."'";
 
 
