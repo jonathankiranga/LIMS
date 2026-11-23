@@ -311,7 +311,7 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo, $receiptDocumen
  * @param string $salesoderno
  * @param string $stcode       Stock item code
  * @param float  $qty          Quantity sold
- * @param int    $key          SalesLine.entryno
+ * @param int    $key          salesline.entryno
  * @param int    $batchrowid   Optional specific batch rowid to deplete (0 = auto FIFO)
  */
 function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key, $batchrowid = 0)
@@ -329,10 +329,10 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key, $batchr
 
     // Fetch UOM for this sales line
     $uomResult  = DB_query(
-        "SELECT SalesLine.UOM
+        "SELECT salesline.UOM
          FROM `salesheader`
-         JOIN `salesline` ON SalesLine.documentno = SalesHeader.documentno
-         WHERE SalesLine.entryno = $key",
+         JOIN `salesline` ON salesline.documentno = salesheader.documentno
+         WHERE salesline.entryno = $key",
         $db
     );
     $uomRow = DB_fetch_row($uomResult);
@@ -414,10 +414,10 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key, $batchr
                          amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
                       SELECT
                         '$journal',
-                        SalesHeader.docdate,
+                        salesheader.docdate,
                         '$PeriodNo',
-                        SalesHeader.documentno,
-                        SalesHeader.documenttype,
+                        salesheader.documentno,
+                        salesheader.documenttype,
                         inventorypostinggroup.stockvariance,
                         inventorypostinggroup.balancesheet,
                         '',
@@ -425,29 +425,29 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key, $batchr
                         0,
                         '$funcCurrency',
                         1,
-                        SalesHeader.customercode,
+                        salesheader.customercode,
                         CONCAT(
-                            RTRIM(SalesLine.description), '@',
+                            RTRIM(salesline.description), '@',
                             CAST($reportCost AS CHAR), ' X ',
                             CAST($reportQty  AS CHAR),
-                            CASE SalesLine.UOM
+                            CASE salesline.UOM
                                 WHEN 'fulqty'
                                 THEN (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.units    = u.code
-                                      AND  sm2.itemcode = SalesLine.code)
+                                      AND  sm2.itemcode = salesline.code)
                                 ELSE (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.subunits = u.code
-                                      AND  sm2.itemcode = SalesLine.code)
+                                      AND  sm2.itemcode = salesline.code)
                             END
                         ) AS narration
                       FROM `salesheader`
-                      JOIN `salesline`          ON SalesLine.documentno          = SalesHeader.documentno
-                      JOIN stockmaster        ON SalesLine.code                = stockmaster.itemcode
+                      JOIN `salesline`          ON salesline.documentno          = salesheader.documentno
+                      JOIN stockmaster        ON salesline.code                = stockmaster.itemcode
                       JOIN inventorypostinggroup ON inventorypostinggroup.code = stockmaster.postinggroup
-                      JOIN currencies         ON SalesHeader.currencycode      = currencies.currabrev
-                      WHERE SalesHeader.documentno = '$salesoderno'
-                        AND SalesLine.code         = '$stcode'
-                        AND SalesLine.entryno      = $key";
+                      JOIN currencies         ON salesheader.currencycode      = currencies.currabrev
+                      WHERE salesheader.documentno = '$salesoderno'
+                        AND salesline.code         = '$stcode'
+                        AND salesline.entryno      = $key";
 
             DB_query($glSQL, $db);
         }
@@ -502,7 +502,7 @@ function GetFIFOissues($journal, $PeriodNo, $salesoderno, $stcode, $qty, $mypost
  * @param string $salesoderno
  * @param string $stcode       Container item code (may be empty)
  * @param float  $qty
- * @param int    $key          SalesLine.entryno
+ * @param int    $key          salesline.entryno
  */
 function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 {
@@ -564,10 +564,10 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
                          amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
                       SELECT
                         '$journal',
-                        SalesHeader.docdate,
+                        salesheader.docdate,
                         '$PeriodNo',
-                        SalesHeader.documentno,
-                        SalesHeader.documenttype,
+                        salesheader.documentno,
+                        salesheader.documenttype,
                         inventorypostinggroup.stockvariance,
                         inventorypostinggroup.balancesheet,
                         '',
@@ -575,29 +575,29 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
                         0,
                         '$funcCurrency',
                         1,
-                        SalesHeader.customercode,
+                        salesheader.customercode,
                         CONCAT(
-                            RTRIM(SalesLine.description), '@',
+                            RTRIM(salesline.description), '@',
                             CAST($avecost AS CHAR), ' X ',
                             CAST($useQty  AS CHAR),
-                            CASE SalesLine.UOM
+                            CASE salesline.UOM
                                 WHEN 'fulqty'
                                 THEN (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.units    = u.code
-                                      AND  sm2.itemcode = SalesLine.containercode)
+                                      AND  sm2.itemcode = salesline.containercode)
                                 ELSE (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.subunits = u.code
-                                      AND  sm2.itemcode = SalesLine.containercode)
+                                      AND  sm2.itemcode = salesline.containercode)
                             END
                         ) AS narration
                       FROM `salesheader`
-                      JOIN `salesline`          ON SalesLine.documentno          = SalesHeader.documentno
-                      JOIN stockmaster        ON SalesLine.containercode       = stockmaster.itemcode
+                      JOIN `salesline`          ON salesline.documentno          = salesheader.documentno
+                      JOIN stockmaster        ON salesline.containercode       = stockmaster.itemcode
                       JOIN inventorypostinggroup ON inventorypostinggroup.code = stockmaster.postinggroup
-                      JOIN currencies         ON SalesHeader.currencycode      = currencies.currabrev
-                      WHERE SalesHeader.documentno  = '$salesoderno'
-                        AND SalesLine.containercode = '$itemcode'
-                        AND SalesLine.entryno       = $key";
+                      JOIN currencies         ON salesheader.currencycode      = currencies.currabrev
+                      WHERE salesheader.documentno  = '$salesoderno'
+                        AND salesline.containercode = '$itemcode'
+                        AND salesline.entryno       = $key";
 
             DB_query($glSQL, $db);
         }
