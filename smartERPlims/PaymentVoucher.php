@@ -180,7 +180,7 @@ if(isset($selectedrec) and (mb_strlen($selectedrec)>0)){
         `SupplierStatement`.`JournalNo`
       FROM `paymentvoucherheader` 
       join `paymentvoucherline` on `paymentvoucherheader`.`journal`=`paymentvoucherline`.`journal`
-      join SupplierStatement on `paymentvoucherline`.`invoice_journal`=`SupplierStatement`.`JournalNo`
+      join `supplierstatement` on `paymentvoucherline`.`invoice_journal`=`SupplierStatement`.`JournalNo`
       where `paymentvoucherheader`.`journal`='".$selectedrec."'";
       
         if(isset($_GET['edit'])){
@@ -196,12 +196,12 @@ if(isset($selectedrec) and (mb_strlen($selectedrec)>0)){
 $sql="SELECT `Date`,`Documentno`,`Documenttype`,`Accountno`
       ,`Grossamount`,`JournalNo`,`Dimension_One` ,`Dimension_Two`
       ,(SELECT 
-         IFNULL(sum(`amount`),0) FROM `paymentsallocation`` 
+         IFNULL(sum(`amount`),0) FROM `paymentsallocation``` 
          where `itemcode`=`SupplierStatement`.`Accountno` 
           and `date`=`SupplierStatement`.`date` 
           and `invoiceno`=`SupplierStatement`.`Documentno` 
           and `journalno`=`SupplierStatement`.`JournalNo`) as Pamount
-      FROM `supplierstatement`` where
+      FROM `supplierstatement``` where
       `SupplierStatement`.`Accountno`='".$SelectedCustomer."'";
 
     
@@ -470,7 +470,7 @@ class Classpaymentvoucher {
             `currencies`.`rate`,
             `SupplierStatement`.`whtax`,
             `SupplierStatement`.Documentno
-            FROM `supplierstatement`` 
+            FROM `supplierstatement``` 
             join creditors on itemcode=Accountno
             left join `currencies` on `currencies`.`currabrev`=creditors.curr_cod 
             where `Accountno`='%s' and `JournalNo`='%s' ",$this->CustomerID,$journal);
