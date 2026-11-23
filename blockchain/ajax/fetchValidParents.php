@@ -19,10 +19,10 @@ $descendantIds = [];
 if ($currentId) {
     $stmt = $conn->prepare("
         WITH RECURSIVE Descendants AS (
-            SELECT ParameterID FROM ParameterMatrix WHERE ParentID = ?
+            SELECT ParameterID FROM parametermatrix WHERE ParentID = ?
             UNION ALL
             SELECT pm.ParameterID
-            FROM ParameterMatrix pm
+            FROM parametermatrix pm
             INNER JOIN Descendants d ON pm.ParentID = d.ParameterID
         )
         SELECT ParameterID FROM Descendants
@@ -47,7 +47,7 @@ $sql = "WITH RECURSIVE ParameterHierarchy AS (
         ParentID,
         CAST(ParameterName AS CHAR(255)) AS FullPath,
         0 AS Level
-    FROM ParameterMatrix
+    FROM parametermatrix
     WHERE ParentID IS NULL
 
     UNION ALL
@@ -58,7 +58,7 @@ $sql = "WITH RECURSIVE ParameterHierarchy AS (
         pm.ParentID,
         CONCAT(ph.FullPath, ' > ', pm.ParameterName),
         ph.Level + 1
-    FROM ParameterMatrix pm
+    FROM parametermatrix pm
     INNER JOIN ParameterHierarchy ph ON pm.ParentID = ph.ParameterID
 )
 SELECT ParameterID, ParameterName, FullPath, Level
