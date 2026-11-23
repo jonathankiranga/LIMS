@@ -51,7 +51,7 @@ function columnExists($table, $column, $db)
     return $res && DB_num_rows($res) > 0;
 }
 
-$hasLastAlert = columnExists('Tasks', 'lastalert', $db);
+$hasLastAlert = columnExists('tasks', 'lastalert', $db);
 
 $where = [
     "t.datedue IS NOT NULL",
@@ -66,7 +66,7 @@ $whereSql = 'WHERE ' . implode(' AND ', $where);
 $sql = "
     SELECT t.pkey, t.Taskname, t.TaskOwner, t.datedue, t.taskdetails, t.Status,
            u.email, u.realname
-    FROM Tasks t
+    FROM tasks t
     LEFT JOIN www_users u ON u.userid = t.TaskOwner
     $whereSql
     ORDER BY t.datedue ASC
@@ -142,7 +142,7 @@ while ($row = DB_fetch_array($result)) {
 
     $sentCount++;
     if ($hasLastAlert) {
-        DB_query("UPDATE Tasks SET lastalert = NOW() WHERE pkey = '$taskId'", $db);
+        DB_query("UPDATE tasks SET lastalert = NOW() WHERE pkey = '$taskId'", $db);
     }
 }
 
