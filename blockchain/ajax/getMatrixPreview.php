@@ -18,8 +18,8 @@ $stmt = $conn->prepare("SELECT
         tp.matrixID,
         PM.ParameterName as matrixdesc
  FROM testparameters tp
- INNER JOIN TestStandards ts ON tp.StandardID = ts.StandardID
- left join ParameterMatrix PM on PM.ParameterID = tp.matrixID
+ INNER JOIN teststandards ts ON tp.StandardID = ts.StandardID
+ left join parametermatrix PM on PM.ParameterID = tp.matrixID
  WHERE tp.matrixID = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
