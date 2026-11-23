@@ -223,7 +223,7 @@
                 if (success) {
                    log.disabled = true;
                    log.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-                 setTimeout(function() { window.location.href = "homepage.php"; },5000); 
+                 window.location.href = "homepage.php"; 
                 } else {
                     displayErrorMessage(message); // Type out error message
                 }
