@@ -52,7 +52,7 @@ $SQL="select
         SalesLine.documentno,
         SalesHeader.customercode ,
         SalesHeader.documenttype 
-        FROM SalesHeader 
+        FROM `salesheader` 
         join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  
         join stockmaster on stockmaster.itemcode=SalesLine.code where SalesLine.documentno='%s' ",$_GET['No']);
      

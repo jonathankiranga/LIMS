@@ -253,7 +253,7 @@ function etimsFetchInvoiceHeader($documentType, $documentNo) {
                    debtors.country,
                    debtors.contact,
                    debtors.middlen AS PIN
-            FROM SalesHeader
+            FROM `salesheader`
             LEFT JOIN debtors ON SalesHeader.customercode = debtors.itemcode
             WHERE SalesHeader.documenttype='" . (int) $documentType . "'
               AND SalesHeader.documentno='" . DB_escape_string($documentNo) . "'
@@ -283,7 +283,7 @@ function etimsFetchInvoiceLines($documentType, $documentNo) {
                    partperunit,
                    totalchargedcontainers,
                    containercode
-            FROM SalesLine
+            FROM `salesline`
             WHERE documenttype='" . (int) $documentType . "'
               AND documentno='" . DB_escape_string($documentNo) . "'
             ORDER BY entryno";

@@ -29,7 +29,7 @@ $sql=array();
  $imagesArray = json_decode($decodedString);
  $imagesArray2 = json_encode($imagesArray);
  
-$sql[]="INSERT INTO SalesHeader
+$sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -86,7 +86,7 @@ foreach ($_SESSION['sales_orders'] as $lineno => $rows) {
     
     // Try to insert with discount column if it exists
     // If the column doesn't exist, an error will occur and the INSERT will fail
-    $sql[] =  sprintf("INSERT INTO SalesLine
+    $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype
            ,docdate
            ,documentno
