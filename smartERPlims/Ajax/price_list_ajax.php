@@ -78,7 +78,7 @@ function plPriceMap(array $codes) {
     foreach ($codes as $c) {
         $list[] = plStr($c);
     }
-    $sql = "SELECT id, stockcode, price, TAT, units_code, quantity FROM PriceList
+    $sql = "SELECT id, stockcode, price, TAT, units_code, quantity FROM `pricelist`
             WHERE customerCode = '' AND stockcode IN (" . implode(',', $list) . ")
             ORDER BY stockcode, quantity";
     $res = plDB($sql);
@@ -329,7 +329,7 @@ switch ($action) {
         if ($id <= 0) {
             plFail('Cannot edit a row that has no price yet - add it instead.', 'NOT_SAVED');
         }
-        $cur = plDB("SELECT id, stockcode, units_code, quantity, price, TAT FROM PriceList WHERE id = $id LIMIT 1");
+        $cur = plDB("SELECT id, stockcode, units_code, quantity, price, TAT FROM `pricelist` WHERE id = $id LIMIT 1");
         if ($cur === false) {
             plFail('Could not read the price row. See the error log.', 'DB_READ');
         }
@@ -365,11 +365,11 @@ switch ($action) {
             plFail('Nothing to save.', 'NO_CHANGES');
         }
         // quantity is intentionally left alone: it keys the default price row.
-        $upd = plDB("UPDATE PriceList SET " . implode(', ', $sets) . " WHERE id = $id");
+        $upd = plDB("UPDATE `pricelist` SET " . implode(', ', $sets) . " WHERE id = $id");
         if ($upd === false) {
             plFail('Could not save the price. See the error log.', 'DB_UPDATE');
         }
-        $after = plDB("SELECT id, stockcode, price, TAT, units_code, quantity FROM PriceList WHERE id = $id LIMIT 1");
+        $after = plDB("SELECT id, stockcode, price, TAT, units_code, quantity FROM `pricelist` WHERE id = $id LIMIT 1");
         $out = mysqli_fetch_assoc($after);
         plOk(array(
             'id' => $id,
@@ -411,20 +411,20 @@ switch ($action) {
             $units = 'PCS';
         }
         $qty = plDefaultQuantity();
-        $chk = plDB("SELECT id FROM PriceList WHERE customerCode = '' AND stockcode = " . plStr($stockcode)
+        $chk = plDB("SELECT id FROM `pricelist` WHERE customerCode = '' AND stockcode = " . plStr($stockcode)
             . " AND units_code = " . plStr($units) . " AND quantity = $qty LIMIT 1");
         if ($chk === false) {
             plFail('Could not check for an existing price. See the error log.', 'DB_CHECK');
         }
         if ($existing = mysqli_fetch_assoc($chk)) {
             $id = (int)$existing['id'];
-            $upd = plDB("UPDATE PriceList SET price = $price, TAT = $tat WHERE id = $id");
+            $upd = plDB("UPDATE `pricelist` SET price = $price, TAT = $tat WHERE id = $id");
             if ($upd === false) {
                 plFail('Could not update the existing price. See the error log.', 'DB_UPDATE');
             }
             $created = false;
         } else {
-            $ins = plDB("INSERT INTO PriceList (customerCode, stockcode, units_code, quantity, price, TAT, approved)
+            $ins = plDB("INSERT INTO `pricelist` (customerCode, stockcode, units_code, quantity, price, TAT, approved)
                          VALUES ('', " . plStr($stockcode) . ", " . plStr($units) . ", $qty, $price, $tat, 1)");
             if ($ins === false) {
                 plFail('Could not insert the price. See the error log.', 'DB_INSERT');
@@ -462,7 +462,7 @@ switch ($action) {
         if ($id <= 0) {
             plFail('Invalid price row id.', 'BAD_ID');
         }
-        $cur = plDB("SELECT stockcode, units_code, quantity FROM PriceList WHERE id = $id LIMIT 1");
+        $cur = plDB("SELECT stockcode, units_code, quantity FROM `pricelist` WHERE id = $id LIMIT 1");
         if ($cur === false) {
             plFail('Could not read the price row. See the error log.', 'DB_READ');
         }
@@ -474,7 +474,7 @@ switch ($action) {
         $qty = (float)$row['quantity'];
         // Mirrors PriceList::deleteMasterdata(): when no customer-specific rows
         // share this stockcode+unit+quantity, the other default rows go too.
-        $chk = plDB("SELECT COUNT(*) AS c FROM PriceList
+        $chk = plDB("SELECT COUNT(*) AS c FROM `pricelist`
                      WHERE stockcode = $code AND units_code = $units AND quantity = $qty AND customerCode <> ''");
         if ($chk === false) {
             plFail('Could not check related prices. See the error log.', 'DB_CHECK');
@@ -482,9 +482,9 @@ switch ($action) {
         $crow = mysqli_fetch_assoc($chk);
         $customerRows = (int)($crow['c'] ?? 0);
         if ($customerRows === 0) {
-            $del = plDB("DELETE FROM PriceList WHERE stockcode = $code AND units_code = $units AND quantity = $qty");
+            $del = plDB("DELETE FROM `pricelist` WHERE stockcode = $code AND units_code = $units AND quantity = $qty");
         } else {
-            $del = plDB("DELETE FROM PriceList WHERE id = $id");
+            $del = plDB("DELETE FROM `pricelist` WHERE id = $id");
         }
         if ($del === false) {
             plFail('Could not delete the price. See the error log.', 'DB_DELETE');
@@ -536,7 +536,7 @@ switch ($action) {
         if ($id <= 0) {
             plFail('Invalid ID', 'BAD_ID');
         }
-        $res = plDB("SELECT id, stockcode, price, TAT, units_code, quantity FROM PriceList WHERE id = $id");
+        $res = plDB("SELECT id, stockcode, price, TAT, units_code, quantity FROM `pricelist` WHERE id = $id");
         if ($res === false) {
             plFail('Could not read the price. See the error log.', 'DB_READ');
         }

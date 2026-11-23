@@ -17,8 +17,8 @@ if (isset($_GET['export_prices'])) {
     $out = fopen('php://output', 'w');
     fputcsv($out, ['stockcode','description','price','tat']);
     $rs = DB_query("SELECT s.itemcode, s.descrip,
-                           (SELECT price FROM PriceList WHERE customerCode='' AND stockcode=s.itemcode ORDER BY quantity LIMIT 1) AS price,
-                           (SELECT tat FROM PriceList WHERE customerCode='' AND stockcode=s.itemcode ORDER BY quantity LIMIT 1) AS tat
+                           (SELECT price FROM `pricelist` WHERE customerCode='' AND stockcode=s.itemcode ORDER BY quantity LIMIT 1) AS price,
+                           (SELECT tat FROM `pricelist` WHERE customerCode='' AND stockcode=s.itemcode ORDER BY quantity LIMIT 1) AS tat
                     FROM stockmaster s
                     WHERE s.isstock_1=1
                     ORDER BY s.descrip", $db);
@@ -50,13 +50,13 @@ if (isset($_POST['import_prices']) && isset($_FILES['prices_file'])) {
             $tat       = (int)($row[$idx_tat] ?? 0);
             if ($stockcode === '') { continue; }
             $esc_sc = $db->real_escape_string($stockcode);
-            $chk = DB_query("SELECT COUNT(*) FROM PriceList WHERE customerCode='' AND stockcode='$esc_sc'", $db);
+            $chk = DB_query("SELECT COUNT(*) FROM `pricelist` WHERE customerCode='' AND stockcode='$esc_sc'", $db);
             $cnt = DB_fetch_row($chk);
             if ($cnt[0] > 0) {
-                DB_query("UPDATE PriceList SET price=$price, tat=$tat WHERE customerCode='' AND stockcode='$esc_sc'", $db);
+                DB_query("UPDATE `pricelist` SET price=$price, tat=$tat WHERE customerCode='' AND stockcode='$esc_sc'", $db);
                 $updated++;
             } else {
-                DB_query("INSERT INTO PriceList (customerCode,stockcode,price,tat) VALUES ('','$esc_sc',$price,$tat)", $db);
+                DB_query("INSERT INTO `pricelist` (customerCode,stockcode,price,tat) VALUES ('','$esc_sc',$price,$tat)", $db);
                 $inserted++;
             }
         }

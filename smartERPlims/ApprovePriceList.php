@@ -40,14 +40,14 @@ if(isset($_POST['action'])){
     foreach ($_POST['action'] as $key => $value) {
         switch ($value) {
             case 'Approve':
-                $SQL = sprintf("UPDATE PriceList set approved=1,`approvedby`='%s'
+                $SQL = sprintf("UPDATE `pricelist` set approved=1,`approvedby`='%s'
                              ,`DateTime`='%s' where id='%s' ", $_SESSION['UserID'],gmdate('Y-m-d H:i:s'),$key);
                         $ResultIndex = DB_query($SQL,$db); 
 
                 break;
 
              case 'Reject':
-                  $SQL = sprintf("UPDATE PriceList set approved=0,`approvedby`='%s'
+                  $SQL = sprintf("UPDATE `pricelist` set approved=0,`approvedby`='%s'
                              ,`DateTime`='%s' where id='%s' ", $_SESSION['UserID'],gmdate('Y-m-d H:i:s'),$key);
                         $ResultIndex = DB_query($SQL,$db); 
 

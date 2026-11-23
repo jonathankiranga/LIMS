@@ -31,7 +31,7 @@ if ($price <= 0) {
 }
 
 // Check if default price already exists and preserve TAT
-$existingStmt = mysqli_prepare($db, "SELECT id, tat FROM PriceList WHERE stockcode = ? AND (customerCode IS NULL OR customerCode = '') AND approved = 1 LIMIT 1");
+$existingStmt = mysqli_prepare($db, "SELECT id, tat FROM `pricelist` WHERE stockcode = ? AND (customerCode IS NULL OR customerCode = '') AND approved = 1 LIMIT 1");
 mysqli_stmt_bind_param($existingStmt, 's', $testItemcode);
 mysqli_stmt_execute($existingStmt);
 $existingResult = mysqli_stmt_get_result($existingStmt);
@@ -41,7 +41,7 @@ $existingTat = $existingRow ? (int)$existingRow['tat'] : 0;
 mysqli_stmt_close($existingStmt);
 
 if ($existingId > 0) {
-  $updateStmt = mysqli_prepare($db, "UPDATE PriceList SET price = ?, DateTime = NOW() WHERE id = ?");
+  $updateStmt = mysqli_prepare($db, "UPDATE `pricelist` SET price = ?, DateTime = NOW() WHERE id = ?");
   mysqli_stmt_bind_param($updateStmt, 'di', $price, $existingId);
   $ok = mysqli_stmt_execute($updateStmt);
   mysqli_stmt_close($updateStmt);
@@ -51,7 +51,7 @@ if ($existingId > 0) {
     echo json_encode(['success' => false, 'message' => 'Update failed']);
   }
 } else {
-  $insertStmt = mysqli_prepare($db, "INSERT INTO PriceList (customerCode, stockcode, approved, approvedby, DateTime, units_code, quantity, price, tat) VALUES ('', ?, 1, '', NOW(), ?, ?, ?, ?)");
+  $insertStmt = mysqli_prepare($db, "INSERT INTO `pricelist` (customerCode, stockcode, approved, approvedby, DateTime, units_code, quantity, price, tat) VALUES ('', ?, 1, '', NOW(), ?, ?, ?, ?)");
   mysqli_stmt_bind_param($insertStmt, 'ssidi', $testItemcode, $unitsCode, $qty, $price, $existingTat);
   $ok = mysqli_stmt_execute($insertStmt);
   mysqli_stmt_close($insertStmt);
