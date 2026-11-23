@@ -23,10 +23,10 @@ $SQL="select
       ,`debtors`.phone
       ,`debtors`.contact
       ,`SalesHeader`.`yourreference`   
-      ,SalesHeader.`locationcode` as BankCode
+      ,salesheader.`locationcode` as BankCode
       ,`SalesHeader`.`picture`
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
            left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
       where `SalesHeader`.`documenttype`='1' 
@@ -58,34 +58,34 @@ $SQL="select
     $companyPIN = htmlspecialchars($_SESSION['CompanyRecord']['PIN'] ?? '', ENT_QUOTES, 'UTF-8');
     
      $SQL=Sprintf("SELECT      
-         SalesLine.SampleID as sampleid, 
+         salesline.SampleID as sampleid, 
          stockmaster.barcode
        ,Container.`descrip` as containername
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,SalesLine.Quantity,
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,salesline.Quantity,
        `SalesLine`.UOM,
-       SalesLine.UnitPrice as Sp ,
+       salesline.UnitPrice as Sp ,
        `SalesLine`.`unitofmeasure` as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesLine.vatamount
-      ,SalesLine.invoiceamount-SalesLine.vatamount as netamt
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`totalchargedcontainers`
-      ,SalesLine.PartPerUnit as partperunit
-      ,SalesLine.code as itemcode
-      ,IFNULL(SalesLine.TAT,0) as TAT
-      ,IFNULL(SalesLine.LineDiscountPercent,0) as lineDiscount
-      ,IFNULL(SalesHeader.QtyDiscount,0) as headerDiscount
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesline.vatamount
+      ,salesline.invoiceamount-salesline.vatamount as netamt
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`totalchargedcontainers`
+      ,salesline.PartPerUnit as partperunit
+      ,salesline.code as itemcode
+      ,IFNULL(salesline.TAT,0) as TAT
+      ,IFNULL(salesline.LineDiscountPercent,0) as lineDiscount
+      ,IFNULL(salesheader.QtyDiscount,0) as headerDiscount
   FROM `salesheader``` 
-        join `salesline` on SalesHeader.documentno=SalesLine.documentno  and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=1
-        join stockmaster on stockmaster.itemcode=SalesLine.code
-        left join stockmaster Container on Container.itemcode=SalesLine.containercode
-        where SalesHeader.documentno='%s'  order by `description` asc ",$_GET['No']);
+        join `salesline` on salesheader.documentno=salesline.documentno  and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=1
+        join stockmaster on stockmaster.itemcode=salesline.code
+        left join stockmaster Container on Container.itemcode=salesline.containercode
+        where salesheader.documentno='%s'  order by `description` asc ",$_GET['No']);
      
      $Results=DB_query($SQL,$db);
      $R1=0; $R2=0; $R3=0; $maxTAT=0; $headerDiscountPercent=0;
@@ -235,7 +235,7 @@ $SQL="select
     $pdf->__destruct();
     
     
-    DB_query("Update `salesheader`` set printed=1 where SalesHeader.documenttype=1 and SalesHeader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader`` set printed=1 where salesheader.documenttype=1 and salesheader.documentno='".$_GET['No']."'", $db);
     
 }else{
 
@@ -260,9 +260,9 @@ if(isset($_GET['unprintedonly'])){
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' and (`SalesHeader`.`printed` is null or `SalesHeader`.`printed`=0)
        group by 
        `SalesHeader`.`documentno`
@@ -289,9 +289,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' 
        group by 
        `SalesHeader`.`documentno`

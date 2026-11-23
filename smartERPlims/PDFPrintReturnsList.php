@@ -23,7 +23,7 @@ $SQL="select
       ,`debtors`.phone
       ,`debtors`.contact
       from `salesheader`` 
-      join `salesline`` on `SalesHeader`.`documentno`=SalesLine.`documentno`
+      join `salesline`` on `SalesHeader`.`documentno`=salesline.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -45,19 +45,19 @@ $SQL="select
      
     $SQL=Sprintf("SELECT 
                    stockmaster.barcode ,
-                   SalesHeader.docdate ,
-                   SalesLine.`description` ,
-                   SalesLine.`Quantity`, 
+                   salesheader.docdate ,
+                   salesline.`description` ,
+                   salesline.`Quantity`, 
                    `SalesLine`.UOM, 
-                   SalesLine.UnitPrice as Sp , 
-                   SalesLine.`unitofmeasure` as UOMDesc , 
-                   SalesHeader.`documentno` , 
-                   SalesHeader.`customercode` , 
-                   SalesHeader.`documenttype` 
+                   salesline.UnitPrice as Sp , 
+                   salesline.`unitofmeasure` as UOMDesc , 
+                   salesheader.`documentno` , 
+                   salesheader.`customercode` , 
+                   salesheader.`documenttype` 
                    FROM `salesheader`` 
-                   join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  and SalesHeader.documenttype='11' 
-                   left join stockmaster on stockmaster.itemcode=SalesLine.code 
-                   where SalesHeader.documentno='%s' ",$_GET['No']);
+                   join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype  and salesheader.documenttype='11' 
+                   left join stockmaster on stockmaster.itemcode=salesline.code 
+                   where salesheader.documentno='%s' ",$_GET['No']);
      
      
      $FontSize = 12;
@@ -121,7 +121,7 @@ $SQL="Select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
       from `salesheader`` 
-      join `salesline` on `SalesHeader`.documentno=SalesLine.`documentno`  
+      join `salesline` on `SalesHeader`.documentno=salesline.`documentno`  
       where `SalesHeader`.`documenttype`='11' 
       order by `SalesHeader`.`docdate` desc";
     $Result=DB_query($SQL,$db);

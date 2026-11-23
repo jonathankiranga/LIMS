@@ -27,7 +27,7 @@ $SQL="select
       ,`SalesHeader`.`yourreference`
       ,`SalesHeader`.`printed`
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       left join  debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documenttype`='12' and `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -51,31 +51,31 @@ $SQL="select
      $SQL=Sprintf("SELECT 
        stockmaster.barcode
        ,Container.`descrip` as containername
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,SalesLine.Quantity,
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,salesline.Quantity,
        `SalesLine`.UOM,
-       SalesLine.UnitPrice as Sp ,
+       salesline.UnitPrice as Sp ,
    	  (case `SalesLine`.UOM when 'fulqty' 
-          then (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on stockmaster.units=`unit`.code and stockmaster.itemcode=SalesLine.code) 
-	  else (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on `stockmaster`.`units`=`unit`.code and stockmaster.itemcode=SalesLine.code)
+          then (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on stockmaster.units=`unit`.code and stockmaster.itemcode=salesline.code) 
+	  else (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on `stockmaster`.`units`=`unit`.code and stockmaster.itemcode=salesline.code)
 	  end) as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesLine.vatamount
-      ,SalesLine.invoiceamount-SalesLine.vatamount as netamt
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`totalchargedcontainers`
-      ,SalesLine.`shipping`
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesline.vatamount
+      ,salesline.invoiceamount-salesline.vatamount as netamt
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`totalchargedcontainers`
+      ,salesline.`shipping`
   FROM `salesheader``` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=12
-        join stockmaster on stockmaster.itemcode=SalesLine.code
-        left join stockmaster Container on Container.itemcode=SalesLine.containercode
-        where SalesHeader.documentno='%s' ",$_GET['No']);
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=12
+        join stockmaster on stockmaster.itemcode=salesline.code
+        left join stockmaster Container on Container.itemcode=salesline.containercode
+        where salesheader.documentno='%s' ",$_GET['No']);
      
      $FontSize = 12;
      $YPos=$firstrowpos-20;
@@ -150,7 +150,7 @@ $SQL="select
     $pdf->OutputD($_SESSION['DatabaseName'] . '_CASHSALE_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    DB_query("Update `salesheader`` set printed=1 where SalesHeader.documenttype=12 and SalesHeader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader`` set printed=1 where salesheader.documenttype=12 and salesheader.documentno='".$_GET['No']."'", $db);
 }else{
 
 include('includes/header.inc');
@@ -183,9 +183,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='12' ".    
         (isset($_POST['CustomerID'])?" and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":'')."
        group by 
