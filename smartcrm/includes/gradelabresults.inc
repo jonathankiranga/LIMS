@@ -6,7 +6,7 @@ $ParameterGetarray = array();
 Function SampleName($SampleTypeID){
     Global $db;
     
-    $SQL="SELECT `sampletypeName` FROM `SampleTypes` WHERE `sampletypeid`='".$SampleTypeID."'";
+    $SQL="SELECT `sampletypeName` FROM `sampletypes` WHERE `sampletypeid`='".$SampleTypeID."'";
     $ResultIndex = DB_query($SQL,$db);
     $return = DB_fetch_row($ResultIndex);
     
@@ -17,7 +17,7 @@ Function GetParameter($Id,$PID){
       Global $db,$ParameterGetarray;
      
       $SQL="SELECT `Parameter`,`Limits_min`,`Limits_max`,`Method`,`Units`,`NoStandardlimit`
-      FROM `LaboratoryStandards` WHERE `itemcode`='".$Id."' AND `ParameterID`='".$PID."' LIMIT 1";
+      FROM `laboratorystandards` WHERE `itemcode`='".$Id."' AND `ParameterID`='".$PID."' LIMIT 1";
       $ResultIndex = DB_query($SQL,$db);
       $return = DB_fetch_row($ResultIndex);
       
