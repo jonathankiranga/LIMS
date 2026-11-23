@@ -14,7 +14,7 @@ $SQL="SELECT
       ,BankAccounts.currency
       ,BankAccounts.bankName
       ,`currencies`.hundredsname
-   FROM `BankTransactions` join BankAccounts on 
+   FROM `banktransactions`` join BankAccounts on 
   BankTransactions.bankcode=BankAccounts.accountcode 
   join currencies on BankAccounts.currency=`currencies`.`currabrev`
      where journal='".$_GET['PVNUMBER']."'";
@@ -58,7 +58,7 @@ $PaperSize='A5_Landscape';
     $YPos= $Firstinvoicerow;
     
     $SQL="SELECT `date`,`invoiceno`,abs(`amount`) as amount
-        FROM `PaymentsAllocation` where 
+        FROM `paymentsallocation`` where 
         `receiptjournal`='".$_GET['PVNUMBER']."'";
     
     $ResultIndex = DB_query($SQL,$db);
@@ -113,7 +113,7 @@ $PaperSize='A5_Landscape';
       ,`narrative`
       ,BankAccounts.currency
       ,BankAccounts.bankName
-  FROM `BankTransactions` join BankAccounts on BankTransactions.bankcode=BankAccounts.accountcode 
+  FROM `banktransactions`` join BankAccounts on BankTransactions.bankcode=BankAccounts.accountcode 
    where doctype=53 or ChequePrinted=0 
   order by `DocDate` desc limit 50" ;
   

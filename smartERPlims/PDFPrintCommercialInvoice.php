@@ -69,7 +69,7 @@ $SQL="select
       ,SalesLine.`totalchargedcontainers`
       ,`SalesLine`.`partperunit`
       ,SalesLine.code as itemcode
-  FROM `SalesHeader` join SalesLine 
+  FROM `salesheader`` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         and SalesHeader.documenttype=54  
@@ -333,7 +333,7 @@ function displaycolums1($Y,$Bankcode){
     $YBank1=$Y; 
       
   $GetbankSql="SELECT `bankName`,`currency`,`AccountNo`,`BranchCode`,`BranchName`,`AcctName`,`bankCode`,`swiftcode`
-  FROM BankAccounts where `accountcode`='".$Bankcode."'";
+  FROM `bankaccounts` where `accountcode`='".$Bankcode."'";
   $Results = DB_query($GetbankSql,$db);
   $BankRow = DB_fetch_row($Results);
   
@@ -371,7 +371,7 @@ function displaycolums2($Y,$Bankcode){
     $YBank1=$Y; 
       
   $GetbankSql="SELECT `bankName`,`currency`,`AccountNo`,`BranchCode`,`BranchName`,`AcctName`,`bankCode`,`swiftcode`
-  FROM BankAccounts where `accountcode`='".$Bankcode."'";
+  FROM `bankaccounts` where `accountcode`='".$Bankcode."'";
   $Results = DB_query($GetbankSql,$db);
   $BankRow = DB_fetch_row($Results);
   

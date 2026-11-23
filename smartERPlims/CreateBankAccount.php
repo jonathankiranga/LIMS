@@ -9,7 +9,7 @@ include('includes/SQL_CommonFunctions.inc');
 
 if(isset($_POST['update'])){
     
-   $sql= sprintf("UPDATE `BankAccounts`
+   $sql= sprintf("UPDATE `bankaccounts``
                     SET  `bankName`='%s'
                         ,`AccountNo`='%s'
                         ,`BranchCode`='%s'
@@ -44,7 +44,7 @@ if(isset($_POST['submit'])){
  
    $accountcode = Triger_bankaccounts();
  
-    $sql=sprintf("INSERT INTO `BankAccounts`
+    $sql=sprintf("INSERT INTO `bankaccounts``
            (`accountcode`
            ,`bankName`
            ,`currency`
@@ -123,7 +123,7 @@ if($bankcodeselected){
           ,`AcctName`
           ,`bankCode`
           ,`swiftcode`
-      FROM `BankAccounts`
+      FROM `bankaccounts``
       where `accountcode`='".$bankcodeselected."'";
     
     $ResultIndex=DB_query($sql,$db);
@@ -199,7 +199,7 @@ $sql="SELECT `accountcode`
       ,`Makeinactive`
       ,`PostingGroup`
       ,`Fluctuation`
-  FROM `BankAccounts`";
+  FROM `bankaccounts``";
 $BankAccounts=array();
 echo '<div class="container">';
 echo '<table class="table-bordered"><tr>'
