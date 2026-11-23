@@ -15,7 +15,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,True);
 
 $sql=array();
 
-$sql[]="INSERT INTO `PurchaseHeader`
+$sql[]="INSERT INTO `purchaseheader``
            (`documenttype`
            ,`documentno`
            ,`docdate`
@@ -93,7 +93,7 @@ foreach ($_POST['quantity'] as $itemcode => $value ) {
     
     
     
-    $sql[] =  sprintf("INSERT INTO `PurchaseLine`
+    $sql[] =  sprintf("INSERT INTO `purchaseline``
            (`documenttype`
            ,`docdate`
            ,`documentno`
@@ -178,7 +178,7 @@ if($_SESSION['savedsuccessfuly']==true){
       ,`printed`
       ,`released`
       ,`status`
-      ,`userid` FROM `PurchaseHeader`
+      ,`userid` FROM `purchaseheader``
       WHERE `documenttype`='18' AND `documentno`='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
        
@@ -214,7 +214,7 @@ if($_SESSION['savedsuccessfuly']==true){
            ,`unitofmeasure`
            ,`Quantity`
            ,`UnitPrice`
-           ,`invoiceamount` FROM `PurchaseLine`
+           ,`invoiceamount` FROM `purchaseline``
            WHERE `documenttype`=18 AND `documentno`='".$_POST['documentno']."'";
    
     $ResultIndex=DB_query($SQL,$db);

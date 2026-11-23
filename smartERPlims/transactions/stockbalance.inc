@@ -25,7 +25,7 @@
        $line="";
        
        
-       $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+       $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
        $line .='<select name="location['.$code.']" required="required" onchange="CalculateForm(salesform.submit);">';
               
        while($rows=  DB_fetch_array($REsults)){
@@ -255,7 +255,7 @@ $itemArray=array(
          $tankClass=new tankClass() ;
          $tankClass->update_tank_balance();
          
-         $sql=sprintf("SELECT IFNULL(units,0) FROM ProductionUnit 
+         $sql=sprintf("SELECT IFNULL(units,0) FROM `productionunit` 
               where tankname='%s' and itemcode='%s'",$tank,$itemcode);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
@@ -271,7 +271,7 @@ $itemArray=array(
          $tankClass=new tankClass() ;
          $tankClass->update_tank_balance();
          
-         $sql=sprintf("SELECT balance FROM ProductionUnit 
+         $sql=sprintf("SELECT balance FROM `productionunit` 
               where tankname='%s' and itemcode='%s'",$tank,$itemcode);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
@@ -286,7 +286,7 @@ $itemArray=array(
                 function update_tank_balance(){
                     global $db;
 
-                    $sql="SELECT tankname FROM ProductionUnit";
+                    $sql="SELECT tankname FROM `productionunit`";
                        $ResultIndex = DB_query($sql,$db);
                        while($dbrows= DB_fetch_array($ResultIndex)){
                            $this->rows1[]=$dbrows;

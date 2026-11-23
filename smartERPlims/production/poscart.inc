@@ -117,7 +117,7 @@ class ProcessInformation
 
         // Save production master
         $sql[] = sprintf(
-            "INSERT INTO `ProductionMaster` (`Batchno`, `itemcode`, `production`, `date`, `userid`, `bitumenph`)
+            "INSERT INTO `productionmaster`` (`Batchno`, `itemcode`, `production`, `date`, `userid`, `bitumenph`)
              VALUES ('%s', '%s', %f, '%s', '%s', '%s')",
             $documentno, $proitemcode, $totalProduction, $formatedDate, $userID, $bitumenph
         );
@@ -147,7 +147,7 @@ class ProcessInformation
             );
 
             $sql[] = sprintf(
-                "INSERT INTO `StockRegister` (`itemcode`, `StockIn`, `cost`, `journal`, `GRN`, `StockOut`)
+                "INSERT INTO `stockregister`` (`itemcode`, `StockIn`, `cost`, `journal`, `GRN`, `StockOut`)
                  VALUES ('%s', %f, %f, '%s', '%s', 0)",
                 $proitemcode, $totalProduction, $averagecost, _esc($journal), $documentno
             );
@@ -163,7 +163,7 @@ class ProcessInformation
             $ri_temp     = (float)$rowdata['TEMP'];
 
             $sql[] = sprintf(
-                "INSERT INTO `ProdcutionMasterLine`
+                "INSERT INTO `prodcutionmasterline``
                     (`Batchno`, `itemcode`, `qty`, `cost`, `volcorfactor`, `temperature`)
                  VALUES ('%s', '%s', %f, %f, %f, %f)",
                 $documentno, $ri_itemcode, $ri_qty, $ri_cost, $ri_vcf, $ri_temp
@@ -223,7 +223,7 @@ class NewAssemble
     {
         global $db;
         $line = '';
-        $sql  = sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode));
+        $sql  = sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode));
         $ResultIndex = DB_query($sql, $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
@@ -232,7 +232,7 @@ class NewAssemble
             if (mb_stristr($ItemCode, 'H2O') == 'H2O') {
                 $line .= '<option></option>';
             } else {
-                $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+                $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
                 while ($rows = DB_fetch_array($REsults)) {
                     $sel   = ($_POST['location'][$key] == trim($rows['code'])) ? 'selected="selected"' : '';
                     $line .= sprintf('<option value="%s" %s>%s</option>', trim($rows['code']), $sel, $rows['Storename']);
@@ -240,7 +240,7 @@ class NewAssemble
             }
         } else {
             $this->tankStore = "T";
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $sel   = ($_POST['location'][$key] == trim($value['tankname'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($value['tankname']), $sel, $value['tankname']);
@@ -252,17 +252,17 @@ class NewAssemble
     function MakeDefaultStoreTankForItem($ItemCode, $key)
     {
         global $db;
-        $sql         = sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode));
+        $sql         = sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode));
         $ResultIndex = DB_query($sql, $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] == 0) {
-            $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+            $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
             while ($rows = DB_fetch_array($REsults)) {
                 $this->Default[0] = array('code' => trim($rows['code']), 'Storename' => $rows['Storename']);
             }
         } else {
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $this->Default[0] = array('code' => trim($value['tankname']), 'Storename' => trim($value['tankname']));
             }
@@ -273,13 +273,13 @@ class NewAssemble
     {
         global $db;
         $line        = '';
-        $sql         = sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode));
+        $sql         = sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode));
         $ResultIndex = DB_query($sql, $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] == 0) {
             $this->productionTankStore = "S";
-            $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+            $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
             while ($rows = DB_fetch_array($REsults)) {
                 $sel   = ($_POST['ProdStore'] == trim($rows['code'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($rows['code']), $sel, $rows['Storename']);
@@ -289,7 +289,7 @@ class NewAssemble
             }
         } else {
             $this->productionTankStore = "T";
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $sel   = ($_POST['ProdStore'] == trim($value['tankname'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($value['tankname']), $sel, $value['tankname']);
@@ -488,7 +488,7 @@ class NewAssemble
     function IsTankOrStore($ItemCode)
     {
         global $db;
-        $sql         = sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode));
+        $sql         = sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode));
         $ResultIndex = DB_query($sql, $db);
         $Stores      = DB_fetch_row($ResultIndex);
         $this->tankStore = ($Stores[0] == 0) ? "S" : "T";
@@ -497,12 +497,12 @@ class NewAssemble
     function tankresults($store, $item)
     {
         global $db;
-        $sql         = sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($item));
+        $sql         = sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($item));
         $ResultIndex = DB_query($sql, $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] > 0) {
-            $sql         = sprintf("SELECT `balance` FROM `ProductionUnit` WHERE `tankname` = '%s' AND `itemcode` = '%s'", _esc($store), _esc($item));
+            $sql         = sprintf("SELECT `balance` FROM `productionunit`` WHERE `tankname` = '%s' AND `itemcode` = '%s'", _esc($store), _esc($item));
             $ResultIndex = DB_query($sql, $db);
             $row         = DB_fetch_row($ResultIndex);
             return sprintf('%f', (int)$row[0]);
@@ -613,7 +613,7 @@ class NewAssemble
         $_POST['documentno']     = $batchno;
         $_SESSION['work_orders'] = array();
 
-        $SQL         = sprintf("SELECT `itemcode` FROM `ProductionMaster` WHERE `Batchno` = '%s'", _esc($batchno));
+        $SQL         = sprintf("SELECT `itemcode` FROM `productionmaster`` WHERE `Batchno` = '%s'", _esc($batchno));
         $ResultIndex = DB_query($SQL, $db);
         $row         = DB_fetch_row($ResultIndex);
         $_POST['proitemcode'] = $row[0];
@@ -621,7 +621,7 @@ class NewAssemble
         $StockArray          = $this->GetStockdetails($_POST['proitemcode']);
         $_POST['Prostockname'] = $StockArray['stockname'];
 
-        $SQL    = sprintf("SELECT `Batchno`, `itemcode`, `qty`, `cost` FROM `ProdcutionMasterLine` WHERE `Batchno` = '%s'", _esc($batchno));
+        $SQL    = sprintf("SELECT `Batchno`, `itemcode`, `qty`, `cost` FROM `prodcutionmasterline`` WHERE `Batchno` = '%s'", _esc($batchno));
         $result = DB_query($SQL, $db);
         while ($row = DB_fetch_array($result)) {
             $StockList = $this->GetStockdetails($row['itemcode']);
@@ -668,7 +668,7 @@ class Assemble
     {
         global $db;
         $line        = '';
-        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] == 0) {
@@ -676,7 +676,7 @@ class Assemble
             if (mb_stristr($ItemCode, 'H2O') == 'H2O') {
                 $line .= '<option></option>';
             } else {
-                $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+                $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
                 while ($rows = DB_fetch_array($REsults)) {
                     $sel   = ($_POST['location'][$key] == trim($rows['code'])) ? 'selected="selected"' : '';
                     $line .= sprintf('<option value="%s" %s>%s</option>', trim($rows['code']), $sel, $rows['Storename']);
@@ -684,7 +684,7 @@ class Assemble
             }
         } else {
             $this->tankStore = "T";
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $sel   = ($_POST['location'][$key] == trim($value['tankname'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($value['tankname']), $sel, $value['tankname']);
@@ -696,16 +696,16 @@ class Assemble
     function MakeDefaultStoreTankForItem($ItemCode, $key)
     {
         global $db;
-        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] == 0) {
-            $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+            $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
             while ($rows = DB_fetch_array($REsults)) {
                 $this->Default[0] = array('code' => trim($rows['code']), 'Storename' => $rows['Storename']);
             }
         } else {
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $this->Default[0] = array('code' => trim($value['tankname']), 'Storename' => trim($value['tankname']));
             }
@@ -716,12 +716,12 @@ class Assemble
     {
         global $db;
         $line        = '';
-        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] == 0) {
             $this->productionTankStore = "S";
-            $REsults = DB_query('SELECT `code`, `Storename` FROM `Stores`', $db);
+            $REsults = DB_query('SELECT `code`, `Storename` FROM `stores``', $db);
             while ($rows = DB_fetch_array($REsults)) {
                 $sel   = ($_POST['ProdStore'] == trim($rows['code'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($rows['code']), $sel, $rows['Storename']);
@@ -731,7 +731,7 @@ class Assemble
             }
         } else {
             $this->productionTankStore = "T";
-            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `tankname` FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
             while ($value = DB_fetch_array($ResultIndex)) {
                 $sel   = ($_POST['ProdStore'] == trim($value['tankname'])) ? 'selected="selected"' : '';
                 $line .= sprintf('<option value="%s" %s>%s</option>', trim($value['tankname']), $sel, $value['tankname']);
@@ -834,7 +834,7 @@ class Assemble
     function IsTankOrStore($ItemCode)
     {
         global $db;
-        $ResultIndex     = DB_query(sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
+        $ResultIndex     = DB_query(sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($ItemCode)), $db);
         $Stores          = DB_fetch_row($ResultIndex);
         $this->tankStore = ($Stores[0] == 0) ? "S" : "T";
     }
@@ -842,11 +842,11 @@ class Assemble
     function tankresults($store, $item)
     {
         global $db;
-        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `ProductionUnit` WHERE `itemcode` = '%s'", _esc($item)), $db);
+        $ResultIndex = DB_query(sprintf("SELECT COUNT(*) FROM `productionunit`` WHERE `itemcode` = '%s'", _esc($item)), $db);
         $Stores      = DB_fetch_row($ResultIndex);
 
         if ($Stores[0] > 0) {
-            $ResultIndex = DB_query(sprintf("SELECT `balance` FROM `ProductionUnit` WHERE `tankname` = '%s' AND `itemcode` = '%s'", _esc($store), _esc($item)), $db);
+            $ResultIndex = DB_query(sprintf("SELECT `balance` FROM `productionunit`` WHERE `tankname` = '%s' AND `itemcode` = '%s'", _esc($store), _esc($item)), $db);
             $row         = DB_fetch_row($ResultIndex);
             return sprintf('%f', (int)$row[0]);
         }
@@ -960,14 +960,14 @@ class Assemble
         $_POST['documentno']     = $batchno;
         $_SESSION['work_orders'] = array();
 
-        $ResultIndex = DB_query(sprintf("SELECT `itemcode` FROM `ProductionMaster` WHERE `Batchno` = '%s'", _esc($batchno)), $db);
+        $ResultIndex = DB_query(sprintf("SELECT `itemcode` FROM `productionmaster`` WHERE `Batchno` = '%s'", _esc($batchno)), $db);
         $row         = DB_fetch_row($ResultIndex);
         $_POST['proitemcode'] = $row[0];
 
         $StockArray            = $this->GetStockdetails($_POST['proitemcode']);
         $_POST['Prostockname'] = $StockArray['stockname'];
 
-        $result = DB_query(sprintf("SELECT `Batchno`, `itemcode`, `qty`, `cost` FROM `ProdcutionMasterLine` WHERE `Batchno` = '%s'", _esc($batchno)), $db);
+        $result = DB_query(sprintf("SELECT `Batchno`, `itemcode`, `qty`, `cost` FROM `prodcutionmasterline`` WHERE `Batchno` = '%s'", _esc($batchno)), $db);
         while ($row = DB_fetch_array($result)) {
             $StockList = $this->GetStockdetails($row['itemcode']);
             if (mb_strwidth($StockList['itemcode']) > 0) {
@@ -1269,7 +1269,7 @@ class ProcessInformationAlter
         $Prostockname    = _esc($this->post['Prostockname']);
 
         $sql[] = sprintf(
-            "UPDATE `ProductionMaster` SET `modified` = %f, `userid` = '%s'
+            "UPDATE `productionmaster`` SET `modified` = %f, `userid` = '%s'
              WHERE `Batchno` = '%s' AND `itemcode` = '%s'",
             $totalProduction, $userID, $documentno, $proitemcode
         );
@@ -1299,7 +1299,7 @@ class ProcessInformationAlter
             );
 
             $sql[] = sprintf(
-                "INSERT INTO `StockRegister` (`itemcode`, `StockIn`, `cost`, `journal`, `GRN`, `StockOut`)
+                "INSERT INTO `stockregister`` (`itemcode`, `StockIn`, `cost`, `journal`, `GRN`, `StockOut`)
                  VALUES ('%s', %f, %f, '%s', '%s', 0)",
                 $proitemcode, $DiffProduction, $averagecost, _esc($journal), $documentno
             );

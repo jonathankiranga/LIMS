@@ -5,7 +5,7 @@
        $line="";
        
        
-       $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+       $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
        $line .='<select name="location['.$code.']" required="required">';
               
        while($rows=  DB_fetch_array($REsults)){
@@ -28,7 +28,7 @@
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
           $_SESSION['productionTankStore']="S";
-           $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+           $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
            while($rows= DB_fetch_array($REsults)){
                 $line .= sprintf('<option value="%s" %s>%s</option>',trim($rows['code']),$_POST['location']==trim($rows['code'])?'selected="selected"':'',$rows['Storename']);
             }
