@@ -7,7 +7,7 @@
 
 Function GetNextTransNo($TransType, &$odb){
     global $db;
-    /* SQL to get the next transaction number these are maintained in the table SysTypes - Transaction Types
+    /* SQL to get the next transaction number these are maintained in the table systypes - Transaction Types
     Also updates the transaction number
     10 sales invoice
     11 sales credit note
@@ -36,7 +36,7 @@ Function GetNextTransNo($TransType, &$odb){
 
 Function GetTempNextNo($TransType){
     global $db;
-    /* SQL to get the next transaction number these are maintained in the table SysTypes - Transaction Types
+    /* SQL to get the next transaction number these are maintained in the table systypes - Transaction Types
 Also updates the transaction number
 
 10 sales invoice
