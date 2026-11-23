@@ -4,7 +4,7 @@ require '../db_connection.php'; // Ensure this connects to your PDO instance and
 $response = ['success' => false, 'message' => 'Invalid request'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['StandardID'])) {
     $standardID = intval($_POST['StandardID']);
-    $stmt = $conn->prepare("DELETE FROM TestStandards WHERE StandardID = ?");
+    $stmt = $conn->prepare("DELETE FROM teststandards WHERE StandardID = ?");
     $stmt->bind_param('i', $standardID);
     if ($stmt->execute()) {
         $response['success'] = true;
