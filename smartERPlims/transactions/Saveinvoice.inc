@@ -284,35 +284,35 @@ function PostDebtors($period,$journal,$doc){
       ,ledger
       ,period)
   (SELECT 
-      SalesHeader.docdate
-      ,rtrim(SalesLine.description)  as narration,'I'
-      ,SalesHeader.documentno
-      ,SalesHeader.customercode
-      ,SUM(SalesLine.invoiceamount) as Value
+      salesheader.docdate
+      ,rtrim(salesline.description)  as narration,'I'
+      ,salesheader.documentno
+      ,salesheader.customercode
+      ,SUM(salesline.invoiceamount) as Value
       ,0.00
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,'I'
       ,'%s'
       ,'r'
-      ,SUM(SalesLine.vatamount) as VAT
-      ,SalesHeader.documenttype
-      ,SalesHeader.postinggroup
+      ,SUM(salesline.vatamount) as VAT
+      ,salesheader.documenttype
+      ,salesheader.postinggroup
       ,'%s'
   FROM `salesheader`` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
-        where SalesHeader.documentno='%s' 
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
+        where salesheader.documentno='%s' 
         group by
-       SalesHeader.documenttype
-      ,SalesHeader.documentno
-      ,SalesHeader.docdate
-      ,SalesHeader.customercode
-      ,SalesHeader.externaldocumentno
-      ,SalesHeader.postinggroup
-      ,SalesHeader.currencycode
-      ,SalesLine.Quantity
-      ,SalesLine.description
-      ,SalesLine.code)", $journal,$period,$doc);
+       salesheader.documenttype
+      ,salesheader.documentno
+      ,salesheader.docdate
+      ,salesheader.customercode
+      ,salesheader.externaldocumentno
+      ,salesheader.postinggroup
+      ,salesheader.currencycode
+      ,salesline.Quantity
+      ,salesline.description
+      ,salesline.code)", $journal,$period,$doc);
    
    return $SQL;
 }
@@ -337,27 +337,27 @@ function PostGL($period,$journal,$doc){
       ,dimension2)
       (select
        '%s'
-      ,SalesHeader.docdate
+      ,salesheader.docdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,postinggroups.debtorsaccount
       ,inventorypostinggroup.defaultgl_sales
       ,inventorypostinggroup.defaultgl_vat
-      ,SalesLine.invoiceamount
-      ,IFNULL(SalesLine.vatamount,0) as vatamount
-      ,SalesHeader.currencycode
+      ,salesline.invoiceamount
+      ,IFNULL(salesline.vatamount,0) as vatamount
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,(rtrim(SalesLine.description))  as narration
+      ,salesheader.customercode
+      ,(rtrim(salesline.description))  as narration
       ,'".$_POST['DimensionOne']."' 
       ,'".$_POST['DimensionTwo']."'
-      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      from `salesheader` join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       AND inventorypostinggroup.defaultgl_sales IS NOT NULL
       AND inventorypostinggroup.defaultgl_vat IS NOT NULL
       )",$journal,$period,$doc);
@@ -384,25 +384,25 @@ function VATPostGL($period,$journal,$doc){
       ,narration)
       (select
        '%s'
-      ,SalesHeader.docdate
+      ,salesheader.docdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,inventorypostinggroup.defaultgl_sales
       ,inventorypostinggroup.defaultgl_vat
       ,''
-      ,SalesLine.vatamount
+      ,salesline.vatamount
       ,0
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,(rtrim(SalesLine.description))  as narration
-      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      ,salesheader.customercode
+      ,(rtrim(salesline.description))  as narration
+      from `salesheader` join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       AND inventorypostinggroup.defaultgl_sales IS NOT NULL
       AND inventorypostinggroup.defaultgl_vat IS NOT NULL
       )",$journal,$period,$doc);
@@ -423,25 +423,25 @@ Function CustomerStatemet($journal,$doc){
            ,Dimension_Two
            ,Currency)
       (select
-              SalesHeader.docdate
-             ,SalesHeader.documentno
-             ,SalesHeader.documenttype
-             ,SalesHeader.customercode
-             ,sum(SalesLine.invoiceamount)
+              salesheader.docdate
+             ,salesheader.documentno
+             ,salesheader.documenttype
+             ,salesheader.customercode
+             ,sum(salesline.invoiceamount)
              ,'%s'
              ,'".$_POST['DimensionOne']."'
              ,'".$_POST['DimensionTwo']."' 
-             ,SalesHeader.currencycode    
+             ,salesheader.currencycode    
              from `salesheader`
              join `salesline` 
-          on SalesLine.documentno = SalesHeader.documentno 
-           where SalesHeader.documentno='%s' 
+          on salesline.documentno = salesheader.documentno 
+           where salesheader.documentno='%s' 
            Group by 
-             SalesHeader.docdate
-             ,SalesHeader.documentno
-             ,SalesHeader.documenttype
-             ,SalesHeader.customercode
-             ,SalesHeader.currencycode
+             salesheader.docdate
+             ,salesheader.documentno
+             ,salesheader.documenttype
+             ,salesheader.customercode
+             ,salesheader.currencycode
              ) ",
             $journal,$doc);
     
@@ -468,28 +468,28 @@ function COGSPostGL($period,$journal,$doc){
       ,dimension2)
       (select
        '%s'
-      ,SalesHeader.docdate
+      ,salesheader.docdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,inventorypostinggroup.CostOfSales
       ,inventorypostinggroup.balancesheet
       ,''
-      ,IFNULL(stockmaster.averagestock,0) * SalesLine.Quantity
+      ,IFNULL(stockmaster.averagestock,0) * salesline.Quantity
       ,0
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,rtrim(SalesLine.description) as narration
+      ,salesheader.customercode
+      ,rtrim(salesline.description) as narration
       ,'".$_POST['DimensionOne']."'
       ,'".$_POST['DimensionTwo']."'
       from `salesheader` 
-      join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       )",$journal,$period,$doc);
 
     return $sql;

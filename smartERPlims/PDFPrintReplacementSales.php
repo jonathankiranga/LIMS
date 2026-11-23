@@ -45,19 +45,19 @@ $SQL="select
      
      $SQL=Sprintf("SELECT 
         stockmaster.barcode ,
-        SalesHeader.docdate ,
-        SalesLine.description ,
-        SalesLine.Quantity ,
-        SalesLine.UOM,
-        SalesLine.UnitPrice as Sp ,
-        SalesLine.unitofmeasure as UOMDesc,
-        SalesLine.documentno,
-        SalesHeader.customercode ,
-        SalesHeader.documenttype 
+        salesheader.docdate ,
+        salesline.description ,
+        salesline.Quantity ,
+        salesline.UOM,
+        salesline.UnitPrice as Sp ,
+        salesline.unitofmeasure as UOMDesc,
+        salesline.documentno,
+        salesheader.customercode ,
+        salesheader.documenttype 
         FROM `SalesHeader` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  
-        join stockmaster on stockmaster.itemcode=SalesLine.code 
-        where SalesLine.documentno='%s' ",$_GET['No']);
+        join SalesLine on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype  
+        join stockmaster on stockmaster.itemcode=salesline.code 
+        where salesline.documentno='%s' ",$_GET['No']);
      
      $FontSize = 10;
      $YPos = $firstrowpos-20;
@@ -114,7 +114,7 @@ $SQL="SELECT
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
       from `SalesHeader`
-      join `SalesLine` on `SalesHeader`.documentno=SalesLine.`documentno` 
+      join `SalesLine` on `SalesHeader`.documentno=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='19' 
       order by `SalesHeader`.`docdate` desc limit 50";
     $Result=DB_query($SQL,$db);

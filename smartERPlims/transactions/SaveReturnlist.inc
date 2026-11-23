@@ -130,9 +130,9 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                      if($_SESSION['productionTankStore'][$stcode]=="S"){
                             $sql[]="INSERT INTO stockledger (date,stname,doctyp,itemcode,invref,netamt,vat,amount,fulqty
                                 ,loosqty,price,store,journal,period,jobcard,PartPerUnit)
-                                (SELECT SalesLine.docdate ,substring(SalesLine.description,0,30)
-                                   ,'11',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
-                                   , 0 as fulqty,".$looseUnits." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
+                                (SELECT salesline.docdate ,substring(salesline.description,0,30)
+                                   ,'11',salesline.code ,salesline.documentno,salesline.invoiceamount ,salesline.vatamount,salesline.invoiceamount
+                                   , 0 as fulqty,".$looseUnits." as loosqty,(salesline.UnitPrice/salesline.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
                                  FROM `salesline`` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
@@ -160,25 +160,25 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                                         ,narration)
                                         (select
                                          '%s'
-                                        ,SalesHeader.docdate
+                                        ,salesheader.docdate
                                         ,'%s'
-                                        ,SalesHeader.documentno
-                                        ,SalesHeader.documenttype
+                                        ,salesheader.documentno
+                                        ,salesheader.documenttype
                                         ,inventorypostinggroup.balancesheet
                                         ,inventorypostinggroup.stockvariance
                                          ,''
                                         ,IFNULL(stockmaster.averagestock,0) * ".$qty."
                                         ,0
-                                        ,SalesHeader.currencycode
+                                        ,salesheader.currencycode
                                         ,currencies.rate
-                                        ,SalesHeader.customercode
-                                        ,CONCAT(RTRIM(SalesLine.description),' X ".$qty." ',SalesLine.unitofmeasure) as narration
+                                        ,salesheader.customercode
+                                        ,CONCAT(RTRIM(salesline.description),' X ".$qty." ',salesline.unitofmeasure) as narration
                                         from `salesheader` 
-                                        join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-                                        join stockmaster on SalesLine.code=stockmaster.itemcode
+                                        join `salesline` on salesline.documentno = salesheader.documentno 
+                                        join stockmaster on salesline.code=stockmaster.itemcode
                                         join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-                                        join currencies on SalesHeader.currencycode=currencies.currabrev
-                                        where SalesLine.entryno='%s'
+                                        join currencies on salesheader.currencycode=currencies.currabrev
+                                        where salesline.entryno='%s'
                                         )", $journal,$PeriodNo,$key);
     
                                              
@@ -204,17 +204,17 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                     ,jobcard
                     ,partperunit)
                     (SELECT 
-                        SalesLine.docdate
-                       ,substring(SalesLine.description,0,30)
+                        salesline.docdate
+                       ,substring(salesline.description,0,30)
                        ,'11'
-                       ,SalesLine.containercode
-                       ,SalesLine.documentno
-                       ,SalesLine.invoiceamount
-                       ,SalesLine.vatamount
-                       ,SalesLine.invoiceamount
+                       ,salesline.containercode
+                       ,salesline.documentno
+                       ,salesline.invoiceamount
+                       ,salesline.vatamount
+                       ,salesline.invoiceamount
                        ,".($emptyunits)."
                        ,0
-                       ,SalesLine.UnitPrice
+                       ,salesline.UnitPrice
                        ,'".$location."'
                        ,'".$journal."'
                        ,'".$PeriodNo."'
@@ -240,25 +240,25 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                     ,narration)
                     (select
                      '%s'
-                    ,SalesHeader.docdate
+                    ,salesheader.docdate
                     ,'%s'
-                    ,SalesHeader.documentno
-                    ,SalesHeader.documenttype
+                    ,salesheader.documentno
+                    ,salesheader.documenttype
                     ,inventorypostinggroup.balancesheet
                     ,inventorypostinggroup.stockvariance
                     ,''
                     ,(IFNULL(stockmaster.averagestock,0) * ".$emptyunits.")
                     ,0
-                    ,SalesHeader.currencycode
+                    ,salesheader.currencycode
                     ,currencies.rate
-                    ,SalesHeader.customercode
-                    ,CONCAT(RTRIM(stockmaster.descrip),' X ".$emptyunits." ',SalesLine.unitofmeasure)  as narration
+                    ,salesheader.customercode
+                    ,CONCAT(RTRIM(stockmaster.descrip),' X ".$emptyunits." ',salesline.unitofmeasure)  as narration
                     from `salesheader` 
-                    join `salesline` on SalesLine.documentno=SalesHeader.documentno 
-                    join stockmaster on SalesLine.containercode=stockmaster.itemcode
+                    join `salesline` on salesline.documentno=salesheader.documentno 
+                    join stockmaster on salesline.containercode=stockmaster.itemcode
                     join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-                    join currencies on SalesHeader.currencycode=currencies.currabrev
-                    where SalesLine.entryno='%s' and SalesLine.containercode='".$emptycode."'
+                    join currencies on salesheader.currencycode=currencies.currabrev
+                    where salesline.entryno='%s' and salesline.containercode='".$emptycode."'
                     )", $journal,$PeriodNo,$key);
                 }
               
