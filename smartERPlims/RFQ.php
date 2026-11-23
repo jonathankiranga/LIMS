@@ -582,9 +582,9 @@ echo '</div>';
 if (isset($_GET['awarded'])) {
     $awardedRows = DB_query("SELECT h.id,h.rfq_no,h.title,h.currencycode,h.awarded_supplier_code,
         h.awarded_quote_id,h.po_documentno,h.created_at,c.customer,
-        (SELECT COUNT(*) FROM PurchaseHeader ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_count,
+        (SELECT COUNT(*) FROM `purchaseheader` ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_count,
         (SELECT GROUP_CONCAT(ph.documentno ORDER BY ph.documentno DESC SEPARATOR ', ')
-            FROM PurchaseHeader ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_numbers,
+            FROM `purchaseheader` ph WHERE ph.documenttype=18 AND ph.rfq_quote_id=h.awarded_quote_id) AS po_numbers,
         (SELECT COUNT(*) FROM rfq_lines rl WHERE rl.rfq_id=h.id) AS line_count,
         (SELECT COUNT(*) FROM rfq_quote_lines ql WHERE ql.quote_id=h.awarded_quote_id) AS quoted_line_count,
         (SELECT SUM(ql.unit_price * rl.quantity * CASE WHEN q.tax_inclusive=1 THEN 1 ELSE 1 + (ql.tax_rate / 100) END)
@@ -682,7 +682,7 @@ if (isset($_GET['compare'])) {
         $head = DB_fetch_array($hr);
         if ($head['status'] === 'awarded') {
             echo '<div class="alert alert-success">Awarded to supplier ' . rfq_h($head['awarded_supplier_code']) . '. Selected quotation ID: ' . (int)$head['awarded_quote_id'] . '.</div>';
-            $relatedPos = DB_query("SELECT documentno FROM PurchaseHeader WHERE documenttype=18 AND rfq_quote_id=" .
+            $relatedPos = DB_query("SELECT documentno FROM `purchaseheader` WHERE documenttype=18 AND rfq_quote_id=" .
                 (int)$head['awarded_quote_id'] . " ORDER BY documentno DESC", $db);
             $relatedPoNumbers = array();
             while ($relatedPo = DB_fetch_array($relatedPos)) {
