@@ -11,38 +11,38 @@ include('includes/header.inc');
     echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' . _('Sales Invoice') .'" alt="" />' . ' ' . _('Sales Invoice') . '</p>';
 
 $SQL="select 
-       `SalesHeader`.`documentno`
-      ,`SalesHeader`.`docdate`
-      ,`SalesHeader`.`oderdate`
-      ,`SalesHeader`.`duedate`
-      ,`SalesHeader`.`customercode`
-      ,`SalesHeader`.`customername`
-      ,`SalesHeader`.`currencycode`
-      ,`SalesHeader`.`salespersoncode`
-      ,`SalesHeader`.`status`
-      ,`SalesHeader`.`userid` 
-      ,sum(SalesLine.`invoiceamount`) as OrderValue
-      ,`SalesHeader`.`documenttype`
-      ,SalesHeader.entryno
-      from `SalesHeader` 
-      join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
-      where (`SalesHeader`.`documenttype`='1' and `SalesHeader`.`released`=1) 
-      or `SalesHeader`.`documenttype`='40' 
+       `salesheader`.`documentno`
+      ,`salesheader`.`docdate`
+      ,`salesheader`.`oderdate`
+      ,`salesheader`.`duedate`
+      ,`salesheader`.`customercode`
+      ,`salesheader`.`customername`
+      ,`salesheader`.`currencycode`
+      ,`salesheader`.`salespersoncode`
+      ,`salesheader`.`status`
+      ,`salesheader`.`userid` 
+      ,sum(salesline.`invoiceamount`) as OrderValue
+      ,`salesheader`.`documenttype`
+      ,salesheader.entryno
+      from `salesheader` 
+      join salesline on `salesheader`.`documentno`=salesline.`documentno` 
+      where (`salesheader`.`documenttype`='1' and `salesheader`.`released`=1) 
+      or `salesheader`.`documenttype`='40' 
       group by 
-       `SalesHeader`.`documentno`
-      ,`SalesHeader`.`docdate`
-      ,`SalesHeader`.`oderdate`
-      ,`SalesHeader`.`duedate`
-      ,`SalesHeader`.`customercode`
-      ,`SalesHeader`.`customername`
-      ,`SalesHeader`.`currencycode`
-      ,`SalesHeader`.`salespersoncode`
-      ,`SalesHeader`.`status`
-      ,`SalesHeader`.`documenttype`
-      ,SalesHeader.entryno
-      ,`SalesHeader`.`userid` 
+       `salesheader`.`documentno`
+      ,`salesheader`.`docdate`
+      ,`salesheader`.`oderdate`
+      ,`salesheader`.`duedate`
+      ,`salesheader`.`customercode`
+      ,`salesheader`.`customername`
+      ,`salesheader`.`currencycode`
+      ,`salesheader`.`salespersoncode`
+      ,`salesheader`.`status`
+      ,`salesheader`.`documenttype`
+      ,salesheader.entryno
+      ,`salesheader`.`userid` 
       order by 
-      `SalesHeader`.`entryno` DESC";
+      `salesheader`.`entryno` DESC";
     $Result=DB_query($SQL,$db);
        
     Echo '<table class="table-condensed table-responsive-small table-bordered"><tr>'
