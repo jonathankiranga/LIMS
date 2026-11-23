@@ -592,7 +592,7 @@ if ($action === 'listTasks') {
     }
     
     $where = empty($whereParts) ? '' : 'WHERE ' . implode(' AND ', $whereParts);
-    $sql = "SELECT pkey, Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated, lastactivity FROM Tasks $where ORDER BY datecreated DESC LIMIT 200";
+    $sql = "SELECT pkey, Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated, lastactivity FROM tasks $where ORDER BY datecreated DESC LIMIT 200";
     $result = $db->query($sql);
     $tasks = array();
     while ($row = $result->fetch_assoc()) {
@@ -626,11 +626,11 @@ if ($action === 'saveTask') {
     }
     
     if ($id > 0) {
-        $sql = "UPDATE Tasks SET Taskname='" . $db->real_escape_string($title) . "', Status=$status, Priority=$priority, 
+        $sql = "UPDATE tasks SET Taskname='" . $db->real_escape_string($title) . "', Status=$status, Priority=$priority, 
                 datedue=" . ($duedate ? "'" . $db->real_escape_string($duedate) . "'" : "NULL") . ", 
                 taskdetails='" . $db->real_escape_string($details) . "', lastactivity=NOW() WHERE pkey=$id";
     } else {
-        $sql = "INSERT INTO Tasks (Taskname, Status, Priority, datedue, taskdetails, TaskOwner, datecreated, lastactivity) 
+        $sql = "INSERT INTO tasks (Taskname, Status, Priority, datedue, taskdetails, TaskOwner, datecreated, lastactivity) 
                 VALUES ('" . $db->real_escape_string($title) . "', $status, $priority, " . ($duedate ? "'" . $db->real_escape_string($duedate) . "'" : "NULL") . ", 
                 '" . $db->real_escape_string($details) . "', '" . $db->real_escape_string($userID) . "', NOW(), NOW())";
     }
@@ -648,7 +648,7 @@ if ($action === 'updateTaskStatus') {
         echo json_encode(array('error' => 'Invalid id'));
         exit;
     }
-    $db->query("UPDATE Tasks SET Status=$status, lastactivity=NOW() WHERE pkey=$id");
+    $db->query("UPDATE tasks SET Status=$status, lastactivity=NOW() WHERE pkey=$id");
     echo json_encode(array('ok' => true));
     exit;
 }
@@ -659,7 +659,7 @@ if ($action === 'deleteTask') {
         echo json_encode(array('error' => 'Invalid id'));
         exit;
     }
-    $db->query("DELETE FROM Tasks WHERE pkey=$id");
+    $db->query("DELETE FROM tasks WHERE pkey=$id");
     echo json_encode(array('ok' => true));
     exit;
 }
@@ -1478,10 +1478,10 @@ if ($action === 'getDashboardStats') {
     
 
     
-    $r = $db->query("SELECT COUNT(*) as cnt FROM Tasks WHERE Status < 4");
+    $r = $db->query("SELECT COUNT(*) as cnt FROM tasks WHERE Status < 4");
     if ($row = $r->fetch_assoc()) $stats['tasks_pending'] = (int)$row['cnt'];
     
-    $r = $db->query("SELECT COUNT(*) as cnt FROM Tasks WHERE Status < 4 AND datedue < '$today'");
+    $r = $db->query("SELECT COUNT(*) as cnt FROM tasks WHERE Status < 4 AND datedue < '$today'");
     if ($row = $r->fetch_assoc()) $stats['tasks_overdue'] = (int)$row['cnt'];
     
     $r = $db->query("SELECT COUNT(*) as cnt FROM workspaces");
@@ -1657,10 +1657,10 @@ if ($action === 'getWeeklyReport') {
     );
     
     // CRM Metrics from database
-    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM Tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59'", 'getWeeklyReport:tasks_created');
+    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59'", 'getWeeklyReport:tasks_created');
     if ($r && ($row = $r->fetch_assoc())) $report['crm_metrics']['tasks_created'] = (int)$row['cnt'];
     
-    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM Tasks WHERE TaskOwner='$userId' AND Status=4 AND lastactivity BETWEEN '$safeStart' AND '$safeEnd 23:59:59'", 'getWeeklyReport:tasks_completed');
+    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM tasks WHERE TaskOwner='$userId' AND Status=4 AND lastactivity BETWEEN '$safeStart' AND '$safeEnd 23:59:59'", 'getWeeklyReport:tasks_completed');
     if ($r && ($row = $r->fetch_assoc())) $report['crm_metrics']['tasks_completed'] = (int)$row['cnt'];
 
     // Also include Workspace Cards
@@ -1701,7 +1701,7 @@ if ($action === 'getWeeklyReport') {
     }
     
     // Recent Tasks (this week)
-    $result = db_query_safe($db, "SELECT pkey, Taskname, Status, TaskOwner, datedue, taskdetails FROM Tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59' ORDER BY datecreated DESC LIMIT 10", 'getWeeklyReport:recent_tasks');
+    $result = db_query_safe($db, "SELECT pkey, Taskname, Status, TaskOwner, datedue, taskdetails FROM tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59' ORDER BY datecreated DESC LIMIT 10", 'getWeeklyReport:recent_tasks');
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $report['recent_tasks'][] = $row;
@@ -1752,7 +1752,7 @@ if ($action === 'exportWeeklyReport') {
     $writeRow(array('CRM SUMMARY'));
     $writeRow(array('Metric', 'Value'));
     
-    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM Tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$weekEnd 23:59:59'", 'exportWeeklyReport:tasks_created');
+    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM tasks WHERE TaskOwner='$userId' AND datecreated BETWEEN '$safeStart' AND '$weekEnd 23:59:59'", 'exportWeeklyReport:tasks_created');
     $row = $r ? $r->fetch_assoc() : array('cnt' => 0);
     $cntTasksCreated = (int)($row['cnt'] ?? 0);
     
@@ -1762,7 +1762,7 @@ if ($action === 'exportWeeklyReport') {
     }
     $writeRow(array('Tasks Created', $cntTasksCreated));
     
-    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM Tasks WHERE TaskOwner='$userId' AND Status=4 AND lastactivity BETWEEN '$safeStart' AND '$weekEnd 23:59:59'", 'exportWeeklyReport:tasks_completed');
+    $r = db_query_safe($db, "SELECT COUNT(*) as cnt FROM tasks WHERE TaskOwner='$userId' AND Status=4 AND lastactivity BETWEEN '$safeStart' AND '$weekEnd 23:59:59'", 'exportWeeklyReport:tasks_completed');
     $row = $r ? $r->fetch_assoc() : array('cnt' => 0);
     $cntTasksCompleted = (int)($row['cnt'] ?? 0);
     foreach ($boardActivities as $activity) {
@@ -2163,7 +2163,7 @@ if ($action === 'createTaskReminder') {
     $remindBefore = (int)($_POST['remind_before_minutes'] ?? 60);
     $sendEmail = isset($_POST['send_email']) ? 1 : 1;
     
-    $result = $db->query("SELECT pkey, Taskname, datedue, TaskOwner FROM Tasks WHERE pkey=$taskId LIMIT 1");
+    $result = $db->query("SELECT pkey, Taskname, datedue, TaskOwner FROM tasks WHERE pkey=$taskId LIMIT 1");
     if ($row = $result->fetch_assoc()) {
         $dueDate = $row['datedue'];
         if (!$dueDate) {
