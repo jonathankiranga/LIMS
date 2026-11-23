@@ -617,7 +617,7 @@ function EmployeeNamefind($offset, $height, $value)
     global $db;
 
     $ResultIndex = DB_query(
-        "SELECT code, salesman FROM productionEmployee",
+        "SELECT code, salesman FROM `productionemployee`",
         $db
     );
 
@@ -662,7 +662,7 @@ function Checkwhenpaid()
     global $db;
 
     $ResultIndex = DB_query(
-        "SELECT Accountno, JournalNo FROM `customerstatement`",
+        "SELECT Accountno, JournalNo FROM `customerstatement``",
         $db
     );
 
@@ -683,7 +683,7 @@ function Checkwhenpaid()
  *  2. Sum all CustomerStatement.grossamount for this account + journal â†’ $grossAmount
  *  3. If ($grossAmount + $balance) <= 1  (i.e. fully settled within rounding):
  *       - Find the latest receipt date for this journal
- *       - Update CustomerStatement.Datewhenpaid to whichever is later:
+ *       - Update `customerstatement`.Datewhenpaid to whichever is later:
  *           the invoice date (CustomerStatement.Date) or the receipt date
  *
  * @param  string $accountno   Debtor account code
@@ -710,7 +710,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
     // Step 2 â€” gross invoice amount(s) on the statement
     $row = DB_fetch_array(DB_query(
         "SELECT IFNULL(SUM(grossamount), 0) AS grossamount
-         FROM `customerstatement`
+         FROM `customerstatement``
          WHERE Accountno = '$accountno'
            AND JournalNo = '$journalno'",
         $db
@@ -738,7 +738,7 @@ function checkInvoiceWhenpaid($accountno, $journalno)
             // Set Datewhenpaid = GREATEST(invoice date, receipt date)
             // mirrors the original CASE WHEN Date > @datepaid THEN Date ELSE @datepaid END
             DB_query(
-                "UPDATE `customerstatement`
+                "UPDATE `customerstatement``
                  SET    Datewhenpaid = GREATEST(`Date`, '$datepaid')
                  WHERE  JournalNo = '$journalno'
                    AND  Accountno = '$accountno'",
