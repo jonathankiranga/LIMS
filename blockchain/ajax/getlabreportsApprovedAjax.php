@@ -30,7 +30,7 @@ $query = "SELECT
     st.coa_last_email_status AS COALastEmailStatus
 FROM test_results tr
 JOIN sample_header sh ON tr.HeaderID = sh.HeaderID
-LEFT JOIN Sample_Tests st ON st.TestID = tr.TestID
+LEFT JOIN sample_tests st ON st.TestID = tr.TestID
 WHERE tr.StatusID = 4";
 if (mb_strlen($searchtext) > 2) {
     $query .= " AND (tr.SampleID LIKE CONCAT('%', ?, '%') OR sh.DocumentNo LIKE CONCAT('%', ?, '%'))";
