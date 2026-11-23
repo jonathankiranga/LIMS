@@ -202,7 +202,7 @@ $sampletypes = array(
  $regulation="";
   $createdAt = date('Y-m-d H:i:s');
   
- $sql = "INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt)  VALUES (?, ?, ?, ?, ?)";
+ $sql = "INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt)  VALUES (?, ?, ?, ?, ?)";
  $stmt = $conn->prepare($sql);
             if ($stmt) {
                 // Bind parameters (s = string, i = integer, d = double, b = blob)
