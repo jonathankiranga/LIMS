@@ -63,7 +63,7 @@ while ($row = DB_fetch_array($ResultIndex)) {
  }
  
  $_SESSION['bankaccounts']=array();
- $ResultIndex=DB_query("SELECT `accountcode` FROM `BankAccounts`", $db);
+ $ResultIndex=DB_query("SELECT `accountcode` FROM `bankaccounts``", $db);
  while ($row = DB_fetch_array($ResultIndex)) {
     $_SESSION['bankaccounts'][] = trim($row['accountcode']);
  }
@@ -75,7 +75,7 @@ while ($row = DB_fetch_array($ResultIndex)) {
  $_SESSION['Financial_Periods']=$_POST['Financial_Periods'];
   
             $ResultIndex=DB_query(sprintf("SELECT `start_date`,`end_date`,`Name`,`periodno`  
-            FROM `FinancialPeriods` where `periodno`='%s' order by start_date asc",$_SESSION['Financial_Periods']), $db);
+            FROM `financialperiods`` where `periodno`='%s' order by start_date asc",$_SESSION['Financial_Periods']), $db);
 
             while ($row = DB_fetch_array($ResultIndex)) {
                  $Querry[]=$row;
@@ -196,7 +196,7 @@ $end_date=$Querryvalue["end_date"];
 $Lamount=$paidOut;
 DrillReceivables($journal,$MonthName,$paidOut,$Querryvalue);
   /*
- $sql=sprintf("SELECT `journalno` FROM `ReceiptsAllocation` where receiptjournal='%s'",$journal);
+ $sql=sprintf("SELECT `journalno` FROM `receiptsallocation`` where receiptjournal='%s'",$journal);
  $ResultIndex=DB_query($sql,$db);
  $ReceiptsAllocation=DB_fetch_row($ResultIndex);
   if(isset($ReceiptsAllocation[0])){
@@ -398,7 +398,7 @@ function Drillgl($journal,$typ,$MonthName,$paidOut,$Querryvalue){
  
    $Lamount=$paidOut;
  /*
-  $ResultIndex=DB_query(sprintf("SELECT `journalno` FROM `PaymentsAllocation` where receiptjournal='%s'",$journal),$db);
+  $ResultIndex=DB_query(sprintf("SELECT `journalno` FROM `paymentsallocation`` where receiptjournal='%s'",$journal),$db);
   $PaymentsAllocation=DB_fetch_row($ResultIndex);
   if(isset($PaymentsAllocation[0])){
        $journal=trim($PaymentsAllocation[0]);

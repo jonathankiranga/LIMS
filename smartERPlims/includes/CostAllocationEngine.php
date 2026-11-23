@@ -64,7 +64,7 @@ class CostAllocationEngine {
         $dt = mysqli_real_escape_string($this->db, $dateTo);
 
         $result = DB_query("SELECT COALESCE(SUM(amount),0) as balance
-            FROM Generalledger
+            FROM `generalledger`
             WHERE accountcode = '$ga'
             AND Docdate BETWEEN '$df' AND DATE_ADD('$dt', INTERVAL 1 DAY)", $this->db);
         $row = DB_fetch_array($result);

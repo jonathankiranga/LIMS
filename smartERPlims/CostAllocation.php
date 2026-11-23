@@ -103,7 +103,7 @@ if ($Action == 'run') {
 
                         // Get GL balance for this account in the period
                         $glResult = DB_query("SELECT COALESCE(SUM(amount),0) as balance
-                            FROM Generalledger
+                            FROM `generalledger`
                             WHERE accountcode = '$glAccount'
                             AND Docdate BETWEEN '$periodStart' AND DATE_ADD('$periodEnd', INTERVAL 1 DAY)", $db);
                         $glRow = DB_fetch_array($glResult);

@@ -35,10 +35,10 @@ function _getPeriodDates($yearPeriod)
     $lastPeriod = $yearPeriod - 12;
 
     $sql = "SELECT
-                (SELECT MIN(start_date) FROM FinancialPeriods WHERE periodno = $yearPeriod) AS cur_start,
-                (SELECT MAX(end_date)   FROM FinancialPeriods WHERE periodno = $yearPeriod) AS cur_end,
-                (SELECT MIN(start_date) FROM FinancialPeriods WHERE periodno = $lastPeriod) AS last_start,
-                (SELECT MAX(end_date)   FROM FinancialPeriods WHERE periodno = $lastPeriod) AS last_end";
+                (SELECT MIN(start_date) FROM `financialperiods` WHERE periodno = $yearPeriod) AS cur_start,
+                (SELECT MAX(end_date)   FROM `financialperiods` WHERE periodno = $yearPeriod) AS cur_end,
+                (SELECT MIN(start_date) FROM `financialperiods` WHERE periodno = $lastPeriod) AS last_start,
+                (SELECT MAX(end_date)   FROM `financialperiods` WHERE periodno = $lastPeriod) AS last_end";
 
     $result = DB_query($sql, $db);
     $row    = DB_fetch_array($result);
@@ -69,30 +69,30 @@ function _buildGLColumns($dates)
 
     return "
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$ce')
-            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS debit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$ce')
-            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS credit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS debit_Last,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS credit_Last";
 }
@@ -206,30 +206,30 @@ function DB_AccountBalance_withfilter($filter = '')
     // balance-sheet debit â€” preserved here for behavioural consistency.
     $glColumns = "
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate < '$ce')
-            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS debit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$ce')
-            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS credit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS debit_Last,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS credit_Last";
 
@@ -337,15 +337,15 @@ function DB_Profit_loss_by_month()
                 Sale_Purchase_Neither,
                 accno,
                 CASE acct.balance_income
-                    WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                    WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                                  WHERE gl.accountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                    WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                    WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                                  WHERE gl.accountcode = acct.accno AND gl.period = '$escapedPeriod')
                 END AS debit,
                 CASE acct.balance_income
-                    WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                    WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                                  WHERE gl.balaccountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                    WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                    WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                                  WHERE gl.balaccountcode = acct.accno AND gl.period = '$escapedPeriod')
                 END AS credit,
                 NULL AS debit_Last,
@@ -386,51 +386,51 @@ function DB_Profit_loss_Project()
 
     $glColumnsProject = "
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$ce')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS debit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$ce')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$cs' AND '$ce')
         END AS credit,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS debit_Last,
 
         CASE acct.balance_income
-            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cs')
-            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
-                         JOIN ProjectDimensions pd ON pd.Code = gl.dimension2
+            ELSE         (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
+                         JOIN `projectdimensions` pd ON pd.Code = gl.dimension2
                          WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ls' AND '$le')
         END AS credit_Last";
 
     $sql = "WITH RECURSIVE ProjectDimensions AS (
                 SELECT Code, Dimension, parent
-                FROM   Dimensions
+                FROM `dimensions`
                 WHERE  Code = '$escapedProject'
 
                 UNION ALL
 
                 SELECT child.Code, child.Dimension, child.parent
-                FROM   Dimensions child
-                INNER JOIN ProjectDimensions pd ON child.parent = pd.Code
+                FROM `dimensions` child
+                INNER JOIN `projectdimensions` pd ON child.parent = pd.Code
             )
             SELECT " . _acctColumns() . "
             FROM (
@@ -473,18 +473,18 @@ function DB_House_cost($projectSelected)
                     + IFNULL(SUM(DISTINCT pl.invoiceamount), 0)               AS Total,
                 NULL                                                           AS Balance,
                 NULL                                                           AS percent
-            FROM Dimensions d
+            FROM `dimensions` d
 
-            LEFT JOIN Generalledger gl
+            LEFT JOIN `generalledger` gl
                    ON gl.dimension2 = d.Code
                   AND gl.accountcode IN (SELECT accno FROM acct WHERE balance_income = 1)
 
-            LEFT JOIN PurchaseHeader ph
+            LEFT JOIN `purchaseheader` ph
                    ON ph.Dimension_2  = d.Code
                   AND ph.released     = 1
                   AND ph.documenttype = 18
 
-            LEFT JOIN PurchaseLine pl
+            LEFT JOIN `purchaseline` pl
                    ON pl.documenttype = ph.documenttype
                   AND pl.documentno   = ph.documentno
 

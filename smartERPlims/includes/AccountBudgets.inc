@@ -6,7 +6,7 @@ function db_AccountBudgets($yearIndex){
     $yearIndex = (int)$yearIndex;
 
     $dateSQL = "SELECT MIN(start_date) AS datefrom, MAX(end_date) AS dateto
-                FROM FinancialPeriods
+                FROM `financialperiods`
                 WHERE periodno='" . $yearIndex . "'";
     $dateResult = DB_query($dateSQL, $db);
     $dateRow = DB_fetch_row($dateResult);
@@ -19,14 +19,14 @@ function db_AccountBudgets($yearIndex){
                 SUM(b.amount) AS BudgetAmount,
                 IFNULL((
                     SELECT SUM(gl.amount)
-                    FROM Generalledger gl
+                    FROM `generalledger` gl
                     WHERE gl.dimension = b.dimecode
                       AND gl.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                 ),0) AS Expeses,
                 IFNULL((
                     SELECT SUM(pl.invoiceamount)
-                    FROM PurchaseHeader ph
-                    JOIN PurchaseLine pl
+                    FROM `purchaseheader` ph
+                    JOIN `purchaseline` pl
                       ON ph.documenttype = pl.documenttype
                      AND ph.documentno = pl.documentno
                     WHERE ph.released = 1
@@ -36,15 +36,15 @@ function db_AccountBudgets($yearIndex){
                 (
                     IFNULL((
                         SELECT SUM(gl2.amount)
-                        FROM Generalledger gl2
+                        FROM `generalledger` gl2
                         WHERE gl2.dimension = b.dimecode
                           AND gl2.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                     ),0)
                     +
                     IFNULL((
                         SELECT SUM(pl2.invoiceamount)
-                        FROM PurchaseHeader ph2
-                        JOIN PurchaseLine pl2
+                        FROM `purchaseheader` ph2
+                        JOIN `purchaseline` pl2
                           ON ph2.documenttype = pl2.documenttype
                          AND ph2.documentno = pl2.documentno
                         WHERE ph2.released = 1
@@ -56,15 +56,15 @@ function db_AccountBudgets($yearIndex){
                     SUM(b.amount) - (
                         IFNULL((
                             SELECT SUM(gl3.amount)
-                            FROM Generalledger gl3
+                            FROM `generalledger` gl3
                             WHERE gl3.dimension = b.dimecode
                               AND gl3.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                         ),0)
                         +
                         IFNULL((
                             SELECT SUM(pl3.invoiceamount)
-                            FROM PurchaseHeader ph3
-                            JOIN PurchaseLine pl3
+                            FROM `purchaseheader` ph3
+                            JOIN `purchaseline` pl3
                               ON ph3.documenttype = pl3.documenttype
                              AND ph3.documentno = pl3.documentno
                             WHERE ph3.released = 1
@@ -82,15 +82,15 @@ function db_AccountBudgets($yearIndex){
                                     SUM(b.amount) - (
                                         IFNULL((
                                             SELECT SUM(gl4.amount)
-                                            FROM Generalledger gl4
+                                            FROM `generalledger` gl4
                                             WHERE gl4.dimension = b.dimecode
                                               AND gl4.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                                         ),0)
                                         +
                                         IFNULL((
                                             SELECT SUM(pl4.invoiceamount)
-                                            FROM PurchaseHeader ph4
-                                            JOIN PurchaseLine pl4
+                                            FROM `purchaseheader` ph4
+                                            JOIN `purchaseline` pl4
                                               ON ph4.documenttype = pl4.documenttype
                                              AND ph4.documentno = pl4.documentno
                                             WHERE ph4.released = 1
@@ -103,7 +103,7 @@ function db_AccountBudgets($yearIndex){
                         )
                     END
                 ) AS percent
-            FROM Dimensions d
+            FROM `dimensions` d
             JOIN budgets b
               ON d.code = b.dimecode
              AND b.periodno = '" . $yearIndex . "'
@@ -120,7 +120,7 @@ function db_AccountProject($yearIndex){
     $yearIndex = (int)$yearIndex;
 
     $dateSQL = "SELECT MIN(start_date) AS datefrom, MAX(end_date) AS dateto
-                FROM FinancialPeriods
+                FROM `financialperiods`
                 WHERE periodno='" . $yearIndex . "'";
     $dateResult = DB_query($dateSQL, $db);
     $dateRow = DB_fetch_row($dateResult);
@@ -133,14 +133,14 @@ function db_AccountProject($yearIndex){
                 SUM(b.amount) AS BudgetAmount,
                 IFNULL((
                     SELECT SUM(gl.amount)
-                    FROM Generalledger gl
+                    FROM `generalledger` gl
                     WHERE gl.dimension2 = b.dimecode
                       AND gl.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                 ),0) AS Expeses,
                 IFNULL((
                     SELECT SUM(pl.invoiceamount)
-                    FROM PurchaseHeader ph
-                    JOIN PurchaseLine pl
+                    FROM `purchaseheader` ph
+                    JOIN `purchaseline` pl
                       ON ph.documenttype = pl.documenttype
                      AND ph.documentno = pl.documentno
                     WHERE ph.released = 1
@@ -150,15 +150,15 @@ function db_AccountProject($yearIndex){
                 (
                     IFNULL((
                         SELECT SUM(gl2.amount)
-                        FROM Generalledger gl2
+                        FROM `generalledger` gl2
                         WHERE gl2.dimension2 = b.dimecode
                           AND gl2.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                     ),0)
                     +
                     IFNULL((
                         SELECT SUM(pl2.invoiceamount)
-                        FROM PurchaseHeader ph2
-                        JOIN PurchaseLine pl2
+                        FROM `purchaseheader` ph2
+                        JOIN `purchaseline` pl2
                           ON ph2.documenttype = pl2.documenttype
                          AND ph2.documentno = pl2.documentno
                         WHERE ph2.released = 1
@@ -170,15 +170,15 @@ function db_AccountProject($yearIndex){
                     SUM(b.amount) - (
                         IFNULL((
                             SELECT SUM(gl3.amount)
-                            FROM Generalledger gl3
+                            FROM `generalledger` gl3
                             WHERE gl3.dimension2 = b.dimecode
                               AND gl3.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                         ),0)
                         +
                         IFNULL((
                             SELECT SUM(pl3.invoiceamount)
-                            FROM PurchaseHeader ph3
-                            JOIN PurchaseLine pl3
+                            FROM `purchaseheader` ph3
+                            JOIN `purchaseline` pl3
                               ON ph3.documenttype = pl3.documenttype
                              AND ph3.documentno = pl3.documentno
                             WHERE ph3.released = 1
@@ -196,15 +196,15 @@ function db_AccountProject($yearIndex){
                                     SUM(b.amount) - (
                                         IFNULL((
                                             SELECT SUM(gl4.amount)
-                                            FROM Generalledger gl4
+                                            FROM `generalledger` gl4
                                             WHERE gl4.dimension2 = b.dimecode
                                               AND gl4.Docdate BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "'
                                         ),0)
                                         +
                                         IFNULL((
                                             SELECT SUM(pl4.invoiceamount)
-                                            FROM PurchaseHeader ph4
-                                            JOIN PurchaseLine pl4
+                                            FROM `purchaseheader` ph4
+                                            JOIN `purchaseline` pl4
                                               ON ph4.documenttype = pl4.documenttype
                                              AND ph4.documentno = pl4.documentno
                                             WHERE ph4.released = 1
@@ -217,7 +217,7 @@ function db_AccountProject($yearIndex){
                         )
                     END
                 ) AS percent
-            FROM Dimensions d
+            FROM `dimensions` d
             JOIN budgets b
               ON d.code = b.dimecode
              AND b.periodno = '" . $yearIndex . "'
