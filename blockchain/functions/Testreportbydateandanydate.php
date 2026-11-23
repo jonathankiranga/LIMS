@@ -21,8 +21,8 @@ $sql = "SELECT
             sh.DocumentNo AS BatchNo,
             dr.Customer AS Customer,
             COUNT(st.TestID) AS NumberOfSamples
-        FROM Sample_Header sh
-        JOIN Sample_Tests st ON sh.HeaderID = st.HeaderID
+        FROM sample_header sh
+        JOIN sample_tests st ON sh.HeaderID = st.HeaderID
         LEFT JOIN debtors dr ON sh.CustomerID = dr.itemcode
         WHERE sh.`Date` BETWEEN ? AND ?
         GROUP BY sh.DocumentNo, dr.Customer, sh.`Date`
