@@ -127,7 +127,7 @@ $DRamount=0;$Uncleared=0;$Difference=0;$CRamount=0;
 
 $banklist=array();
 
-$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `BankAccounts`", $db);
+$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts`", $db);
 while($row=DB_fetch_array($resultindex)){
     $banklist[trim($row['accountcode'])]=$row['bankName'].' '.$row['BranchName'].' '.$row['currency'];
 }
@@ -146,16 +146,16 @@ while($row=DB_fetch_array($resultindex)){
       ,`narrative`
       ,`exchangerate`
       ,IFNULL(`cleared`,0) AS `cleared`
-      ,`BankTransactions`.`reconciled`
-  FROM `BankTransactions` 
-  left join `systypes_1` on `BankTransactions`.`doctype`=`systypes_1`.typeid 
+      ,`banktransactions`.`reconciled`
+  FROM `banktransactions` 
+  left join `systypes_1` on `banktransactions`.`doctype`=`systypes_1`.typeid 
   where (`bankcode`='".$_POST['Bank_Code']."')";
    
   if(mb_strlen($_POST['statementstartdate'])>6 and mb_strlen($_POST['enddate'])>6){
-        $SQL .= " and (`BankTransactions`.`DocDate` between '".$_POST['statementstartdate']."' and '".$_POST['enddate']."')"
-           . " or (`BankTransactions`.`reconciled` is NULL)";
+        $SQL .= " and (`banktransactions`.`DocDate` between '".$_POST['statementstartdate']."' and '".$_POST['enddate']."')"
+           . " or (`banktransactions`.`reconciled` is NULL)";
   }elseif(mb_strlen($_POST['statementstartdate'])>6){
-        $SQL .= " and (`BankTransactions`.`DocDate` > '".$_POST['statementstartdate']."') or (`BankTransactions`.`reconciled` is NULL)";
+        $SQL .= " and (`banktransactions`.`DocDate` > '".$_POST['statementstartdate']."') or (`banktransactions`.`reconciled` is NULL)";
   }
     
 $SQL .=" order by `DocDate` Asc" ;
