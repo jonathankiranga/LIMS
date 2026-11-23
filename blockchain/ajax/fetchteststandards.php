@@ -22,7 +22,7 @@ if ($contractedOnly) {
 }
 $where = count($conditions) ? ' WHERE ' . implode(' AND ', $conditions) : '';
 
-$countSql = "SELECT COUNT(*) AS total FROM TestStandards ts" . $where;
+$countSql = "SELECT COUNT(*) AS total FROM teststandards ts" . $where;
 $countStmt = $conn->prepare($countSql);
 if (!$countStmt) {
     http_response_code(500);
@@ -45,7 +45,7 @@ $countStmt->close();
 $totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $limit) : 0;
 
 $sql = "SELECT ts.*, sm.*
-        FROM TestStandards ts
+        FROM teststandards ts
         LEFT JOIN standard_methods sm ON ts.sm = sm.MethodID" . $where . "
         ORDER BY ts.StandardName ASC
         LIMIT ? OFFSET ?";
