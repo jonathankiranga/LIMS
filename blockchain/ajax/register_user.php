@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
      
        
         // Insert user into the database
-        $sql = "INSERT INTO Users (username, email, full_name, role, password_hash,  created_at, telephone, status) 
+        $sql = "INSERT INTO users (username, email, full_name, role, password_hash,  created_at, telephone, status) 
                 VALUES (?, ?, ?, ?,  ?, NOW(), ?, 'active')";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
@@ -163,8 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
     
     
-   // Check if the email exists in the Users table
-    $sql = "SELECT user_id FROM Users WHERE email = ?";
+   // Check if the email exists in the users table
+    $sql = "SELECT user_id FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&  $_POST['action'] === 'validate_tok
         $conn->autocommit(false);
     // Update the user's password
         $password_hash = hashPassword($new_password);
-        $sql = "UPDATE Users SET password_hash = ? WHERE user_id = ?";
+        $sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $password_hash, $user_id);
         $stmt->execute();
