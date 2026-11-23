@@ -26,7 +26,7 @@ $SQL="select
       ,`SalesHeader`.`externaldocumentno` as BankCode2
       ,SalesHeader.`locationcode` as BankCode
       ,SalesHeader.paymentterms
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
@@ -69,7 +69,7 @@ $SQL="select
       ,SalesLine.`totalchargedcontainers`
       ,`SalesLine`.`partperunit`
       ,SalesLine.code as itemcode
-  FROM `salesheader`` join SalesLine 
+  FROM `salesheader``` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         and SalesHeader.documenttype=54  
@@ -255,7 +255,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(SalesLine.`invoiceamount`) as OrderValue
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='54' 
        group by 

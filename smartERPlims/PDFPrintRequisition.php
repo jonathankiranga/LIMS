@@ -23,9 +23,9 @@ $SQL="select
       ,`productionEmployee`.country
       ,`productionEmployee`.phone
       ,`productionEmployee`.`pinno` 
-      from `SalesHeader` 
-      join `SalesLine` on SalesLine.`documentno` =`SalesLine`.`documentno`
-      join `productionEmployee` on `SalesHeader`.`customercode`=`productionEmployee`.`code`
+      from `salesheader`` 
+      join `salesline`` on SalesLine.`documentno` =`SalesLine`.`documentno`
+      join `productionemployee`` on `SalesHeader`.`customercode`=`productionEmployee`.`code`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_row($Result);
@@ -52,8 +52,8 @@ $SQL="select
         SalesLine.documentno,
         SalesHeader.customercode ,
         SalesHeader.documenttype 
-        FROM `salesheader` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  
+        FROM `salesheader`` 
+        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  
         join stockmaster on stockmaster.itemcode=SalesLine.code where SalesLine.documentno='%s' ",$_GET['No']);
      
      $FontSize = 12;
@@ -118,8 +118,8 @@ $SQL="SELECT
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `SalesHeader`
-      join `SalesLine` on `SalesHeader`.documentno=SalesLine.`documentno` 
+      from `salesheader``
+      join `salesline`` on `SalesHeader`.documentno=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='40' and `SalesHeader`.`status`=2
       order by `SalesHeader`.`documentno` desc limit 50";
     $Result=DB_query($SQL,$db);

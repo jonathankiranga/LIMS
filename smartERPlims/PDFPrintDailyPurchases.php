@@ -39,7 +39,7 @@ if(isset($_POST['salesreport'])){
       ,sum(PurchaseLine.invoiceamount) as invoiceamount
       ,sum(PurchaseLine.vatamount) as vatamount
       ,sum(PurchaseLine.invoiceamount-PurchaseLine.vatamount) as netamt
-  FROM `purchaseheader`` join PurchaseLine 
+  FROM `purchaseheader`` join `purchaseline` 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype
         and PurchaseHeader.documenttype=20
@@ -66,8 +66,8 @@ if(isset($_POST['salesreport'])){
            . "`EnterbillsLines`.`vatamount` as vatamount,"
            . "`EnterbillsLines`.`grossamount`  as invoiceamount,  "
            . "`EnterbillsLines`.`grossamount`-`EnterbillsLines`.`vatamount` as netamt "
-           . " from `EnterbillHeaders`"
-           . " join `EnterbillsLines` on `EnterbillsLines`.`documentno`=`EnterbillHeaders`.`documentno` and "
+           . " from `enterbillheaders``"
+           . " join `enterbillslines`` on `EnterbillsLines`.`documentno`=`EnterbillHeaders`.`documentno` and "
            . "  `EnterbillsLines`.`documenttype`=`EnterbillHeaders`.`documenttype` "
            . "  where `EnterbillHeaders`.`documenttype`='23' "
            . "  and  `EnterbillHeaders`.`date` between '%s' and '%s' ",$castdate,$Tcastdate);
@@ -142,7 +142,7 @@ if(isset($_POST['salesreport'])){
       ,sum(PurchaseLine.invoiceamount) as invoiceamount
       ,sum(PurchaseLine.vatamount) as vatamount
       ,sum(PurchaseLine.invoiceamount-PurchaseLine.vatamount) as netamt
-  FROM `purchaseheader`` join PurchaseLine 
+  FROM `purchaseheader`` join `purchaseline` 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype
         and PurchaseHeader.documenttype=20
@@ -169,8 +169,8 @@ if(isset($_POST['salesreport'])){
            . "`EnterbillsLines`.`vatamount` as vatamount,"
            . "`EnterbillsLines`.`grossamount`  as invoiceamount,  "
            . "`EnterbillsLines`.`grossamount`-`EnterbillsLines`.`vatamount` as netamt "
-           . " from `EnterbillHeaders`"
-           . " join `EnterbillsLines` on `EnterbillsLines`.`documentno`=`EnterbillHeaders`.`documentno` and "
+           . " from `enterbillheaders``"
+           . " join `enterbillslines`` on `EnterbillsLines`.`documentno`=`EnterbillHeaders`.`documentno` and "
            . "  `EnterbillsLines`.`documenttype`=`EnterbillHeaders`.`documenttype` "
            . "  where `EnterbillHeaders`.`documenttype`='23' "
            . "  and  `EnterbillHeaders`.`date` between '%s' and '%s' ",$castdate,$Tcastdate);
