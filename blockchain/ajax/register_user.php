@@ -12,7 +12,7 @@ use PHPMailer\PHPMailer\Exception;
 
 // Helper function to validate the reset token
 function isTokenValid($conn, $token) {
-    $sql = "SELECT user_id, expires_at FROM Password_Reset WHERE reset_token = ? AND is_used = 0";
+    $sql = "SELECT user_id, expires_at FROM password_reset WHERE reset_token = ? AND is_used = 0";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $token);
     $stmt->execute();
@@ -195,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         if ($result['success'] === true) {
             // Email confirmed sent — now safe to store the token
-            $sql = "INSERT INTO Password_Reset (user_id, reset_token, created_at, expires_at, is_used) VALUES (?, ?, NOW(), ?, 0)";
+            $sql = "INSERT INTO password_reset (user_id, reset_token, created_at, expires_at, is_used) VALUES (?, ?, NOW(), ?, 0)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("iss", $user_id, $reset_token, $expires_at);
             $stmt->execute();
@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&  $_POST['action'] === 'validate_tok
         }
        
         // Mark the token as used
-        $sql = "UPDATE Password_Reset SET is_used = 1 WHERE reset_token = ?";
+        $sql = "UPDATE password_reset SET is_used = 1 WHERE reset_token = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $reset_token);
         $stmt->execute();
