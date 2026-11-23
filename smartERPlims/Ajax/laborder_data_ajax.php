@@ -98,7 +98,7 @@ function labTatFor($stockCode) {
     if (empty($stockCode)) {
         return 0;
     }
-    $ResultIndex = labDB(sprintf("SELECT tat FROM PriceList WHERE stockcode='%s' LIMIT 1", mysqli_real_escape_string($db, $stockCode)));
+    $ResultIndex = labDB(sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", mysqli_real_escape_string($db, $stockCode)));
     if ($ResultIndex && ($row = DB_fetch_row($ResultIndex))) {
         return (int)($row[0] ?? 0);
     }
@@ -111,13 +111,13 @@ function labPriceFor($stockid, $quantity = 1, $customerid = '') {
     $price = 0;
     $Dprice = 0;
     if (mb_strlen($customerid) > 1) {
-        $ResultIndex = labDB(sprintf("SELECT price FROM PriceList WHERE stockcode='%s' AND approved=1 AND quantity=%f AND customerCode='%s'",
+        $ResultIndex = labDB(sprintf("SELECT price FROM `pricelist` WHERE stockcode='%s' AND approved=1 AND quantity=%f AND customerCode='%s'",
             mysqli_real_escape_string($db, $stockid), $quantity, mysqli_real_escape_string($db, $customerid)));
         if ($ResultIndex && ($row = DB_fetch_row($ResultIndex))) {
             $price = $row[0];
         }
     }
-    $ResultIndex = labDB(sprintf("SELECT price FROM PriceList WHERE stockcode='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
+    $ResultIndex = labDB(sprintf("SELECT price FROM `pricelist` WHERE stockcode='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
         mysqli_real_escape_string($db, $stockid), $quantity));
     if ($ResultIndex && ($row = DB_fetch_row($ResultIndex))) {
         $Dprice = $row[0];
@@ -430,7 +430,7 @@ function labBanks($currency) {
     if (trim((string)$currency) === '') {
         return $banks;
     }
-    $ResultIndex = labDB("SELECT accountcode, bankName, BranchName, currency FROM BankAccounts
+    $ResultIndex = labDB("SELECT accountcode, bankName, BranchName, currency FROM `bankaccounts`
                           WHERE currency='" . mysqli_real_escape_string($db, trim((string)$currency)) . "' ORDER BY bankName, BranchName");
     if ($ResultIndex === false) {
         labFail('Could not load bank accounts. See the error log.', 'DB_BANKS');
@@ -453,20 +453,20 @@ function labFillCart($docno, $type) {
     $docnoEsc = mysqli_real_escape_string($db, trim($docno));
     // Pre-migration fallback: pricingmode column not yet added
     // (see sql/migration_add_pricingmode_column.sql).
-    $pmCol = labDB("SHOW COLUMNS FROM SalesHeader LIKE 'pricingmode'");
+    $pmCol = labDB("SHOW COLUMNS FROM `salesheader` LIKE 'pricingmode'");
     $pmSelect = ($pmCol !== false && DB_num_rows($pmCol) > 0) ? ', pricingmode' : '';
     if ($type === 1) {
         $hdrSql = "SELECT documentno, docdate, customercode, customername, yourreference, currencycode,
                           salespersoncode, QtyDiscount, locationcode" . $pmSelect . "
-                   FROM SalesHeader WHERE documenttype=1 AND documentno='$docnoEsc' LIMIT 1";
+                   FROM `salesheader` WHERE documenttype=1 AND documentno='$docnoEsc' LIMIT 1";
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, sampleID, PartPerUnit
-                    FROM SalesLine WHERE documenttype=1 AND documentno='$docnoEsc' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline` WHERE documenttype=1 AND documentno='$docnoEsc' AND code IS NOT NULL AND code != ''";
     } else {
         $hdrSql = "SELECT documentno, docdate, customercode, customername, yourreference, currencycode,
                           salespersoncode, QtyDiscount, locationcode" . $pmSelect . "
-                   FROM SalesHeader WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1";
+                   FROM `salesheader` WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1";
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, PartPerUnit
-                    FROM SalesLine WHERE documenttype=54 AND documentno='$docnoEsc' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline` WHERE documenttype=54 AND documentno='$docnoEsc' AND code IS NOT NULL AND code != ''";
     }
     $hdrResult = labDB($hdrSql);
     if ($hdrResult === false) {
@@ -555,7 +555,7 @@ switch ($action) {
             $qEsc = mysqli_real_escape_string($db, $q);
             $where .= " AND (documentno LIKE '%$qEsc%' OR customername LIKE '%$qEsc%' OR customercode LIKE '%$qEsc%')";
         }
-        $ResultIndex = labDB("SELECT documentno, customername, docdate FROM SalesHeader
+        $ResultIndex = labDB("SELECT documentno, customername, docdate FROM `salesheader`
                               WHERE $where ORDER BY docdate DESC LIMIT 15");
         if ($ResultIndex === false) {
             labFail('Order search failed. See the error log for details.', 'DB_SEARCH_ORDERS');
@@ -577,7 +577,7 @@ switch ($action) {
             $qEsc = mysqli_real_escape_string($db, $q);
             $where .= " AND (documentno LIKE '%$qEsc%' OR customername LIKE '%$qEsc%' OR customercode LIKE '%$qEsc%')";
         }
-        $ResultIndex = labDB("SELECT documentno, customername, docdate FROM SalesHeader
+        $ResultIndex = labDB("SELECT documentno, customername, docdate FROM `salesheader`
                               WHERE $where ORDER BY docdate DESC LIMIT 15");
         if ($ResultIndex === false) {
             labFail('Quote search failed. See the error log for details.', 'DB_SEARCH_QUOTES');
@@ -1012,11 +1012,11 @@ switch ($action) {
             mysqli_real_escape_string($db, $imagesArray2 ?: '[]'),
             (float)($req['DiscountPercent'] ?? 0),
         );
-        $colRes = labDB("SHOW COLUMNS FROM SalesHeader LIKE 'pricingmode'");
+        $colRes = labDB("SHOW COLUMNS FROM `salesheader` LIKE 'pricingmode'");
         $hasPricingMode = ($colRes !== false && DB_num_rows($colRes) > 0);
         if ($hasPricingMode) {
             $sql[] = sprintf(
-                "INSERT INTO SalesHeader (
+                "INSERT INTO `salesheader` (
                     documenttype, documentno, docdate, oderdate, duedate,
                     customercode, customername, yourreference, coa_documentno,
                     postinggroup, currencycode, salespersoncode, status,
@@ -1035,7 +1035,7 @@ switch ($action) {
             // Pre-migration fallback: column not yet added.
             labLog('SalesHeader.pricingmode column missing - saving without per-standard pricing modes. Run sql/migration_add_pricingmode_column.sql');
             $sql[] = sprintf(
-                "INSERT INTO SalesHeader (
+                "INSERT INTO `salesheader` (
                     documenttype, documentno, docdate, oderdate, duedate,
                     customercode, customername, yourreference, coa_documentno,
                     postinggroup, currencycode, salespersoncode, status,
@@ -1110,7 +1110,7 @@ switch ($action) {
                 $columns[] = 'Qunatity_delivered';
                 $values[] = labSqlVal($qty);
             }
-            $sql[] = "INSERT INTO SalesLine (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ")";
+            $sql[] = "INSERT INTO `salesline` (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ")";
         }
 
         $stmtIdx = 0;
@@ -1154,7 +1154,7 @@ switch ($action) {
             labFail('No order number provided.', 'NO_DOCNO');
         }
         $docnoEsc = mysqli_real_escape_string($db, $docno);
-        $ResultIndex = labDB("UPDATE SalesHeader SET status=1, released=1
+        $ResultIndex = labDB("UPDATE `salesheader` SET status=1, released=1
                               WHERE documenttype=1 AND documentno='$docnoEsc'");
         if ($ResultIndex === false) {
             labFail('Could not confirm the order. See the error log.', 'DB_CONFIRM');
@@ -1178,7 +1178,7 @@ switch ($action) {
             labFail('No order number provided.', 'NO_DOCNO');
         }
         $docnoEsc = mysqli_real_escape_string($db, $docno);
-        $chk = labDB("SELECT released FROM SalesHeader WHERE documenttype=1 AND documentno='$docnoEsc' LIMIT 1");
+        $chk = labDB("SELECT released FROM `salesheader` WHERE documenttype=1 AND documentno='$docnoEsc' LIMIT 1");
         if ($chk === false) {
             labFail('Could not check the order status. See the error log.', 'DB_DELETE_CHECK');
         }
@@ -1190,8 +1190,8 @@ switch ($action) {
             labFail('Order ' . $docno . ' is already released and cannot be deleted. Raise a credit note instead.', 'RELEASED');
         }
         $transstart = DB_Txn_Begin($db);
-        $r1 = labDB("DELETE FROM SalesLine WHERE documentno='$docnoEsc' AND documenttype=1");
-        $r2 = labDB("DELETE FROM SalesHeader WHERE documentno='$docnoEsc' AND documenttype=1");
+        $r1 = labDB("DELETE FROM `salesline` WHERE documentno='$docnoEsc' AND documenttype=1");
+        $r2 = labDB("DELETE FROM `salesheader` WHERE documentno='$docnoEsc' AND documenttype=1");
         if ($r1 === false || $r2 === false || DB_error_no($db) > 0) {
             $errNo = DB_error_no($db);
             $errMsg = function_exists('DB_error_msg') ? DB_error_msg($db) : $db->error;

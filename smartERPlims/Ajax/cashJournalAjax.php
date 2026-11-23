@@ -19,11 +19,11 @@ function ajaxDB_query($sql, $conn) {
 function deleteGLPostings($journalno) {
     global $db;
     $jn = mysqli_real_escape_string($db, $journalno);
-    ajaxDB_query("DELETE FROM Generalledger WHERE DocumentNo='$jn' AND DocumentType='0'", $db);
-    ajaxDB_query("DELETE FROM BankTransactions WHERE DocumentNo='$jn'", $db);
-    ajaxDB_query("DELETE FROM CustomerStatement WHERE Documentno='$jn'", $db);
+    ajaxDB_query("DELETE FROM `generalledger` WHERE DocumentNo='$jn' AND DocumentType='0'", $db);
+    ajaxDB_query("DELETE FROM `banktransactions` WHERE DocumentNo='$jn'", $db);
+    ajaxDB_query("DELETE FROM `customerstatement` WHERE Documentno='$jn'", $db);
     ajaxDB_query("DELETE FROM debtorsledger WHERE invref='$jn'", $db);
-    ajaxDB_query("DELETE FROM SupplierStatement WHERE Documentno='$jn'", $db);
+    ajaxDB_query("DELETE FROM `supplierstatement` WHERE Documentno='$jn'", $db);
     ajaxDB_query("DELETE FROM creditorsledger WHERE invref='$jn'", $db);
 }
 
@@ -33,7 +33,7 @@ switch ($action) {
 
     case 'get_banks':
         $rows = [];
-        $res = ajaxDB_query("SELECT accountcode, bankName FROM BankAccounts ORDER BY bankName", $db);
+        $res = ajaxDB_query("SELECT accountcode, bankName FROM `bankaccounts` ORDER BY bankName", $db);
         while ($r = DB_fetch_array($res)) {
             $rows[] = ['value' => trim($r['accountcode']), 'label' => trim($r['bankName'])];
         }
@@ -59,7 +59,7 @@ switch ($action) {
                 $rows[] = ['value' => trim($r['itemcode']), 'label' => trim($r['customer'])];
             }
         } elseif ($type == 'bank') {
-            $res = ajaxDB_query("SELECT accountcode, bankName FROM BankAccounts ORDER BY bankName", $db);
+            $res = ajaxDB_query("SELECT accountcode, bankName FROM `bankaccounts` ORDER BY bankName", $db);
             while ($r = DB_fetch_array($res)) {
                 $rows[] = ['value' => trim($r['accountcode']), 'label' => trim($r['bankName'])];
             }
@@ -94,8 +94,8 @@ switch ($action) {
 
         $rows = [];
         $res = ajaxDB_query("SELECT je.*,
-                    (SELECT ba.accountcode FROM BankAccounts ba WHERE ba.PostingGroup = je.Account LIMIT 1) AS bankcode
-                    FROM JournalEntries je
+                    (SELECT ba.accountcode FROM `bankaccounts` ba WHERE ba.PostingGroup = je.Account LIMIT 1) AS bankcode
+                    FROM `journalentries` je
                     WHERE je.Account = je.BalAccount
                       AND je.Docdate >= '$startDate' AND je.Docdate <= '$endDate'
                     ORDER BY je.JournalNo, je.Docdate", $db);
@@ -209,7 +209,7 @@ switch ($action) {
             $bankPG = $cj->PostingGroup(3, $bankcode);
         }
 
-        $sql = "UPDATE JournalEntries SET
+        $sql = "UPDATE `journalentries` SET
                     Docdate = '$docdate',
                     Currency = '" . mysqli_real_escape_string($db, $currency) . "',
                     narration = '" . mysqli_real_escape_string($db, $narration) . "',
@@ -242,7 +242,7 @@ switch ($action) {
             exit;
         }
 
-        $sql = "DELETE FROM JournalEntries
+        $sql = "DELETE FROM `journalentries`
                 WHERE JournalNo = '" . mysqli_real_escape_string($db, $journalno) . "'
                   AND transtype = '" . mysqli_real_escape_string($db, $transtype) . "'
                   AND itemcode = '" . mysqli_real_escape_string($db, $itemcode) . "'
@@ -264,8 +264,8 @@ switch ($action) {
 
         $jesc = mysqli_real_escape_string($db, $journalno);
         $res = ajaxDB_query("SELECT je.*,
-                    (SELECT ba.accountcode FROM BankAccounts ba WHERE ba.PostingGroup = je.Account LIMIT 1) AS bankcode
-                    FROM JournalEntries je
+                    (SELECT ba.accountcode FROM `bankaccounts` ba WHERE ba.PostingGroup = je.Account LIMIT 1) AS bankcode
+                    FROM `journalentries` je
                     WHERE je.JournalNo='$jesc' AND je.Account = je.BalAccount
                     ORDER BY je.Docdate", $db);
         $rows = [];

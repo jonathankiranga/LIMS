@@ -19,7 +19,7 @@ if (empty($currencycode)) {
     exit;
 }
 
-$SQL = "SELECT accountcode, bankName, BranchName, currency FROM BankAccounts WHERE currency='" . mysqli_real_escape_string($db, $currencycode) . "'";
+$SQL = "SELECT accountcode, bankName, BranchName, currency FROM `bankaccounts` WHERE currency='" . mysqli_real_escape_string($db, $currencycode) . "'";
 $result = mysqli_query($db, $SQL);
 
 $banks = [];

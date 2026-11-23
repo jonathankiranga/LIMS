@@ -19,11 +19,11 @@ function ajaxDB_query($sql, $conn) {
 function deleteGLPostings($journalno) {
     global $db;
     $jn = mysqli_real_escape_string($db, $journalno);
-    ajaxDB_query("DELETE FROM Generalledger WHERE DocumentNo='$jn' AND DocumentType='0'", $db);
-    ajaxDB_query("DELETE FROM BankTransactions WHERE DocumentNo='$jn'", $db);
-    ajaxDB_query("DELETE FROM CustomerStatement WHERE Documentno='$jn'", $db);
+    ajaxDB_query("DELETE FROM `generalledger` WHERE DocumentNo='$jn' AND DocumentType='0'", $db);
+    ajaxDB_query("DELETE FROM `banktransactions` WHERE DocumentNo='$jn'", $db);
+    ajaxDB_query("DELETE FROM `customerstatement` WHERE Documentno='$jn'", $db);
     ajaxDB_query("DELETE FROM debtorsledger WHERE invref='$jn'", $db);
-    ajaxDB_query("DELETE FROM SupplierStatement WHERE Documentno='$jn'", $db);
+    ajaxDB_query("DELETE FROM `supplierstatement` WHERE Documentno='$jn'", $db);
     ajaxDB_query("DELETE FROM creditorsledger WHERE invref='$jn'", $db);
 }
 
@@ -42,11 +42,11 @@ switch ($action) {
                                     WHEN 'debtors'    THEN (SELECT customer FROM debtors WHERE itemcode = je.itemcode)
                                     WHEN 'creditors'  THEN (SELECT customer FROM creditors WHERE itemcode = je.itemcode AND IsEmployee IS NULL)
                                     WHEN 'employee'   THEN (SELECT customer FROM creditors WHERE itemcode = je.itemcode AND IsEmployee = 1)
-                                    WHEN 'bank'       THEN (SELECT bankName FROM BankAccounts WHERE accountcode = je.itemcode)
+                                    WHEN 'bank'       THEN (SELECT bankName FROM `bankaccounts` WHERE accountcode = je.itemcode)
                                     WHEN 'GL'         THEN (SELECT accdesc FROM acct WHERE accno = je.itemcode)
                                     WHEN 'fixedassets' THEN (SELECT description FROM fixedassets WHERE assetid = je.itemcode)
                                 END AS name_display
-                         FROM JournalEntries je
+                         FROM `journalentries` je
                          LEFT JOIN acct ON je.account = acct.accno
                          WHERE je.Docdate >= '$startDate' AND je.Docdate <= '$endDate'
                          ORDER BY je.JournalNo, je.Docdate", $db);
@@ -105,7 +105,7 @@ switch ($action) {
                 $rows[] = ['value' => trim($r['itemcode']), 'label' => trim($r['customer'])];
             }
         } elseif ($type == 'bank') {
-            $res = ajaxDB_query("SELECT accountcode, bankName FROM BankAccounts ORDER BY bankName", $db);
+            $res = ajaxDB_query("SELECT accountcode, bankName FROM `bankaccounts` ORDER BY bankName", $db);
             while ($r = DB_fetch_array($res)) {
                 $rows[] = ['value' => trim($r['accountcode']), 'label' => trim($r['bankName'])];
             }
@@ -238,7 +238,7 @@ switch ($action) {
             exit;
         }
 
-        $sql = "UPDATE JournalEntries SET
+        $sql = "UPDATE `journalentries` SET
                     Docdate = '$docdate',
                     Currency = '" . mysqli_real_escape_string($db, $currency) . "',
                     narration = '" . mysqli_real_escape_string($db, $narration) . "',
@@ -274,7 +274,7 @@ switch ($action) {
             exit;
         }
 
-        $sql = "DELETE FROM JournalEntries
+        $sql = "DELETE FROM `journalentries`
                 WHERE JournalNo = '" . mysqli_real_escape_string($db, $journalno) . "'
                   AND Account = '" . mysqli_real_escape_string($db, $account) . "'
                   AND BalAccount = '" . mysqli_real_escape_string($db, $cracount) . "'
@@ -296,7 +296,7 @@ switch ($action) {
         }
 
         $jesc = mysqli_real_escape_string($db, $journalno);
-        $res = ajaxDB_query("SELECT * FROM JournalEntries WHERE JournalNo='$jesc' ORDER BY Docdate", $db);
+        $res = ajaxDB_query("SELECT * FROM `journalentries` WHERE JournalNo='$jesc' ORDER BY Docdate", $db);
         $rows = [];
         while ($r = DB_fetch_array($res)) {
             $rows[] = $r;
