@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Determine whether to CREATE or UPDATE
         if ($StandardCloneID>0) {
            // CREATE operation
-            $query = "INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt,sm)
+            $query = "INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt,sm)
                       VALUES (?, ?, ?, ?, ?, ?)";
             $createdAt = date('Y-m-d H:i:s');
             $stmt = $conn->prepare($query);
@@ -47,12 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if($StandardID>0){
                 // CREATE operation
-                $query = "INSERT INTO TestParameters
+                $query = "INSERT INTO testparameters
                 (
                     ParameterName, StandardID,MinLimit,MaxLimit,Limits,UnitOfMeasure,Method, BaseID,Category,MRL,MRLUnit,CreatedAt
                 )
                 SELECT  ParameterName,?,MinLimit,MaxLimit,Limits,UnitOfMeasure,Method,BaseID,Category,MRL,MRLUnit,NOW()   
-                FROM TestParameters WHERE StandardID = ?;
+                FROM testparameters WHERE StandardID = ?;
                 ";
 
                 $stmt = $conn->prepare($query);
