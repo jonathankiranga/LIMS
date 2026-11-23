@@ -141,10 +141,6 @@
 
             <hr>
 
-            <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addSampleRow()">
-                <i class="fa fa-plus"></i> Add Sample
-            </button>
-
             <div id="sampleTableContainer" class="table-responsive">
                 <table class="table table-bordered table-hover table-sm align-middle table-responsive" id="sampleTable">
                     <thead class="table-light">
