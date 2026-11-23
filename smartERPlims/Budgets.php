@@ -153,7 +153,7 @@ function Getamount($dim){
                `periodno`
               ,`dimecode`
               ,`amount`
-           FROM `Budgets` where 
+           FROM `budgets`` where 
            `periodno`='". $period."'  "
                  . " and `dimecode`='".$dim."' "
                  . " and `dimecode2`='".$_POST['projectcode']."'";
@@ -162,7 +162,7 @@ function Getamount($dim){
               `periodno`
              ,`dimecode`
              ,sum(`amount`)
-          FROM `Budgets` where 
+          FROM `budgets`` where 
           `periodno`='". $period."'"
                 . " and `dimecode`='".$dim."'"
                 . " group by `periodno`,`dimecode`";
