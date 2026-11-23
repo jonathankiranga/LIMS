@@ -39,7 +39,7 @@ if(isset($_POST['salesreport'])){
       ,sum(PurchaseLine.invoiceamount) as invoiceamount
       ,sum(PurchaseLine.vatamount) as vatamount
       ,sum(PurchaseLine.invoiceamount-PurchaseLine.vatamount) as netamt
-  FROM `PurchaseHeader` join PurchaseLine 
+  FROM `purchaseheader`` join PurchaseLine 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype
         and PurchaseHeader.documenttype=20
@@ -142,7 +142,7 @@ if(isset($_POST['salesreport'])){
       ,sum(PurchaseLine.invoiceamount) as invoiceamount
       ,sum(PurchaseLine.vatamount) as vatamount
       ,sum(PurchaseLine.invoiceamount-PurchaseLine.vatamount) as netamt
-  FROM `PurchaseHeader` join PurchaseLine 
+  FROM `purchaseheader`` join PurchaseLine 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype
         and PurchaseHeader.documenttype=20
