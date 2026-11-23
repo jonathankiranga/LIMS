@@ -98,7 +98,7 @@ CREATE TABLE standard_methods (
 );
 
 -- Test Standards Master Table
-CREATE TABLE TestStandards (
+CREATE TABLE teststandards (
     StandardID INT AUTO_INCREMENT PRIMARY KEY,
     StandardCode varchar(100) DEFAULT NULL,
     StandardName VARCHAR(255) NOT NULL,
@@ -107,11 +107,11 @@ CREATE TABLE TestStandards (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DATETIME ON UPDATE CURRENT_TIMESTAMP
 );
-ALTER TABLE `TestStandards` 
+ALTER TABLE `teststandards` 
 ADD COLUMN sm INT REFERENCES standard_methods(MethodID);
 
 -- Test Parameters Table
-CREATE TABLE TestParameters (
+CREATE TABLE testparameters (
     ParameterID INT AUTO_INCREMENT PRIMARY KEY,
     BaseID INT NOT NULL,
     ParameterName VARCHAR(255) NOT NULL,           -- Name of the parameter
@@ -127,7 +127,7 @@ CREATE TABLE TestParameters (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,  -- Record creation timestamp
     UpdatedAt DATETIME ON UPDATE CURRENT_TIMESTAMP,-- Record update timestamp
     UnitOfMeasure varchar(50);
-    FOREIGN KEY (StandardID) REFERENCES TestStandards(StandardID) ON DELETE RESTRICT ,
+    FOREIGN KEY (StandardID) REFERENCES teststandards(StandardID) ON DELETE RESTRICT ,
     FOREIGN KEY (BaseID) REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT
 );
 
@@ -181,11 +181,11 @@ CREATE TABLE `debtors` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*
 SELECT tp.ParameterName, tp.Limits, tp.Method, ts.StandardName 
-FROM TestParameters tp
-INNER JOIN TestStandards ts ON tp.StandardID = ts.StandardID
+FROM testparameters tp
+INNER JOIN teststandards ts ON tp.StandardID = ts.StandardID
 WHERE ts.StandardID = 2;
 */
-CREATE TABLE `Sample_Header` (
+CREATE TABLE `sample_header` (
     `HeaderID` INT AUTO_INCREMENT PRIMARY KEY,
     `Date` DATETIME NOT NULL,
     `DocumentNo` VARCHAR(50) NOT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE `Sample_Header` (
     `User_name` VARCHAR(255) NOT NULL  -- User name (can be base64 encoded or raw signature)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `Sample_Tests` (
+CREATE TABLE `sample_tests` (
     `TestID` INT AUTO_INCREMENT PRIMARY KEY,
     `HeaderID` INT NOT NULL,
     `SampleID` varchar(20) NOT NULL,
@@ -219,7 +219,7 @@ CREATE TABLE `Sample_Tests` (
     `coa_last_email_status` VARCHAR(20) NULL,
     `coa_last_email_message` TEXT NULL,
     `User_name` VARCHAR(255) NOT NULL,  -- User name (can be base64 encoded or raw signature)
-    FOREIGN KEY (`HeaderID`) REFERENCES `Sample_Header`(`HeaderID`)  ON DELETE RESTRICT,
+    FOREIGN KEY (`HeaderID`) REFERENCES `sample_header`(`HeaderID`)  ON DELETE RESTRICT,
     FOREIGN KEY (`StandardID`) REFERENCES `testparameters`(`StandardID`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -232,7 +232,7 @@ ALTER TABLE `sample_tests`
   DROP `ResultStatus`,
   DROP `RangeResult`; 
 */
-    CREATE TABLE `Test_Results` (
+    CREATE TABLE `test_results` (
     `resultsID` INT AUTO_INCREMENT PRIMARY KEY,
     `TestID` INT NOT NULL,
     `HeaderID` INT NOT NULL,
@@ -243,14 +243,14 @@ ALTER TABLE `sample_tests`
     `ResultStatus` ENUM('ND', 'Absent', 'Detected', 'Below Limit', 'Detected Range', 'Trace', 'Above Limit', 'Inconclusive', 'Error', 'Invalid') NULL,
     `RangeResult` VARCHAR(255) NULL,
     `User_name` VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`TestID`) REFERENCES `Sample_Tests`(`TestID`) ON DELETE RESTRICT,
-    FOREIGN KEY (`HeaderID`) REFERENCES `Sample_Header`(`HeaderID`) ON DELETE RESTRICT,
+    FOREIGN KEY (`TestID`) REFERENCES `sample_tests`(`TestID`) ON DELETE RESTRICT,
+    FOREIGN KEY (`HeaderID`) REFERENCES `sample_header`(`HeaderID`) ON DELETE RESTRICT,
     FOREIGN KEY (`ParameterID`) REFERENCES `testparameters`(`ParameterID`) ON DELETE RESTRICT,
     FOREIGN KEY (`StandardID`) REFERENCES `testparameters`(`StandardID`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-ALTER TABLE `Test_Results` 
+ALTER TABLE `test_results` 
 ADD COLUMN StatusID INT REFERENCES sample_statuses(StatusID);
 
 ALTER TABLE test_results
@@ -288,11 +288,11 @@ INSERT INTO sample_statuses (StatusOrder, StatusName, Description, ColorCode) VA
 (15, 'Archived', 'Sample testing records are archived for future reference', '#808080');
 
 
-ALTER TABLE `Sample_Header` 
+ALTER TABLE `sample_header` 
 ADD COLUMN previous_version_id INT NULL,   -- Link to the previous version (if updated)
 ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE -- Flag to mark soft-deletion
 
-ALTER TABLE Sample_Tests
+ALTER TABLE sample_tests
 ADD COLUMN previous_version_id INT NULL,   -- Link to the previous version (if updated)
 ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE, -- Flag to mark soft-deletion
 --ADD COLUMN StatusID INT REFERENCES sample_statuses(StatusID);
@@ -334,10 +334,10 @@ CREATE TABLE environmental_parameters (
 );
 
 
-ALTER TABLE Sample_Tests
+ALTER TABLE sample_tests
 ADD COLUMN environmental_id INT REFERENCES environmental_parameters(param_id);
 
-CREATE INDEX idx_environmental_id ON Sample_Tests(environmental_id);
+CREATE INDEX idx_environmental_id ON sample_tests(environmental_id);
 
 CREATE TABLE chain_of_custody (
     `custody_id` INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each custody record
@@ -521,8 +521,8 @@ CREATE TABLE ParameterMatrix (
     UpdatedAt DATETIME ON UPDATE CURRENT_TIMESTAMP -- Record update timestamp
  );
 
-ALTER TABLE `TestParameters` ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
-ALTER TABLE `TestParameters` ADD COLUMN matrixID INT REFERENCES ParameterMatrix(ParameterID) ON DELETE RESTRICT;
+ALTER TABLE `testparameters` ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
+ALTER TABLE `testparameters` ADD COLUMN matrixID INT REFERENCES ParameterMatrix(ParameterID) ON DELETE RESTRICT;
 
  
 
