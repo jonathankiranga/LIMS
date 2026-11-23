@@ -1,7 +1,7 @@
 <?php
 require '../db_connection.php'; // Ensure this connects to your MySQLi instance
 // Query to fetch machine data
-$sql = "SELECT machine_id, machine_name FROM Machines";
+$sql = "SELECT machine_id, machine_name FROM machines";
 $result = $conn->query($sql);
 
 $machines = array();
