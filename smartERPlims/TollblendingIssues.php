@@ -123,7 +123,7 @@ $Saleslineinex=0;
 }
 
     if(!isset($_SESSION['Stores'])){
-    $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -682,7 +682,7 @@ function getbachno($itemcode,$docref,$transdate){
           ,stockmaster.descrip
           ,`ProductionMaster`.`date`
           ,`ProductionMaster`.`SalesHeader`
-      FROM `ProductionMaster` 
+      FROM `productionmaster`` 
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       where `ProductionMaster`.`itemcode`='%s' and (`ProductionMaster`.`date`
       between DATE_ADD('%s', INTERVAL -7 DAY) and DATE_ADD('%s', INTERVAL 1 DAY))
@@ -721,7 +721,7 @@ function getbachnoentry($itemcode,$transdate){
           ,`ProductionMaster`.`itemcode`  
           ,stockmaster.descrip
           ,`ProductionMaster`.`date`
-      FROM `ProductionMaster` 
+      FROM `productionmaster`` 
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       where `ProductionMaster`.`itemcode`='%s' and (`ProductionMaster`.`date`
       between DATE_ADD('%s', INTERVAL -7 DAY) and DATE_ADD('%s', INTERVAL 1 DAY))

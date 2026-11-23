@@ -41,7 +41,7 @@ include('includes/header.inc');
 
    
  if(!isset($_SESSION['Stores'])){
-    $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -58,7 +58,7 @@ include('includes/header.inc');
      if($_POST['submit']=='Save Item Request'){
         If($_SESSION['SINGLEUSER']=='Singleuser'){
             include('transactions/postStockIssues.inc');  
-            DB_query("UPDATE `SalesHeader` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
+            DB_query("UPDATE `salesheader`` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
             include('transactions/SaveStockIssues.inc'); 
              unset($_POST);
          }else{
@@ -141,7 +141,7 @@ Function Entry(){
           
           $sql = "SELECT rowid, GRN, expiry_date, batch_reference, serial,
                          (StockIn - IFNULL(StockOut,0)) AS StockBalance, cost
-                  FROM StockRegister
+                  FROM `stockregister`
                   WHERE itemcode = '" . trim($selectedItem) . "'
                     AND (StockIn - IFNULL(StockOut,0)) > 0
                   ORDER BY COALESCE(expiry_date, '2099-12-31') ASC, rowid ASC";
