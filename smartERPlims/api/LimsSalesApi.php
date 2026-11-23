@@ -204,7 +204,7 @@ class LimsSalesApi{
         // Stage 1: Check customer-specific price
         if (!empty($customercode)) {
             $stmt = $this->db->prepare("
-                SELECT price FROM PriceList 
+                SELECT price FROM `pricelist` 
                 WHERE stockcode = ? AND approved = 1 AND units_code = ? 
                 AND quantity = ? AND customerCode = ?
             ");
@@ -221,7 +221,7 @@ class LimsSalesApi{
             $userPrice = $customerPrice;
         } else {
             $stmt = $this->db->prepare("
-                SELECT price FROM PriceList 
+                SELECT price FROM `pricelist` 
                 WHERE stockcode = ? AND units_code = ? AND quantity = ? 
                 AND (customerCode IS NULL OR customerCode = '')
             ");
@@ -246,7 +246,7 @@ class LimsSalesApi{
         // Stage 1: Check customer-specific price
         if (!empty($customercode)) {
             $stmt = $this->db->prepare("
-                SELECT price FROM PriceList 
+                SELECT price FROM `pricelist` 
                 WHERE stockcode = ? AND approved = 1  AND customerCode = ?
             ");
             $stmt->bind_param('ss', $itemcode, $customercode);
@@ -262,7 +262,7 @@ class LimsSalesApi{
             $userPrice = $customerPrice;
         } else {
             $stmt = $this->db->prepare("
-                SELECT price FROM PriceList 
+                SELECT price FROM `pricelist` 
                 WHERE stockcode = ? AND (customerCode IS NULL OR customerCode = '')
             ");
             $stmt->bind_param('s', $itemcode);

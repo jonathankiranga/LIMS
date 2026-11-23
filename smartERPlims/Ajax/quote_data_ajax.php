@@ -71,7 +71,7 @@ function quoteTatFor($stockCode) {
     if (empty($stockCode)) {
         return 0;
     }
-    $SQL = sprintf("SELECT tat FROM PriceList WHERE stockcode='%s' LIMIT 1", mysqli_real_escape_string($db, $stockCode));
+    $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", mysqli_real_escape_string($db, $stockCode));
     $ResultIndex = ajaxDB_query($SQL);
     if ($row = DB_fetch_row($ResultIndex)) {
         return (int)($row[0] ?? 0);
@@ -85,14 +85,14 @@ function SelectTestPriceListToUse($stockid, $quantity = 1, $customerid = '') {
     $price = 0;
     $Dprice = 0;
     if (mb_strlen($customerid) > 1) {
-        $SQL = sprintf("SELECT price FROM PriceList WHERE stockcode='%s' AND approved=1 AND quantity=%f AND customerCode='%s'",
+        $SQL = sprintf("SELECT price FROM `pricelist` WHERE stockcode='%s' AND approved=1 AND quantity=%f AND customerCode='%s'",
             mysqli_real_escape_string($db, $stockid), $quantity, mysqli_real_escape_string($db, $customerid));
         $ResultIndex = ajaxDB_query($SQL);
         if ($row = DB_fetch_row($ResultIndex)) {
             $price = $row[0];
         }
     }
-    $SQL = sprintf("SELECT price FROM PriceList WHERE stockcode='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
+    $SQL = sprintf("SELECT price FROM `pricelist` WHERE stockcode='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
         mysqli_real_escape_string($db, $stockid), $quantity);
     $ResultIndex = ajaxDB_query($SQL);
     if ($row = DB_fetch_row($ResultIndex)) {
@@ -454,7 +454,7 @@ switch ($action) {
             $qEsc = mysqli_real_escape_string($db, $q);
             $where .= " AND (documentno LIKE '%$qEsc%' OR customername LIKE '%$qEsc%' OR customercode LIKE '%$qEsc%')";
         }
-        $ResultIndex = ajaxDB_query("SELECT documentno, customername, docdate FROM SalesHeader
+        $ResultIndex = ajaxDB_query("SELECT documentno, customername, docdate FROM `salesheader`
                                      WHERE $where ORDER BY docdate DESC LIMIT 15");
         if ($ResultIndex) {
             while ($row = DB_fetch_array($ResultIndex)) {
@@ -553,12 +553,12 @@ switch ($action) {
         $hdr = null;
         $ResultIndex = ajaxDB_query("SELECT documentno, docdate, customercode, customername, currencycode, salespersoncode,
                                             QtyDiscount, locationcode, externaldocumentno AS Bank_Code2, paymentterms, picture, pricingmode
-                                     FROM SalesHeader WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1");
+                                     FROM `salesheader` WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1");
         if ($ResultIndex === false) {
             // Pre-migration fallback: pricingmode column not yet added (see sql/migration_add_pricingmode_column.sql).
             $ResultIndex = ajaxDB_query("SELECT documentno, docdate, customercode, customername, currencycode, salespersoncode,
                                                 QtyDiscount, locationcode, externaldocumentno AS Bank_Code2, paymentterms, picture
-                                         FROM SalesHeader WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1");
+                                         FROM `salesheader` WHERE documenttype=54 AND documentno='$docnoEsc' LIMIT 1");
         }
         if ($ResultIndex && ($row = DB_fetch_array($ResultIndex))) {
             $hdr = [
@@ -582,7 +582,7 @@ switch ($action) {
         $lines = [];
         $ResultIndex = ajaxDB_query("SELECT code, description, unitofmeasure, Quantity, UnitPrice, vatrate, inclusive,
                                             LineDiscountPercent, TAT, PartPerUnit
-                                     FROM SalesLine WHERE documenttype=54 AND documentno='$docnoEsc'
+                                     FROM `salesline` WHERE documenttype=54 AND documentno='$docnoEsc'
                                        AND code IS NOT NULL AND code != ''");
         // Price the saved lines server-side so the grid paints final amounts
         // in one pass with no client recompute.
@@ -802,7 +802,7 @@ switch ($action) {
         // customer's currency, else the quote currency, else leave locationcode NULL.
         if ($Bank_Code === '') {
             $bankCurrency = ($cur !== '' ? $cur : $quoteCurrency);
-            $ResultIndex = ajaxDB_query("SELECT accountcode FROM BankAccounts WHERE currency='" . mysqli_real_escape_string($db, $bankCurrency) . "' ORDER BY accountcode LIMIT 1");
+            $ResultIndex = ajaxDB_query("SELECT accountcode FROM `bankaccounts` WHERE currency='" . mysqli_real_escape_string($db, $bankCurrency) . "' ORDER BY accountcode LIMIT 1");
             if ($bankRow = DB_fetch_row($ResultIndex)) {
                 $Bank_Code = trim((string)$bankRow[0]);
             }
@@ -829,7 +829,7 @@ switch ($action) {
             }
         }
 
-        $ResultIndex = ajaxDB_query("SELECT documentno FROM SalesHeader WHERE documenttype='54' AND documentno='$docnoEsc' LIMIT 1");
+        $ResultIndex = ajaxDB_query("SELECT documentno FROM `salesheader` WHERE documenttype='54' AND documentno='$docnoEsc' LIMIT 1");
         $isEdit = (DB_fetch_row($ResultIndex) !== null);
 
         if (!$isEdit && preg_match('/(\d+)$/', $docno, $m)) {
@@ -839,12 +839,12 @@ switch ($action) {
         $db->begin_transaction();
 
         if ($isEdit) {
-            ajaxDB_query("UPDATE SalesHeader SET released=0 WHERE documenttype='54' AND documentno='$docnoEsc'");
-            ajaxDB_query("DELETE FROM SalesLine WHERE documenttype='54' AND documentno='$docnoEsc'");
-            ajaxDB_query("DELETE FROM SalesHeader WHERE documenttype='54' AND documentno='$docnoEsc'");
+            ajaxDB_query("UPDATE `salesheader` SET released=0 WHERE documenttype='54' AND documentno='$docnoEsc'");
+            ajaxDB_query("DELETE FROM `salesline` WHERE documenttype='54' AND documentno='$docnoEsc'");
+            ajaxDB_query("DELETE FROM `salesheader` WHERE documenttype='54' AND documentno='$docnoEsc'");
         }
 
-        $SQL = "INSERT INTO SalesHeader
+        $SQL = "INSERT INTO `salesheader`
                 (documenttype, documentno, docdate, customercode, customername, externaldocumentno,
                  locationcode, postinggroup, currencycode, salespersoncode, status, userid, period,
                  vatinclusive, picture, QtyDiscount, pricingmode)
@@ -868,7 +868,7 @@ switch ($action) {
         if ($hdrErrno == 1054 && stripos($hdrError, 'pricingmode') !== false) {
             // Pre-migration fallback: pricingmode column not yet added (see sql/migration_add_pricingmode_column.sql).
             quoteLog('pricingmode column missing, saving without it. Run sql/migration_add_pricingmode_column.sql');
-            $SQL = "INSERT INTO SalesHeader
+            $SQL = "INSERT INTO `salesheader`
                     (documenttype, documentno, docdate, customercode, customername, externaldocumentno,
                      locationcode, postinggroup, currencycode, salespersoncode, status, userid, period,
                      vatinclusive, picture, QtyDiscount)
@@ -889,7 +889,7 @@ switch ($action) {
             $hdrErrno = $db->errno;
             $hdrError = $db->error;
         }
-        $hdrCheck = ajaxDB_query("SELECT documentno FROM SalesHeader WHERE documenttype='54' AND documentno='$docnoEsc' LIMIT 1");
+        $hdrCheck = ajaxDB_query("SELECT documentno FROM `salesheader` WHERE documenttype='54' AND documentno='$docnoEsc' LIMIT 1");
         if (DB_fetch_row($hdrCheck) === null) {
             quoteLog('save header failed: errno=' . $hdrErrno . ' error=' . $hdrError . ' docno=' . $docno . ' customer=' . $customerid
                 . ' bank=' . ($Bank_Code !== '' ? $Bank_Code : 'NULL') . ' period=' . $PeriodNo . ' date=' . $DATE
@@ -943,7 +943,7 @@ switch ($action) {
             // Shared amount math (single source of truth with reprice).
             list($net, $vat, $gross) = quoteLineAmounts($price, $qty, $ppu, $lineDisc, $vatrate, $VATinclusive, $qtyDiscount);
 
-            $SQL = "INSERT INTO SalesLine
+            $SQL = "INSERT INTO `salesline`
                     (documenttype, docdate, documentno, code, description, unitofmeasure, Quantity,
                      UnitPrice, vatamount, invoiceamount, vatrate, inclusive, containerprice,
                      containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent, category)
@@ -964,8 +964,8 @@ switch ($action) {
             }
         }
 
-        ajaxDB_query("UPDATE SalesHeader SET released = 1 WHERE documentno='$docnoEsc' AND documenttype='54'");
-        $finRes = ajaxDB_query("UPDATE SalesLine SET completed = 1 WHERE documentno='$docnoEsc' AND documenttype='54'");
+        ajaxDB_query("UPDATE `salesheader` SET released = 1 WHERE documentno='$docnoEsc' AND documenttype='54'");
+        $finRes = ajaxDB_query("UPDATE `salesline` SET completed = 1 WHERE documentno='$docnoEsc' AND documenttype='54'");
         if ($finRes === false) {
             $finErrno = $db->errno;
             $finError = $db->error;
@@ -994,8 +994,8 @@ switch ($action) {
             quoteFail('No quote number provided.');
         }
         $docnoEsc = mysqli_real_escape_string($db, $docno);
-        ajaxDB_query("UPDATE SalesHeader SET released = 1 WHERE documentno='$docnoEsc'");
-        ajaxDB_query("UPDATE SalesLine SET completed = 1 WHERE documentno='$docnoEsc'");
+        ajaxDB_query("UPDATE `salesheader` SET released = 1 WHERE documentno='$docnoEsc'");
+        ajaxDB_query("UPDATE `salesline` SET completed = 1 WHERE documentno='$docnoEsc'");
         $_SESSION['CompleteDocument'] = $docno;
         echo json_encode(['status' => 'ok', 'message' => 'Quote confirmed: ' . $docno]);
         break;
@@ -1006,8 +1006,8 @@ switch ($action) {
             quoteFail('No quote number provided.');
         }
         $docnoEsc = mysqli_real_escape_string($db, $docno);
-        ajaxDB_query("DELETE FROM SalesLine WHERE documentno='$docnoEsc' AND documenttype='15'");
-        ajaxDB_query("DELETE FROM SalesHeader WHERE documentno='$docnoEsc' AND documenttype='15'");
+        ajaxDB_query("DELETE FROM `salesline` WHERE documentno='$docnoEsc' AND documenttype='15'");
+        ajaxDB_query("DELETE FROM `salesheader` WHERE documentno='$docnoEsc' AND documenttype='15'");
         unset($_SESSION['CompleteDocument']);
         echo json_encode(['status' => 'ok', 'message' => 'Quote deleted: ' . $docno]);
         break;
