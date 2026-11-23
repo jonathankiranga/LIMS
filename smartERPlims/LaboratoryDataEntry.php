@@ -60,7 +60,7 @@ echo '<tr><td colspan="4">'
         . '</tr>';
 
       $SQL="SELECT `ParameterID`,`Parameter`,`Limits_min`,`Limits_max`,`Method`,`NoStandardlimit` 
-            FROM `LaboratoryStandards`  where `itemcode`='". $itemcode."'";
+            FROM `laboratorystandards`  where `itemcode`='". $itemcode."'";
     
       $ResultIndex = DB_query($SQL,$db);
      while($return = DB_fetch_array($ResultIndex)){
@@ -148,7 +148,7 @@ Function GetParameter($Id,$PID){
       Global $db;
       
       $SQL="SELECT `ParameterID`,`Parameter`,`Limits_min`,`Limits_max`,`Method`,`NoStandardlimit` "
-       . " FROM `LaboratoryStandards`  where `itemcode`='".$Id."'  and `ParameterID`='".$PID."'";
+       . " FROM `laboratorystandards`  where `itemcode`='".$Id."'  and `ParameterID`='".$PID."'";
       $ResultIndex = DB_query($SQL,$db);
       $return = DB_fetch_row($ResultIndex);
       
@@ -158,7 +158,7 @@ Function GetParameter($Id,$PID){
 Function GetRecordValue($itemcode,$ParaDetails){
     global $db;
     
-   $SQL=sprintf("SELECT `Results` from `LabPostingDetail` WHERE `SampleID`='%s' and  `ParameterID`='%s'",$itemcode,$ParaDetails) ;
+   $SQL=sprintf("SELECT `Results` from `labpostingdetail` WHERE `SampleID`='%s' and  `ParameterID`='%s'",$itemcode,$ParaDetails) ;
    $ResultIndex = DB_query($SQL,$db);
    $row = DB_fetch_row($ResultIndex);
    return   (isset($row[0])?$row[0]:'');
