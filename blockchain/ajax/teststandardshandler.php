@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Determine whether to CREATE or UPDATE
         if ($standardID) {
             // UPDATE operation
-            $query = "UPDATE TestStandards 
+            $query = "UPDATE teststandards 
                       SET StandardCode= ?, StandardName = ?, Description = ?, ApplicableRegulation = ?, UpdatedAt = ?,sm=?
                       WHERE StandardID = ?";
             $stmt = $conn->prepare($query);
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // CREATE operation
-            $query = "INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt,sm)
+            $query = "INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt,sm)
                       VALUES (?, ?, ?, ?, ?, ?)";
             $createdAt = date('Y-m-d H:i:s');
             $stmt = $conn->prepare($query);
