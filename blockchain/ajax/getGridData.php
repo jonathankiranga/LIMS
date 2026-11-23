@@ -50,7 +50,7 @@ if ($category === 'subcontracted') {
                AND ST.SampleID = TR.SampleID
             JOIN test_assignments ta
                 ON ta.resultsID = TR.resultsID
-            JOIN TestParameters tp
+            JOIN testparameters tp
                 ON TR.ParameterID = tp.ParameterID
                AND TR.StandardID = tp.StandardID
             LEFT JOIN baseparameters bp
@@ -79,10 +79,10 @@ if ($category === 'subcontracted') {
                 EXISTS (SELECT 1 FROM test_result_audit_trail at WHERE at.resultsID = TR.resultsID) AS HasAuditTrail,
                 TR.StatusID
             FROM test_results TR
-            JOIN TestParameters tp
+            JOIN testparameters tp
                 ON TR.ParameterID = tp.ParameterID
                AND TR.StandardID = tp.StandardID
-            JOIN TestStandards ts
+            JOIN teststandards ts
                 ON TR.StandardID = ts.StandardID
             LEFT JOIN baseparameters bp
                 ON tp.BaseID = bp.ParameterID
