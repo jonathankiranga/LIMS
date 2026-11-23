@@ -32,25 +32,25 @@ if(isset($_POST['submit']) and $_POST['submit']=='Confirm Debit Note'){
 echo '<a href="'.htmlspecialchars('PurchaseOrderDBlist.php',ENT_QUOTES,'UTF-8').'">Purchase Orders</a>';
      
 $filter="SELECT 
-            `PurchaseHeader`.`documenttype`
-           ,`PurchaseHeader`.`documentno`
-           ,`PurchaseHeader`.`docdate`
-           ,`PurchaseHeader`.`oderdate`
-           ,`PurchaseHeader`.`duedate`
-           ,`PurchaseHeader`.`postingdate`
-           ,`PurchaseHeader`.`vendorcode`
-           ,`PurchaseHeader`.`vendorname`
-           ,`PurchaseHeader`.`yourreference`
-           ,`PurchaseHeader`.`externaldocumentno`
-           ,`PurchaseHeader`.`locationcode`
-           ,`PurchaseHeader`.`paymentterms`
-           ,`PurchaseHeader`.`postinggroup`
-           ,`PurchaseHeader`.`currencycode`
-           ,`PurchaseHeader`.`vatinclusive`
+            `purchaseheader`.`documenttype`
+           ,`purchaseheader`.`documentno`
+           ,`purchaseheader`.`docdate`
+           ,`purchaseheader`.`oderdate`
+           ,`purchaseheader`.`duedate`
+           ,`purchaseheader`.`postingdate`
+           ,`purchaseheader`.`vendorcode`
+           ,`purchaseheader`.`vendorname`
+           ,`purchaseheader`.`yourreference`
+           ,`purchaseheader`.`externaldocumentno`
+           ,`purchaseheader`.`locationcode`
+           ,`purchaseheader`.`paymentterms`
+           ,`purchaseheader`.`postinggroup`
+           ,`purchaseheader`.`currencycode`
+           ,`purchaseheader`.`vatinclusive`
            ,stockledger.jobcard
-       FROM stockledger join `PurchaseHeader`  
-       on `PurchaseHeader`.`documentno`=`stockledger`.`invref`
-       join PurchaseLine on `PurchaseHeader`.`documentno`=`PurchaseLine`.`documentno`
+       FROM stockledger join `purchaseheader`  
+       on `purchaseheader`.`documentno`=`stockledger`.`invref`
+       join purchaseline on `purchaseheader`.`documentno`=`purchaseline`.`documentno`
       where stockledger.jobcard='".$_POST['documentno']."' "
         . "and stockledger.doctyp='30' ";
 
@@ -106,31 +106,31 @@ $VATinclusive = $debtorsrow[8];
 $IsTaxed = $debtorsrow[9];
 
 $Slaqry ="SELECT 
-    `PurchaseLine`.`entryno`
-    ,`PurchaseLine`.`documenttype`
-    ,`PurchaseLine`.`docdate`
-    ,`PurchaseLine`.`documentno`
-    ,`PurchaseLine`.`locationcode`
-    ,`PurchaseLine`.`stocktype`
-    ,`PurchaseLine`.`code` 
-    ,`PurchaseLine`.`description`
-    ,`PurchaseLine`.`unitofmeasure`
-    ,`PurchaseLine`.`Quantity`
-    ,`PurchaseLine`.`Quantity_toinvoice`
-    ,`PurchaseLine`.`Qunatity_delivered`
-    ,`PurchaseLine`.`UnitPrice`
-    ,`PurchaseLine`.`vatamount`
-    ,`PurchaseLine`.`invoiceamount`
-    ,`PurchaseLine`.`vatrate` 
-    ,`PurchaseLine`.`inclusive`
-    ,`PurchaseLine`.`PartPerUnit`
+    `purchaseline`.`entryno`
+    ,`purchaseline`.`documenttype`
+    ,`purchaseline`.`docdate`
+    ,`purchaseline`.`documentno`
+    ,`purchaseline`.`locationcode`
+    ,`purchaseline`.`stocktype`
+    ,`purchaseline`.`code` 
+    ,`purchaseline`.`description`
+    ,`purchaseline`.`unitofmeasure`
+    ,`purchaseline`.`Quantity`
+    ,`purchaseline`.`Quantity_toinvoice`
+    ,`purchaseline`.`Qunatity_delivered`
+    ,`purchaseline`.`UnitPrice`
+    ,`purchaseline`.`vatamount`
+    ,`purchaseline`.`invoiceamount`
+    ,`purchaseline`.`vatrate` 
+    ,`purchaseline`.`inclusive`
+    ,`purchaseline`.`PartPerUnit`
     ,stockmaster.`averagestock`
-    ,`PurchaseLine`.`UOM`
-FROM  PurchaseLine 
-join `stockmaster` on `PurchaseLine`.`code`=`stockmaster`.`itemcode` 
-join `stockledger` on `PurchaseLine`.`documentno`=`stockledger`.`jobcard` 
+    ,`purchaseline`.`UOM`
+FROM  purchaseline 
+join `stockmaster` on `purchaseline`.`code`=`stockmaster`.`itemcode` 
+join `stockledger` on `purchaseline`.`documentno`=`stockledger`.`jobcard` 
 and stockledger.jobcard='".$_POST['documentno']."' and stockledger.doctyp='30' 
-and stockledger.itemcode=PurchaseLine.code";
+and stockledger.itemcode=purchaseline.code";
 
 
  $ResultIndex = DB_query($Slaqry,$db);
