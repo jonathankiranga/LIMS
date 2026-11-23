@@ -13,7 +13,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO `assetsheader`
+$sql[]="INSERT INTO `assetsheader``
            (documenttype
            ,documentno
            ,docdate
@@ -64,7 +64,7 @@ foreach ($_POST['grossamount'] as $itemcode => $value ) {
            FROM fixedassets 
            left join fixedassetcategories on fixedassets.assetcategoryid=fixedassetcategories.categoryid
            left join acct on fixedassetcategories.costact=acct.accno
-           left join GLpostinggroup on acct.postinggroup=GLpostinggroup.code 
+           left join `glpostinggroup` on acct.postinggroup=GLpostinggroup.code 
            left join vatcategory on fixedassetcategories.vatcategorycode=vatcategory.vatc
            where fixedassets.assetid='".$itemcode."'", $db);
      
@@ -91,7 +91,7 @@ foreach ($_POST['grossamount'] as $itemcode => $value ) {
        $vatamount = $_POST['vatamount'][$itemcode];
     }
     
-    $sql[] =  sprintf("INSERT INTO `fixedassetsline`
+    $sql[] =  sprintf("INSERT INTO `fixedassetsline``
            (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity
            ,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM)
      VALUES
@@ -151,7 +151,7 @@ if($_SESSION['savedsuccessfuly']==true){
       ,printed
       ,released
       ,status
-      ,userid from AssetsHeader
+      ,userid from `assetsheader`
       where documenttype='18' and documentno='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
        
@@ -191,7 +191,7 @@ if($_SESSION['savedsuccessfuly']==true){
            ,Quantity
            ,UnitPrice
            ,vatamount
-           ,invoiceamount from FixedAssetsLine
+           ,invoiceamount from `fixedassetsline`
            where documenttype=18 and documentno='".$_POST['documentno']."'";
    
     $ResultIndex=DB_query($SQL,$db);
