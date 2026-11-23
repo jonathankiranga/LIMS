@@ -23,13 +23,13 @@ $sql = "SELECT
             ep.*,
             dr.*
         FROM 
-            Test_Results tr
+            test_results tr
         JOIN 
-            Sample_Tests st ON tr.TestID = st.TestID
+            sample_tests st ON tr.TestID = st.TestID
         JOIN 
-            Sample_Header sp ON tr.HeaderID = sp.HeaderID
+            sample_header sp ON tr.HeaderID = sp.HeaderID
         JOIN 
-            TestParameters tp ON tr.`StandardID`=tp.StandardID AND tr.ParameterID=tp.ParameterID
+            testparameters tp ON tr.`StandardID`=tp.StandardID AND tr.ParameterID=tp.ParameterID
         left join 
             debtors dr on sp.CustomerID=dr.itemcode
         left Join 
