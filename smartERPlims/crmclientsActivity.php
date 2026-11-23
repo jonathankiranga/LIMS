@@ -83,7 +83,7 @@ if(isset($_POST['saveActivity'])){
                  $service->events->insert('primary', $event);
            }
              
-        $SQL=sprintf("INSERT INTO `newactivity``(`ActivityOwner`,`Activityname`,
+        $SQL=sprintf("INSERT INTO `newactivity```(`ActivityOwner`,`Activityname`,
             `fromdue`,`todue`,`Contact`,`Status`,`valueofbusiness`,`taskdetails`,
             `createdby`,`createdon`,`lastactivity`,`Sart_time_from`,`End_time_to`,`location`)
          VALUES ('%s','%s','%s','%s','%s','%s',%f,'%s','%s',NOW(),NOW(),'%s','%s','%s')",
@@ -112,7 +112,7 @@ if(isset($_POST['editactivity'])){
   
  $TaskDetails = $_POST['taskdetails'].htmlspecialchars('<p><u>Previous Status on '.Date('Y-m-d H:i:s').'</u></p>').$_POST["Currenttaskdetails"];
 
-  $SQL = "update `NewActivity` set `Status`=".$_POST['Status'];
+  $SQL = "update `newactivity`` set `Status`=".$_POST['Status'];
   $SQL.= sprintf(",`lastactivity`=NOW(),`taskdetails`='%s' ", $TaskDetails);
   $SQL.= ",`fromdue`='".$fromdue."' ,`todue`='".$todue."'  where pkey=".$_POST['activityID'];
 
@@ -129,7 +129,7 @@ echo '<div class="container"><input type="hidden" name="FormID" value="' . $_SES
 
 if(isset($_GET['id'])){
     $SQL=sprintf("SELECT `ActivityOwner`,`Activityname`,`fromdue`,`todue`,`Contact`,`Status`,`valueofbusiness`,"
-            . "`taskdetails`,`Sart_time_from` ,`End_time_to`,`location` FROM `newactivity`` where `pkey`='%s'",$_GET['id']);
+            . "`taskdetails`,`Sart_time_from` ,`End_time_to`,`location` FROM `newactivity``` where `pkey`='%s'",$_GET['id']);
     $ResultIndex = DB_query($SQL,$db);
     $ActivityOwne = DB_fetch_row($ResultIndex);
     
