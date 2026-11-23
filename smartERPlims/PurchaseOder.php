@@ -180,10 +180,10 @@ if ($rfqPrefillError !== '') {
  
 If($_SESSION['SINGLEUSER']=='Singleuser'){
     if(isset($_POST['Delete'])){
-        DB_query("Delete from `PurchaseLine` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
-        DB_query("delete from `PurchaseHeader` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
+        DB_query("Delete from `purchaseline` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
+        DB_query("delete from `purchaseheader` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
         if (isset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'])) {
-            DB_query("UPDATE rfq_header SET po_documentno=(SELECT documentno FROM PurchaseHeader
+            DB_query("UPDATE rfq_header SET po_documentno=(SELECT documentno FROM purchaseheader
                 WHERE documenttype=18 AND rfq_quote_id=" . (int)$_SESSION['RFQQuoteID'] .
                 " ORDER BY documentno DESC LIMIT 1) WHERE id=" . (int)$_SESSION['RFQHeaderID'] .
                 " AND awarded_quote_id=" . (int)$_SESSION['RFQQuoteID'], $db);
@@ -194,8 +194,8 @@ If($_SESSION['SINGLEUSER']=='Singleuser'){
     }
 
     if(isset($_POST['confirm'])){
-        DB_query("UPDATE `PurchaseHeader` SET `released` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
-        DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
+        DB_query("UPDATE `purchaseheader` SET `released` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
+        DB_query("UPDATE `purchaseline` SET `completed` = 1 where documenttype=18 AND documentno='".$_SESSION['CompleteDocument']."'", $db);
         unset($_SESSION['RFQQuoteID'], $_SESSION['RFQHeaderID'], $_SESSION['RFQNo'], $_SESSION['RFQTaxInclusive']);
      
       echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
@@ -422,8 +422,8 @@ echo '</table>';
 Function DeletePOS($DOC){
     global $db;
   
-    DB_query("Delete from `PurchaseLine` where documentno='".$DOC."' and `documenttype`='18'", $db);
-    DB_query("delete from `PurchaseHeader` where documentno='".$DOC."' and `documenttype`='18'", $db);
+    DB_query("Delete from `purchaseline` where documentno='".$DOC."' and `documenttype`='18'", $db);
+    DB_query("delete from `purchaseheader` where documentno='".$DOC."' and `documenttype`='18'", $db);
     
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
