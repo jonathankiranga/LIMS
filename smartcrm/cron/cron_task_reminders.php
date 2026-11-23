@@ -37,7 +37,7 @@ $tomorrow = date('Y-m-d', strtotime('+1 day'));
 $SQL = "
     SELECT t.pkey, t.Taskname, t.Status, t.Priority, t.TaskOwner, t.datedue, t.taskdetails,
            u.email, u.realname
-      FROM Tasks t
+      FROM tasks t
  LEFT JOIN www_users u ON u.userid = t.TaskOwner
      WHERE t.datedue IS NOT NULL
        AND t.Status <> 4
