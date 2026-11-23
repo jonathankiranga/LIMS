@@ -12,7 +12,7 @@ if (!isset($_GET['No'])) {
 $GRN = $_GET['No'];
 
 // Check if serial numbers exist for this GRN
-$countSQL = "SELECT COUNT(*) FROM StockRegister WHERE GRN='" . $GRN . "' AND serial != ''";
+$countSQL = "SELECT COUNT(*) FROM `stockregister` WHERE GRN='" . $GRN . "' AND serial != ''";
 $countResult = DB_query($countSQL, $db);
 $countRow = DB_fetch_row($countResult);
 $serialCount = (int)$countRow[0];
@@ -42,7 +42,7 @@ $hdrSQL = "SELECT
                creditors.phone,
                creditors.contact,
                '" . $GRN . "' AS jobcard
-           FROM PurchaseHeader
+           FROM `purchaseheader`
            JOIN creditors ON creditors.itemcode = PurchaseHeader.vendorcode
            WHERE PurchaseHeader.documentno='" . $GRN . "'
              AND PurchaseHeader.documenttype=30";
@@ -80,7 +80,7 @@ $YPos -= $line_height * 2;
 
 // Query serial numbers
 $sql = "SELECT sr.serial, sr.itemcode, sr.printed, sm.descrip
-        FROM StockRegister sr
+        FROM `stockregister` sr
         JOIN stockmaster sm ON sm.itemcode = sr.itemcode
         WHERE sr.GRN='" . $GRN . "'
           AND sr.serial != ''
@@ -110,5 +110,5 @@ $pdf->OutputD($_SESSION['DatabaseName'] . '_SerialNumbers_' . $GRN . '_' . date(
 $pdf->__destruct();
 
 // Mark all printed serials as printed
-DB_query("UPDATE StockRegister SET printed=1 WHERE GRN='" . $GRN . "' AND serial != ''", $db);
+DB_query("UPDATE `stockregister` SET printed=1 WHERE GRN='" . $GRN . "' AND serial != ''", $db);
 ?>
