@@ -257,7 +257,7 @@ try {
 
         dbLog('DB #2 PREPARE: INSERT TESTPARAMETERS');
 
-        $query = "INSERT INTO TestParameters
+        $query = "INSERT INTO testparameters
                   (ParameterName, StandardID, MinLimit, MaxLimit, Limits, UnitOfMeasure, Method, BaseID, Category, AccreditationStatus, MRL, MRLUnit, CreatedAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
