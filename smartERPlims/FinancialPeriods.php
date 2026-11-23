@@ -52,7 +52,7 @@ If(isset($_POST['CloseMonth'])){
     
     DB_query("UPDATE companies set `PeriodRollover`=DATE_ADD(`PeriodRollover`, INTERVAL 1 MONTH) WHERE coycode=1",$db);
 
-    DB_query("UPDATE `FinancialPeriods` set `closed`=1 where `end_date` <=(select `PeriodRollover`"
+    DB_query("UPDATE `financialperiods`` set `closed`=1 where `end_date` <=(select `PeriodRollover`"
             . " from companies WHERE coycode=1)",$db);
 }
 
@@ -65,7 +65,7 @@ $ForceConfigReload = False;
   echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
   
   $ResultIndex=DB_query("SELECT `start_date`,`end_date`,`Name`,`newyear`,`closed`,`periodno`  
- FROM `FinancialPeriods` order by start_date desc limit 12", $db);
+ FROM `financialperiods`` order by start_date desc limit 12", $db);
  
   
   echo '<table class="table table-bordered">'
@@ -141,7 +141,7 @@ class journalentries {
          Global $db;
          
         $resultindex=DB_query("SELECT `BankAccounts`.`currency`,`currencies`.`rate`
-        FROM `BankAccounts` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev` where `accountcode`='".$accountCode."'", $db);
+        FROM `bankaccounts`` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev` where `accountcode`='".$accountCode."'", $db);
         
         $row=DB_fetch_row($resultindex);
         $BankArray['currency']=$row[0];
@@ -240,7 +240,7 @@ class journalentries {
         }
         
         if($type=='bank'){
-               $sql="SELECT `accountcode`,`bankName` FROM `BankAccounts` where `accountcode`='".$itemcode."'";
+               $sql="SELECT `accountcode`,`bankName` FROM `bankaccounts`` where `accountcode`='".$itemcode."'";
                $ResultIndex = DB_query($sql,$db);
                $row = DB_fetch_row($ResultIndex);
                $array['accno']=$row[0];
@@ -326,7 +326,7 @@ class journalentries {
         } 
         
             if($type=='bank'){
-            $ResultIndex = DB_query("SELECT `accountcode`,`bankName` FROM `BankAccounts`", $db);
+            $ResultIndex = DB_query("SELECT `accountcode`,`bankName` FROM `bankaccounts``", $db);
              while($row = DB_fetch_array($ResultIndex)){
                 $selected=(trim($row['accountcode']) == trim($value))?'selected="selected"':'';
                 
@@ -440,12 +440,12 @@ class journalentries {
            
          if(mb_strlen($row['account'])>0 and mb_strlen($row['balaccount'])>0){
                
-           $this->JournalArray[]=  sprintf("INSERT INTO `JournalEntries`
+           $this->JournalArray[]=  sprintf("INSERT INTO `journalentries``
           (`Docdate`,`JournalNo`,`Currency`,`Dimension_1`,`Dimension_2`,`Account`,`BalAccount`,`transtype`,`itemcode`,`narration`,`amount`)
            VALUES ('%s','%s','%s','%s','%s','%s' ,'%s' ,'%s','%s','%s',%f)", FormatDateForSQL($_POST['ClosingDate']),$_POST['JournalNo'],$_POST['currency'],$_POST['DimensionOne'],$_POST['DimensionTwo'],
            $row['account'], $row['balaccount'], $row['acctype'],$row['itemcode'],$_POST['comments'],$row['amount']);
                           
-            $this->JournalArray[]= sprintf("INSERT INTO `Generalledger`
+            $this->JournalArray[]= sprintf("INSERT INTO `generalledger``
            (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
            `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
            `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,

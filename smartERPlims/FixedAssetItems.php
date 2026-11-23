@@ -160,7 +160,7 @@ if (isset($_POST['submit'])) {
                                 $JOURNAL  = GetNextTransNo(0,$db);
                                 $_POST['currency']  = $_SESSION['CompanyRecord']['currencydefault'];
                                 
-                                $SQL =sprintf("INSERT INTO `Generalledger`
+                                $SQL =sprintf("INSERT INTO `generalledger``
                                            (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                                            `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
                                            `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -180,7 +180,7 @@ if (isset($_POST['submit'])) {
                                 
                 if ($OldDetails['accumdepn']!=0) {
                                     
-                        $SQL =sprintf("INSERT INTO `Generalledger`
+                        $SQL =sprintf("INSERT INTO `generalledger``
                                  (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                                  `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
                                  `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -322,7 +322,7 @@ if (isset($_POST['submit'])) {
                                 $TransNo  = GetNextTransNo( 43, $db); 
                                 $_POST['currency']  = $_SESSION['CompanyRecord']['currencydefault'];
                                 
-                                $SQL =sprintf("INSERT INTO `Generalledger`
+                                $SQL =sprintf("INSERT INTO `generalledger``
                                            (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                                            `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
                                            `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,

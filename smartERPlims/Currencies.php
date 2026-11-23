@@ -158,14 +158,14 @@ if (isset($_POST['submit'])) {
 					accountcode,
                                         PostingGroup,
                                         Fluctuation
-					FROM BankAccounts
+					FROM `bankaccounts`
 					WHERE currency= '" . $SelectedCurrency . "'";
 		$resultBankAccounts = DB_query($SQLBankAccounts,$db);
 		while ($myrowBankAccount=DB_fetch_array($resultBankAccounts)){
 
 			/*Get the balance of the bank account concerned */
 			$SQL = "SELECT sum(`amount`) AS balance
-					FROM BankTransactions
+					FROM `banktransactions`
 					WHERE  bankcode='" . $myrowBankAccount['accountcode'] . "'";
 
 			$ErrMsg = _('The bank account balance could not be returned by the SQL because');
@@ -181,7 +181,7 @@ if (isset($_POST['submit'])) {
 			$DifferenceToAdjust = $NewBalanceInFucntionalCurrency - $OldBalanceInFunctionalCurrency;
 			if(OldRate != NewRate){
                             
-                            $MYSQL[]=sprintf("INSERT INTO `Generalledger`
+                            $MYSQL[]=sprintf("INSERT INTO `generalledger``
                                                         (`journalno`
                                                         ,`Docdate`
                                                         ,`period`
@@ -250,7 +250,7 @@ if (isset($_POST['submit'])) {
 			prnMsg(_('Cannot delete this currency because supplier accounts have been created referring to this currency')
 			 . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('supplier accounts that refer to this currency'),'warn');
 		} else {
-			$sql= "SELECT COUNT(*) FROM BankAccounts WHERE currency = '" . $SelectedCurrency . "'";
+			$sql= "SELECT COUNT(*) FROM `bankaccounts` WHERE currency = '" . $SelectedCurrency . "'";
 			$result = DB_query($sql,$db);
 			$myrow = DB_fetch_row($result);
 			if ($myrow[0] > 0){

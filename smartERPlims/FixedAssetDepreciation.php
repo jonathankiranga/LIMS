@@ -103,7 +103,7 @@ while ($AssetRow = DB_fetch_array($AssetsResult)) {
 		$ResultIndex = DB_query($SQL,$db);
 		$Row=DB_fetch_row($ResultIndex);
 
-		$SQLArray[]= Sprintf("INSERT INTO `Generalledger` (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,`balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`narration`,`asset_id`) VALUES ('%s','%s','%s','%s','%s','%s','%s',%f,'%s',%f,'%s',%s)",
+		$SQLArray[]= Sprintf("INSERT INTO `generalledger`` (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,`balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`narration`,`asset_id`) VALUES ('%s','%s','%s','%s','%s','%s','%s',%f,'%s',%f,'%s',%s)",
 			$TransNo , FormatDateForSQL($_POST['ProcessDate']) ,$PeriodNo ,$TransNo ,44 , $Row[0], $Row[1] , $NewDepreciation , $_SESSION['CompanyRecord']['currencydefault'] ,1 , _('Monthly depreciation for ') . ' ' . $AssetRow['categorydescription'] , $AssetRow['assetid'] );
 		  //insert the fixedassettrans record
 		$SQLArray[] = "INSERT INTO fixedassettrans (assetid, transtype, transno, transdate,periodno, inputdate, fixedassettranstype, amount)
