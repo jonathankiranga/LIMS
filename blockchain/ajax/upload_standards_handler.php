@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excelFile'])) {
             $createdAt = date('Y-m-d H:i:s');
             
                         // Assuming $conn is your MySQLi connection object
-            $sql = "INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt) 
+            $sql = "INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, CreatedAt) 
                     VALUES (?, ?, ?, ?, ?)";
 
             // Prepare the statement
