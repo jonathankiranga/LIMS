@@ -88,7 +88,7 @@ function importTestStandards($data) {
         $sm = (int)$row['E'];
 
         $query = "
-            INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, sm)
+            INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, sm)
             VALUES ('$standardCode', '$standardName', '$description', '$applicableRegulation', $sm)
             ON DUPLICATE KEY UPDATE
                 StandardName = VALUES(StandardName),
@@ -96,7 +96,7 @@ function importTestStandards($data) {
                 ApplicableRegulation = VALUES(ApplicableRegulation),
                 sm = VALUES(sm)";
         if (!$conn->query($query)) {
-            throw new Exception("Error inserting/updating TestStandards: " . $conn->error);
+            throw new Exception("Error inserting/updating teststandards: " . $conn->error);
         }
     }
 }
@@ -126,7 +126,7 @@ function importTestParameters($data) {
             $resultType = 'rangeField';
         }
 
-        $standardIDQuery = "SELECT StandardID FROM TestStandards WHERE StandardCode = '$standardCode'";
+        $standardIDQuery = "SELECT StandardID FROM teststandards WHERE StandardCode = '$standardCode'";
         $result = $conn->query($standardIDQuery);
         if ($result && $result->num_rows > 0) {
             $standardID = $result->fetch_assoc()['StandardID'];
@@ -155,7 +155,7 @@ function importTestParameters($data) {
                     UnitOfMeasure = VALUES(UnitOfMeasure),
                     ResultType = VALUES(ResultType)";
             if (!$conn->query($query)) {
-                throw new Exception("Error inserting/updating TestParameters: " . $conn->error);
+                throw new Exception("Error inserting/updating testparameters: " . $conn->error);
             }
         }
     }
@@ -178,10 +178,10 @@ function importCombinedSheet($data) {
             $standardsMap[$standardName] = $currentStandardCode;
 
             $query = "
-                INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation)
+                INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation)
                 VALUES ('$currentStandardCode', '$standardName', '$description', '$applicableRegulation')";
             if (!$conn->query($query)) {
-                throw new Exception("Error inserting TestStandards: " . $conn->error);
+                throw new Exception("Error inserting teststandards: " . $conn->error);
             }
         }
 
@@ -215,9 +215,9 @@ function importCombinedSheet($data) {
 
             $query = "
                 INSERT INTO testparameters (BaseID, StandardID, ParameterName, Limits, MinLimit, MaxLimit, Method, Vital, Category, MRL, MRLUnit, UnitOfMeasure, ResultType)
-                VALUES ($baseID, (SELECT StandardID FROM TestStandards WHERE StandardCode = '$currentStandardCode'), '$parameterName', '$limits', $minLimit, $maxLimit, '$method', $vital, '$category', $mrl, '$mrlUnit', '$unitOfMeasure', '$resultType')";
+                VALUES ($baseID, (SELECT StandardID FROM teststandards WHERE StandardCode = '$currentStandardCode'), '$parameterName', '$limits', $minLimit, $maxLimit, '$method', $vital, '$category', $mrl, '$mrlUnit', '$unitOfMeasure', '$resultType')";
             if (!$conn->query($query)) {
-                throw new Exception("Error inserting TestParameters: " . $conn->error);
+                throw new Exception("Error inserting testparameters: " . $conn->error);
             }
         }
     }
@@ -296,7 +296,7 @@ function importTestParametersWithDictionary($data) {
         
         if (empty($standardName)) continue;
         
-        $stmtStd = $conn->prepare("SELECT StandardID FROM TestStandards WHERE StandardName = ?");
+        $stmtStd = $conn->prepare("SELECT StandardID FROM teststandards WHERE StandardName = ?");
         $stmtStd->bind_param('s', $standardName);
         $stmtStd->execute();
         $resultStd = $stmtStd->get_result();
@@ -304,7 +304,7 @@ function importTestParametersWithDictionary($data) {
         $stmtStd->close();
         
         if (!$stdRow) {
-            $stmtCreate = $conn->prepare("INSERT INTO TestStandards (StandardName) VALUES (?)");
+            $stmtCreate = $conn->prepare("INSERT INTO teststandards (StandardName) VALUES (?)");
             $stmtCreate->bind_param('s', $standardName);
             $stmtCreate->execute();
             $standardID = $conn->insert_id;
