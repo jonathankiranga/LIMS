@@ -41,7 +41,7 @@ $POSclass = new Transfers();
 
    
  if(!isset($_SESSION['Stores'])){
-    $REsults=DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -238,8 +238,8 @@ echo '<table class="table-bordered table-condensed">'
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='16'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='16'", $db);
+    DB_query("Delete from `salesline``` where documentno='".$DOC."' and `documenttype`='16'", $db);
+    DB_query("delete from `salesheader``` where documentno='".$DOC."' and `documenttype`='16'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }
