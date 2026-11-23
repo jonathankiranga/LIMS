@@ -17,7 +17,7 @@ function getTaskActivities($status) {
     $SQL = sprintf(
         "SELECT `TaskOwner`,`Taskname`,`datedue`,`Status`,`Priority`,`frequency`,`taskdetails`,
         DATEDIFF(`datedue`,NOW()) as Future
-        FROM `Tasks`
+        FROM `tasks``
         WHERE `Status`=%f
         ORDER BY `Priority` ASC, `datedue` ASC",
         $status
