@@ -523,7 +523,7 @@ Custurl();
 Function Cust(){
     global $db,$MenuItems;
     
-   $ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `DimensionSetUp`', $db);
+   $ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `dimensionsetup`', $db);
    while($rows=DB_fetch_array($ResultIndex)){
        $items = $rows['Dimension_type'];
        $MenuItems['Sales']['Maintenance']['Caption'][] = $items;
@@ -534,7 +534,7 @@ Function Cust(){
 Function Custurl(){
   global $db,$MenuItems;
     
-   $ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `DimensionSetUp`', $db);
+   $ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `dimensionsetup`', $db);
    while($rows=DB_fetch_array($ResultIndex)){
        $items = '/Dimensionlist.php?id='.$rows['id'];
        $MenuItems['Sales']['Maintenance']['URL'][]= $items;
