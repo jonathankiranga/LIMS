@@ -11,7 +11,7 @@ $deviation_trend = $_POST['deviation_trend'];
 $usage_hours = $_POST['usage_hours'];
  
 // Insert data into equipmentusage table
-$insertQuery = "INSERT INTO Equipment (machine_id, last_calibration, predicted_calibration, deviation_trend, usage_hours)
+$insertQuery = "INSERT INTO equipment (machine_id, last_calibration, predicted_calibration, deviation_trend, usage_hours)
                 VALUES (?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($insertQuery);
 $stmt->bind_param("isssis", $equipmentId, $last_calibration, $predicted_calibration, $deviation_trend, $usage_hours);
