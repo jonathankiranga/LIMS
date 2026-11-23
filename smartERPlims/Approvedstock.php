@@ -95,7 +95,7 @@ echo '<table class="table table-bordered table-condensed table-striped">'
 $SQL = "SELECT `documenttype`, `docdate`, `documentno`, `code`, `description`,
                `PartPerUnit`, `Quantity`, `UnitPrice`, `vatamount`,
                `invoiceamount`, `unitofmeasure`
-        FROM `SalesLine`
+        FROM `salesline``
         WHERE `documenttype`=40 AND `documentno`='" . $_POST['documentno'] . "'";
 
 $ResultIndex = DB_query($SQL, $db);

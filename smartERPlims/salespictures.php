@@ -30,7 +30,7 @@ function getiamgearray(){
     global $db;
       $images =array();
       
-      $SQL="SELECT `picture` FROM `SalesHeader` where `picture` is not null";
+      $SQL="SELECT `picture` FROM `salesheader`` where `picture` is not null";
       $Result=DB_query($SQL,$db);
       while($myrow = DB_fetch_array($Result)){
       $urlString = $myrow['picture'];

@@ -43,7 +43,7 @@ $filter="SELECT
            ,`currencycode`
            ,`salespersoncode`
            ,`vatinclusive`
-       FROM `SalesHeader` 
+       FROM `salesheader`` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -149,7 +149,7 @@ $Slaqry ="SELECT `entryno`
       ,`vatrate` 
       ,`inclusive`
       ,`partperunit`
-  FROM `SalesLine` 
+  FROM `salesline`` 
  where `documentno`='".$_POST['documentno']."' group by  
        `entryno`,`documenttype`,`docdate`,`documentno`
       ,`locationcode`,`code` ,`description` ,`unitofmeasure`,`Qunatity_delivered`

@@ -45,7 +45,7 @@ $filter="SELECT
            ,`currencycode`
            ,`salespersoncode`
            ,`vatinclusive`
-       FROM `SalesHeader` 
+       FROM `salesheader`` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -152,7 +152,7 @@ $query="SELECT
       ,`SalesLine`.`partperunit`
       ,`stockmaster`.`averagestock`
       ,UOM
-  FROM `SalesLine` 
+  FROM `salesline`` 
   join `stockmaster` on `SalesLine`.code=`stockmaster`.itemcode
   where `documentno`='".$_POST['documentno']."'
     and (`Qunatity_delivered` < `Quantity` or `Qunatity_delivered` is null)";
