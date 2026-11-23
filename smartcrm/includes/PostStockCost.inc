@@ -67,19 +67,19 @@ function AverageCost($itemcode)
     $itemcode = mysqli_real_escape_string($db, trim($itemcode));
 
     $SQL = "SELECT
-                (PurchaseLine.UnitPrice * currencies.rate) AS UnitPrice,
-                PurchaseHeader.documentno,
-                PurchaseHeader.docdate,
-                PurchaseHeader.currencycode,
-                PurchaseLine.code,
-                PurchaseLine.UOM,
+                (purchaseline.UnitPrice * currencies.rate) AS UnitPrice,
+                purchaseheader.documentno,
+                purchaseheader.docdate,
+                purchaseheader.currencycode,
+                purchaseline.code,
+                purchaseline.UOM,
                 stockmaster.partperunit
-            FROM PurchaseHeader
-            JOIN PurchaseLine  ON PurchaseLine.documentno  = PurchaseHeader.documentno
-            JOIN currencies    ON currencies.currabrev     = PurchaseHeader.currencycode
-            JOIN stockmaster   ON PurchaseLine.code        = stockmaster.itemcode
-            WHERE PurchaseLine.code = '$itemcode'
-            ORDER BY PurchaseHeader.docdate DESC
+            FROM purchaseheader
+            JOIN purchaseline  ON purchaseline.documentno  = purchaseheader.documentno
+            JOIN currencies    ON currencies.currabrev     = purchaseheader.currencycode
+            JOIN stockmaster   ON purchaseline.code        = stockmaster.itemcode
+            WHERE purchaseline.code = '$itemcode'
+            ORDER BY purchaseheader.docdate DESC
             LIMIT 1";
 
     $result = DB_query($SQL, $db);
@@ -118,7 +118,7 @@ function FindJournal($invref)
 
 /**
  * Update stockmaster.averagestock with the cost from the earliest open
- * StockRegister row (StockBalance > 0) for each item.
+ * stockregister row (StockBalance > 0) for each item.
  *
  * Replaces the MS-SQL cursor that iterated every stockmaster row.
  */
@@ -131,10 +131,10 @@ function GetStockRegister()
     $SQL = "UPDATE stockmaster sm
             INNER JOIN (
                 SELECT sr.itemcode, sr.cost
-                FROM   StockRegister sr
+                FROM   stockregister sr
                 INNER JOIN (
                     SELECT itemcode, MIN(rowid) AS min_rowid
-                    FROM   StockRegister
+                    FROM   stockregister
                     WHERE  StockBalance > 0
                     GROUP  BY itemcode
                 ) first_row ON first_row.itemcode  = sr.itemcode
@@ -147,15 +147,15 @@ function GetStockRegister()
 }
 
 // ---------------------------------------------------------------------------
-// PostStockRegister — GRN receipt into StockRegister + Generalledger
+// PostStockRegister — GRN receipt into stockregister + generalledger
 // ---------------------------------------------------------------------------
 
 /**
- * Record a goods-received quantity into StockRegister and post the
+ * Record a goods-received quantity into stockregister and post the
  * corresponding GL entry.
  *
  * @param float  $Quantity
- * @param int    $key       PurchaseLine.entryno
+ * @param int    $key       purchaseline.entryno
  * @param string $journal
  * @param string $PeriodNo
  */
@@ -169,31 +169,31 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
     $PeriodNo = mysqli_real_escape_string($db, $PeriodNo);
 
     $SQL = "SELECT
-                PurchaseHeader.documentno,
-                PurchaseHeader.docdate,
-                PurchaseHeader.currencycode,
-                PurchaseLine.code,
-                (PurchaseLine.UnitPrice * currencies.rate)     AS UnitPrice,
-                PurchaseLine.UOM,
+                purchaseheader.documentno,
+                purchaseheader.docdate,
+                purchaseheader.currencycode,
+                purchaseline.code,
+                (purchaseline.UnitPrice * currencies.rate)     AS UnitPrice,
+                purchaseline.UOM,
                 stockmaster.partperunit,
-                (PurchaseLine.invoiceamount * currencies.rate) AS invoiceamount,
-                (PurchaseHeader.freight * currencies.rate)     AS freight,
-                PurchaseLine.Quantity,
+                (purchaseline.invoiceamount * currencies.rate) AS invoiceamount,
+                (purchaseheader.freight * currencies.rate)     AS freight,
+                purchaseline.Quantity,
                 (SELECT SUM(PL.Quantity * SM.partperunit)
-                 FROM   PurchaseLine PL
+                 FROM   purchaseline PL
                  JOIN   stockmaster  SM ON PL.code = SM.itemcode
                  WHERE  PL.documentno IN (
-                     SELECT documentno FROM PurchaseLine PLi
+                     SELECT documentno FROM purchaseline PLi
                      JOIN   stockmaster smi ON PLi.code = smi.itemcode
                      WHERE  PLi.entryno = $key
                  )
                  AND SM.isstock <> 3) AS Totunits
-            FROM PurchaseHeader
-            JOIN PurchaseLine ON PurchaseLine.documentno = PurchaseHeader.documentno
-            JOIN currencies   ON currencies.currabrev    = PurchaseHeader.currencycode
-            JOIN stockmaster  ON PurchaseLine.code       = stockmaster.itemcode
+            FROM purchaseheader
+            JOIN purchaseline ON purchaseline.documentno = purchaseheader.documentno
+            JOIN currencies   ON currencies.currabrev    = purchaseheader.currencycode
+            JOIN stockmaster  ON purchaseline.code       = stockmaster.itemcode
             WHERE stockmaster.isstock <> 3
-              AND PurchaseLine.entryno = $key";
+              AND purchaseline.entryno = $key";
 
     $RESULTS       = DB_query($SQL, $db);
     $rows          = DB_fetch_row($RESULTS);
@@ -231,26 +231,26 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
         $unitPrice      = $unitPrice + $freightPerUnit;
     }
 
-    // Insert into StockRegister
+    // Insert into stockregister
     DB_query(
-        "INSERT INTO StockRegister (itemcode, StockIn, cost, StockOut, journal, GRN)
+        "INSERT INTO stockregister (itemcode, StockIn, cost, stockout, journal, GRN)
          VALUES ('$itemcode', $looseQty, $unitPrice, 0, '$journal', '$GRN')",
         $db
     );
 
-    // Post to Generalledger via subquery SELECT for account codes + narration
+    // Post to generalledger via subquery SELECT for account codes + narration
     $funcCurrency = mysqli_real_escape_string($db, $_SESSION['CompanyRecord']['currencydefault']);
 
-    $glSQL = "INSERT INTO Generalledger
+    $glSQL = "INSERT INTO generalledger
                 (journalno, Docdate, period, DocumentNo, DocumentType,
                  accountcode, balaccountcode, VATaccountcode,
                  amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
               SELECT
                 '$journal',
-                PurchaseHeader.docdate,
+                purchaseheader.docdate,
                 '$PeriodNo',
-                PurchaseHeader.documentno,
-                PurchaseHeader.documenttype,
+                purchaseheader.documentno,
+                purchaseheader.documenttype,
                 inventorypostinggroup.balancesheet,
                 inventorypostinggroup.stockvariance,
                 '',
@@ -258,25 +258,25 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
                 0,
                 '$funcCurrency',
                 1,
-                PurchaseHeader.vendorcode,
+                purchaseheader.vendorcode,
                 CONCAT(
-                    RTRIM(PurchaseLine.description), ' X $Quantity ',
-                    CASE PurchaseLine.UOM
+                    RTRIM(purchaseline.description), ' X $Quantity ',
+                    CASE purchaseline.UOM
                         WHEN 'fulqty'
                         THEN (SELECT RTRIM(u.descrip) FROM unit u
                               JOIN stockmaster sm2 ON sm2.units    = u.code
-                              AND  sm2.itemcode = PurchaseLine.code)
+                              AND  sm2.itemcode = purchaseline.code)
                         ELSE (SELECT RTRIM(u.descrip) FROM unit u
                               JOIN stockmaster sm2 ON sm2.subunits = u.code
-                              AND  sm2.itemcode = PurchaseLine.code)
+                              AND  sm2.itemcode = purchaseline.code)
                     END
                 ) AS narration
-              FROM PurchaseHeader
-              JOIN PurchaseLine         ON PurchaseLine.documentno         = PurchaseHeader.documentno
-              JOIN stockmaster          ON PurchaseLine.code               = stockmaster.itemcode
+              FROM purchaseheader
+              JOIN purchaseline         ON purchaseline.documentno         = purchaseheader.documentno
+              JOIN stockmaster          ON purchaseline.code               = stockmaster.itemcode
               JOIN inventorypostinggroup ON inventorypostinggroup.code     = stockmaster.postinggroup
-              JOIN currencies           ON PurchaseHeader.currencycode     = currencies.currabrev
-              WHERE PurchaseLine.entryno = $key";
+              JOIN currencies           ON purchaseheader.currencycode     = currencies.currabrev
+              WHERE purchaseline.entryno = $key";
 
     DB_query($glSQL, $db);
     GetStockRegister();
@@ -294,7 +294,7 @@ function PostStockRegister($Quantity, $key, $journal, $PeriodNo)
  * @param string $salesoderno
  * @param string $stcode       Stock item code
  * @param float  $qty          Quantity sold
- * @param int    $key          SalesLine.entryno
+ * @param int    $key          salesline.entryno
  */
 function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 {
@@ -310,10 +310,10 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 
     // Fetch UOM for this sales line
     $uomResult  = DB_query(
-        "SELECT SalesLine.UOM
-         FROM SalesHeader
-         JOIN SalesLine ON SalesLine.documentno = SalesHeader.documentno
-         WHERE SalesLine.entryno = $key",
+        "SELECT salesline.UOM
+         FROM salesheader
+         JOIN salesline ON salesline.documentno = salesheader.documentno
+         WHERE salesline.entryno = $key",
         $db
     );
     $uomRow = DB_fetch_row($uomResult);
@@ -329,10 +329,10 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
     // Convert to loose units
     $remaining = ($UOM === 'fulqty') ? ($qty * $partperunit) : $qty;
 
-    // FIFO loop over open StockRegister rows
+    // FIFO loop over open stockregister rows
     $srResult = DB_query(
         "SELECT sr.rowid, sr.StockBalance, sm.averagestock
-         FROM   StockRegister sr
+         FROM   stockregister sr
          JOIN   stockmaster sm ON sm.itemcode = sr.itemcode
          WHERE  sr.itemcode   = '$stcode'
            AND  sr.StockBalance > 0
@@ -353,9 +353,9 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
             $remaining = 0;
         }
 
-        // Update StockOut
+        // Update stockout
         DB_query(
-            "UPDATE StockRegister SET StockOut = StockOut + $useQty WHERE rowid = $rowid",
+            "UPDATE stockregister SET stockout = stockout + $useQty WHERE rowid = $rowid",
             $db
         );
 
@@ -364,16 +364,16 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
         $reportCost = ($UOM === 'fulqty') ? ($avecost * $partperunit) : $avecost;
 
         if ($reportQty > 0) {
-            $glSQL = "INSERT INTO Generalledger
+            $glSQL = "INSERT INTO generalledger
                         (journalno, Docdate, period, DocumentNo, DocumentType,
                          accountcode, balaccountcode, VATaccountcode,
                          amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
                       SELECT
                         '$journal',
-                        SalesHeader.docdate,
+                        salesheader.docdate,
                         '$PeriodNo',
-                        SalesHeader.documentno,
-                        SalesHeader.documenttype,
+                        salesheader.documentno,
+                        salesheader.documenttype,
                         inventorypostinggroup.stockvariance,
                         inventorypostinggroup.balancesheet,
                         '',
@@ -381,29 +381,29 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
                         0,
                         '$funcCurrency',
                         1,
-                        SalesHeader.customercode,
+                        salesheader.customercode,
                         CONCAT(
-                            RTRIM(SalesLine.description), '@',
+                            RTRIM(salesline.description), '@',
                             CAST($reportCost AS CHAR), ' X ',
                             CAST($reportQty  AS CHAR),
-                            CASE SalesLine.UOM
+                            CASE salesline.UOM
                                 WHEN 'fulqty'
                                 THEN (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.units    = u.code
-                                      AND  sm2.itemcode = SalesLine.code)
+                                      AND  sm2.itemcode = salesline.code)
                                 ELSE (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.subunits = u.code
-                                      AND  sm2.itemcode = SalesLine.code)
+                                      AND  sm2.itemcode = salesline.code)
                             END
                         ) AS narration
-                      FROM SalesHeader
-                      JOIN SalesLine          ON SalesLine.documentno          = SalesHeader.documentno
-                      JOIN stockmaster        ON SalesLine.code                = stockmaster.itemcode
+                      FROM salesheader
+                      JOIN salesline          ON salesline.documentno          = salesheader.documentno
+                      JOIN stockmaster        ON salesline.code                = stockmaster.itemcode
                       JOIN inventorypostinggroup ON inventorypostinggroup.code = stockmaster.postinggroup
-                      JOIN currencies         ON SalesHeader.currencycode      = currencies.currabrev
-                      WHERE SalesHeader.documentno = '$salesoderno'
-                        AND SalesLine.code         = '$stcode'
-                        AND SalesLine.entryno      = $key";
+                      JOIN currencies         ON salesheader.currencycode      = currencies.currabrev
+                      WHERE salesheader.documentno = '$salesoderno'
+                        AND salesline.code         = '$stcode'
+                        AND salesline.entryno      = $key";
 
             DB_query($glSQL, $db);
         }
@@ -425,7 +425,7 @@ function GetFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
  * @param string $salesoderno
  * @param string $stcode       Container item code (may be empty)
  * @param float  $qty
- * @param int    $key          SalesLine.entryno
+ * @param int    $key          salesline.entryno
  */
 function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 {
@@ -438,9 +438,9 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
     $qty         = (float)$qty;
     $funcCurrency = mysqli_real_escape_string($db, $_SESSION['CompanyRecord']['currencydefault']);
 
-    // Resolve container code from SalesLine
+    // Resolve container code from salesline
     $itemRow = DB_fetch_row(DB_query(
-        "SELECT containercode FROM SalesLine WHERE entryno = $key", $db
+        "SELECT containercode FROM salesline WHERE entryno = $key", $db
     ));
     $itemcode = isset($itemRow[0]) ? mysqli_real_escape_string($db, trim($itemRow[0])) : '';
 
@@ -452,7 +452,7 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 
     $srResult = DB_query(
         "SELECT sr.rowid, sr.StockBalance, sm.averagestock
-         FROM   StockRegister sr
+         FROM   stockregister sr
          JOIN   stockmaster sm ON sm.itemcode = sr.itemcode
          WHERE  sr.itemcode    = '$itemcode'
            AND  sr.StockBalance > 0
@@ -474,21 +474,21 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
         }
 
         DB_query(
-            "UPDATE StockRegister SET StockOut = StockOut + $useQty WHERE rowid = $rowid",
+            "UPDATE stockregister SET stockout = stockout + $useQty WHERE rowid = $rowid",
             $db
         );
 
         if ($useQty > 0) {
-            $glSQL = "INSERT INTO Generalledger
+            $glSQL = "INSERT INTO generalledger
                         (journalno, Docdate, period, DocumentNo, DocumentType,
                          accountcode, balaccountcode, VATaccountcode,
                          amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
                       SELECT
                         '$journal',
-                        SalesHeader.docdate,
+                        salesheader.docdate,
                         '$PeriodNo',
-                        SalesHeader.documentno,
-                        SalesHeader.documenttype,
+                        salesheader.documentno,
+                        salesheader.documenttype,
                         inventorypostinggroup.stockvariance,
                         inventorypostinggroup.balancesheet,
                         '',
@@ -496,29 +496,29 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
                         0,
                         '$funcCurrency',
                         1,
-                        SalesHeader.customercode,
+                        salesheader.customercode,
                         CONCAT(
-                            RTRIM(SalesLine.description), '@',
+                            RTRIM(salesline.description), '@',
                             CAST($avecost AS CHAR), ' X ',
                             CAST($useQty  AS CHAR),
-                            CASE SalesLine.UOM
+                            CASE salesline.UOM
                                 WHEN 'fulqty'
                                 THEN (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.units    = u.code
-                                      AND  sm2.itemcode = SalesLine.containercode)
+                                      AND  sm2.itemcode = salesline.containercode)
                                 ELSE (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.subunits = u.code
-                                      AND  sm2.itemcode = SalesLine.containercode)
+                                      AND  sm2.itemcode = salesline.containercode)
                             END
                         ) AS narration
-                      FROM SalesHeader
-                      JOIN SalesLine          ON SalesLine.documentno          = SalesHeader.documentno
-                      JOIN stockmaster        ON SalesLine.containercode       = stockmaster.itemcode
+                      FROM salesheader
+                      JOIN salesline          ON salesline.documentno          = salesheader.documentno
+                      JOIN stockmaster        ON salesline.containercode       = stockmaster.itemcode
                       JOIN inventorypostinggroup ON inventorypostinggroup.code = stockmaster.postinggroup
-                      JOIN currencies         ON SalesHeader.currencycode      = currencies.currabrev
-                      WHERE SalesHeader.documentno  = '$salesoderno'
-                        AND SalesLine.containercode = '$itemcode'
-                        AND SalesLine.entryno       = $key";
+                      JOIN currencies         ON salesheader.currencycode      = currencies.currabrev
+                      WHERE salesheader.documentno  = '$salesoderno'
+                        AND salesline.containercode = '$itemcode'
+                        AND salesline.entryno       = $key";
 
             DB_query($glSQL, $db);
         }
@@ -533,7 +533,7 @@ function GetEmptiesFIFO($journal, $PeriodNo, $salesoderno, $stcode, $qty, $key)
 // ---------------------------------------------------------------------------
 
 /**
- * Process a purchase debit note: deplete StockRegister FIFO and post GL.
+ * Process a purchase debit note: deplete stockregister FIFO and post GL.
  *
  * @param float  $Quantity
  * @param int    $key
@@ -551,14 +551,14 @@ function PostDebitRegister($Quantity, $key, $journal, $PeriodNo)
     $funcCurrency = mysqli_real_escape_string($db, $_SESSION['CompanyRecord']['currencydefault']);
 
     $SQL = "SELECT
-                PurchaseHeader.docdate,
-                PurchaseHeader.currencycode,
-                PurchaseLine.code,
-                PurchaseLine.UnitPrice,
-                PurchaseLine.UOM
-            FROM PurchaseHeader
-            JOIN PurchaseLine ON PurchaseLine.documentno = PurchaseHeader.documentno
-            WHERE PurchaseLine.entryno = $key";
+                purchaseheader.docdate,
+                purchaseheader.currencycode,
+                purchaseline.code,
+                purchaseline.UnitPrice,
+                purchaseline.UOM
+            FROM purchaseheader
+            JOIN purchaseline ON purchaseline.documentno = purchaseheader.documentno
+            WHERE purchaseline.entryno = $key";
 
     $RESULTS = DB_query($SQL, $db);
     $rows    = DB_fetch_row($RESULTS);
@@ -579,7 +579,7 @@ function PostDebitRegister($Quantity, $key, $journal, $PeriodNo)
 
     $srResult = DB_query(
         "SELECT rowid, cost, StockBalance
-         FROM   StockRegister
+         FROM   stockregister
          WHERE  itemcode     = '$itemcode'
            AND  StockBalance > 0
          ORDER  BY rowid ASC",
@@ -600,26 +600,26 @@ function PostDebitRegister($Quantity, $key, $journal, $PeriodNo)
         }
 
         DB_query(
-            "UPDATE StockRegister SET StockOut = StockOut + $useQty WHERE rowid = $rowid",
+            "UPDATE stockregister SET stockout = stockout + $useQty WHERE rowid = $rowid",
             $db
         );
 
         if ($useQty > 0) {
-            $glSQL = "INSERT INTO Generalledger
+            $glSQL = "INSERT INTO generalledger
                         (journalno, Docdate, period, DocumentNo, DocumentType,
                          accountcode, balaccountcode, VATaccountcode,
                          amount, VATamount, currencycode, ExchangeRate, cutomercode, narration)
                       SELECT
                         '$journal',
-                        PurchaseHeader.docdate,
+                        purchaseheader.docdate,
                         '$PeriodNo',
-                        PurchaseHeader.documentno,
-                        PurchaseHeader.documenttype,
+                        purchaseheader.documentno,
+                        purchaseheader.documenttype,
                         inventorypostinggroup.stockvariance,
                         inventorypostinggroup.balancesheet,
                         '',
                         ($avecost * $useQty *
-                            CASE PurchaseLine.UOM
+                            CASE purchaseline.UOM
                                 WHEN 'fulqty' THEN stockmaster.partperunit
                                 ELSE 1
                             END
@@ -627,26 +627,26 @@ function PostDebitRegister($Quantity, $key, $journal, $PeriodNo)
                         0,
                         '$funcCurrency',
                         1,
-                        PurchaseHeader.vendorcode,
+                        purchaseheader.vendorcode,
                         CONCAT(
-                            RTRIM(PurchaseLine.description), ' X ',
+                            RTRIM(purchaseline.description), ' X ',
                             CAST($useQty AS CHAR),
-                            CASE PurchaseLine.UOM
+                            CASE purchaseline.UOM
                                 WHEN 'fulqty'
                                 THEN (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.units    = u.code
-                                      AND  sm2.itemcode = PurchaseLine.code)
+                                      AND  sm2.itemcode = purchaseline.code)
                                 ELSE (SELECT RTRIM(u.descrip) FROM unit u
                                       JOIN stockmaster sm2 ON sm2.subunits = u.code
-                                      AND  sm2.itemcode = PurchaseLine.code)
+                                      AND  sm2.itemcode = purchaseline.code)
                             END
                         ) AS narration
-                      FROM PurchaseHeader
-                      JOIN PurchaseLine          ON PurchaseLine.documentno          = PurchaseHeader.documentno
-                      JOIN stockmaster           ON PurchaseLine.code               = stockmaster.itemcode
+                      FROM purchaseheader
+                      JOIN purchaseline          ON purchaseline.documentno          = purchaseheader.documentno
+                      JOIN stockmaster           ON purchaseline.code               = stockmaster.itemcode
                       JOIN inventorypostinggroup ON inventorypostinggroup.code      = stockmaster.postinggroup
-                      JOIN currencies            ON PurchaseHeader.currencycode     = currencies.currabrev
-                      WHERE PurchaseLine.entryno = $key";
+                      JOIN currencies            ON purchaseheader.currencycode     = currencies.currabrev
+                      WHERE purchaseline.entryno = $key";
 
             DB_query($glSQL, $db);
         }
@@ -661,7 +661,7 @@ function PostDebitRegister($Quantity, $key, $journal, $PeriodNo)
 // ---------------------------------------------------------------------------
 
 /**
- * Re-post all non-service purchase lines to StockRegister and Generalledger.
+ * Re-post all non-service purchase lines to stockregister and generalledger.
  * Used for data repair / initial population.
  */
 function RepopulateGeneral_ledger()
@@ -676,8 +676,8 @@ function RepopulateGeneral_ledger()
                 completed, printed, containerprice, containersunits,
                 totalchargedcontainers, containercode, vatrate,
                 inclusive, UOM, shipping
-            FROM PurchaseLine
-            JOIN stockmaster ON PurchaseLine.code = stockmaster.itemcode
+            FROM purchaseline
+            JOIN stockmaster ON purchaseline.code = stockmaster.itemcode
             WHERE stockmaster.isstock <> 3";
 
     $ResultIndex = DB_query($SQL, $db);
@@ -699,7 +699,7 @@ function RepopulateGeneral_ledger()
 // ---------------------------------------------------------------------------
 
 /**
- * Calculate blended cost and insert into StockRegister for a tank receipt.
+ * Calculate blended cost and insert into stockregister for a tank receipt.
  *
  * @param array $row  Row from buffertable
  */
@@ -749,7 +749,7 @@ function StoreToTank($row = array())
 
     if ($newcost > 0) {
         DB_query(
-            "INSERT INTO StockRegister (itemcode, StockIn, cost, StockOut, journal, GRN)
+            "INSERT INTO stockregister (itemcode, StockIn, cost, stockout, journal, GRN)
              VALUES ('$itemcode', $TotalUnits, $newcost, 0, '$journal', '$batchno')",
             $db
         );
@@ -759,12 +759,12 @@ function StoreToTank($row = array())
 }
 
 // ---------------------------------------------------------------------------
-// ledgerManufucture — BOM production: calculate blended cost → StockRegister
+// ledgerManufucture — BOM production: calculate blended cost → stockregister
 // ---------------------------------------------------------------------------
 
 /**
  * Calculate the cost of a manufactured item from its components and
- * insert into StockRegister.
+ * insert into stockregister.
  *
  * @param array $row  Row from buffertable
  */
@@ -834,7 +834,7 @@ function ledgerManufucture($row = array())
 
     if ($newcost > 0) {
         DB_query(
-            "INSERT INTO StockRegister (itemcode, StockIn, cost, StockOut, journal, GRN)
+            "INSERT INTO stockregister (itemcode, StockIn, cost, stockout, journal, GRN)
              VALUES ('$itemcode', $TotalUnits, $newcost, 0, '$journal', '$batchno')",
             $db
         );
@@ -866,7 +866,7 @@ function ledgerSalePlus($row = array())
 
     $srResult = DB_query(
         "SELECT rowid, cost, StockBalance
-         FROM   StockRegister
+         FROM   stockregister
          WHERE  itemcode     = '$itemcode'
            AND  StockBalance > 0
          ORDER  BY rowid ASC",
@@ -886,7 +886,7 @@ function ledgerSalePlus($row = array())
         }
 
         DB_query(
-            "UPDATE StockRegister SET StockOut = StockOut + $useQty WHERE rowid = $rowid",
+            "UPDATE stockregister SET stockout = stockout + $useQty WHERE rowid = $rowid",
             $db
         );
     }
@@ -952,7 +952,7 @@ function PostProductionGeneralStage2()
                 UnitPrice, vatamount, invoiceamount,
                 completed, printed, containerprice, containersunits,
                 containercode, vatrate, inclusive, UOM, shipping
-            FROM SalesLine";
+            FROM salesline";
 
     $ResultIndex = DB_query($SQL, $db);
 
@@ -988,7 +988,7 @@ function isBOM($itemcode)
     global $db;
     $itemcode = mysqli_real_escape_string($db, $itemcode);
     $result   = DB_query(
-        "SELECT COUNT(*) FROM BOM_items WHERE parent_itemcode = '$itemcode'", $db
+        "SELECT COUNT(*) FROM bom_items WHERE parent_itemcode = '$itemcode'", $db
     );
     $number   = DB_fetch_row($result);
     return isset($number[0]) && $number[0] > 0;
@@ -1085,7 +1085,7 @@ function Stockledgeritems($ProductionMaster = array())
                 tt.doctype,
                 tt.date
             FROM tanktrans tt
-            LEFT JOIN ProdcutionMasterLine pml
+            LEFT JOIN prodcutionmasterline pml
                    ON pml.Batchno  = tt.batchno
                   AND pml.itemcode = tt.itemcode
             JOIN stockmaster sm ON tt.itemcode = sm.itemcode
