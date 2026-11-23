@@ -38,7 +38,7 @@ $body = str_replace('{{contractor_name}}', $safeContractorName, $body);
 $query = "SELECT DISTINCT tp.ParameterName
           FROM sample_tests ST
           JOIN test_results TR ON ST.TestID = TR.TestID
-          JOIN TestParameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
+          JOIN testparameters tp ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
           JOIN test_assignments ta ON TR.resultsID = ta.resultsID
           WHERE ST.SampleID = ?
             AND ta.subcontractor = ?
