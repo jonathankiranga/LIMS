@@ -22,7 +22,7 @@ if($_SESSION['DocumentPosted']==true){
     
     
  
-    $sql[] ="insert into SalesHeader 
+    $sql[] ="insert into `salesheader` 
       (documenttype
       ,documentno
       ,docdate
@@ -74,9 +74,9 @@ if($_SESSION['DocumentPosted']==true){
             $vatamount  = $_POST['vatamount'][$key];
             $grossamount = $_POST['grossamount'][$key];
           
-            $sql[] = sprintf("INSERT INTO `salesline` 
+            $sql[] = sprintf("INSERT INTO `salesline`` 
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,locationcode,UOM) 
-                (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,documentno,UOM from SalesLine where entryno='%s')"
+                (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,documentno,UOM from `salesline` where entryno='%s')"
                 ,13,FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$salesprice,$vatamount,$grossamount ,$key);
     
          }
@@ -161,7 +161,7 @@ function PostDebtors($period,$journal,$doc){
       ,SalesHeader.documenttype
       ,SalesHeader.postinggroup
       ,'%s'
-  FROM `salesheader` join SalesLine 
+  FROM `salesheader`` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         where SalesLine.documentno='%s' and SalesLine.documenttype =13
@@ -182,7 +182,7 @@ function PostDebtors($period,$journal,$doc){
 }
 
 function PostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -216,8 +216,8 @@ function PostGL($period,$journal,$doc){
       ,rtrim(SalesLine.description)  as narration
        ,' ".$_POST['DimensionOne']."' 
        ,' ".$_POST['DimensionTwo']."'
-      from SalesHeader join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join SalesLine on SalesLine.documentno = SalesHeader.documentno 
+      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
+      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
       join stockmaster on SalesLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on SalesHeader.currencycode=currencies.currabrev
@@ -250,8 +250,8 @@ Function CustomerStatemet($journal,$doc){
              ,'".$_POST['DimensionOne']."'
              ,'".$_POST['DimensionTwo']."' 
              ,SalesHeader.currencycode    
-             from SalesHeader
-             join SalesLine  on SalesLine.documentno = SalesHeader.documentno 
+             from `salesheader`
+             join `salesline`  on SalesLine.documentno = SalesHeader.documentno 
            where SalesLine.documentno='%s' and SalesLine.documenttype =13
            Group by 
              SalesHeader.postingdate

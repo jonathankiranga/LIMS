@@ -21,7 +21,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO `salesheader`
+$sql[]="INSERT INTO `salesheader``
            (documenttype
            ,documentno
            ,docdate
@@ -118,7 +118,7 @@ if($value>0){
        $vatamount= $_POST['vatamount'][$itemcode];
     }
     
-    $sql[] =  sprintf("INSERT INTO `salesline`
+    $sql[] =  sprintf("INSERT INTO `salesline``
            (documenttype,docdate,documentno
            ,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount
@@ -195,7 +195,7 @@ if($_SESSION['savedsuccessfuly']==true){
       ,printed
       ,released
       ,status
-      ,userid from SalesHeader where documenttype='32' and  documentno='".$_POST['documentno']."'";
+      ,userid from `salesheader` where documenttype='32' and  documentno='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
        
     Echo '<Table class="table"><tr><th>Parameter</th><th>Value</th></tr>';
@@ -221,7 +221,7 @@ if($_SESSION['savedsuccessfuly']==true){
            ,UnitPrice
            ,vatamount
            ,invoiceamount
-           ,UOM from SalesLine 
+           ,UOM from `salesline` 
            where documenttype=32 
            and documentno='".$_POST['documentno']."'";
     echo '<tr><td colspan="2">';

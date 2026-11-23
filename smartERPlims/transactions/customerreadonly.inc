@@ -62,7 +62,7 @@ $discount     = (float)($_POST['DiscountPercent'] ?? 0);
 
 // build SQL
 $sql[] = sprintf(
-    "INSERT INTO `salesheader` (
+    "INSERT INTO `salesheader`` (
         documenttype, documentno, docdate, oderdate, duedate,
         customercode, customername, yourreference, coa_documentno,
         postinggroup, currencycode, salespersoncode, status,
@@ -224,7 +224,7 @@ foreach ($_SESSION['sales_orders'] as $line_No => $rows) {
             $values[]  = sqlVal($db, $qty);
         }
 
-        $insertSql = "INSERT INTO `salesline` (" . implode(", ", $columns) . ")
+        $insertSql = "INSERT INTO `salesline`` (" . implode(", ", $columns) . ")
                       VALUES (" . implode(", ", $values) . ")";
 
         $sql[] = $insertSql;
@@ -265,7 +265,7 @@ foreach ($_SESSION['sales_orders'] as $line_No => $rows) {
       ,userid
       ,shipping
       ,packagescharge
-      from SalesHeader where documenttype='1' and  documentno='".$_POST['documentno']."'";
+      from `salesheader` where documenttype='1' and  documentno='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
        
     Echo '<div class="confirmso" id="conso" onmouseover="dragElement(this);">'
@@ -301,7 +301,7 @@ foreach ($_SESSION['sales_orders'] as $line_No => $rows) {
                ,PartPerUnit
                ,PriceInPricelist
                ,shipping
-           from SalesLine where documenttype=1 and documentno='".$_POST['documentno']."'";
+           from `salesline` where documenttype=1 and documentno='".$_POST['documentno']."'";
     echo '<tr><td colspan="2">';
     
     echo '<table class="table-bordered table-condensed table-responsive-small"><tr>'

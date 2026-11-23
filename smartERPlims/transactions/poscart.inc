@@ -65,7 +65,7 @@
          if(empty($stockCode)){
              return $tat;
          }
-         $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", $stockCode);
+         $SQL = sprintf("SELECT tat FROM `pricelist`` WHERE stockcode='%s' LIMIT 1", $stockCode);
          $ResultIndex = DB_query($SQL, $db);
          if($Row = DB_fetch_row($ResultIndex)){
              $tat = (int)($Row[0] ?? 0);
@@ -313,14 +313,14 @@
            
      }
      
-          // Helper: fetch TAT (days) from PriceList for given customer/item/units/quantity
+          // Helper: fetch TAT (days) from `pricelist` for given customer/item/units/quantity
      function GetTatFromPriceList($stockCode){
           global $db;
            $tat = 0;
            if( empty($stockCode) ){
                return $tat;
            }
-           $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s'  LIMIT 1",$stockCode);
+           $SQL = sprintf("SELECT tat FROM `pricelist`` WHERE stockcode='%s'  LIMIT 1",$stockCode);
            $ResultIndex = DB_query($SQL, $db);
            if($Row = DB_fetch_row($ResultIndex)){
                $tat = (int)($Row[0] ?? 0);
@@ -330,7 +330,7 @@
      
      Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -345,7 +345,7 @@
         
           
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -360,7 +360,7 @@
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['location'][$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -373,7 +373,7 @@
         
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -384,7 +384,7 @@
                   }
        }else{
            
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $this->Default[0]=array('code'=>trim($value['tankname']),'Storename'=>trim($value['tankname']));
            }
@@ -678,7 +678,7 @@ function showtable(){
      
      Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -693,7 +693,7 @@ function showtable(){
         
           
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -708,7 +708,7 @@ function showtable(){
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['location'][$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -721,7 +721,7 @@ function showtable(){
         
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -732,7 +732,7 @@ function showtable(){
                   }
        }else{
            
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $this->Default[0]=array('code'=>trim($value['tankname']),'Storename'=>trim($value['tankname']));
            }
@@ -988,7 +988,7 @@ function showtable(){
          if(empty($stockCode)){
              return $tat;
          }
-         $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", $stockCode);
+         $SQL = sprintf("SELECT tat FROM `pricelist`` WHERE stockcode='%s' LIMIT 1", $stockCode);
          $ResultIndex = DB_query($SQL, $db);
          if($Row = DB_fetch_row($ResultIndex)){
              $tat = (int)($Row[0] ?? 0);
@@ -1185,12 +1185,12 @@ function showtable(){
           foreach ($_SESSION['price_list'] as $key => $row) {
             $approved =(mb_strlen($row['customercode'])>1)?False:True;
               
-            $SQL = sprintf("Delete from PriceList where customerCode='%s' and stockcode='%s' and units_code='%s' and quantity='%s'",
+            $SQL = sprintf("Delete from `pricelist` where customerCode='%s' and stockcode='%s' and units_code='%s' and quantity='%s'",
                     $row['customercode'],$row['itemcode'],$row['unitcode'],$row['packing']);
                  $ResultIndex = DB_query($SQL,$db);  
               
             $tatValue = isset($row['tat']) ? (int)$row['tat'] : 0;
-            $SQL = sprintf("insert into PriceList (customerCode,stockcode,units_code,quantity,price,container,approved,tat) "
+            $SQL = sprintf("insert into `pricelist` (customerCode,stockcode,units_code,quantity,price,container,approved,tat) "
                     . " values ('%s','%s','%s',%f,%f,'%s','%s',%d)",$row['customercode'],$row['itemcode'],$row['unitcode'],$row['packing'],$row['sellingprice'],$_POST['container'],$approved,$tatValue);
              DB_query($SQL,$db);
           }
@@ -1216,11 +1216,11 @@ function showtable(){
      function deleteMasterdata($id){
          global $db;
          
-         $SQL = sprintf("select stockcode,units_code,quantity from PriceList where id='%s' ",$id);
+         $SQL = sprintf("select stockcode,units_code,quantity from `pricelist` where id='%s' ",$id);
          $ResultIndex = DB_query($SQL,$db);
          $stockcode = DB_fetch_row($ResultIndex);
          
-         $SQL = sprintf("select id from PriceList "
+         $SQL = sprintf("select id from `pricelist` "
                  . " where stockcode='%s' and units_code='%s' and quantity='%s' "
                  . " order by customerCode desc",
                  $stockcode[0],$stockcode[1],$stockcode[2]);
@@ -1229,7 +1229,7 @@ function showtable(){
              $DeleteAll[]=$row['id'];
          }
          
-         $SQL = sprintf("select count(*) from PriceList "
+         $SQL = sprintf("select count(*) from `pricelist` "
                  . " where stockcode='%s' and units_code='%s' and quantity='%s'"
                  . " and customerCode<>'' ",$stockcode[0],$stockcode[1],$stockcode[2]);
          $ResultIndex = DB_query($SQL,$db);
@@ -1237,13 +1237,13 @@ function showtable(){
          
          if($count[0]==0){
              if(mb_strlen($id)>0){
-                $SQL = sprintf("Delete from PriceList where id='%s'",$id);
+                $SQL = sprintf("Delete from `pricelist` where id='%s'",$id);
                 $ResultIndex = DB_query($SQL,$db);
              }
              $this->getready();
          }else{
              foreach ($DeleteAll as $value) {
-                    $SQL = sprintf("Delete from PriceList where id='%s'",$value);
+                    $SQL = sprintf("Delete from `pricelist` where id='%s'",$value);
                      $ResultIndex = DB_query($SQL,$db);
              }
              prnMsg("You have also deleted in ". $count[0]." other places", 'warn');
@@ -1254,7 +1254,7 @@ function showtable(){
      function deletedata($id){
          global $db;
              if(mb_strlen($id)>0){
-                $SQL = sprintf("Delete from PriceList where id='%s'",$id);
+                $SQL = sprintf("Delete from `pricelist` where id='%s'",$id);
                 $ResultIndex = DB_query($SQL,$db);
                 
                 $results = DB_query(sprintf("SELECT customer FROM debtors where itemcode='%s'",trim($_POST['CustomerID'])), $db);
@@ -1266,7 +1266,7 @@ function showtable(){
      
      function showPriceList(){
          global $db,$RootPath,$Theme,$pge;
-            $SQL="select stockcode,units_code,quantity,price,id,tat from PriceList where customerCode=''";
+            $SQL="select stockcode,units_code,quantity,price,id,tat from `pricelist` where customerCode=''";
              
         $table = '<center><h3>Price List</h3></center>'
                     . '<table class="register display">'
@@ -1329,7 +1329,7 @@ function showtable(){
 
      }
  
-        // Helper: fetch TAT (days) from PriceList for given customer/item/units/quantity
+        // Helper: fetch TAT (days) from `pricelist` for given customer/item/units/quantity
      function GetTatFromPriceList($stockCode){
          global $db;
            $tat = 0;
@@ -1338,7 +1338,7 @@ function showtable(){
                return $tat;
            }
            
-           $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s'  LIMIT 1",
+           $SQL = sprintf("SELECT tat FROM `pricelist`` WHERE stockcode='%s'  LIMIT 1",
                $customerCode, $stockCode, $unitsCode, (int)$quantity);
            $ResultIndex = DB_query($SQL, $db);
            if($Row = DB_fetch_row($ResultIndex)){
@@ -1354,7 +1354,7 @@ function showtable(){
             $SQL=sprintf("select pl.stockcode,pl.units_code,pl.container,pl.quantity,pl.price,pl.id,"
                 . "pl.approved,pl.approvedby,pl.DateTime,pl.tat,"
                 . " CASE WHEN pl.stockcode LIKE 'TS____' THEN pl.stockcode WHEN dt.categoryid LIKE 'TS____' THEN dt.categoryid ELSE CONCAT('~',pl.stockcode) END AS grp"
-                . " from PriceList pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
+                . " from `pricelist` pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
                 . " where pl.customerCode='%s' order by grp asc, (pl.stockcode LIKE 'TS____') desc, sm.descrip asc",$id);
             $ResultIndex=DB_query($SQL,$db);
             while($row= DB_fetch_array($ResultIndex)){
@@ -1435,7 +1435,7 @@ function showtable(){
             if(mb_strlen($id)>0){
                  $SQL=sprintf("select pl.container,pl.stockcode,pl.units_code,pl.quantity,pl.price,pl.id,pl.approved,pl.approvedby,pl.DateTime,pl.TAT,"
                 . " CASE WHEN pl.stockcode LIKE 'TS____' THEN pl.stockcode WHEN dt.categoryid LIKE 'TS____' THEN dt.categoryid ELSE CONCAT('~',pl.stockcode) END AS grp"
-                . " from PriceList pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
+                . " from `pricelist` pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
                 . " where pl.customerCode='%s' order by grp asc, (pl.stockcode LIKE 'TS____') desc, sm.descrip asc",$id);
                
                   $table .='<center><h2>'.$_POST['CustomerName'].' PRICE LIST</h2></center>'
@@ -1453,7 +1453,7 @@ function showtable(){
           }else{
                  $SQL="select pl.container,pl.stockcode,pl.units_code,pl.quantity,pl.price,pl.id,pl.tat,"
                 . " CASE WHEN pl.stockcode LIKE 'TS____' THEN pl.stockcode WHEN dt.categoryid LIKE 'TS____' THEN dt.categoryid ELSE CONCAT('~',pl.stockcode) END AS grp"
-                . " from PriceList pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
+                . " from `pricelist` pl LEFT JOIN discounttable dt ON dt.itemcode = pl.stockcode AND dt.categoryid LIKE 'TS____' LEFT JOIN stockmaster sm ON sm.itemcode = pl.stockcode"
                 . " where pl.customerCode='' order by grp asc, (pl.stockcode LIKE 'TS____') desc, sm.descrip asc";
                  $table .='<center><h3>DEFAULT PRICE LIST</h3></center>'
                      . '<table class="register display table-bordered table-striped">'
@@ -1575,7 +1575,7 @@ function showtable(){
       function getPriceById($id) {
           global $db;
           $id = (int)$id;
-          $res = DB_query("SELECT id, stockcode, price, tat, units_code, quantity FROM `pricelist` WHERE id='$id'", $db);
+          $res = DB_query("SELECT id, stockcode, price, tat, units_code, quantity FROM `pricelist`` WHERE id='$id'", $db);
           return DB_fetch_assoc($res);
       }
      
@@ -1612,7 +1612,7 @@ function showtable(){
       function GetCustomizeditems($itemcode='',$qty=1,$customercode='',$unitscode='',$price=0,$id){
           global $db;
           
-          $SQL=sprintf("select units_code from PriceList where id='%s'",$id);
+          $SQL=sprintf("select units_code from `pricelist` where id='%s'",$id);
           $ResultIndex=DB_query($SQL,$db);
           $row = DB_fetch_row($ResultIndex);
           $unitscode = trim($row[0]);
@@ -2555,7 +2555,7 @@ function showtable(){
                     : number_format($afterBalance, 0))
             );
 
-            // Update PE_orders with current data for SaveStockIssues
+            // Update `pe_orders` with current data for SaveStockIssues
             $_SESSION['PE_orders'][$lineno]['location'] = $location;
             $_SESSION['PE_orders'][$lineno]['stkbalance'] = $afterBalance;
             
