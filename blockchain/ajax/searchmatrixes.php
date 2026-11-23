@@ -22,7 +22,7 @@ if ($searchTerm !== '') {
 }
 
 // Build the SQL query for counting total records
-$countSql = "SELECT COUNT(*) FROM ParameterMatrix $where";
+$countSql = "SELECT COUNT(*) FROM parametermatrix $where";
 $stmt = $conn->prepare($countSql);
 
 // Bind parameters if a search term was provided
@@ -51,7 +51,7 @@ $sqlquery = "
             CAST(ParameterName AS CHAR(255)) AS FullPath,
             0 AS Level
         FROM 
-            ParameterMatrix
+            parametermatrix
         WHERE 
             ParentID IS NULL 
 
@@ -64,7 +64,7 @@ $sqlquery = "
             CONCAT(ph.FullPath, ' -> ', pm.ParameterName) AS FullPath,
             ph.Level + 1
         FROM 
-            ParameterMatrix pm
+            parametermatrix pm
         INNER JOIN 
             ParameterHierarchy ph ON pm.ParentID = ph.ParameterID
     )
@@ -88,7 +88,7 @@ $sqlquery = "
             CAST(ParameterName AS CHAR(255)) AS FullPath,
             0 AS Level
         FROM 
-            ParameterMatrix
+            parametermatrix
         WHERE 
             ParentID IS NULL
 
@@ -101,7 +101,7 @@ $sqlquery = "
             CONCAT(ph.FullPath, ' -> ', pm.ParameterName) AS FullPath,
             ph.Level + 1
         FROM 
-            ParameterMatrix pm
+            parametermatrix pm
         INNER JOIN 
             ParameterHierarchy ph ON pm.ParentID = ph.ParameterID
     )
