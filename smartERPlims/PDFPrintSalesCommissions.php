@@ -53,9 +53,9 @@ if(isset($_POST['Financial_Periods'])){
       ,SalesLine.`PriceInPricelist`
       ,SalesLine.`Increase`
       ,SalesLine.`partperunit`
-  FROM `salesheader`` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
-        join `CustomerStatement` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
+  FROM `salesheader``` 
+        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
+        join `customerstatement`` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` between '%s' and '%s' 
   and SalesHeader.`salespersoncode`='%s' 
   and SalesHeader.documenttype=10  order by SalesHeader.`documentno`  asc ",$FromDate,$ToDate,$_POST['salespersoncode']);
@@ -83,9 +83,9 @@ if(isset($_POST['Financial_Periods'])){
       ,SalesLine.`Increase`
       ,SalesLine.`partperunit`
       ,CustomerStatement.JournalNo
-  FROM `salesheader`` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
-        join `CustomerStatement` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
+  FROM `salesheader``` 
+        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
+        join `customerstatement`` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` is null
   and SalesHeader.`salespersoncode`='%s' 
   and SalesHeader.documenttype=10  order by SalesHeader.docdate  DESC limit 500",$_POST['salespersoncode']);

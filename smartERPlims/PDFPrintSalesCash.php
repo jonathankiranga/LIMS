@@ -26,7 +26,7 @@ $SQL="select
       ,`debtors`.contact
       ,`SalesHeader`.`yourreference`
       ,`SalesHeader`.`printed`
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       left join  debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documenttype`='12' and `SalesHeader`.`documentno`='".$_GET['No']."'";
@@ -70,7 +70,7 @@ $SQL="select
       ,SalesLine.vatrate
       ,SalesLine.`totalchargedcontainers`
       ,SalesLine.`shipping`
-  FROM `salesheader`` join SalesLine 
+  FROM `salesheader``` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=12
         join stockmaster on stockmaster.itemcode=SalesLine.code
@@ -150,7 +150,7 @@ $SQL="select
     $pdf->OutputD($_SESSION['DatabaseName'] . '_CASHSALE_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    DB_query("Update `SalesHeader` set printed=1 where SalesHeader.documenttype=12 and SalesHeader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader`` set printed=1 where SalesHeader.documenttype=12 and SalesHeader.documentno='".$_GET['No']."'", $db);
 }else{
 
 include('includes/header.inc');
@@ -184,7 +184,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(SalesLine.`invoiceamount`) as OrderValue
-      from `SalesHeader` join SalesLine on 
+      from `salesheader`` join `salesline` on 
       `SalesHeader`.`documentno`=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='12' ".    
         (isset($_POST['CustomerID'])?" and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":'')."

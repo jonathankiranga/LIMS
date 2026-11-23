@@ -269,8 +269,8 @@ if(isset($_GET['No'])){
            ,SalesHeader.`locationcode` as BankCode
            ,SalesHeader.paymentterms
            ,`picture`
-        from `SalesHeader` 
-        left join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+        from `salesheader`` 
+        left join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
         left join debtors on `SalesHeader`.`customercode`=debtors.itemcode
         left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
         where `SalesHeader`.`documenttype`='54' 
@@ -302,8 +302,8 @@ if(isset($_GET['No'])){
     
     // Get line items and calculate maxTAT, including discount
     // Note: LineDiscountPercent column should be added to SalesLine table:
-    // ALTER TABLE `salesline` ADD COLUMN LineDiscountPercent DECIMAL(5,2) DEFAULT 0 AFTER TAT;
-    // ALTER TABLE `salesheader` ADD COLUMN QtyDiscount DECIMAL(5,2) DEFAULT 0;
+    // ALTER TABLE `salesline`` ADD COLUMN LineDiscountPercent DECIMAL(5,2) DEFAULT 0 AFTER TAT;
+    // ALTER TABLE `salesheader`` ADD COLUMN QtyDiscount DECIMAL(5,2) DEFAULT 0;
     $SQL=Sprintf("SELECT 
         SalesLine.code as barcode
        ,SalesHeader.docdate
@@ -327,7 +327,7 @@ if(isset($_GET['No'])){
        ,IFNULL(SalesHeader.QtyDiscount, 0) as headerdiscount
        ,IFNULL(SalesHeader.pricingmode, '{}') as pricingmode
        ,IFNULL(SalesLine.category, '') as stdgroup
-    FROM `salesheader` join SalesLine 
+    FROM `salesheader`` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         and SalesHeader.documenttype=54  
@@ -704,7 +704,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(SalesLine.`invoiceamount`) as OrderValue
-    from `SalesHeader` join SalesLine on 
+    from `salesheader`` join `salesline` on 
     `SalesHeader`.`documentno`=SalesLine.`documentno` 
     where `SalesHeader`.`documenttype`='54' 
     group by 
