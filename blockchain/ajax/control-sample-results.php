@@ -26,7 +26,7 @@ if (empty($equipmentId) || empty($sampleName) || !is_numeric($knownValue) || !is
 }
 
 // Prepare and bind the SQL statement
-$stmt = $conn->prepare("INSERT INTO ControlSampleResults (equipment_id, sample_name, known_value, measured_value,deviation) VALUES (?, ?, ?, ?,?)");
+$stmt = $conn->prepare("INSERT INTO controlsampleresults (equipment_id, sample_name, known_value, measured_value,deviation) VALUES (?, ?, ?, ?,?)");
 $stmt->bind_param("isddd", $equipmentId, $sampleName, $knownValue, $measuredValue,$deviation);
 
 if ($stmt->execute()) {
