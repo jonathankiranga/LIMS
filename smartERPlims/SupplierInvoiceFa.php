@@ -115,8 +115,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                                             FROM fixedassets
                                             WHERE assetid = '" . $stcode . "'";
 
-                                        $sql[] =sprintf("INSERT INTO 
-                                               `PurchaseLine`
+                                        $sql[] =sprintf("INSERT INTO `purchaseline``
                                                (`documenttype`,
                                                `docdate`,
                                                `documentno`,
@@ -207,7 +206,7 @@ $filter="SELECT
            ,`AssetsHeader`.`postinggroup`
            ,`AssetsHeader`.`currencycode`
            ,`AssetsHeader`.`vatinclusive`
-       FROM `AssetsHeader` 
+       FROM `assetsheader`` 
        join FixedAssetsLine on `AssetsHeader`.`documentno`=`FixedAssetsLine`.`documentno`
        where `AssetsHeader`.`documentno`='".$_POST['documentno']."' and  `AssetsHeader`.`documenttype`='41' ";
 
@@ -289,7 +288,7 @@ $Slaqry ="SELECT
     ,`FixedAssetsLine`.`vatrate` 
     ,`FixedAssetsLine`.`inclusive`
     ,`FixedAssetsLine`.`UOM`
-  FROM  FixedAssetsLine
+  FROM `fixedassetsline`
   where `FixedAssetsLine`.`documentno`='".$_POST['documentno']."' "
  . " and `FixedAssetsLine`.`documenttype`='41' ";
 
@@ -415,7 +414,7 @@ include('includes/footer.inc');
           ,PurchaseHeader.`documenttype`
           ,PurchaseHeader.`postinggroup`
           ,'%s'
-      FROM `PurchaseHeader` join PurchaseLine 
+      FROM `purchaseheader`` join PurchaseLine 
             on PurchaseHeader.documentno=PurchaseLine.documentno 
             and PurchaseHeader.documenttype=PurchaseLine.documenttype 
             where PurchaseHeader.documentno='%s' 
@@ -526,7 +525,7 @@ include('includes/footer.inc');
     }
 
     Function SupplierStatemet($journal,$doc){
-        $sql=sprintf("INSERT INTO `SupplierStatement`
+        $sql=sprintf("INSERT INTO `supplierstatement``
                (`Date`
                ,`Documentno`
                ,`Documenttype`
