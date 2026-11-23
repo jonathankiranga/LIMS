@@ -65,7 +65,7 @@
          if(empty($stockCode)){
              return $tat;
          }
-         $SQL = sprintf("SELECT tat FROM PriceList WHERE stockcode='%s' LIMIT 1", $stockCode);
+         $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", $stockCode);
          $ResultIndex = DB_query($SQL, $db);
          if($Row = DB_fetch_row($ResultIndex)){
              $tat = (int)($Row[0] ?? 0);
@@ -320,7 +320,7 @@
            if( empty($stockCode) ){
                return $tat;
            }
-           $SQL = sprintf("SELECT tat FROM PriceList WHERE stockcode='%s'  LIMIT 1",$stockCode);
+           $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s'  LIMIT 1",$stockCode);
            $ResultIndex = DB_query($SQL, $db);
            if($Row = DB_fetch_row($ResultIndex)){
                $tat = (int)($Row[0] ?? 0);
@@ -353,7 +353,7 @@
             if(mb_stristr($ItemCode,'H2O')=='H2O'){
                $line .= '<option></option>';
              }else{
-                $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+                $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
                 while($rows= DB_fetch_array($REsults)){
                      $line .= sprintf('<option value="%s" %s >%s</option>',trim($rows['code']),$_POST['location'][$key]==trim($rows['code'])?'selected="selected"':'',$rows['Storename']);
                   }
@@ -378,7 +378,7 @@
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
             
-                $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+                $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
                 while($rows =DB_fetch_array($REsults)){
                      $this->Default[0]=array('code'=>trim($rows['code']),'Storename'=>$rows['Storename']);
                   }
@@ -701,7 +701,7 @@ function showtable(){
             if(mb_stristr($ItemCode,'H2O')=='H2O'){
                $line .= '<option></option>';
              }else{
-                $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+                $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
                 while($rows= DB_fetch_array($REsults)){
                      $line .= sprintf('<option value="%s" %s >%s</option>',trim($rows['code']),$_POST['location'][$key]==trim($rows['code'])?'selected="selected"':'',$rows['Storename']);
                   }
@@ -726,7 +726,7 @@ function showtable(){
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
             
-                $REsults=DB_query('SELECT code,Storename FROM Stores', $db);
+                $REsults=DB_query('SELECT code,Storename FROM `stores`', $db);
                 while($rows =DB_fetch_array($REsults)){
                      $this->Default[0]=array('code'=>trim($rows['code']),'Storename'=>$rows['Storename']);
                   }
@@ -988,7 +988,7 @@ function showtable(){
          if(empty($stockCode)){
              return $tat;
          }
-         $SQL = sprintf("SELECT tat FROM PriceList WHERE stockcode='%s' LIMIT 1", $stockCode);
+         $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s' LIMIT 1", $stockCode);
          $ResultIndex = DB_query($SQL, $db);
          if($Row = DB_fetch_row($ResultIndex)){
              $tat = (int)($Row[0] ?? 0);
@@ -1338,7 +1338,7 @@ function showtable(){
                return $tat;
            }
            
-           $SQL = sprintf("SELECT tat FROM PriceList WHERE stockcode='%s'  LIMIT 1",
+           $SQL = sprintf("SELECT tat FROM `pricelist` WHERE stockcode='%s'  LIMIT 1",
                $customerCode, $stockCode, $unitsCode, (int)$quantity);
            $ResultIndex = DB_query($SQL, $db);
            if($Row = DB_fetch_row($ResultIndex)){
@@ -1575,7 +1575,7 @@ function showtable(){
       function getPriceById($id) {
           global $db;
           $id = (int)$id;
-          $res = DB_query("SELECT id, stockcode, price, tat, units_code, quantity FROM PriceList WHERE id='$id'", $db);
+          $res = DB_query("SELECT id, stockcode, price, tat, units_code, quantity FROM `pricelist` WHERE id='$id'", $db);
           return DB_fetch_assoc($res);
       }
      
@@ -1844,7 +1844,7 @@ function showtable(){
                 
                 
                 if(isset($_POST['TradeDiscount']) and mb_strlen($_POST['TradeDiscount'])>0 ){
-                    $ResultIndex=DB_query(sprintf("SELECT Rate FROM Discouts where rowid='%s'",$_POST['TradeDiscount']), $db);
+                    $ResultIndex=DB_query(sprintf("SELECT Rate FROM `discouts` where rowid='%s'",$_POST['TradeDiscount']), $db);
                     $dicrow=DB_fetch_row($ResultIndex);
 
                     $salesprice= $rowvalue['salesprice']*(1-$dicrow[0]) ;
@@ -2505,7 +2505,7 @@ function showtable(){
             // Available balance across all batches
             $balResult = DB_query(
                 "SELECT COALESCE(SUM(StockIn - IFNULL(StockOut,0)), 0)
-                 FROM StockRegister
+                 FROM `stockregister`
                  WHERE itemcode = '$itemcode'",
                 $db
             );
@@ -2518,7 +2518,7 @@ function showtable(){
                 "SELECT rowid, GRN,
                         (StockIn - IFNULL(StockOut,0)) AS StockBalance,
                         serial
-                 FROM StockRegister
+                 FROM `stockregister`
                  WHERE itemcode = '$itemcode'
                    AND (StockIn - IFNULL(StockOut,0)) > 0
                  ORDER BY rowid ASC",

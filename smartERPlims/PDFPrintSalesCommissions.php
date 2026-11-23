@@ -53,7 +53,7 @@ if(isset($_POST['Financial_Periods'])){
       ,SalesLine.`PriceInPricelist`
       ,SalesLine.`Increase`
       ,SalesLine.`partperunit`
-  FROM `SalesHeader` 
+  FROM `salesheader`` 
         join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
         join `CustomerStatement` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` between '%s' and '%s' 
@@ -83,7 +83,7 @@ if(isset($_POST['Financial_Periods'])){
       ,SalesLine.`Increase`
       ,SalesLine.`partperunit`
       ,CustomerStatement.JournalNo
-  FROM `SalesHeader` 
+  FROM `salesheader`` 
         join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
         join `CustomerStatement` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` is null
@@ -263,15 +263,15 @@ Function CalCulateCommision($sp,$mp,$qty){
 function GetCommTable($r){
     global $db;
     
-    $ResultIndex=DB_query(sprintf("SELECT count(*) FROM Commision where ceiling='%s'",$_POST['Financial_Periods']),$db);
+    $ResultIndex=DB_query(sprintf("SELECT count(*) FROM `commision` where ceiling='%s'",$_POST['Financial_Periods']),$db);
     $rows = DB_fetch_row($ResultIndex);
     if($rows[0]>1){
        $ResultIndex=DB_query(sprintf("SELECT commisionabove,commisionbelow 
-       FROM Commision where rownumber='%s' and ceiling='%s'",(($r>5)?5:$r),$_POST['Financial_Periods']),$db);
+       FROM `commision` where rownumber='%s' and ceiling='%s'",(($r>5)?5:$r),$_POST['Financial_Periods']),$db);
     }else{
        $FinPrd= selectlast();
        $ResultIndex=DB_query(sprintf("SELECT commisionabove,commisionbelow 
-       FROM Commision where rownumber='%s' and ceiling='%s'",(($r>5)?5:$r),$FinPrd),$db);
+       FROM `commision` where rownumber='%s' and ceiling='%s'",(($r>5)?5:$r),$FinPrd),$db);
     }
     
    $rows = DB_fetch_row($ResultIndex);
@@ -281,7 +281,7 @@ function GetCommTable($r){
 Function selectlast(){
       global $db;
     
-   $ResultIndex=DB_query("SELECT ceiling FROM Commision order by ceiling desc limit 1",$db);
+   $ResultIndex=DB_query("SELECT ceiling FROM `commision` order by ceiling desc limit 1",$db);
    $rows = DB_fetch_row($ResultIndex);
    return $rows[0];
 
@@ -290,7 +290,7 @@ Function selectlast(){
 FUNCTION PaymentsAllocations ($journal ,$Accountno ){
    global $db;
     
-   $sql= sprintf("select sum(amount) FROM `ReceiptsAllocation` "
+   $sql= sprintf("select sum(amount) FROM `receiptsallocation`` "
            . "  where `journalno`='%s' and `itemcode`='%s' ",$journal,$Accountno);
   
    $ResultIndex=DB_query($sql,$db);

@@ -31,7 +31,7 @@ if($_SESSION['invoicerrors']==0){
  $sql=array();
     
 
-$sql[]="INSERT INTO SalesHeader
+$sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -94,7 +94,7 @@ $sql[]="INSERT INTO SalesHeader
                 $vatamount    =(float) $rowvalue['vatamount'];
                 $rate         =(float) $rowvalue['vat'];
                 
-                $sql[] =  sprintf("INSERT INTO SalesLine
+                $sql[] =  sprintf("INSERT INTO `salesline`
                        (documenttype,docdate ,documentno,code,description ,unitofmeasure
                        ,Quantity ,Qunatity_delivered,UnitPrice ,vatamount,invoiceamount,vatrate,inclusive
                        ,containerprice,containersunits,totalchargedcontainers,containercode,PartPerUnit)
@@ -116,7 +116,7 @@ $sql[]="INSERT INTO SalesHeader
                                            ,'40',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                                            , 0 as fulqty,".(0-$rowvalue['quantity'])." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                                            ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$_SESSION['DocumentNo'] ."' ,1 
-                                         FROM SalesLine 
+                                         FROM `salesline` 
                                          where documentno='".$salesoderno."' and code='".$stcode."' )";
                                     
                                      GetFIFO($journal,$PeriodNo,$_SESSION['DocumentNo'],$stcode,$value,$mypost);
@@ -140,7 +140,7 @@ $sql[]="INSERT INTO SalesHeader
                              ,'40',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                              , 0 as fulqty,".($rowvalue['quantity'])." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                              ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$_SESSION['DocumentNo']."' ,1 
-                           FROM SalesLine 
+                           FROM `salesline` 
                            where documentno='".$salesoderno."' and code='".$stcode."' )";
                   }elseif($rowvalue['tankstore']=="T"){
                            $sql[] = sprintf("INSERT INTO tanktrans (tankname,units,uom,date,batchno,doctype,itemcode)
@@ -168,7 +168,7 @@ $sql[]="INSERT INTO SalesHeader
     } else {
         DB_Txn_Commit($db);
         
-        DB_query("UPDATE SalesHeader SET status = 2 where documentno='".$_SESSION['DocumentNo']."'", $db);
+        DB_query("UPDATE `salesheader` SET status = 2 where documentno='".$_SESSION['DocumentNo']."'", $db);
        
         prnMsg('This Request document '.$_SESSION['DocumentNo'].' has been created .');
     }

@@ -162,7 +162,7 @@ $sqldebtors = DB_query("SELECT itemcode, creditlimit, customer, phone, email, ci
         }
     }
 
-    $legacyHeaderNoMode = "INSERT INTO SalesHeader
+    $legacyHeaderNoMode = "INSERT INTO `salesheader`
                    (documenttype, documentno, docdate, customercode, customername, externaldocumentno,
                     locationcode, postinggroup, currencycode, salespersoncode, status, userid, period,
                     vatinclusive, paymentterms, picture, QtyDiscount)
@@ -180,7 +180,7 @@ $sqldebtors = DB_query("SELECT itemcode, creditlimit, customer, phone, email, ci
                 '" . mysqli_real_escape_string($db, $imagesArray2 ?: '[]') . "',
                 '" . (int)($_POST['DiscountPercent'] ?? 0) . "')";
                 $sql = array();
-                $sql[] = "INSERT INTO SalesHeader
+                $sql[] = "INSERT INTO `salesheader`
                    (documenttype, documentno, docdate, customercode, customername, externaldocumentno,
                     locationcode, postinggroup, currencycode, salespersoncode, status, userid, period,
                     vatinclusive, paymentterms, picture, QtyDiscount, pricingmode)
@@ -224,7 +224,7 @@ $sqldebtors = DB_query("SELECT itemcode, creditlimit, customer, phone, email, ci
             }
             $stdGroupEsc = mysqli_real_escape_string($db, $stdGroup);
 
-            $sql[] = sprintf("INSERT INTO SalesLine
+            $sql[] = sprintf("INSERT INTO `salesline`
                    (documenttype, docdate, documentno, code, description, unitofmeasure, Quantity,
                     UnitPrice, vatamount, invoiceamount, vatrate, inclusive, containerprice,
                     containersunits, totalchargedcontainers, containercode, Partperunit, TAT, LineDiscountPercent, category)
