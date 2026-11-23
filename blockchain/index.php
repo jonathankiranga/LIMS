@@ -57,15 +57,10 @@
         alert('LocalStorage is blocked or not working in this browser.');
     }
 
-    window.onload = async () => {
-    try {
-        // Wait for system settings to be loaded before proceeding
-        await loadSystemSettings();
-        // Now type the boot sequence line after settings are loaded
-        typeLine(bootLines[currentLine]);
-    } catch (error) {
-        console.error('Error loading system settings:', error);
-    }
+    window.onload = () => {
+    // Load settings in the background; the login greeting must not wait for a network request.
+    loadSystemSettings();
+    typeLine(bootLines[currentLine], 0);
   };
 </script>
 </body>
