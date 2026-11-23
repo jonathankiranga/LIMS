@@ -241,8 +241,8 @@ function FindBudgetline($budget){
         . "`DefaultDimension_1` ,"
         . "`DefaultDimension_2`  "
         . "FROM `companies`  "
-        . "left join DimensionSetUp Dim1 on `companies`.`DefaultDimension_1`=Dim1.`id` "
-        . "left join DimensionSetUp Dim2 on `companies`.`DefaultDimension_2`=Dim2.`id` "
+        . "left join `dimensionsetup` Dim1 on `companies`.`DefaultDimension_1`=Dim1.`id` "
+        . "left join `dimensionsetup` Dim2 on `companies`.`DefaultDimension_2`=Dim2.`id` "
         . "where `companies`.`coycode`=1",$db);
 $DimensionRow = DB_fetch_row($Result);
 
@@ -267,8 +267,8 @@ function FindProjectline($budget){
         . "`DefaultDimension_1` ,"
         . "`DefaultDimension_2`  "
         . "FROM `companies`  "
-        . "left join DimensionSetUp Dim1 on `companies`.`DefaultDimension_1`=Dim1.`id` "
-        . "left join DimensionSetUp Dim2 on `companies`.`DefaultDimension_2`=Dim2.`id` "
+        . "left join `dimensionsetup` Dim1 on `companies`.`DefaultDimension_1`=Dim1.`id` "
+        . "left join `dimensionsetup` Dim2 on `companies`.`DefaultDimension_2`=Dim2.`id` "
         . "where `companies`.`coycode`=1",$db);
 $DimensionRow = DB_fetch_row($Result);
 

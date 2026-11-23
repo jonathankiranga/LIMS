@@ -40,14 +40,14 @@ if(isset($_POST['action'])){
     foreach ($_POST['action'] as $key => $value) {
         switch ($value) {
             case 'Approve':
-                $SQL = sprintf("UPDATE `pricelist` set approved=1,`approvedby`='%s'
+                $SQL = sprintf("UPDATE `pricelist`` set approved=1,`approvedby`='%s'
                              ,`DateTime`='%s' where id='%s' ", $_SESSION['UserID'],gmdate('Y-m-d H:i:s'),$key);
                         $ResultIndex = DB_query($SQL,$db); 
 
                 break;
 
              case 'Reject':
-                  $SQL = sprintf("UPDATE `pricelist` set approved=0,`approvedby`='%s'
+                  $SQL = sprintf("UPDATE `pricelist`` set approved=0,`approvedby`='%s'
                              ,`DateTime`='%s' where id='%s' ", $_SESSION['UserID'],gmdate('Y-m-d H:i:s'),$key);
                         $ResultIndex = DB_query($SQL,$db); 
 
@@ -102,7 +102,7 @@ function DisplayPOS(){
                 PriceList.quantity,PriceList.price,PriceList.id,PriceList.approved,PriceList.`approvedby`
       ,PriceList.`DateTime`,debtors.customer,"
       . " CASE WHEN PriceList.stockcode LIKE 'TS____' THEN PriceList.stockcode WHEN dt.categoryid LIKE 'TS____' THEN dt.categoryid ELSE CONCAT('~',PriceList.stockcode) END AS grp"
-      . " from PriceList 
+      . " from `pricelist` 
       join debtors on PriceList.customerCode=debtors.itemcode 
       LEFT JOIN discounttable dt ON dt.itemcode = PriceList.stockcode AND dt.categoryid LIKE 'TS____'
       LEFT JOIN stockmaster sm ON sm.itemcode = PriceList.stockcode
