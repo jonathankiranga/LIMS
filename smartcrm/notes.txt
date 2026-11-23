@@ -1,5 +1,5 @@
-ALTER TABLE `Tasks`
+ALTER TABLE `tasks`
   ADD COLUMN `lastalert` DATETIME NULL DEFAULT NULL
   COMMENT 'Timestamp of last follow-up alert sent';
 
-CREATE INDEX idx_tasks_lastalert ON `Tasks` (`lastalert`);
+CREATE INDEX idx_tasks_lastalert ON `tasks` (`lastalert`);
