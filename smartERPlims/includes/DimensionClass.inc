@@ -143,7 +143,7 @@ function SelectTestPriceListToUse($stockid,$quantity=1,$customerid=''){
             $price=''; $return=0; $Dprice='';
           
             if(mb_strlen($customerid)>1){
-                $SQL1 = sprintf("select price from PriceList where stockcode='%s' and approved=1 "
+                $SQL1 = sprintf("select price from `pricelist` where stockcode='%s' and approved=1 "
                         . " and quantity=%f and customerCode='%s'",
                         $stockid,$quantity,$customerid);
                 $ResultIndex = DB_query($SQL1,$db);
@@ -151,7 +151,7 @@ function SelectTestPriceListToUse($stockid,$quantity=1,$customerid=''){
                 $price = $row[0];
             }
 
-            $SQL2 = sprintf("select price from PriceList where stockcode='%s' "
+            $SQL2 = sprintf("select price from `pricelist` where stockcode='%s' "
                     . " and quantity=%f and (customerCode is null or customerCode='')",
                     $stockid,$quantity);
             $ResultIndex = DB_query($SQL2,$db);
@@ -173,14 +173,14 @@ function SelectTestPriceListToUse($stockid,$quantity=1,$customerid=''){
             $price=''; $return=0; $Dprice='';
           
             if(mb_strlen($customerid)>1){
-                $SQL1 = sprintf("select price from PriceList where stockcode='%s' and approved=1 and units_code='%s' and quantity=%f and customerCode='%s'",
+                $SQL1 = sprintf("select price from `pricelist` where stockcode='%s' and approved=1 and units_code='%s' and quantity=%f and customerCode='%s'",
                         $stockid,$unitscode,$quantity,$customerid);
                 $ResultIndex = DB_query($SQL1,$db);
                 $row = DB_fetch_row($ResultIndex);
                 $price = $row[0];
             }
 
-            $SQL2 = sprintf("select price from PriceList where stockcode='%s' and units_code='%s' and quantity=%f and (customerCode is null or customerCode='')",
+            $SQL2 = sprintf("select price from `pricelist` where stockcode='%s' and units_code='%s' and quantity=%f and (customerCode is null or customerCode='')",
                     $stockid,$unitscode,$quantity);
             $ResultIndex = DB_query($SQL2,$db);
             $row = DB_fetch_row($ResultIndex);
@@ -208,7 +208,7 @@ return (isset($row[0])?$row[0]:'');
          global $db;
             $price=''; $return=0; $Dprice='';
   
-            $SQL2 = sprintf("SELECT IFNULL(container,'') FROM `pricelist` WHERE stockcode='%s' AND units_code='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
+            $SQL2 = sprintf("SELECT IFNULL(container,'') FROM `pricelist`` WHERE stockcode='%s' AND units_code='%s' AND quantity=%f AND (customerCode IS NULL OR customerCode='')",
                     $stockid,$unitscode,$quantity);
             $ResultIndex = DB_query($SQL2,$db);
             $row = DB_fetch_row($ResultIndex);
