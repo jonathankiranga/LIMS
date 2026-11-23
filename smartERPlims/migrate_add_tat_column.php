@@ -7,7 +7,7 @@ if ($db->connect_error) {
 }
 
 // Add TAT column to SalesLine
-$sql = "ALTER TABLE PriceList ADD COLUMN TAT INT DEFAULT NULL COMMENT 'Turn Around Time in days'";
+$sql = "ALTER TABLE `pricelist` ADD COLUMN TAT INT DEFAULT NULL COMMENT 'Turn Around Time in days'";
 
 if ($db->query($sql)) {
     echo "Added TAT column to SalesLine successfully!";
