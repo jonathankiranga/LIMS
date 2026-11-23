@@ -38,7 +38,7 @@ $sql="SELECT taskid,
             `manager`,
             `userid`,
             `comments`
-            FROM `CustomerVisits`
+            FROM `customervisits``
             INNER JOIN debtors ON `CustomerVisits`.itemcode=debtors.itemcode
             left JOIN www_users ON `CustomerVisits`.userresponsible=www_users.`salesman`
             WHERE `today` between '".ConvertSQLDate($_POST['date'])."' and '".ConvertSQLDate($_POST['datedue'])."'
