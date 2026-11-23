@@ -6,7 +6,7 @@ CREATE TABLE Machines (
 );
 
 -- Control Sample Results table to track test results for control samples
-CREATE TABLE ControlSampleResults (
+CREATE TABLE controlsampleresults (
     result_id INT PRIMARY KEY AUTO_INCREMENT,
     equipment_id INT,
     sample_name VARCHAR(255),
