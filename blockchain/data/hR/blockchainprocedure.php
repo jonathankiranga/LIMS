@@ -10,8 +10,8 @@ $query = "SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMI
 $result = $pdo->query($query);
 $previousHash = $result->fetchColumn() ?? str_repeat('0', 64); // Use all zeros for the genesis block
 
- // Fetch Sample_Header data
-// Collect Sample_Header data
+ // Fetch sample_header data
+// Collect sample_header data
 $headerData = json_encode([
     'Date' => $date,
     'DocumentNo' => $documentNo,
@@ -25,7 +25,7 @@ $headerData = json_encode([
     'NumberOfSamples' => $numberOfSamples
 ]);
 
-// Collect Sample_Tests data
+// Collect sample_tests data
 $sampleTestsData = [];
 for ($i = 1; $i <= $numberOfSamples; $i++) {
     $sampleTestsData[] = [
@@ -47,8 +47,8 @@ $testsData = json_encode($sampleTestsData);
 try {
     $mysqli->autocommit(false);
 
-    // Insert Sample_Header
-    $query = "INSERT INTO Sample_Header (
+    // Insert sample_header
+    $query = "INSERT INTO sample_header (
         `Date`, `DocumentNo`, `CustomerName`, `CustomerID`, `SampledBy`, 
         `SamplingMethod`, `SamplingDate`, `OrderNo`, `ScopeOfWork`, `NumberOfSamples`
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -69,8 +69,8 @@ try {
     $stmt->execute();
     $headerID = $mysqli->insert_id;
 
-    // Insert Sample_Tests
-    $query = "INSERT INTO Sample_Tests (
+    // Insert sample_tests
+    $query = "INSERT INTO sample_tests (
         `HeaderID`, `SampleFileKey`, `SampleFee`, `InternalSample`, `SKU`, 
         `BatchNo`, `BatchSize`, `ManufactureDate`, `ExpDate`, `ExternalSample`
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
