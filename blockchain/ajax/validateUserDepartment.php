@@ -11,7 +11,7 @@ $query = "SELECT
 FROM sample_tests ST
     JOIN test_results TR 
         ON ST.TestID = TR.TestID
-    JOIN TestParameters tp 
+    JOIN testparameters tp 
         ON TR.ParameterID = tp.ParameterID  AND TR.StandardID = tp.StandardID
 WHERE tp.Category = ? ";
  // Prepare the statement
