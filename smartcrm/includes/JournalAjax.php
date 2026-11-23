@@ -171,7 +171,7 @@ $getsql = "SELECT
                VATamount,
                dimension,
                dimension2
-           FROM Generalledger
+           FROM generalledger
            WHERE Docdate BETWEEN '$journalDate' AND '$journalDate'";
 
 if (mb_strlen($journalFind) > 0) {
