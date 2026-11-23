@@ -13,22 +13,22 @@ echo '<p class="page_title_text">'
         . ' ' . _('Purchase Orders List') . '</p>';
 
 $SQL="Select Distinct 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      from `PurchaseHeader` 
-      join PurchaseLine on `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
-      where `PurchaseHeader`.`documenttype`='18' 
-      and `PurchaseHeader`.`released`=1 and PurchaseHeader.status=1
-      order by `PurchaseHeader`.`docdate` desc";
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      from `purchaseheader` 
+      join purchaseline on `purchaseheader`.`documentno`=purchaseline.`documentno` 
+      where `purchaseheader`.`documenttype`='18' 
+      and `purchaseheader`.`released`=1 and purchaseheader.status=1
+      order by `purchaseheader`.`docdate` desc";
     $Result=DB_query($SQL,$db);
-           // --and PurchaseHeader.status=2
+           // --and purchaseheader.status=2
     Echo '<DIV class="container">'
         . '<Table class="table table-bordered"><tr>'
         . '<th>Supplier Invoice<br /> for GRN</th>'
