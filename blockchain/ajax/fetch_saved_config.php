@@ -6,10 +6,10 @@ $descendantIds = [];
 if ($matrix_id) {
     $stmt = $conn->prepare("
         WITH RECURSIVE Descendants AS (
-            SELECT ParameterID FROM ParameterMatrix WHERE ParentID = ?
+            SELECT ParameterID FROM parametermatrix WHERE ParentID = ?
             UNION ALL
             SELECT pm.ParameterID
-            FROM ParameterMatrix pm
+            FROM parametermatrix pm
             INNER JOIN Descendants d ON pm.ParentID = d.ParameterID
         )
         SELECT ParameterID FROM Descendants
