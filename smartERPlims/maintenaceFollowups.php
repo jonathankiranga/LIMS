@@ -11,7 +11,7 @@ while ($row = DB_fetch_array($result)) {
 }
 
 $NewContacts = array();
-$result = DB_query("SELECT `Company`,`pkey` FROM `NewContacts`", $db);
+$result = DB_query("SELECT `Company`,`pkey` FROM `newcontacts``", $db);
 while ($row = DB_fetch_array($result)) {
     $pkey = (int)$row['pkey'];
     $NewContacts[$pkey] = $row['Company'];
@@ -25,7 +25,7 @@ function getFollowupActivities($status) {
         "SELECT `pkey`,`ActivityOwner`,`Activityname`,`fromdue`,`todue`,`Contact`,`Status`,
         `valueofbusiness`,`taskdetails`,`createdby`,`createdon`,`lastactivity`,
         DATEDIFF(`fromdue`,NOW()) as Future
-        FROM `NewActivity`
+        FROM `newactivity``
         WHERE `Status`=%f
         ORDER BY `pkey` DESC",
         $status

@@ -21,7 +21,7 @@ While($row= DB_fetch_array($result)){
     $wwwusers[]=$row;
 }
 
-$result = DB_query("SELECT `Company`,`pkey`,`createdby`,`Contact_email` FROM `NewContacts`",$db);
+$result = DB_query("SELECT `Company`,`pkey`,`createdby`,`Contact_email` FROM `newcontacts``",$db);
 While($row= DB_fetch_array($result)){
     $key=trim($row['pkey']);
     $NewContacts[$key]=$row;
@@ -83,7 +83,7 @@ if(isset($_POST['saveActivity'])){
                  $service->events->insert('primary', $event);
            }
              
-        $SQL=sprintf("INSERT INTO `NewActivity`(`ActivityOwner`,`Activityname`,
+        $SQL=sprintf("INSERT INTO `newactivity``(`ActivityOwner`,`Activityname`,
             `fromdue`,`todue`,`Contact`,`Status`,`valueofbusiness`,`taskdetails`,
             `createdby`,`createdon`,`lastactivity`,`Sart_time_from`,`End_time_to`,`location`)
          VALUES ('%s','%s','%s','%s','%s','%s',%f,'%s','%s',NOW(),NOW(),'%s','%s','%s')",
@@ -129,7 +129,7 @@ echo '<div class="container"><input type="hidden" name="FormID" value="' . $_SES
 
 if(isset($_GET['id'])){
     $SQL=sprintf("SELECT `ActivityOwner`,`Activityname`,`fromdue`,`todue`,`Contact`,`Status`,`valueofbusiness`,"
-            . "`taskdetails`,`Sart_time_from` ,`End_time_to`,`location` FROM `NewActivity` where `pkey`='%s'",$_GET['id']);
+            . "`taskdetails`,`Sart_time_from` ,`End_time_to`,`location` FROM `newactivity`` where `pkey`='%s'",$_GET['id']);
     $ResultIndex = DB_query($SQL,$db);
     $ActivityOwne = DB_fetch_row($ResultIndex);
     

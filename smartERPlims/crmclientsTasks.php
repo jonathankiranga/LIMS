@@ -72,7 +72,7 @@ if(isset($_POST['savetask'])){
            }
             //Alter table Tasks add time_from varchar(10),time_to varchar(10),location varchar(max)
             
-             $SQL=sprintf("INSERT INTO `Tasks`(
+             $SQL=sprintf("INSERT INTO `tasks``(
                 `userid`,`datecreated`,lastactivity,`TaskOwner`,`Taskname`,`datedue`,`Status`,
                 `Priority`,`frequency`,`taskdetails`,time_from,time_to,location)
              VALUES ('%s',NOW(),NOW(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
@@ -108,7 +108,7 @@ $SQL = array();
 
             if($frequencyint>0){
                   $dateR = GetNextRoutine($_POST["datedue"],$frequencyint);
-                  $SQL2 = sprintf("INSERT INTO `Tasks`(`userid`,`datecreated`,lastactivity,`TaskOwner`,`Taskname`,`datedue`,`Status`,
+                  $SQL2 = sprintf("INSERT INTO `tasks``(`userid`,`datecreated`,lastactivity,`TaskOwner`,`Taskname`,`datedue`,`Status`,
                    `Priority`,`frequency`,`taskdetails`) VALUES ('%s',NOW(),NOW(),'%s','%s','%s','%s','%s','%s','%s')",
                   $_SESSION['UserID'],$_POST["TaskOwner"],$_POST["Taskname"],$dateR,0,$_POST["Priority"],$_POST["frequency"], $_POST["taskdetails"]);
 
@@ -142,7 +142,7 @@ $SQL=sprintf("SELECT "
         . "`time_to`,"
         . "`location`,"
         . "`taskdetails` "
-        . "FROM `Tasks` where `pkey`='%s'",$_GET['id']);
+        . "FROM `tasks`` where `pkey`='%s'",$_GET['id']);
 $ResultIndex = DB_query($SQL,$db);
 $TaskOwne = DB_fetch_row($ResultIndex);
 

@@ -27,7 +27,7 @@ if(isset($_POST['AddNew'])){
     }
     
     if($i==0){
-        $sql=sprintf("INSERT INTO `NewContacts`
+        $sql=sprintf("INSERT INTO `newcontacts``
        (`company`,`postcode`,`city`,`country`,`Physical_Address`,`PIN_VAT`,`phone`,`email`
        ,`salesman` ,`Contact_Name` ,`Contact_Designation` ,`Contact_Telephone`
        ,`Contact_email`,`Alt_Contact_Name`,`Alt_Contact_Designation` ,`Alt_Contact_Telephone`
@@ -46,7 +46,7 @@ if(isset($_POST['AddNew'])){
 if(isset($_POST['Edit'])){
     if(mb_stristr($_SESSION['UserID'],$_POST['username'])==$_POST['username']){
             
-       $sql=sprintf("UPDATE `NewContacts` SET `company` = '%s',`postcode` = '%s' ,`city` = '%s' ,`country` = '%s'
+       $sql=sprintf("UPDATE `newcontacts`` SET `company` = '%s',`postcode` = '%s' ,`city` = '%s' ,`country` = '%s'
       ,`Physical_Address` = '%s',`PIN_VAT` = '%s' ,`phone` = '%s',`email` = '%s',`salesman` = '%s'
       ,`Contact_Name` = '%s',`Contact_Designation` = '%s' ,`Contact_Telephone` = '%s',`Contact_email` = '%s'
       ,`Alt_Contact_Name` = '%s',`Alt_Contact_Designation` = '%s' ,`Alt_Contact_Telephone` = '%s' ,`Alt_Contact_email` = '%s'
@@ -68,7 +68,7 @@ if(isset($_GET['itemcode'])){
       ,`postcode` ,`city` ,`country`,`Physical_Address`,`PIN_VAT` ,`phone` ,`email` ,`salesman`
       ,`Contact_Name` ,`Contact_Designation`,`Contact_Telephone`,`Contact_email`
       ,`Alt_Contact_Name` ,`Alt_Contact_Designation`,`Alt_Contact_Telephone`,`Alt_Contact_email`
-      ,`createdby`  FROM `NewContacts` where pkey=".$_GET['itemcode'],$db);
+      ,`createdby`  FROM `newcontacts`` where pkey=".$_GET['itemcode'],$db);
     $myrow = DB_fetch_row($result);
       $_POST['company']=trim($myrow[0]);
       $_POST['postcode']=trim($myrow[1]);
@@ -176,7 +176,7 @@ echo '<form><div class="container">
       ,`postcode` ,`Physical_Address`,`PIN_VAT` ,`phone` ,`email` ,`salesman`
       ,`Contact_Name` ,`Contact_Designation`,`Contact_Telephone`,`Contact_email`
       ,`Alt_Contact_Name` ,`Alt_Contact_Designation`,`Alt_Contact_Telephone`,`Alt_Contact_email`
-      ,`createdby`,`Date_Created`,`Last_Activity` ,pkey FROM `NewContacts`', $db);
+      ,`createdby`,`Date_Created`,`Last_Activity` ,pkey FROM `newcontacts``', $db);
        
        
        $k=0;
