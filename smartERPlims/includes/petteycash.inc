@@ -161,7 +161,7 @@ class Petteycash{
        
          $translatedamount = ($this->Form['Grossamount']) * $this->getrates($this->SuppCurrency,$this->Form['currencycode']);
                       
-          $this->SQLARRAY[]="INSERT INTO SupplierStatement (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
+          $this->SQLARRAY[]="INSERT INTO `supplierstatement` (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
            VALUES ('".FormatDateForSQL($this->Form['date']) ."','". $this->Form['documentno'] ."',2,'". $this->Form['itemcode']."',".
                   $translatedamount .",'".$JourNal."','".$this->Form['currencycode']."' )";
                     
@@ -176,7 +176,7 @@ class Petteycash{
             FormatDateForSQL($this->Form['date']),$_SESSION['UserID'],$this->Form['Grossamount']
             ,$this->Form['itemcode'],$this->Form['comments'],$this->Form['documentno'],$JourNal,$this->Form['shiftno']);
       
-        $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+        $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
            (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode
            ,journal,amount,ClearedAmount,narrative,exchangerate)
             VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code'],
@@ -185,7 +185,7 @@ class Petteycash{
           $this->ExtractRate($this->Form['currencycode']));
         
         
-            $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+            $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
            (journalno,Docdate,period,DocumentNo,DocumentType
            ,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
            ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
@@ -209,7 +209,7 @@ class Petteycash{
                        FormatDateForSQL($this->Form['date']),$_SESSION['UserID'],$this->Form['Grossamount']
                        ,$this->Form['acctno'],$this->Form['comments'],$this->Form['documentno'],$JourNal,$this->Form['shiftno']);
 
-                   $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+                   $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
                       (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode
                       ,journal,amount,ClearedAmount,narrative,exchangerate)
                        VALUES ('%s','%s',2 ,'%s','GL' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code'],
@@ -217,7 +217,7 @@ class Petteycash{
                     (0-$this->Form['Grossamount']),(0-$this->Form['Grossamount']),$this->Form['comments'], $this->ExtractRate($this->Form['currencycode']));
 
 
-                    $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+                    $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
                      (journalno,Docdate,period,DocumentNo,DocumentType
                      ,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
                      ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
@@ -228,7 +228,7 @@ class Petteycash{
 
                     if(mb_strlen($this->Form['VATGLaccount'])>0){
                         
-                        $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+                        $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
                         (journalno,Docdate,period,DocumentNo,DocumentType
                         ,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
                         ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
@@ -247,7 +247,7 @@ class Petteycash{
                 $this->Form['Grossamount'] * $this->getrates($this->Form['currencycodeFrom'],$this->Form['currencycode'])
                 ,$this->Form['itemcode'],$this->Form['comments'],$this->Form['documentno'],$JourNal,$this->Form['shiftno']);
 
-                $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+                $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
                 (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode,journal,amount,ClearedAmount,narrative,exchangerate)
                  VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code'],
                 FormatDateForSQL($this->Form['date']),$this->Form['documentno'],$this->Form['itemcode'],$JourNal,  
@@ -255,14 +255,14 @@ class Petteycash{
                 ,($this->Form['Grossamount']),$this->Form['comments'],$this->ExtractRate($this->Form['currencycode']));
 
 
-                 $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+                 $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
                  (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode,journal,amount,ClearedAmount,narrative,exchangerate)
                  VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code2'],
                  FormatDateForSQL($this->Form['date']),$this->Form['documentno'],$this->Form['itemcode'],$JourNal,  
                  (0-$this->Form['Grossamount']),(0-$this->Form['Grossamount']),$this->Form['comments'], $this->ExtractRate($this->Form['currencycodeFrom']));
 
 
-                $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+                $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
                 (journalno,Docdate,period,DocumentNo,DocumentType,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
                 ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
                 VALUES ('%s','%s' ,'%s','%s',2,'%s','%s' ,%f ,'%s' ,%f ,' ','%s' ,1,'%s' ,0 ,' ' ,0 ,' ' ,' ')", $JourNal ,FormatDateForSQL($this->Form['date']), $PERIODNO ,
@@ -281,7 +281,7 @@ class Petteycash{
        
          $translatedamount = ($this->Form['Grossamount']) * $this->getrates($this->SuppCurrency,$this->Form['currencycode']);
                       
-          $this->SQLARRAY[]="INSERT INTO CustomerStatement (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
+          $this->SQLARRAY[]="INSERT INTO `customerstatement` (Date,Documentno,Documenttype,Accountno,Grossamount,JournalNo ,Currency)
            VALUES ('".FormatDateForSQL($this->Form['date']) ."','". $this->Form['documentno'] ."',2,'". $this->Form['itemcode']."',".
                   $translatedamount .",'".$JourNal."','".$this->Form['currencycode']."' )";
                     
@@ -296,7 +296,7 @@ class Petteycash{
             FormatDateForSQL($this->Form['date']),$_SESSION['UserID'],$this->Form['Grossamount']
             ,$this->Form['itemcode'],$this->Form['comments'],$this->Form['documentno'],$JourNal,$this->Form['shiftno']);
       
-        $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+        $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
            (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode
            ,journal,amount,ClearedAmount,narrative,exchangerate)
             VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code'],
@@ -305,7 +305,7 @@ class Petteycash{
           $this->ExtractRate($this->Form['currencycode']));
         
         
-            $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+            $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
            (journalno,Docdate,period,DocumentNo,DocumentType
            ,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
            ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
@@ -329,7 +329,7 @@ class Petteycash{
                 $this->Form['Grossamount'] * $this->getrates($this->Form['currencycodeFrom'],$this->Form['currencycode'])
                 ,$this->Form['itemcode'],$this->Form['comments'],$this->Form['documentno'],$JourNal,$this->Form['shiftno']);
 
-                $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+                $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
                 (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode,journal,amount,ClearedAmount,narrative,exchangerate)
                  VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code'],
                 FormatDateForSQL($this->Form['date']),$this->Form['documentno'],$this->Form['itemcode'],$JourNal,  
@@ -337,14 +337,14 @@ class Petteycash{
                 ,(0-$this->Form['Grossamount']),$this->Form['comments'],$this->ExtractRate($this->Form['currencycode']));
 
 
-                 $this->SQLARRAY[]= sprintf("INSERT INTO BankTransactions
+                 $this->SQLARRAY[]= sprintf("INSERT INTO `banktransactions`
                  (bankcode,DocDate,doctype,DocumentNo,TransType,itemcode,journal,amount,ClearedAmount,narrative,exchangerate)
                  VALUES ('%s','%s',2 ,'%s','CR' ,'%s' ,'%s',%f ,%f ,'%s' ,%f )",$this->Form['Bank_Code2'],
                  FormatDateForSQL($this->Form['date']),$this->Form['documentno'],$this->Form['itemcode'],$JourNal,  
                  ($this->Form['Grossamount']),($this->Form['Grossamount']),$this->Form['comments'], $this->ExtractRate($this->Form['currencycodeFrom']));
 
 
-                $this->SQLARRAY[] = sprintf("INSERT INTO Generalledger
+                $this->SQLARRAY[] = sprintf("INSERT INTO `generalledger`
                 (journalno,Docdate,period,DocumentNo,DocumentType,accountcode,balaccountcode,amount,currencycode,ExchangeRate,suppliercode ,bankcode
                 ,reconcilled,narration,ExchangeRateDiff,VATaccountcode,VATamount,dimension,dimension2)
                 VALUES ('%s','%s' ,'%s','%s',2,'%s','%s' ,%f ,'%s' ,%f ,' ','%s' ,1,'%s' ,0 ,' ' ,0 ,' ' ,' ')", 

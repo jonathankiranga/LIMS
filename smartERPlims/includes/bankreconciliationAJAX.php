@@ -127,7 +127,7 @@ $DRamount=0;$Uncleared=0;$Difference=0;$CRamount=0;
 
 $banklist=array();
 
-$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `BankAccounts`", $db);
+$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts``", $db);
 while($row=DB_fetch_array($resultindex)){
     $banklist[trim($row['accountcode'])]=$row['bankName'].' '.$row['BranchName'].' '.$row['currency'];
 }
@@ -147,7 +147,7 @@ while($row=DB_fetch_array($resultindex)){
       ,`exchangerate`
       ,IFNULL(`cleared`,0) AS `cleared`
       ,`BankTransactions`.`reconciled`
-  FROM `BankTransactions` 
+  FROM `banktransactions`` 
   left join `systypes_1` on `BankTransactions`.`doctype`=`systypes_1`.typeid 
   where (`bankcode`='".$_POST['Bank_Code']."')";
    

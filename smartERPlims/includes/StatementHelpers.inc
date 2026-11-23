@@ -1,5 +1,5 @@
 <?php
-$ResultIndex = DB_query("SELECT `periodno` FROM `FinancialPeriods`", $db);
+$ResultIndex = DB_query("SELECT `periodno` FROM `financialperiods``", $db);
 $row = DB_fetch_row($ResultIndex);
 
 if (empty($row) || empty($row[0])) {
@@ -17,7 +17,7 @@ function db_customerstatements($accountno, $yearindex) {
     // 1. Get period date range
     $dateResult = DB_query(
         "SELECT MIN(start_date), MAX(end_date)
-         FROM FinancialPeriods
+         FROM `financialperiods`
          WHERE periodno=" . $yearindex,
         $db
     );
@@ -28,7 +28,7 @@ function db_customerstatements($accountno, $yearindex) {
     // 2. Get opening balance ONCE
     $balResult = DB_query(
         "SELECT IFNULL(SUM(Grossamount), 0)
-         FROM CustomerStatement
+         FROM `customerstatement`
          WHERE Accountno='" . $accountno . "'
            AND Date < '" . $dateFrom . "'",
         $db
@@ -45,7 +45,7 @@ function db_customerstatements($accountno, $yearindex) {
                 cs.Grossamount,
                 (cs.Grossamount - IFNULL((
                     SELECT SUM(ra.amount)
-                    FROM ReceiptsAllocation ra
+                    FROM `receiptsallocation` ra
                     WHERE ra.itemcode  = cs.Accountno
                       AND ra.date      = cs.Date
                       AND ra.invoiceno = cs.Documentno
@@ -53,7 +53,7 @@ function db_customerstatements($accountno, $yearindex) {
                 ), 0)) AS pamount,
                 (SELECT s.typename FROM systypes_1 s
                  WHERE s.typeid = cs.Documenttype LIMIT 1) AS doctypes
-            FROM CustomerStatement cs
+            FROM `customerstatement` cs
             WHERE cs.Accountno='" . $accountno . "'
               AND cs.Date BETWEEN '" . $dateFrom . "' AND CURDATE()
             ORDER BY cs.Date";
@@ -73,7 +73,7 @@ function db_ageingCustomers_row($account){
              IFNULL(SUM(CASE
                  WHEN cs.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -82,7 +82,7 @@ function db_ageingCustomers_row($account){
                  WHEN cs.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 60 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -91,7 +91,7 @@ function db_ageingCustomers_row($account){
                  WHEN cs.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 60 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -100,7 +100,7 @@ function db_ageingCustomers_row($account){
                  WHEN cs.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 120 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 90 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -108,12 +108,12 @@ function db_ageingCustomers_row($account){
              IFNULL(SUM(CASE
                  WHEN cs.Date < DATE_SUB(CURDATE(), INTERVAL 120 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
                  ELSE 0 END), 0) AS over90days
-         FROM CustomerStatement cs
+         FROM `customerstatement` cs
          WHERE cs.Accountno='" . $account . "'
            AND cs.Grossamount > 0";
 
@@ -137,7 +137,7 @@ function db_vendorstatements($accountno, $yearindex) {
     // 1. Get period date range
     $dateResult = DB_query(
         "SELECT MIN(start_date), MAX(end_date)
-         FROM FinancialPeriods
+         FROM `financialperiods`
          WHERE periodno=" . $yearindex,
         $db
     );
@@ -148,7 +148,7 @@ function db_vendorstatements($accountno, $yearindex) {
     // 2. Get opening balance ONCE
     $balResult = DB_query(
         "SELECT IFNULL(SUM(Grossamount), 0)
-         FROM SupplierStatement
+         FROM `supplierstatement`
          WHERE Accountno='" . $accountno . "'
            AND Date < '" . $dateFrom . "'",
         $db
@@ -165,7 +165,7 @@ function db_vendorstatements($accountno, $yearindex) {
                 ss.Grossamount,
                 (ss.Grossamount - IFNULL((
                     SELECT SUM(pa.amount)
-                    FROM PaymentsAllocation pa
+                    FROM `paymentsallocation` pa
                     WHERE pa.itemcode  = ss.Accountno
                       AND pa.date      = ss.Date
                       AND pa.invoiceno = ss.Documentno
@@ -173,7 +173,7 @@ function db_vendorstatements($accountno, $yearindex) {
                 ), 0)) AS pamount,
                 (SELECT s.typename FROM systypes_1 s
                  WHERE s.typeid = ss.Documenttype LIMIT 1) AS doctypes
-            FROM SupplierStatement ss
+            FROM `supplierstatement` ss
             WHERE ss.Accountno='" . $accountno . "'
               AND ss.Date BETWEEN '" . $dateFrom . "' AND CURDATE()
             ORDER BY ss.Date";
@@ -193,7 +193,7 @@ function db_ageingSuppliers_row($account){
              IFNULL(SUM(CASE
                  WHEN ss.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -202,7 +202,7 @@ function db_ageingSuppliers_row($account){
                  WHEN ss.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 60 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -211,7 +211,7 @@ function db_ageingSuppliers_row($account){
                  WHEN ss.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 60 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -220,7 +220,7 @@ function db_ageingSuppliers_row($account){
                  WHEN ss.Date BETWEEN DATE_SUB(CURDATE(), INTERVAL 120 DAY)
                                   AND DATE_SUB(CURDATE(), INTERVAL 90 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -228,12 +228,12 @@ function db_ageingSuppliers_row($account){
              IFNULL(SUM(CASE
                  WHEN ss.Date < DATE_SUB(CURDATE(), INTERVAL 120 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
                  ELSE 0 END), 0) AS over90days
-         FROM SupplierStatement ss
+         FROM `supplierstatement` ss
          WHERE ss.Accountno='" . $account . "'
            AND ss.Grossamount < 0";
 
@@ -256,17 +256,17 @@ function db_autoallocatevendors($accountno){
     $receiptsSQL = "SELECT
             (ss.Grossamount - IFNULL((
                 SELECT SUM(pa.amount)
-                FROM PaymentsAllocation pa
+                FROM `paymentsallocation` pa
                 WHERE pa.receiptjournal = ss.JournalNo
                   AND pa.itemcode = '" . $accountno . "'
             ),0)) AS AMOUNT2,
             ss.JournalNo,
             ss.Documentno
-        FROM SupplierStatement ss
+        FROM `supplierstatement` ss
         WHERE ss.Accountno = '" . $accountno . "'
           AND (ss.Grossamount - IFNULL((
                 SELECT SUM(pa.amount)
-                FROM PaymentsAllocation pa
+                FROM `paymentsallocation` pa
                 WHERE pa.receiptjournal = ss.JournalNo
                   AND pa.itemcode = '" . $accountno . "'
           ),0)) > 0
@@ -281,16 +281,16 @@ function db_autoallocatevendors($accountno){
         $invoicesSQL = "SELECT
                 (ss.Grossamount + IFNULL((
                     SELECT SUM(pa.amount)
-                    FROM PaymentsAllocation pa
+                    FROM `paymentsallocation` pa
                     WHERE pa.journalno = ss.JournalNo
                       AND pa.itemcode = '" . $accountno . "'
                 ),0)) AS AMOUNT2,
                 ss.JournalNo
-            FROM SupplierStatement ss
+            FROM `supplierstatement` ss
             WHERE ss.Accountno = '" . $accountno . "'
               AND (ss.Grossamount + IFNULL((
                     SELECT SUM(pa.amount)
-                    FROM PaymentsAllocation pa
+                    FROM `paymentsallocation` pa
                     WHERE pa.journalno = ss.JournalNo
                       AND pa.itemcode = '" . $accountno . "'
               ),0)) < 0
@@ -302,20 +302,20 @@ function db_autoallocatevendors($accountno){
             $journalNoInv  = DB_escape_string($invoiceRow['JournalNo']);
 
             if(($amountReceipt + $amountInvoice) > 0){
-                DB_query("INSERT INTO PaymentsAllocation
+                DB_query("INSERT INTO `paymentsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, Date, Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', (Grossamount * -1), '" . $journalReceipt . "'
-                    FROM SupplierStatement
+                    FROM `supplierstatement`
                     WHERE JournalNo = '" . $journalNoInv . "'", $db);
 
                 $amountReceipt = $amountReceipt + $amountInvoice;
             } else {
-                DB_query("INSERT INTO PaymentsAllocation
+                DB_query("INSERT INTO `paymentsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, Date, Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', " . $amountReceipt . ", '" . $journalReceipt . "'
-                    FROM SupplierStatement
+                    FROM `supplierstatement`
                     WHERE JournalNo = '" . $journalNoInv . "'", $db);
 
                 $amountReceipt = $amountReceipt + $amountInvoice;
@@ -331,7 +331,7 @@ function db_ageingCustomersReport_row($account, $periodno){
     $periodno = (int)$periodno;
 
     $cutoffResult = DB_query("SELECT MAX(end_date) AS cutoff_date
-                              FROM FinancialPeriods
+                              FROM `financialperiods`
                               WHERE periodno='" . $periodno . "'", $db);
     $cutoffRow = DB_fetch_row($cutoffResult);
     $cutoff = (!empty($cutoffRow[0])) ? $cutoffRow[0] : date('Y-m-d');
@@ -340,7 +340,7 @@ function db_ageingCustomersReport_row($account, $periodno){
              IFNULL(SUM(CASE
                  WHEN cs.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 30 DAY) AND '" . $cutoff . "'
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -349,7 +349,7 @@ function db_ageingCustomersReport_row($account, $periodno){
                  WHEN cs.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 60 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 30 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -358,7 +358,7 @@ function db_ageingCustomersReport_row($account, $periodno){
                  WHEN cs.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 90 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 60 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -367,7 +367,7 @@ function db_ageingCustomersReport_row($account, $periodno){
                  WHEN cs.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 120 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 90 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
@@ -375,12 +375,12 @@ function db_ageingCustomersReport_row($account, $periodno){
              IFNULL(SUM(CASE
                  WHEN cs.Date < DATE_SUB('" . $cutoff . "', INTERVAL 120 DAY)
                  THEN cs.Grossamount + IFNULL(
-                     (SELECT SUM(ra.amount) FROM ReceiptsAllocation ra
+                     (SELECT SUM(ra.amount) FROM `receiptsallocation` ra
                       WHERE ra.itemcode  = cs.Accountno
                         AND ra.invoiceno = cs.Documentno
                         AND ra.journalno = cs.JournalNo), 0)
                  ELSE 0 END), 0) AS over90days
-         FROM CustomerStatement cs
+         FROM `customerstatement` cs
          WHERE cs.Accountno='" . $account . "'
            AND cs.Grossamount > 0";
 
@@ -402,7 +402,7 @@ function db_ageingSuppliersReport_row($account, $periodno){
     $periodno = (int)$periodno;
 
     $cutoffResult = DB_query("SELECT MAX(end_date) AS cutoff_date
-                              FROM FinancialPeriods
+                              FROM `financialperiods`
                               WHERE periodno='" . $periodno . "'", $db);
     $cutoffRow = DB_fetch_row($cutoffResult);
     $cutoff = (!empty($cutoffRow[0])) ? $cutoffRow[0] : date('Y-m-d');
@@ -411,7 +411,7 @@ function db_ageingSuppliersReport_row($account, $periodno){
              IFNULL(SUM(CASE
                  WHEN ss.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 30 DAY) AND '" . $cutoff . "'
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -420,7 +420,7 @@ function db_ageingSuppliersReport_row($account, $periodno){
                  WHEN ss.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 60 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 30 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -429,7 +429,7 @@ function db_ageingSuppliersReport_row($account, $periodno){
                  WHEN ss.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 90 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 60 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -438,7 +438,7 @@ function db_ageingSuppliersReport_row($account, $periodno){
                  WHEN ss.Date BETWEEN DATE_SUB('" . $cutoff . "', INTERVAL 120 DAY)
                                   AND DATE_SUB('" . $cutoff . "', INTERVAL 90 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
@@ -446,12 +446,12 @@ function db_ageingSuppliersReport_row($account, $periodno){
              IFNULL(SUM(CASE
                  WHEN ss.Date < DATE_SUB('" . $cutoff . "', INTERVAL 120 DAY)
                  THEN ss.Grossamount + IFNULL(
-                     (SELECT SUM(pa.amount) FROM PaymentsAllocation pa
+                     (SELECT SUM(pa.amount) FROM `paymentsallocation` pa
                       WHERE pa.itemcode  = ss.Accountno
                         AND pa.invoiceno = ss.Documentno
                         AND pa.journalno = ss.JournalNo), 0)
                  ELSE 0 END), 0) AS over90days
-         FROM SupplierStatement ss
+         FROM `supplierstatement` ss
          WHERE ss.Accountno='" . $account . "'
            AND ss.Grossamount < 0";
 
