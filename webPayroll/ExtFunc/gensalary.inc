@@ -232,7 +232,7 @@ Function GetWDOWK(){
     Global $db;
     $status=array();
     
-   $SQL="SELECT `Dayoftheweek`,`isworkingday` FROM `Dayoftheweeks` ";
+   $SQL="SELECT `Dayoftheweek`,`isworkingday` FROM `dayoftheweeks` ";
    $ResultIndex=DB_query($SQL,$db);
    while($row=DB_fetch_array($ResultIndex)){
         $status[$row['Dayoftheweek']]=$row['isworkingday'];
@@ -1198,16 +1198,16 @@ function payslips() {
         ];
 
         // Loan deductions
-        $sqlLoans = "SELECT Prlproducts.description, prlloantrans.amount, 
+        $sqlLoans = "SELECT prlproducts.description, prlloantrans.amount, 
                             CASE 
                                 WHEN prlstaffloans.saving = 1 THEN prlstaffloans.principal + SUM(prlloantrans.amount) 
                                 ELSE prlstaffloans.principal - COALESCE(prlstaffloans.openbalance, 0) - SUM(prlloantrans.amount) 
                             END AS LoanBalance
                      FROM prlloantrans 
                      JOIN prlstaffloans ON prlloantrans.loanindex = prlstaffloans.loanindex 
-                     JOIN Prlproducts ON prlstaffloans.deductcode = Prlproducts.code 
+                     JOIN prlproducts ON prlstaffloans.deductcode = prlproducts.code 
                      WHERE prlloantrans.pfno = '$pfno' AND prlloantrans.payroll_id = '$pid' AND prlloantrans.amount > 0 
-                     GROUP BY Prlproducts.description, prlstaffloans.principal, prlloantrans.amount, prlstaffloans.saving, prlstaffloans.openbalance";
+                     GROUP BY prlproducts.description, prlstaffloans.principal, prlloantrans.amount, prlstaffloans.saving, prlstaffloans.openbalance";
 
         $resultLoans = DB_query($sqlLoans, $db);
         while ($loan = DB_fetch_array($resultLoans)) {
@@ -1228,10 +1228,10 @@ function payslips() {
             'Pfno' => $pfno,
             'Format' => 'N'
         ];
-        $sqlLoanInterest = "SELECT CONCAT('% on ', TRIM(Prlproducts.description)) AS description, prlloantrans.interest 
+        $sqlLoanInterest = "SELECT CONCAT('% on ', TRIM(prlproducts.description)) AS description, prlloantrans.interest 
                             FROM prlloantrans 
                             JOIN prlstaffloans ON prlloantrans.loanindex = prlstaffloans.loanindex 
-                            JOIN Prlproducts ON prlstaffloans.deductcode = Prlproducts.code 
+                            JOIN prlproducts ON prlstaffloans.deductcode = prlproducts.code 
                             WHERE prlloantrans.pfno = '$pfno' AND prlloantrans.payroll_id = '$pid' AND prlloantrans.interest > 0";
         $resultLoanInterest = DB_query($sqlLoanInterest, $db);
         while ($interest = DB_fetch_array($resultLoanInterest)) {
@@ -1615,16 +1615,16 @@ global $db;
         ];
 
         // Loan deductions
-        $sqlLoans = "SELECT Prlproducts.description, prlloantrans.amount, 
+        $sqlLoans = "SELECT prlproducts.description, prlloantrans.amount, 
                             CASE 
                                 WHEN prlstaffloans.saving = 1 THEN prlstaffloans.principal + SUM(prlloantrans.amount) 
                                 ELSE prlstaffloans.principal - COALESCE(prlstaffloans.openbalance, 0) - SUM(prlloantrans.amount) 
                             END AS LoanBalance
                      FROM prlloantrans 
                      JOIN prlstaffloans ON prlloantrans.loanindex = prlstaffloans.loanindex 
-                     JOIN Prlproducts ON prlstaffloans.deductcode = Prlproducts.code 
+                     JOIN prlproducts ON prlstaffloans.deductcode = prlproducts.code 
                      WHERE prlloantrans.pfno = '$pfno' AND prlloantrans.payroll_id = '$pid' AND prlloantrans.amount > 0 
-                     GROUP BY Prlproducts.description, prlstaffloans.principal, prlloantrans.amount, prlstaffloans.saving, prlstaffloans.openbalance";
+                     GROUP BY prlproducts.description, prlstaffloans.principal, prlloantrans.amount, prlstaffloans.saving, prlstaffloans.openbalance";
 
         $resultLoans = DB_query($sqlLoans, $db);
         while ($loan = DB_fetch_array($resultLoans)) {
@@ -1645,10 +1645,10 @@ global $db;
             'Pfno' => $pfno,
             'Format' => 'N'
         ];
-        $sqlLoanInterest = "SELECT CONCAT('% on ', TRIM(Prlproducts.description)) AS description, prlloantrans.interest 
+        $sqlLoanInterest = "SELECT CONCAT('% on ', TRIM(prlproducts.description)) AS description, prlloantrans.interest 
                             FROM prlloantrans 
                             JOIN prlstaffloans ON prlloantrans.loanindex = prlstaffloans.loanindex 
-                            JOIN Prlproducts ON prlstaffloans.deductcode = Prlproducts.code 
+                            JOIN prlproducts ON prlstaffloans.deductcode = prlproducts.code 
                             WHERE prlloantrans.pfno = '$pfno' AND prlloantrans.payroll_id = '$pid' AND prlloantrans.interest > 0";
         $resultLoanInterest = DB_query($sqlLoanInterest, $db);
         while ($interest = DB_fetch_array($resultLoanInterest)) {
@@ -2056,7 +2056,7 @@ function MakeTimedataReady($fromdate, $todate, $period) {
         // Step 4b: Check if the current date is a working day and not a holiday
         $dateName = date('l', strtotime($date));  // Get the day of the week (e.g., Monday, Tuesday)
         
-        $query = "SELECT isworkingday FROM Dayoftheweeks WHERE Dayoftheweek = '$dateName'";
+        $query = "SELECT isworkingday FROM dayoftheweeks WHERE Dayoftheweek = '$dateName'";
         $result = mysqli_query($db, $query);
         $row = mysqli_fetch_assoc($result);
         $isWorkingDay = $row['isworkingday'];
@@ -2131,7 +2131,7 @@ function SetExpectedDateOfReturn($fromDate, $noOfDays = 0) {
         $dayName = date('l', strtotime($date));
 
         // Check if it's a working day using a database query
-        $isWorkingDayQuery = "SELECT isworkingday FROM Dayoftheweeks WHERE Dayoftheweek = '$dayName'";
+        $isWorkingDayQuery = "SELECT isworkingday FROM dayoftheweeks WHERE Dayoftheweek = '$dayName'";
         $result = DB_query($isWorkingDayQuery, $db);
         $isWorkingDay = DB_fetch_array($result)['isworkingday'];
 
@@ -2174,7 +2174,7 @@ function GetDOWdateOfReturn($checkDate) {
         $dayName = date('l', strtotime($date));
 
         // Check if it's a working day
-        $isWorkingDayQuery = "SELECT isworkingday FROM Dayoftheweeks WHERE Dayoftheweek = '$dayName'";
+        $isWorkingDayQuery = "SELECT isworkingday FROM dayoftheweeks WHERE Dayoftheweek = '$dayName'";
         $result = DB_query($isWorkingDayQuery, $db);
         $isWorkingDay = DB_fetch_array($result)['isworkingday'];
 
