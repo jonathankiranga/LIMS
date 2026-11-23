@@ -12,7 +12,7 @@ if ($sourceDocumentNo === '' || !preg_match('/^[A-Za-z0-9._\\/-]{1,20}$/', $sour
 
 $sourceHeader = false;
 if (count($grnValidationErrors) === 0) {
-    $headerResult = DB_query("SELECT documentno, vendorcode FROM PurchaseHeader WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'", $db);
+    $headerResult = DB_query("SELECT documentno, vendorcode FROM `purchaseheader` WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'", $db);
     $sourceHeader = DB_fetch_array($headerResult);
     if (!$sourceHeader) {
         $grnValidationErrors[] = 'The selected Purchase Order was not found.';
@@ -44,7 +44,7 @@ if (!isset($_POST['Toreceive']) || !is_array($_POST['Toreceive'])) {
                     IFNULL(Qunatity_delivered,0) AS Qunatity_delivered,
                     UnitPrice, invoiceamount, vatamount, partperunit,
                     unitofreceivedIn, vatrate, inclusive, docdate
-                FROM PurchaseLine
+                FROM `purchaseline`
                 WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'
                   AND entryno=" . (int)$entryNo, $db);
         $line = DB_fetch_array($lineResult);
@@ -67,7 +67,7 @@ if (!isset($_POST['Toreceive']) || !is_array($_POST['Toreceive'])) {
             $grnValidationErrors[] = 'Select a valid store for item ' . $line['code'] . '.';
             continue;
         }
-        $storeResult = DB_query("SELECT code FROM Stores WHERE code='" . $location . "'", $db);
+        $storeResult = DB_query("SELECT code FROM `stores` WHERE code='" . $location . "'", $db);
         if (!DB_fetch_array($storeResult)) {
             $grnValidationErrors[] = 'The selected store is invalid for item ' . $line['code'] . '.';
             continue;
@@ -121,7 +121,7 @@ if (count($grnValidationErrors) > 0) {
             }
         }
         $orderValueResult = DB_query("SELECT SUM(invoiceamount) AS ordervalue
-            FROM PurchaseLine WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'", $db);
+            FROM `purchaseline` WHERE documenttype=18 AND documentno='" . $sourceDocumentNo . "'", $db);
         $orderValueRow = DB_fetch_array($orderValueResult);
         $orderValue = isset($orderValueRow['ordervalue']) ? (float)$orderValueRow['ordervalue'] : 0;
         $freightRatio = ($orderValue > 0) ? min(1, max(0, $receiptValue / $orderValue)) : 0;
@@ -136,7 +136,7 @@ if (count($grnValidationErrors) > 0) {
             $itemCode = $line['code'];
             $partPerUnit = (float)$line['partperunit'];
 
-            $sql[] = sprintf("UPDATE PurchaseLine SET
+            $sql[] = sprintf("UPDATE `purchaseline` SET
                     Qunatity_delivered=IFNULL(Qunatity_delivered,0)+%.4f,
                     Quantity_toinvoice=QuantityToReceive-(IFNULL(Qunatity_delivered,0)+%.4f)
                     WHERE documenttype=18 AND documentno='%s' AND entryno=%d",
@@ -153,7 +153,7 @@ if (count($grnValidationErrors) > 0) {
                        IF(PurchaseLine.partperunit>1, %.4f, 0),
                        IF(PurchaseLine.partperunit=1, %.4f, 0),
                        PurchaseLine.UnitPrice, '%s', '%s', '%s', '%s', PurchaseLine.partperunit
-                FROM PurchaseLine
+                FROM `purchaseline`
                 WHERE PurchaseLine.documenttype=18 AND PurchaseLine.documentno='%s'
                   AND PurchaseLine.entryno=%d",
                 $entryNo, $qty, $qty, $qty, $qty, $qty, $location, $journal,
@@ -184,7 +184,7 @@ Function RecordGRN($DOCNO, $receivedLines, $freightRatio){
     Global $db, $sql;
     $sourceDocumentNo = $_SESSION['DocumentNo'];
 
-    $sql[] = "INSERT INTO PurchaseHeader
+    $sql[] = "INSERT INTO `purchaseheader`
            (documenttype, documentno, docdate
            ".(Is_date($_POST['Salesoderdate'])?',oderdate':'')."
            ".(Is_date($_POST['datedue'])?',duedate':'')."
@@ -197,12 +197,12 @@ Function RecordGRN($DOCNO, $receivedLines, $freightRatio){
            ,vendorcode, vendorname, yourreference, locationcode, postinggroup,
             currencycode, status, userid, period, vatinclusive, Dimension_1,
             Dimension_2, (IFNULL(freight,0) * ".sprintf('%.8f', (float)$freightRatio).")
-       FROM PurchaseHeader
+       FROM `purchaseheader`
        WHERE documenttype=18 AND documentno='".$sourceDocumentNo."')";
 
     foreach ($receivedLines as $entryNo => $receipt) {
         $qty = $receipt['qty'];
-        $sql[] = sprintf("INSERT INTO PurchaseLine
+        $sql[] = sprintf("INSERT INTO `purchaseline`
                 (documenttype, docdate, documentno, code, description, unitofmeasure,
                  Quantity, UnitPrice, vatamount, invoiceamount, vatrate, inclusive, partperunit)
             SELECT 30, docdate, '%s', code, description, unitofreceivedIn, %.4f,
@@ -210,7 +210,7 @@ Function RecordGRN($DOCNO, $receivedLines, $freightRatio){
                    ROUND(vatamount * (%.4f / NULLIF(QuantityToReceive,0)),2),
                    ROUND(invoiceamount * (%.4f / NULLIF(QuantityToReceive,0)),2),
                    vatrate, inclusive, partperunit
-            FROM PurchaseLine
+            FROM `purchaseline`
             WHERE documenttype=18 AND documentno='%s' AND entryno=%d",
             $DOCNO, $qty, $qty, $qty, $sourceDocumentNo, $entryNo);
     }

@@ -91,9 +91,9 @@ if ($bank2 !== '' && $bank2 === $bank1) {
     $bank2 = '';
 }
 <<<<<<< HEAD
-$sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
+$sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
 =======
-$sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank1) . "', "
+$sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($bank1) . "', "
         . "externaldocumentno='" . $db->real_escape_string($bank2) . "' "
         . "WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
 >>>>>>> 9dd73ced43e182e896c61acca6bcfbbaa1de362b
@@ -141,7 +141,7 @@ $sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank
             $rowInclusive = isset($row['inclusive']) ? (int)((bool)$row['inclusive']) : (int)((bool)$VATinclusive);
 
             $sql[] = sprintf(
-                "INSERT INTO SalesLine
+                "INSERT INTO `salesline`
                    (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,
                     vatamount,invoiceamount,vatrate,inclusive,locationcode,partperunit,LineDiscountPercent,
                     shipping,packagescharge,PriceInPricelist,totalchargedcontainers,containercode,sampleID,TAT)
@@ -180,7 +180,7 @@ $sql[] = "UPDATE SalesHeader SET locationcode='" . $db->real_escape_string($bank
     $sql[]=COGSPostGL($PeriodNo,$journal,$INVOICENO);
     $sql[]=CustomerStatemet($journal,$INVOICENO);
     
-    $checkResult = DB_query("SELECT COUNT(*) FROM SalesLine sl
+    $checkResult = DB_query("SELECT COUNT(*) FROM `salesline` sl
         JOIN stockmaster sm ON sl.code = sm.itemcode
         JOIN inventorypostinggroup ipg ON ipg.code = sm.postinggroup
         WHERE sl.documentno = '".$_SESSION['DocumentNo']."'
@@ -298,7 +298,7 @@ function PostDebtors($period,$journal,$doc){
       ,SalesHeader.documenttype
       ,SalesHeader.postinggroup
       ,'%s'
-  FROM SalesHeader join SalesLine 
+  FROM `salesheader` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         where SalesHeader.documentno='%s' 
@@ -412,7 +412,7 @@ function VATPostGL($period,$journal,$doc){
 }
 
 Function CustomerStatemet($journal,$doc){
-    $sql=sprintf("INSERT INTO CustomerStatement
+    $sql=sprintf("INSERT INTO `customerstatement`
            (Date
            ,Documentno
            ,Documenttype
