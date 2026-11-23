@@ -19,9 +19,9 @@ $query = "SELECT
     SH.Date,
     ST.HeaderID
 FROM sample_tests ST
-JOIN Sample_Header SH 
+JOIN sample_header SH 
     ON ST.HeaderID = SH.HeaderID
-JOIN TestStandards ts 
+JOIN teststandards ts 
     ON ST.StandardID = ts.StandardID
 LEFT JOIN samples_received SR 
        ON ST.SampleID = SR.sample_id 
