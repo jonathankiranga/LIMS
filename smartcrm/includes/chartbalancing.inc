@@ -10,14 +10,14 @@
  *   _acctGroupOrder()             – GROUP BY / ORDER BY tail
  *
  * Account-range boundaries (e.g. salesfrom/salesto) are fetched once from
- * Accountsetup per method and embedded as literals, eliminating the
+ * accountsetup per method and embedded as literals, eliminating the
  * @codefrom/@codeto variable pattern from the MSSQL procedures.
  *
  * Compatible: PHP 7.0+, MySQL 5.7+
  */
 
 // ---------------------------------------------------------------------------
-// Internal helper – fetch an account-range pair from Accountsetup
+// Internal helper – fetch an account-range pair from accountsetup
 // ---------------------------------------------------------------------------
 
 /**
@@ -33,7 +33,7 @@ function _getAccountRange($prefix)
 {
     global $db;
     $prefix = mysqli_real_escape_string($db, $prefix);
-    $sql    = "SELECT `{$prefix}from`, `{$prefix}to` FROM Accountsetup LIMIT 1";
+    $sql    = "SELECT `{$prefix}from`, `{$prefix}to` FROM accountsetup LIMIT 1";
     $result = DB_query($sql, $db);
     $row    = DB_fetch_array($result);
     if (!$row) {
@@ -47,8 +47,8 @@ function _getAccountRange($prefix)
  * and account-range.  Returns a DB result resource or false.
  *
  * @param  array  $dates   From _getPeriodDates()
- * @param  string $from    ReportCode lower bound (escaped by caller)
- * @param  string $to      ReportCode upper bound (escaped by caller)
+ * @param  string $from    reportcode lower bound (escaped by caller)
+ * @param  string $to      reportcode upper bound (escaped by caller)
  * @param  string $extra   Optional extra WHERE clause fragment (e.g. "AND balance_income=1")
  * @return resource|false
  */
@@ -58,11 +58,11 @@ function _queryAccountRange($dates, $from, $to, $extra = '')
     $from = mysqli_real_escape_string($db, $from);
     $to   = mysqli_real_escape_string($db, $to);
 
-    $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
+    $sql = "SELECT reportcode, accdesc, balance_income, ReportStyle,
                    direct, Sale_Purchase_Neither, accno, Calculation,
                    " . _buildGLColumns($dates) . "
             FROM acct
-            WHERE ReportCode BETWEEN '$from' AND '$to'
+            WHERE reportcode BETWEEN '$from' AND '$to'
             $extra
             " . _acctGroupOrder();
 
@@ -112,7 +112,7 @@ class TradingAccountbyMonth
             $this->Amount2 = ($rows['amount']);
         }
 
-        $this->savetotal($rows['ReportCode'], $this->Amount2);
+        $this->savetotal($rows['reportcode'], $this->Amount2);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2 = $this->GetTotal($rows['Calculation']);
@@ -190,22 +190,22 @@ class TradingAccountbyMonth
     {
         return "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.period = '$escapedPeriod')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.period = '$escapedPeriod')
             END AS credit";
     }
 
     /**
-     * Run a monthly query for a given Accountsetup range prefix.
+     * Run a monthly query for a given accountsetup range prefix.
      * Returns a DB result resource or false.
      */
     private function _monthlyQuery($rangePrefix, $extraWhere = '')
@@ -221,11 +221,11 @@ class TradingAccountbyMonth
         $from          = mysqli_real_escape_string($db, $range['from']);
         $to            = mysqli_real_escape_string($db, $range['to']);
 
-        $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
+        $sql = "SELECT reportcode, accdesc, balance_income, ReportStyle,
                        direct, Sale_Purchase_Neither, accno, Calculation,
                        " . $this->_buildMonthlyGLColumns($escapedPeriod) . "
                 FROM acct
-                WHERE ReportCode BETWEEN '$from' AND '$to'
+                WHERE reportcode BETWEEN '$from' AND '$to'
                 $extraWhere
                 " . _acctGroupOrder();
 
@@ -245,11 +245,11 @@ class TradingAccountbyMonth
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']) * -1;
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->Profit += $AMOUNT;
         }
     }
@@ -270,19 +270,19 @@ class TradingAccountbyMonth
 
         // Opening stock: always uses period < current (regardless of balance_income)
         $glCols = "
-            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
              WHERE gl.accountcode = acct.accno AND gl.period < '$escapedPeriod') AS debit,
-            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
              WHERE gl.balaccountcode = acct.accno AND gl.period < '$escapedPeriod') AS credit";
 
-        $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
+        $sql = "SELECT reportcode, accdesc, balance_income, ReportStyle,
                        direct, Sale_Purchase_Neither, accno, Calculation,
                        $glCols
                 FROM acct
-                WHERE ReportCode BETWEEN '$from' AND '$to'
+                WHERE reportcode BETWEEN '$from' AND '$to'
                 " . _acctGroupOrder();
 
-        $this->ResultDataSet['OS']['ReportCode']  = _('OS');
+        $this->ResultDataSet['OS']['reportcode']  = _('OS');
         $this->ResultDataSet['OS']['accdesc']     = _('Opening Stock');
         $this->ResultDataSet['OS']['ReportStyle'] = 2;
 
@@ -290,16 +290,16 @@ class TradingAccountbyMonth
         $ResultsX  = DB_query($sql, $db);
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->COST_OF_SALES += $AMOUNT;
             $openstock           += $AMOUNT;
         }
 
-        $this->ResultDataSet['OS_t']['ReportCode']  = _('OS');
+        $this->ResultDataSet['OS_t']['reportcode']  = _('OS');
         $this->ResultDataSet['OS_t']['accdesc']     = _('Opening Stock Total');
         $this->ResultDataSet['OS_t']['ReportStyle'] = 2;
         $this->ResultDataSet['OS_t']['amount']      = $openstock;
@@ -312,23 +312,23 @@ class TradingAccountbyMonth
             return;
         }
 
-        $this->ResultDataSet['Ps']['ReportCode']  = _('PS');
+        $this->ResultDataSet['Ps']['reportcode']  = _('PS');
         $this->ResultDataSet['Ps']['accdesc']     = _('Add:Purchases');
         $this->ResultDataSet['Ps']['ReportStyle'] = 2;
 
         $openstock = 0;
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->COST_OF_SALES += $AMOUNT;
             $openstock           += $AMOUNT;
         }
 
-        $this->ResultDataSet['Ps_t']['ReportCode']  = _('PS');
+        $this->ResultDataSet['Ps_t']['reportcode']  = _('PS');
         $this->ResultDataSet['Ps_t']['accdesc']     = _('Total Purchases');
         $this->ResultDataSet['Ps_t']['ReportStyle'] = 2;
         $this->ResultDataSet['Ps_t']['amount']      = $openstock;
@@ -342,14 +342,14 @@ class TradingAccountbyMonth
             return;
         }
 
-        $this->ResultDataSet['CS']['ReportCode']  = _('CS');
+        $this->ResultDataSet['CS']['reportcode']  = _('CS');
         $this->ResultDataSet['CS']['accdesc']     = _('Closing Stock');
         $this->ResultDataSet['CS']['ReportStyle'] = 2;
 
         $ClosingStock = 0;
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['accno']]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$Row['accno']]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$Row['accno']]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$Row['accno']]['accno']       = $Row['accno'];
             $this->ResultDataSet[$Row['accno']]['ReportStyle'] = $Row['ReportStyle'];
@@ -358,12 +358,12 @@ class TradingAccountbyMonth
             $ClosingStock        -= $AMOUNT;
         }
 
-        $this->ResultDataSet['CS_t']['ReportCode']  = _('PS');
+        $this->ResultDataSet['CS_t']['reportcode']  = _('PS');
         $this->ResultDataSet['CS_t']['accdesc']     = _('Less Closing Stock');
         $this->ResultDataSet['CS_t']['ReportStyle'] = 2;
         $this->ResultDataSet['CS_t']['amount']      = $ClosingStock;
 
-        $this->ResultDataSet['cos']['ReportCode']  = _('COS');
+        $this->ResultDataSet['cos']['reportcode']  = _('COS');
         $this->ResultDataSet['cos']['accdesc']     = _('Cost Of Sales');
         $this->ResultDataSet['cos']['ReportStyle'] = 2;
         $this->ResultDataSet['cos']['amount']      = $this->COST_OF_SALES;
@@ -380,15 +380,15 @@ class TradingAccountbyMonth
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->Profit -= $AMOUNT;
         }
 
-        $this->ResultDataSet['netprofit']['ReportCode']  = _('netprofit');
+        $this->ResultDataSet['netprofit']['reportcode']  = _('netprofit');
         $this->ResultDataSet['netprofit']['accdesc']     = _('Net Profit');
         $this->ResultDataSet['netprofit']['ReportStyle'] = 2;
         $this->ResultDataSet['netprofit']['amount']      = $this->Profit * -1;
@@ -441,7 +441,7 @@ class TradingAccountForYear
             $this->Amount2 = ($rows['amount']);
         }
 
-        $this->savetotal($rows['ReportCode'], $this->Amount2);
+        $this->savetotal($rows['reportcode'], $this->Amount2);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2 = $this->GetTotal($rows['Calculation']);
@@ -469,7 +469,7 @@ class TradingAccountForYear
             $this->Amount2_lastyear = ($rows['Amount_lastyear']);
         }
 
-        $this->savetotal_last($rows['ReportCode'], $this->Amount2);
+        $this->savetotal_last($rows['reportcode'], $this->Amount2);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2_lastyear = $this->GetTotal_last($rows['Calculation']);
@@ -560,12 +560,12 @@ class TradingAccountForYear
     // Shared query runner for yearly sections
     //
     // Opening Stock is special: its "current year" data comes from
-    // YearPeriod-12 (prior year end) and its "last year" from YearPeriod-24.
-    // All other sections use YearPeriod for current and YearPeriod-12 for last.
+    // yearperiod-12 (prior year end) and its "last year" from yearperiod-24.
+    // All other sections use yearperiod for current and yearperiod-12 for last.
     // ------------------------------------------------------------------
 
     /**
-     * Run a yearly query for the given Accountsetup range prefix.
+     * Run a yearly query for the given accountsetup range prefix.
      *
      * @param  string $rangePrefix   e.g. 'sales', 'stock', 'purchases', 'expense'
      * @param  int    $currentPeriod periodno to use as "current year"
@@ -601,38 +601,38 @@ class TradingAccountForYear
 
         $glCurrent = "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS credit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS debit_Last,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS credit_Last";
 
-        $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
+        $sql = "SELECT reportcode, accdesc, balance_income, ReportStyle,
                        direct, Sale_Purchase_Neither, accno, Calculation,
                        $glCurrent
                 FROM acct
-                WHERE ReportCode BETWEEN '$from' AND '$to'
+                WHERE reportcode BETWEEN '$from' AND '$to'
                 " . _acctGroupOrder();
 
         return DB_query($sql, $db);
@@ -644,59 +644,59 @@ class TradingAccountForYear
 
     function DB_Profit_loss_sales()
     {
-        global $YearPeriod;
-        $YearPeriod = $_POST['Financial_Periods'];
+        global $yearperiod;
+        $yearperiod = $_POST['Financial_Periods'];
 
-        $ResultsX = $this->_yearlyQuery('sales', (int)$YearPeriod, (int)$YearPeriod - 12);
+        $ResultsX = $this->_yearlyQuery('sales', (int)$yearperiod, (int)$yearperiod - 12);
         if (!$ResultsX) {
             return;
         }
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']) * -1;
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->Profit += $AMOUNT;
 
             $AMOUNT_last = ($Row['debit_Last'] - $Row['credit_Last']) * -1;
-            $this->ResultDataSet[$Row['ReportCode']]['Amount_lastyear'] = $AMOUNT_last;
+            $this->ResultDataSet[$Row['reportcode']]['Amount_lastyear'] = $AMOUNT_last;
             $this->Profit_last += $AMOUNT_last;
         }
     }
 
     function DB_Profit_loss_OStock()
     {
-        global $YearPeriod;
+        global $yearperiod;
 
-        // Opening stock for current year = balance at end of prior year (YearPeriod-12)
-        // Opening stock for last year    = balance at end of two years ago  (YearPeriod-24)
-        $ResultsX = $this->_yearlyQuery('stock', (int)$YearPeriod - 12, (int)$YearPeriod - 24);
+        // Opening stock for current year = balance at end of prior year (yearperiod-12)
+        // Opening stock for last year    = balance at end of two years ago  (yearperiod-24)
+        $ResultsX = $this->_yearlyQuery('stock', (int)$yearperiod - 12, (int)$yearperiod - 24);
         if (!$ResultsX) {
             return;
         }
 
-        $this->ResultDataSet['OS']['ReportCode']  = _('OS');
+        $this->ResultDataSet['OS']['reportcode']  = _('OS');
         $this->ResultDataSet['OS']['accdesc']     = _('Opening Stock');
         $this->ResultDataSet['OS']['ReportStyle'] = 2;
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->COST_OF_SALES += $AMOUNT;
 
             $AMOUNT_last = ($Row['debit_Last'] - $Row['credit_Last']);
-            $this->ResultDataSet[$Row['ReportCode']]['Amount_lastyear'] = $AMOUNT_last;
+            $this->ResultDataSet[$Row['reportcode']]['Amount_lastyear'] = $AMOUNT_last;
             $this->COST_OF_SALES_last += $AMOUNT_last;
         }
 
-        $this->ResultDataSet['OS_T']['ReportCode']       = _('OS');
+        $this->ResultDataSet['OS_T']['reportcode']       = _('OS');
         $this->ResultDataSet['OS_T']['accdesc']          = _('Total Opening Stock');
         $this->ResultDataSet['OS_T']['ReportStyle']      = 2;
         $this->ResultDataSet['OS_T']['amount']           = $this->COST_OF_SALES;
@@ -705,37 +705,37 @@ class TradingAccountForYear
 
     function DB_Profit_loss_Purchase()
     {
-        global $YearPeriod;
+        global $yearperiod;
 
         $purchases     = 0;
         $lastpurchases = 0;
 
-        $this->ResultDataSet['PS']['ReportCode']  = _('PS');
+        $this->ResultDataSet['PS']['reportcode']  = _('PS');
         $this->ResultDataSet['PS']['accdesc']     = _('PURCHASES');
         $this->ResultDataSet['PS']['ReportStyle'] = 2;
 
-        $ResultsX = $this->_yearlyQuery('purchases', (int)$YearPeriod, (int)$YearPeriod - 12);
+        $ResultsX = $this->_yearlyQuery('purchases', (int)$yearperiod, (int)$yearperiod - 12);
         if (!$ResultsX) {
             return;
         }
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->COST_OF_SALES += $AMOUNT;
             $purchases           += $AMOUNT;
 
             $AMOUNT_last = ($Row['debit_Last'] - $Row['credit_Last']);
-            $this->ResultDataSet[$Row['ReportCode']]['Amount_lastyear'] = $AMOUNT_last;
+            $this->ResultDataSet[$Row['reportcode']]['Amount_lastyear'] = $AMOUNT_last;
             $this->COST_OF_SALES_last += $AMOUNT_last;
             $lastpurchases            += $AMOUNT_last;
         }
 
-        $this->ResultDataSet['PS_T']['ReportCode']      = _('PS');
+        $this->ResultDataSet['PS_T']['reportcode']      = _('PS');
         $this->ResultDataSet['PS_T']['accdesc']         = _('TOTAL PURCHASES');
         $this->ResultDataSet['PS_T']['ReportStyle']     = 2;
         $this->ResultDataSet['PS_T']['amount']          = $purchases;
@@ -744,23 +744,23 @@ class TradingAccountForYear
 
     function DB_Profit_loss_Clstock()
     {
-        global $YearPeriod;
+        global $yearperiod;
 
         $Closingstock      = 0;
         $Closingstock_last = 0;
 
-        $this->ResultDataSet['CS']['ReportCode']  = _('CS');
+        $this->ResultDataSet['CS']['reportcode']  = _('CS');
         $this->ResultDataSet['CS']['accdesc']     = _('Closing Stock');
         $this->ResultDataSet['CS']['ReportStyle'] = 2;
 
-        $ResultsX = $this->_yearlyQuery('stock', (int)$YearPeriod, (int)$YearPeriod - 12);
+        $ResultsX = $this->_yearlyQuery('stock', (int)$yearperiod, (int)$yearperiod - 12);
         if (!$ResultsX) {
             return;
         }
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['accno']]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$Row['accno']]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$Row['accno']]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$Row['accno']]['accno']       = $Row['accno'];
             $this->ResultDataSet[$Row['accno']]['ReportStyle'] = $Row['ReportStyle'];
@@ -774,13 +774,13 @@ class TradingAccountForYear
             $this->COST_OF_SALES_last     -= $AMOUNT_last;
         }
 
-        $this->ResultDataSet['CS_t']['ReportCode']      = _('CS');
+        $this->ResultDataSet['CS_t']['reportcode']      = _('CS');
         $this->ResultDataSet['CS_t']['accdesc']         = _('LESS Closing Stock');
         $this->ResultDataSet['CS_t']['ReportStyle']     = 2;
         $this->ResultDataSet['CS_t']['amount']          = $Closingstock;
         $this->ResultDataSet['CS_t']['Amount_lastyear'] = $Closingstock_last;
 
-        $this->ResultDataSet['cos']['ReportCode']      = _('COS');
+        $this->ResultDataSet['cos']['reportcode']      = _('COS');
         $this->ResultDataSet['cos']['accdesc']         = _('Cost Of Sales');
         $this->ResultDataSet['cos']['ReportStyle']     = 2;
         $this->ResultDataSet['cos']['amount']          = $this->COST_OF_SALES;
@@ -792,28 +792,28 @@ class TradingAccountForYear
 
     function DB_Profit_loss_expenses()
     {
-        global $YearPeriod;
+        global $yearperiod;
 
-        $ResultsX = $this->_yearlyQuery('expense', (int)$YearPeriod, (int)$YearPeriod - 12);
+        $ResultsX = $this->_yearlyQuery('expense', (int)$yearperiod, (int)$yearperiod - 12);
         if (!$ResultsX) {
             return;
         }
 
         while ($Row = DB_fetch_array($ResultsX)) {
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$Row['ReportCode']]['ReportCode']  = $Row['ReportCode'];
-            $this->ResultDataSet[$Row['ReportCode']]['accdesc']     = $Row['accdesc'];
-            $this->ResultDataSet[$Row['ReportCode']]['accno']       = $Row['accno'];
-            $this->ResultDataSet[$Row['ReportCode']]['ReportStyle'] = $Row['ReportStyle'];
-            $this->ResultDataSet[$Row['ReportCode']]['amount']      = $AMOUNT;
+            $this->ResultDataSet[$Row['reportcode']]['reportcode']  = $Row['reportcode'];
+            $this->ResultDataSet[$Row['reportcode']]['accdesc']     = $Row['accdesc'];
+            $this->ResultDataSet[$Row['reportcode']]['accno']       = $Row['accno'];
+            $this->ResultDataSet[$Row['reportcode']]['ReportStyle'] = $Row['ReportStyle'];
+            $this->ResultDataSet[$Row['reportcode']]['amount']      = $AMOUNT;
             $this->Profit -= $AMOUNT;
 
             $AMOUNT_last = ($Row['debit_Last'] - $Row['credit_Last']);
-            $this->ResultDataSet[$Row['ReportCode']]['Amount_lastyear'] = $AMOUNT_last;
+            $this->ResultDataSet[$Row['reportcode']]['Amount_lastyear'] = $AMOUNT_last;
             $this->Profit_last -= $AMOUNT_last;
         }
 
-        $this->ResultDataSet['netprofit']['ReportCode']      = _('netprofit');
+        $this->ResultDataSet['netprofit']['reportcode']      = _('netprofit');
         $this->ResultDataSet['netprofit']['accdesc']         = _('Net Profit');
         $this->ResultDataSet['netprofit']['ReportStyle']     = 2;
         $this->ResultDataSet['netprofit']['amount']          = $this->Profit;
@@ -822,7 +822,7 @@ class TradingAccountForYear
 }
 
 // ---------------------------------------------------------------------------
-// ShowBankAccounts, Calculator, FinancialPeriods, MonthlyReports,
+// ShowBankAccounts, Calculator, financialperiods, MonthlyReports,
 // MonthlyPeriods, SaveReceipt, SavePrepaymentReceipt, CalculateExchange
 // — these classes contain no stored-procedure calls and are UNCHANGED.
 // ---------------------------------------------------------------------------
@@ -840,7 +840,7 @@ class ShowBankAccounts
         $resultindex = DB_query("SELECT accountcode, bankName, currency, lastreconcileddate,
                                         AccountNo, BranchCode, BranchName, lastreconbalance,
                                         lastChequeno, PostingGroup
-                                 FROM BankAccounts", $db);
+                                 FROM bankaccounts", $db);
 
         while ($row = DB_fetch_array($resultindex)) {
             $selected = (isset($_POST['Bank_Code']) && trim($_POST['Bank_Code']) == trim($row['accountcode']))
@@ -865,7 +865,7 @@ class ShowBankAccounts
         $resultindex = DB_query("SELECT b.accountcode, b.bankName, b.currency, b.lastreconcileddate,
                                         b.AccountNo, b.BranchCode, b.BranchName, b.lastreconbalance,
                                         b.lastChequeno, b.PostingGroup, c.rate, b.StatementNo
-                                 FROM BankAccounts b
+                                 FROM bankaccounts b
                                  JOIN currencies c ON b.currency = c.currabrev
                                  WHERE b.accountcode = '$accountCode'", $db);
 
@@ -924,8 +924,8 @@ class Calculator
             $this->Amount2_lastyear = ($rows['debit_Last'] - $rows['credit_Last']);
         }
 
-        $this->savetotal($rows['ReportCode'], $this->Amount2);
-        $this->savetotal_lastyear($rows['ReportCode'], $this->Amount2_lastyear);
+        $this->savetotal($rows['reportcode'], $this->Amount2);
+        $this->savetotal_lastyear($rows['reportcode'], $this->Amount2_lastyear);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2          = $this->GetTotal($rows['Calculation']);
@@ -995,7 +995,7 @@ class Calculator
     }
 }
 
-class FinancialPeriods
+class financialperiods
 {
     var $SelectObject = '';
 
@@ -1004,7 +1004,7 @@ class FinancialPeriods
         global $db;
         $this->SelectObject = '<tr><td>Select Year</td><td><select name="Financial_Periods">';
         $ResultIndex = DB_query("SELECT periodno, MAX(end_date) AS year
-                                 FROM FinancialPeriods
+                                 FROM financialperiods
                                  GROUP BY periodno
                                  ORDER BY periodno DESC", $db);
         while ($row = DB_fetch_array($ResultIndex)) {
@@ -1160,10 +1160,10 @@ class SaveReceipt extends ShowBankAccounts{
     function GetPaidinvoices($journal,$amount=0){
         if($amount>0){
                 $this->checkbalance += $amount;
-                $this->JournalArray[]=SPRINTF("insert into `ReceiptsAllocation`
+                $this->JournalArray[]=SPRINTF("insert into `receiptsallocation`
                         (`itemcode`,`date`,`invoiceno`,`journalno`,`doctype`,`receiptno`,`amount`,`receiptjournal`) 
                          (Select `Accountno`,`date`,`Documentno`,`JournalNo`,`Documenttype`,'%s',%f,'%s' 
-                         from `CustomerStatement` where `JournalNo`='%s') ",
+                         from `customerstatement` where `JournalNo`='%s') ",
                         $this->documentno,
                         (0-$amount),
                         $this->Receipt_Journal,
@@ -1185,7 +1185,7 @@ class SaveReceipt extends ShowBankAccounts{
     function PostToAccounts(){
         $this->totalamount= $this->checkbalance;
        
-          $this->JournalArray[] =sprintf("INSERT INTO `CustomerStatement`
+          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement`
                                 (`Date`
                                 ,`Documentno`
                                 ,`Documenttype`
@@ -1239,7 +1239,7 @@ class SaveReceipt extends ShowBankAccounts{
                             $this->BankArray['currency']);
         
         
-        $this->JournalArray[]=SPRINTF("INSERT INTO `BankTransactions`
+        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions`
                                     (`bankcode`
                                     ,`DocDate`
                                     ,`doctype`
@@ -1308,7 +1308,7 @@ class SaveReceipt extends ShowBankAccounts{
         
         
         
-             $this->JournalArray[]=SPRINTF("Insert into `Generalledger`
+             $this->JournalArray[]=SPRINTF("Insert into `generalledger`
                                     (`journalno`
                                     ,`Docdate`
                                     ,`period`
@@ -1442,7 +1442,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
     function PostToAccounts(){
         
         
-          $this->JournalArray[] =sprintf("INSERT INTO `CustomerStatement`
+          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement`
                                 (`Date`
                                 ,`Documentno`
                                 ,`Documenttype`
@@ -1496,7 +1496,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
         
         
         
-        $this->JournalArray[]=SPRINTF("INSERT INTO `BankTransactions`
+        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions`
                                     (`bankcode`
                                     ,`DocDate`
                                     ,`doctype`
@@ -1565,7 +1565,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
         
         
         
-             $this->JournalArray[]=SPRINTF("Insert into `Generalledger`
+             $this->JournalArray[]=SPRINTF("Insert into `generalledger`
                                     (`journalno`
                                     ,`Docdate`
                                     ,`period`
@@ -1659,11 +1659,11 @@ class Savepaymentvoucher {
     function GetBankDetails($accountCode){
          Global $db;
         $resultindex=DB_query("SELECT 
-            `accountcode`,`bankName`,`BankAccounts`.`currency`,`lastreconcileddate`
+            `accountcode`,`bankName`,`bankaccounts`.`currency`,`lastreconcileddate`
            ,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`
            ,`lastChequeno`,`PostingGroup`,`currencies`.`rate`,`StatementNo`
-            FROM `BankAccounts` 
-            join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
+            FROM `bankaccounts` 
+            join `currencies` on `bankaccounts`.`currency`=`currencies`.`currabrev`
             where `accountcode`='".$accountCode."'", $db);
         
         $row=DB_fetch_row($resultindex);
@@ -1791,8 +1791,8 @@ class Savepaymentvoucher {
             `Dimension_One` ,
             `Dimension_Two` ,
             `currencies`.`rate`
-            FROM `SupplierStatement` left join `currencies`
-            on `currencies`.`currabrev`=`SupplierStatement`.`Currency`
+            FROM `supplierstatement` left join `currencies`
+            on `currencies`.`currabrev`=`supplierstatement`.`Currency`
             where `Accountno`='%s' and `JournalNo`='%s' ",  $this->CustomerID,$journal);
             
         $ResultIndex = DB_query($SQL,$db);
@@ -1898,7 +1898,7 @@ class BalancesheetForYear
             $this->Amount2 = ($rows['amount']);
         }
 
-        $this->savetotal($rows['ReportCode'], $this->Amount2);
+        $this->savetotal($rows['reportcode'], $this->Amount2);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2 = $this->GetTotal($rows['Calculation']);
@@ -1926,7 +1926,7 @@ class BalancesheetForYear
             $this->Amount2_lastyear = ($rows['Amount_lastyear']);
         }
 
-        $this->savetotal_last($rows['ReportCode'], $this->Amount2);
+        $this->savetotal_last($rows['reportcode'], $this->Amount2);
 
         if ((mb_strlen($rows['Calculation']) > 0) && ($rows['ReportStyle'] == 2)) {
             $this->Amount2_lastyear = $this->GetTotal_last($rows['Calculation']);
@@ -2027,8 +2027,8 @@ class BalancesheetForYear
 
     private function _bsQuery($rangePrefix)
     {
-        global $db, $YearPeriod;
-        $YearPeriod = $_POST['Financial_Periods'];
+        global $db, $yearperiod;
+        $yearperiod = $_POST['Financial_Periods'];
 
         $range = _getAccountRange($rangePrefix);
         if (!$range) {
@@ -2037,7 +2037,7 @@ class BalancesheetForYear
 
         $from         = mysqli_real_escape_string($db, $range['from']);
         $to           = mysqli_real_escape_string($db, $range['to']);
-        $currentPeriod = (int)$YearPeriod;
+        $currentPeriod = (int)$yearperiod;
         $lastPeriod    = $currentPeriod - 12;
 
         $currentDates = _getPeriodDates($currentPeriod);
@@ -2055,38 +2055,38 @@ class BalancesheetForYear
         // Use _buildGLColumns pattern but with explicit period boundaries
         $glCols = "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS credit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS debit_Last,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM Generalledger gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM generalledger gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS credit_Last";
 
-        $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
+        $sql = "SELECT reportcode, accdesc, balance_income, ReportStyle,
                        direct, Sale_Purchase_Neither, accno, Calculation,
                        $glCols
                 FROM acct
-                WHERE ReportCode BETWEEN '$from' AND '$to'
+                WHERE reportcode BETWEEN '$from' AND '$to'
                 " . _acctGroupOrder();
 
         return DB_query($sql, $db);
@@ -2106,7 +2106,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2129,7 +2129,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2152,7 +2152,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2175,7 +2175,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2198,7 +2198,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2212,7 +2212,7 @@ class BalancesheetForYear
 
         // Totals injected after current liabilities — same as original
         $AccountCode = $this->GetID();
-        $this->ResultDataSet[$AccountCode]['ReportCode']      = _('NetAssets');
+        $this->ResultDataSet[$AccountCode]['reportcode']      = _('NetAssets');
         $this->ResultDataSet[$AccountCode]['accdesc']         = _('Net Current Assets');
         $this->ResultDataSet[$AccountCode]['ReportStyle']     = 2;
         $this->ResultDataSet[$AccountCode]['amount']          = $this->CurrentAssets;
@@ -2221,14 +2221,14 @@ class BalancesheetForYear
         $this->DebitSide_Last += $this->CurrentAssets_Last;
 
         $AccountCode = $this->GetID();
-        $this->ResultDataSet[$AccountCode]['ReportCode']      = _('Assets');
+        $this->ResultDataSet[$AccountCode]['reportcode']      = _('Assets');
         $this->ResultDataSet[$AccountCode]['accdesc']         = _('Total Assets');
         $this->ResultDataSet[$AccountCode]['ReportStyle']     = 2;
         $this->ResultDataSet[$AccountCode]['amount']          = $this->DebitSide;
         $this->ResultDataSet[$AccountCode]['Amount_lastyear'] = $this->DebitSide_Last;
 
         $AccountCode = $this->GetID();
-        $this->ResultDataSet[$AccountCode]['ReportCode']  = _('Capital');
+        $this->ResultDataSet[$AccountCode]['reportcode']  = _('Capital');
         $this->ResultDataSet[$AccountCode]['accdesc']     = _('Capital Employed');
         $this->ResultDataSet[$AccountCode]['ReportStyle'] = 4;
     }
@@ -2243,7 +2243,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2266,7 +2266,7 @@ class BalancesheetForYear
         while ($Row = DB_fetch_array($ResultsX)) {
             $AccountCode = $this->GetID();
             $AMOUNT = ($Row['debit'] - $Row['credit']);
-            $this->ResultDataSet[$AccountCode]['ReportCode']  = $Row['ReportCode'];
+            $this->ResultDataSet[$AccountCode]['reportcode']  = $Row['reportcode'];
             $this->ResultDataSet[$AccountCode]['accdesc']     = $Row['accdesc'];
             $this->ResultDataSet[$AccountCode]['accno']       = $Row['accno'];
             $this->ResultDataSet[$AccountCode]['ReportStyle'] = $Row['ReportStyle'];
@@ -2283,14 +2283,14 @@ class BalancesheetForYear
         $this->Profit_last = $this->DebitSide_Last + $this->CreditSide_Last;
 
         $AccountCode = $this->GetID();
-        $this->ResultDataSet[$AccountCode]['ReportCode']      = _('AccFund');
+        $this->ResultDataSet[$AccountCode]['reportcode']      = _('AccFund');
         $this->ResultDataSet[$AccountCode]['accdesc']         = _('Retained Earnings B/F');
         $this->ResultDataSet[$AccountCode]['ReportStyle']     = 2;
         $this->ResultDataSet[$AccountCode]['amount']          = $this->Profit;
         $this->ResultDataSet[$AccountCode]['Amount_lastyear'] = $this->Profit_last;
 
         $AccountCode = $this->GetID();
-        $this->ResultDataSet[$AccountCode]['ReportCode']      = _('Capital');
+        $this->ResultDataSet[$AccountCode]['reportcode']      = _('Capital');
         $this->ResultDataSet[$AccountCode]['accdesc']         = _('Capital Employed');
         $this->ResultDataSet[$AccountCode]['ReportStyle']     = 2;
         $this->ResultDataSet[$AccountCode]['amount']          = ($this->CreditSide - $this->Profit) * -1;
