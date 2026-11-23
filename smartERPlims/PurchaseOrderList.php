@@ -13,32 +13,32 @@ echo '<p class="page_title_text">'
         . ' ' . _('Purchase Orders List') . '</p>';
 
 $SQL="select 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      ,sum(PurchaseLine.`invoiceamount`) as OrderValue
-      ,`PurchaseHeader`.printed
-      from `PurchaseHeader` join PurchaseLine on `PurchaseHeader`.`documentno`=PurchaseLine.`documentno` 
-        and `PurchaseHeader`.`documenttype`=PurchaseLine.`documenttype`
-      where `PurchaseHeader`.`documenttype`='18' and `released`=1  
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      ,sum(purchaseline.`invoiceamount`) as OrderValue
+      ,`purchaseheader`.printed
+      from `purchaseheader` join purchaseline on `purchaseheader`.`documentno`=purchaseline.`documentno` 
+        and `purchaseheader`.`documenttype`=purchaseline.`documenttype`
+      where `purchaseheader`.`documenttype`='18' and `released`=1  
       group by 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid`
-      ,`PurchaseHeader`.printed 
-      order by `PurchaseHeader`.`docdate` DESC";
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid`
+      ,`purchaseheader`.printed 
+      order by `purchaseheader`.`docdate` DESC";
     $Result=DB_query($SQL,$db);
        
     
