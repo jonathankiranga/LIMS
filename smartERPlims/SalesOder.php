@@ -28,7 +28,7 @@ function decodeHtmlEntities($string) {
        }
  
 if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader``` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
@@ -298,8 +298,8 @@ $SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `bankaccounts``
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='1'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='1'", $db);
+    DB_query("Delete from `salesline``` where documentno='".$DOC."' and `documenttype`='1'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='1'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }

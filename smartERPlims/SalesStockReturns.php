@@ -42,7 +42,7 @@ $filter="SELECT
            ,`currencycode`
            ,`salespersoncode`
            ,`vatinclusive`
-       FROM `salesheader`` 
+       FROM `salesheader``` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -144,7 +144,7 @@ $ResultIndex = DB_query("SELECT
       ,`inclusive`
       ,`partperunit`
       ,UOM
-  FROM `salesline``  where `documentno`='".$_POST['documentno']."'", $db);
+  FROM `salesline````  where `documentno`='".$_POST['documentno']."'", $db);
 
 
 echo '<table class="table table-bordered"><thead><tr>'
@@ -261,7 +261,7 @@ Function IsTankOrStore($ItemCode){
     global $db;
     
     $stcode = trim($ItemCode);
-    $sql = sprintf("select count(*) from `ProductionUnit` where itemcode='%s'",$ItemCode);
+    $sql = sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
     $ResultIndex=DB_query($sql,$db);
     $Stores = DB_fetch_row($ResultIndex);
    if($Stores[0]==0){
@@ -278,7 +278,7 @@ Function StoreTankCMB($id,$ItemCode){
 
         $line='';
         $line .='<select name="location['.$id.']" required="required">';
-        $sql=sprintf("select count(*) from `ProductionUnit` where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
         
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
@@ -290,7 +290,7 @@ Function StoreTankCMB($id,$ItemCode){
             }
        }else{
           $_SESSION['productionTankStore'][$stcode]="T";
-           $ResultIndex=DB_query(sprintf("select tankname from `ProductionUnit` where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit`` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                    $line .= sprintf('<option value="%s" %s>%s</option>',trim($value['tankname']),$_POST['location']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
