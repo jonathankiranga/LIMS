@@ -129,7 +129,7 @@ if(isset($_POST['CreateIncomeReport'])){
     
     if($errors==false){
         
-       $sql= sprintf("Update Accountsetup SET "
+       $sql= sprintf("Update `accountsetup` SET "
                . " salesfrom='%s', salesto='%s',"
                . " stockfrom='%s', stockto='%s',"
                . " purchasesfrom='%s', purchasesto='%s',"
@@ -143,7 +143,7 @@ if(isset($_POST['CreateIncomeReport'])){
     }
 }
 
-$SQL='Select salesfrom,salesto,stockfrom,stockto,purchasesfrom,purchasesto,expensefrom,expenseto from Accountsetup';
+$SQL='Select salesfrom,salesto,stockfrom,stockto,purchasesfrom,purchasesto,expensefrom,expenseto from `accountsetup`';
 $ResultIndex=DB_query($SQL, $db);
 while($row=DB_fetch_array($ResultIndex)){
         $_POST['SalesFrom'] = trim($row['salesfrom']);
@@ -179,7 +179,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/m
  </form>';
  
         
- echo '<div class="space"><table class="table table-bordered"><thead><tr><th>Report Line</th><th>From Account</th><th>To Account</th></tr></thead>' ;
+ echo '<div class="space"><table class="table table-bordered"><thead><tr><th>Report Line</th><th>From `account`</th><th>To Account</th></tr></thead>' ;
  echo '<tr><td>SALES/INCOME ACCOUNTS</td><td>'.$_POST['SalesFrom'].'</td><td>'. $_POST['SalesTo'].'</td></tr>';
  echo '<tr><td>OPEN STOCK ACCOUNTS</td><td>'.$_POST['stockFrom'].'</td><td>'. $_POST['stockTo'].'</td></tr>';
  echo '<tr><td>PURCHASE ACCOUNTS</td><td>'.$_POST['PurchasesFrom'].'</td><td>'.$_POST['PurchasesTo'].'</td></tr>';
@@ -190,7 +190,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/m
  
  
  Function Sales(){
-     echo '<tr><td><label>From Account :</label>';
+     echo '<tr><td><label>From `account` :</label>';
      echo '<input type="text" name="SalesFrom" id="SalesFrom" value="'.$_POST['SalesFrom'].'" pattern="^[0-9 ]*" class="accountcode" maxlength="10" size="20" onMouseOut="validateSales();"/>';
      echo '</td><td><label>To Account :</label>';
      echo '<input type="text" name="SalesTo" id="SalesTo" value="'.$_POST['SalesTo'].'" pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"  onMouseOut="validateSales();"/>';
@@ -198,7 +198,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/m
 }
  
  Function Stock(){
-     echo '<tr><td><label>From Account :</label>';
+     echo '<tr><td><label>From `account` :</label>';
      echo '<input type="text" name="stockFrom" id="stockFrom" value="'.$_POST['stockFrom'].'"  pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"   onMouseOut="validateStock();"/>';
      echo '</td><td><label>To Account :</label>';
      echo '<input type="text" name="stockTo" id="stockTo"  value="'.$_POST['stockTo'].'"  pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"   onMouseOut="validateStock();"/>';
@@ -206,7 +206,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/m
   }
  
  Function purchases(){
-     echo '<tr><td><label>From Account :</label>';
+     echo '<tr><td><label>From `account` :</label>';
      echo '<input type="text" name="PurchasesFrom" id="PurchasesFrom" value="'.$_POST['PurchasesFrom'].'"  pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"  onMouseOut="validatepurchases();"/>';
      echo '</td><td><label>To Account :</label>';
      echo '<input type="text" name="PurchasesTo" id="PurchasesTo" value="'.$_POST['PurchasesTo'].'"  pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"  onMouseOut="validatepurchases();"/>';
@@ -214,7 +214,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/m
   }
  
  Function Expenses(){
-     echo '<tr><td><label>From Account :</label>';
+     echo '<tr><td><label>From `account` :</label>';
      echo '<input type="text" name="ExpensesFrom" id="ExpensesFrom" value="'.$_POST['ExpensesFrom'].'"   pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20"  onMouseOut="validateExpenses();"/>';
      echo '</td><td><label>To Account :</label>';
      echo '<input type="text" name="ExpensesTo" id="ExpensesTo" value="'.$_POST['ExpensesTo'].'"   pattern="^[0-9 ]*"  class="accountcode" maxlength="10" size="20" onMouseOut="validateExpenses();"/>';

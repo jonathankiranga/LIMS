@@ -54,7 +54,7 @@ if(isset($_POST['projectcode'])){
 echo '<table class="table table-bordered"><tr><th colspan="4">SetUp Budgets against Projects for the Financial Period</th></tr>';
 echo '<tr>'. Getyearselect().'<td>Select Project :<select name="projectcode" onchange="ReloadForm(budgetform.refresh);"><option selected="selected"></option>';
 
-$Result = DB_query("select Dimensions.Code,Dimensions.Dimension from Dimensions "
+$Result = DB_query("select Dimensions.Code,Dimensions.Dimension from `dimensions` "
         . " join companies on (Dimensions.id=DefaultDimension_2) and `companies`.`coycode`=1",$db);
 while($rows = DB_fetch_array($Result)){
     echo sprintf('<option value="%s" %s>%s</option>',
@@ -69,9 +69,9 @@ echo '</select></td></tr>' ;
 	Budgets.periodno,
 	max(FinancialPeriods.`end_date`) as ENDDATE,
 	min(FinancialPeriods.`start_date`) as STARTDATE,
-	(select sum(B.amount) from Budgets B where B.periodno=Budgets.periodno) as BUDGET
-	from Budgets 
-        join FinancialPeriods on Budgets.periodno=FinancialPeriods.`periodno`
+	(select sum(B.amount) from `budgets` B where B.periodno=Budgets.periodno) as BUDGET
+	from `budgets` 
+        join `financialperiods` on Budgets.periodno=FinancialPeriods.`periodno`
         where Budgets.`dimecode2`='".$_POST['projectcode']."'
 	group by Budgets.periodno,
 	Budgets.amount 
@@ -81,9 +81,9 @@ echo '</select></td></tr>' ;
 	Budgets.periodno,
 	max(FinancialPeriods.`end_date`) as ENDDATE,
 	min(FinancialPeriods.`start_date`) as STARTDATE,
-	(select sum(B.amount) from Budgets B where B.periodno=Budgets.periodno) as BUDGET
-	from Budgets 
-        join FinancialPeriods on Budgets.periodno=FinancialPeriods.`periodno`
+	(select sum(B.amount) from `budgets` B where B.periodno=Budgets.periodno) as BUDGET
+	from `budgets` 
+        join `financialperiods` on Budgets.periodno=FinancialPeriods.`periodno`
 	group by Budgets.periodno,
 	Budgets.amount 
         order by Budgets.periodno",$db);
@@ -111,7 +111,7 @@ echo '</table></td><td><div class="table-responsive mini">';
 
 echo '<table class="table-bordered"><tr><th>Dimension Name</th><th class="number">BUDGET</th></tr>';
 
-$Result = DB_query("select Dimensions.Code,Dimensions.Dimension from Dimensions join companies on 
+$Result = DB_query("select Dimensions.Code,Dimensions.Dimension from `dimensions` join companies on 
                     (Dimensions.id=companies.DefaultDimension_1) 
                     and `companies`.`coycode`=1 order by Dimension",$db);
 $Total=0;
@@ -153,7 +153,7 @@ function Getamount($dim){
                `periodno`
               ,`dimecode`
               ,`amount`
-           FROM `budgets`` where 
+           FROM `budgets``` where 
            `periodno`='". $period."'  "
                  . " and `dimecode`='".$dim."' "
                  . " and `dimecode2`='".$_POST['projectcode']."'";
@@ -162,7 +162,7 @@ function Getamount($dim){
               `periodno`
              ,`dimecode`
              ,sum(`amount`)
-          FROM `budgets`` where 
+          FROM `budgets``` where 
           `periodno`='". $period."'"
                 . " and `dimecode`='".$dim."'"
                 . " group by `periodno`,`dimecode`";
@@ -180,7 +180,7 @@ function createbudget(){
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-         $sql[]="insert into `Budgets` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
+         $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
               . " values ('".$_POST['Financial_Periods']."','".$dimcode."','".$budget."','".$_POST['projectcode']."')";
         }
     }
@@ -204,23 +204,23 @@ function updatebudget(){
     
     
  if(mb_strlen($_POST['projectcode'])>0){
-    $sql[]="Delete from `Budgets` "
+    $sql[]="Delete from `budgets`` "
             . " where `periodno`='".$_POST['fperiod']."' "
             . " and `dimecode2`='".$_POST['projectcode']."'";
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-            $sql[]="insert into `Budgets` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
+            $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
           . " values ('".$_POST['fperiod']."','".$dimcode."','".$budget."','".$_POST['projectcode']."')";
         }
     }
     
  } else {
-   $sql[]="Delete from `Budgets`  where `periodno`='".$_POST['fperiod']."' ";
+   $sql[]="Delete from `budgets``  where `periodno`='".$_POST['fperiod']."' ";
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-            $sql[]="insert into `Budgets` (`periodno`,`dimecode`,`amount`) "
+            $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`) "
           . " values ('".$_POST['fperiod']."','".$dimcode."','".$budget."')";
         }
     }
@@ -244,7 +244,7 @@ function  Getyearselect(){
          Global $db;
          
         $SelectObject='<td>Select Year as the ID</td><td><select name="Financial_Periods">';
-        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `FinancialPeriods` Group by `periodno` order by `periodno` desc", $db);
+        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods`` Group by `periodno` order by `periodno` desc", $db);
         while($row=DB_fetch_array($ResultIndex)){
              $SelectObject .='<option value="'.$row['periodno'].'" '.(($_POST['Financial_Periods']==trim($row['periodno']))?'selected="selected"':'').'  >'.$row['year'].'</option>';
         }
