@@ -34,10 +34,10 @@ $SQLDrilldown ="SELECT
       `dimension2`,
       ".$balance_income." AS `balance_income`,
       '".$openbal."' as balcfwd    
-    from  `Generalledger` 
-    where (`Generalledger`.`accountcode`='".$_POST['Accountcode']."' "
-        . " or  `Generalledger`.`balaccountcode`='".$_POST['Accountcode']."')"
-        . " and `Generalledger`.`Docdate` between '".FormatDateForSQL($_POST['fromdate'])."' "
+    from  `generalledger` 
+    where (`generalledger`.`accountcode`='".$_POST['Accountcode']."' "
+        . " or  `generalledger`.`balaccountcode`='".$_POST['Accountcode']."')"
+        . " and `generalledger`.`Docdate` between '".FormatDateForSQL($_POST['fromdate'])."' "
         . " and '".FormatDateForSQL($_POST['Todate'])."'"
         . " order by `Docdate`,`rowid` asc "
      
