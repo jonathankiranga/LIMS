@@ -32,7 +32,7 @@ if(isset($_GET['Productionid'])){
           ,`ProductionMaster`.`itemcode`  
           ,stockmaster.descrip
           ,`www_users`.`realname`
-      FROM `ProductionMaster` 
+      FROM `productionmaster`` 
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       left join `www_users` on `ProductionMaster`.`userid`=`www_users`.`userid`
       where `ProductionMaster`.`Batchno`='%s'",$_GET['Productionid']);
@@ -45,14 +45,14 @@ if(isset($_GET['Productionid'])){
      $YPos=$firstrowpos-20;
      
      $TOTALUNITS=0; $TOTALCOST=0;
-     $SQL=sprintf("SELECT `qty` ,(`qty`*`cost`) as cost FROM `ProdcutionMasterLine` where `Batchno`='%s'",$_GET['Productionid']);
+     $SQL=sprintf("SELECT `qty` ,(`qty`*`cost`) as cost FROM `prodcutionmasterline`` where `Batchno`='%s'",$_GET['Productionid']);
      $Results=DB_query($SQL,$db);
      while($rows = DB_fetch_array($Results)){
          $TOTALUNITS +=$rows['qty'];
          $TOTALCOST +=$rows['cost'];
      }
     
-     $SQL=sprintf("SELECT `itemcode` ,`qty` ,`cost` FROM `ProdcutionMasterLine` where `Batchno`='%s'",$_GET['Productionid']);
+     $SQL=sprintf("SELECT `itemcode` ,`qty` ,`cost` FROM `prodcutionmasterline`` where `Batchno`='%s'",$_GET['Productionid']);
      $Results=DB_query($SQL,$db);
      while($rows = DB_fetch_array($Results)){
           $Itecode= trim($rows['itemcode']);
@@ -112,7 +112,7 @@ echo '<input type="hidden" name="FormID" value="'. $_SESSION['FormID'] .'"/>';
       ,stockmaster.descrip
       ,`www_users`.`realname`
       ,`ProductionMaster`.`testreport`
-  FROM `ProductionMaster`
+  FROM `productionmaster``
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       left join `www_users` on `ProductionMaster`.`userid`=`www_users`.`userid` 
       order by `ProductionMaster`.`date` desc limit 500";

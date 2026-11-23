@@ -67,7 +67,7 @@ if(isset($BatchNo)){
       unitL.descrip as loseqty ,
       `ProdcutionMasterLine`.`UOM`,
       `ProdcutionMasterLine`.`qty`
-  FROM `ProdcutionMasterLine`
+  FROM `prodcutionmasterline``
   join stockmaster on ProdcutionMasterLine.itemcode=stockmaster.itemcode
   left join unit on stockmaster.units=unit.code
   left join unit unitL on `stockmaster`.`units`=unitL.code

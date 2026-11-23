@@ -32,7 +32,7 @@ $SQL="SELECT
       ,`date`
       ,`averagestock`
       ,`itemcode`
-  FROM `ProductionMaster`
+  FROM `productionmaster``
       where `Batchno`='".$documentno."'";
 
     $ResultIndex = DB_query($SQL,$db);
@@ -106,7 +106,7 @@ echo '</div></form>';
       ,`www_users`.`realname`
       ,`ProductionMaster`.`itemcode`
       ,stockmaster.descrip
-  FROM `ProductionMaster`
+  FROM `productionmaster``
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       left join `www_users` on `ProductionMaster`.`userid`=`www_users`.`userid`
       where `ProductionMaster`.`testreport` is null and `ProductionMaster`.`itemcode` is not null 

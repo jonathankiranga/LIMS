@@ -17,7 +17,7 @@ $SQL="SELECT
             as UOMDesc ,
       `ProductionMaster`.`date`,
       `ProductionMaster`.`userid`
-   FROM `ProdcutionMasterLine` 
+   FROM `prodcutionmasterline`` 
    join stockmaster on `ProdcutionMasterLine`.itemcode=stockmaster.itemcode 
    join `ProductionMaster` on `ProductionMaster`.`Batchno`=`ProdcutionMasterLine`.`Batchno`
   where `ProdcutionMasterLine`.`Batchno`='".$_GET['DocNo']."'  and `ProdcutionMasterLine`.`qty` > 0";
@@ -73,7 +73,7 @@ echo '<input type="hidden" name="FormID" value="'. $_SESSION['FormID'] .'"/>';
 
 $SQL="SELECT 
        `batchno`,`date`,`userid`
-  FROM `ProductionMaster`  
+  FROM `productionmaster``  
   order by date desc";
     $Result=DB_query($SQL,$db);
        
