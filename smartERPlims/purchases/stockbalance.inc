@@ -23,7 +23,7 @@
 
         $line='';
         $line .='<select name="location['.$ItemCode.']" required="required">';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -34,7 +34,7 @@
             }
        }else{
           $_SESSION['productionTankStore']="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                    $line .= sprintf('<option value="%s" %s>%s</option>',trim($value['tankname']),$_POST['location']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }

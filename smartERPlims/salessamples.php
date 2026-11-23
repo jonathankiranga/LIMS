@@ -24,7 +24,7 @@ include('includes/header.inc');
  }
  
  if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader``` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >
       <img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Samples') . '" alt="" />%s</a></p>',
@@ -73,7 +73,7 @@ include('includes/header.inc');
          
                 If($_SESSION['SINGLEUSER']=='Singleuser'){
                     include('transactions/postSampleIssues.inc');  
-                    DB_query("UPDATE `salesheader`` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
+                    DB_query("UPDATE `salesheader``` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
                     include('transactions/SaveSampleIssues.inc'); 
                 }else{
                     include('transactions/requstSampleIssues.inc');  
@@ -214,8 +214,8 @@ echo '<td>Currency Code'
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='15'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='15'", $db);
+    DB_query("Delete from `salesline`` where documentno='".$DOC."' and `documenttype`='15'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='15'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }

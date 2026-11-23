@@ -16,7 +16,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO `purchaseheader`
+$sql[]="INSERT INTO `purchaseheader``
            (documenttype
            ,documentno
            ,docdate
@@ -95,8 +95,8 @@ foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
    $InpacksReceived = $_SESSION['units'][$uomreceived]['descrip'];
    
                
-    //alter table PurchaseLine add discount float
-    $sql[] =  sprintf("INSERT INTO `purchaseline`
+    //alter table `purchaseline` add discount float
+    $sql[] =  sprintf("INSERT INTO `purchaseline``
            (documenttype
            ,docdate
            ,documentno
@@ -202,7 +202,7 @@ $transstart = DB_Txn_Begin($db);
       ,status
       ,userid
       ,freight 
-      from PurchaseHeader  where documenttype='18' and documentno='".$_POST['documentno']."'";
+      from `purchaseheader`  where documenttype='18' and documentno='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
        
     Echo '<Table class="table-bordered"><tr><th>Parameter</th><th>Value</th></tr>';
@@ -247,7 +247,7 @@ $transstart = DB_Txn_Begin($db);
            ,invoiceamount
            ,PartPerUnit 
            ,QuantityToReceive
-           from PurchaseLine 
+           from `purchaseline` 
            where documenttype=18 and documentno='".$_POST['documentno']."'";
    
     $ResultIndex=DB_query($SQL,$db);
