@@ -123,9 +123,9 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         if($_SESSION['productionTankStore'][$stcode]=="S"){
                             $sql[]="INSERT INTO stockledger (date,stname,doctyp,itemcode,invref,netamt,vat,amount,fulqty
                                 ,loosqty,price,store,journal,period,jobcard,PartPerUnit)
-                                (SELECT SalesLine.docdate ,substring(SalesLine.description,0,30)
-                                   ,'4',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
-                                   , 0 as fulqty,".(0-$looseUnits)." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
+                                (SELECT salesline.docdate ,substring(salesline.description,0,30)
+                                   ,'4',salesline.code ,salesline.documentno,salesline.invoiceamount ,salesline.vatamount,salesline.invoiceamount
+                                   , 0 as fulqty,".(0-$looseUnits)." as loosqty,(salesline.UnitPrice/salesline.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
                                  FROM `salesline`` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
@@ -143,9 +143,9 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                     $EmptiesStore = GetEmptiesStore($array['ContainerCode'],$qty);
                      $sql[]="INSERT INTO stockledger (date,stname,doctyp,itemcode,invref,netamt,vat,amount,fulqty,loosqty
                         ,price ,store ,journal,period ,jobcard ,PartPerUnit)
-                        (SELECT  SalesLine.docdate,substring(SalesLine.description,0,30),'4'
-                        ,'".$array['ContainerCode']."',SalesLine.documentno,SalesLine.invoiceamount
-                        ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$array['ContainerQTY']).",0,SalesLine.UnitPrice
+                        (SELECT  salesline.docdate,substring(salesline.description,0,30),'4'
+                        ,'".$array['ContainerCode']."',salesline.documentno,salesline.invoiceamount
+                        ,salesline.vatamount ,salesline.invoiceamount,".(0-$array['ContainerQTY']).",0,salesline.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
                         FROM `salesline``  where documentno='".$salesoderno."' and code='".$stcode."')";
                }
@@ -156,9 +156,9 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
 
                     $sql[]="INSERT INTO stockledger (date,stname,doctyp,itemcode,invref,netamt,vat,amount,fulqty,loosqty
                         ,price ,store ,journal,period ,jobcard ,PartPerUnit)
-                        (SELECT  SalesLine.docdate,substring(SalesLine.description,0,30),'4'
-                        ,SalesLine.containercode,SalesLine.documentno,SalesLine.invoiceamount
-                        ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$emptyunits).",0,SalesLine.UnitPrice
+                        (SELECT  salesline.docdate,substring(salesline.description,0,30),'4'
+                        ,salesline.containercode,salesline.documentno,salesline.invoiceamount
+                        ,salesline.vatamount ,salesline.invoiceamount,".(0-$emptyunits).",0,salesline.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
                         FROM `salesline``  where documentno='".$salesoderno."' and containercode='".$emptycode."')";
                 
@@ -240,27 +240,27 @@ function PostGL($period,$journal,$doc){
       ,dimension2)
       (select
        '%s'
-      ,SalesHeader.docdate
+      ,salesheader.docdate
       ,'%s'
-      ,SalesHeader.documentno
+      ,salesheader.documentno
       ,'4'
       ,inventorypostinggroup.spoilage
       ,inventorypostinggroup.balancesheet
       ,inventorypostinggroup.defaultgl_vat
-      ,SalesLine.invoiceamount
-      ,IFNULL(SalesLine.vatamount,0) as vatamount
-      ,SalesHeader.currencycode
+      ,salesline.invoiceamount
+      ,IFNULL(salesline.vatamount,0) as vatamount
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,(rtrim(SalesLine.description)) as narration
+      ,salesheader.customercode
+      ,(rtrim(salesline.description)) as narration
       ,'".$_POST['DimensionOne']."' 
       ,'".$_POST['DimensionTwo']."'
       from `salesheader` 
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       AND inventorypostinggroup.spoilage IS NOT NULL
       AND inventorypostinggroup.balancesheet IS NOT NULL
       AND inventorypostinggroup.defaultgl_vat IS NOT NULL

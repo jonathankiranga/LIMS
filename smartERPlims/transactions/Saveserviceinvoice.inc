@@ -197,40 +197,40 @@ function PostDebtors($period,$journal,$doc){
       ,ledger
       ,period)
   (SELECT 
-      SalesHeader.postingdate
-      ,CONCAT(RTRIM(SalesLine.description),' X ',CAST(SalesLine.Quantity AS CHAR),' ',
-		  (case SalesLine.UOM when 'fulqty' 
-	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code) 
-		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code)
+      salesheader.postingdate
+      ,CONCAT(RTRIM(salesline.description),' X ',CAST(salesline.Quantity AS CHAR),' ',
+		  (case salesline.UOM when 'fulqty' 
+	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code) 
+		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code)
 		  end))  as narration,'I'
-      ,SalesHeader.documentno
-      ,SalesHeader.customercode
-      ,SUM(SalesLine.invoiceamount) as Value
+      ,salesheader.documentno
+      ,salesheader.customercode
+      ,SUM(salesline.invoiceamount) as Value
       ,0.00
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,'I'
       ,'%s'
       ,'r'
-      ,SUM(SalesLine.vatamount) as VAT
-      ,SalesHeader.documenttype
-      ,SalesHeader.postinggroup
+      ,SUM(salesline.vatamount) as VAT
+      ,salesheader.documenttype
+      ,salesheader.postinggroup
       ,'%s'
   FROM `salesheader`` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
-        where SalesHeader.documentno='%s' 
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
+        where salesheader.documentno='%s' 
         group by
-       SalesHeader.documenttype
-      ,SalesHeader.documentno
-      ,SalesHeader.postingdate
-      ,SalesHeader.customercode
-      ,SalesHeader.externaldocumentno
-      ,SalesHeader.postinggroup
-      ,SalesHeader.currencycode
-      ,SalesLine.Quantity
-      ,SalesLine.description
-      ,SalesLine.code
-      ,SalesLine.UOM)", $journal,$period,$doc);
+       salesheader.documenttype
+      ,salesheader.documentno
+      ,salesheader.postingdate
+      ,salesheader.customercode
+      ,salesheader.externaldocumentno
+      ,salesheader.postinggroup
+      ,salesheader.currencycode
+      ,salesline.Quantity
+      ,salesline.description
+      ,salesline.code
+      ,salesline.UOM)", $journal,$period,$doc);
    
    return $SQL;
 }
@@ -255,31 +255,31 @@ function PostGL($period,$journal,$doc){
       ,dimension2)
       (select
        '%s'
-      ,SalesHeader.postingdate
+      ,salesheader.postingdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,postinggroups.debtorsaccount
       ,inventorypostinggroup.defaultgl_sales
       ,inventorypostinggroup.defaultgl_vat
-      ,SalesLine.invoiceamount
-      ,IFNULL(SalesLine.vatamount,0) as vatamount
-      ,SalesHeader.currencycode
+      ,salesline.invoiceamount
+      ,IFNULL(salesline.vatamount,0) as vatamount
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,CONCAT(RTRIM(SalesLine.description),' X ',CAST(SalesLine.Quantity AS CHAR),' ',
-		  (case SalesLine.UOM when 'fulqty' 
-	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code) 
-		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code)
+      ,salesheader.customercode
+      ,CONCAT(RTRIM(salesline.description),' X ',CAST(salesline.Quantity AS CHAR),' ',
+		  (case salesline.UOM when 'fulqty' 
+	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code) 
+		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code)
 		  end))  as narration
         ,'".$_POST['DimensionOne']."' 
         ,'".$_POST['DimensionTwo']."'
-      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      from `salesheader` join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       AND inventorypostinggroup.defaultgl_sales IS NOT NULL
       AND inventorypostinggroup.defaultgl_vat IS NOT NULL
       )",$journal,$period,$doc);
@@ -306,29 +306,29 @@ function VATPostGL($period,$journal,$doc){
       ,narration)
       (select
        '%s'
-      ,SalesHeader.postingdate
+      ,salesheader.postingdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,inventorypostinggroup.defaultgl_sales
       ,inventorypostinggroup.defaultgl_vat
       ,''
-      ,SalesLine.vatamount
+      ,salesline.vatamount
       ,0
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,CONCAT('VAT on ',RTRIM(SalesLine.description),' X ',CAST(SalesLine.Quantity AS CHAR),' ',
-		  (case SalesLine.UOM when 'fulqty' 
-	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code) 
-		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code)
+      ,salesheader.customercode
+      ,CONCAT('VAT on ',RTRIM(salesline.description),' X ',CAST(salesline.Quantity AS CHAR),' ',
+		  (case salesline.UOM when 'fulqty' 
+	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code) 
+		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code)
 		  end))  as narration
-      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      from `salesheader` join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       AND inventorypostinggroup.defaultgl_sales IS NOT NULL
       AND inventorypostinggroup.defaultgl_vat IS NOT NULL
       )",$journal,$period,$doc);
@@ -349,24 +349,24 @@ Function CustomerStatemet($journal,$doc){
            ,Dimension_Two
            ,Currency)
       (select
-            SalesHeader.postingdate
-           ,SalesHeader.documentno
-           ,SalesHeader.documenttype
-           ,SalesHeader.customercode
-           ,sum(SalesLine.invoiceamount)
+            salesheader.postingdate
+           ,salesheader.documentno
+           ,salesheader.documenttype
+           ,salesheader.customercode
+           ,sum(salesline.invoiceamount)
            ,'%s'
            ,'".$_POST['DimensionOne']."'
            ,'".$_POST['DimensionTwo']."' 
-           ,SalesHeader.currencycode    
+           ,salesheader.currencycode    
            from `salesheader`
-           join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-         where SalesHeader.documentno='%s' 
+           join `salesline` on salesline.documentno = salesheader.documentno 
+         where salesheader.documentno='%s' 
          Group by  
-            SalesHeader.postingdate
-           ,SalesHeader.documentno
-           ,SalesHeader.documenttype
-           ,SalesHeader.customercode
-           ,SalesHeader.currencycode) ",
+            salesheader.postingdate
+           ,salesheader.documentno
+           ,salesheader.documenttype
+           ,salesheader.customercode
+           ,salesheader.currencycode) ",
        $journal,$doc);
 
     return $sql;
@@ -392,31 +392,31 @@ function COGSPostGL($period,$journal,$doc){
       ,dimension2)
       (select
        '%s'
-      ,SalesHeader.postingdate
+      ,salesheader.postingdate
       ,'%s'
-      ,SalesHeader.documentno
-      ,SalesHeader.documenttype
+      ,salesheader.documentno
+      ,salesheader.documenttype
       ,inventorypostinggroup.balancesheet
       ,inventorypostinggroup.CostOfSales
       ,''
-      ,IFNULL(stockmaster.averagestock,0) * SalesLine.Quantity
+      ,IFNULL(stockmaster.averagestock,0) * salesline.Quantity
       ,0
-      ,SalesHeader.currencycode
+      ,salesheader.currencycode
       ,currencies.rate
-      ,SalesHeader.customercode
-      ,CONCAT(RTRIM(SalesLine.description),' X ',CAST(SalesLine.Quantity AS CHAR),' ',
-		  (case SalesLine.UOM when 'fulqty' 
-	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code) 
-		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=SalesLine.code)
+      ,salesheader.customercode
+      ,CONCAT(RTRIM(salesline.description),' X ',CAST(salesline.Quantity AS CHAR),' ',
+		  (case salesline.UOM when 'fulqty' 
+	      then (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code) 
+		  else (select rtrim(unit.descrip) from unit join stockmaster on stockmaster.units=unit.code  and stockmaster.itemcode=salesline.code)
 		  end))  as narration
         ,'".$_POST['DimensionOne']."' 
         ,'".$_POST['DimensionTwo']."'
-      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
-      join stockmaster on SalesLine.code=stockmaster.itemcode
+      from `salesheader` join postinggroups on salesheader.postinggroup=postinggroups.code
+      join `salesline` on salesline.documentno = salesheader.documentno 
+      join stockmaster on salesline.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
-      join currencies on SalesHeader.currencycode=currencies.currabrev
-      where SalesHeader.documentno='%s'
+      join currencies on salesheader.currencycode=currencies.currabrev
+      where salesheader.documentno='%s'
       )",$journal,$period,$doc);
 
     return $sql;

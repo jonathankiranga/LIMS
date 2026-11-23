@@ -233,20 +233,20 @@ function etimsRequestAccessToken($forceRefresh = false) {
 function etimsFetchInvoiceHeader($documentType, $documentNo) {
     global $db;
 
-    $sql = "SELECT SalesHeader.documenttype,
-                   SalesHeader.documentno,
-                   SalesHeader.docdate,
-                   SalesHeader.postingdate,
-                   SalesHeader.duedate,
-                   SalesHeader.customercode,
-                   SalesHeader.customername,
-                   SalesHeader.currencycode,
-                   SalesHeader.salespersoncode,
-                   SalesHeader.yourreference,
-                   SalesHeader.externaldocumentno,
-                   SalesHeader.locationcode,
-                   SalesHeader.vatinclusive,
-                   SalesHeader.packagescharge,
+    $sql = "SELECT salesheader.documenttype,
+                   salesheader.documentno,
+                   salesheader.docdate,
+                   salesheader.postingdate,
+                   salesheader.duedate,
+                   salesheader.customercode,
+                   salesheader.customername,
+                   salesheader.currencycode,
+                   salesheader.salespersoncode,
+                   salesheader.yourreference,
+                   salesheader.externaldocumentno,
+                   salesheader.locationcode,
+                   salesheader.vatinclusive,
+                   salesheader.packagescharge,
                    debtors.email,
                    debtors.phone,
                    debtors.city,
@@ -254,9 +254,9 @@ function etimsFetchInvoiceHeader($documentType, $documentNo) {
                    debtors.contact,
                    debtors.middlen AS PIN
             FROM `salesheader`
-            LEFT JOIN debtors ON SalesHeader.customercode = debtors.itemcode
-            WHERE SalesHeader.documenttype='" . (int) $documentType . "'
-              AND SalesHeader.documentno='" . DB_escape_string($documentNo) . "'
+            LEFT JOIN debtors ON salesheader.customercode = debtors.itemcode
+            WHERE salesheader.documenttype='" . (int) $documentType . "'
+              AND salesheader.documentno='" . DB_escape_string($documentNo) . "'
             LIMIT 1";
 
     $result = DB_query($sql, $db);

@@ -28,7 +28,7 @@ $SQL="select
       from `salesheader``
       join `salesline`` on `SalesHeader`.`documentno`=`SalesLine`.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
-      where `SalesHeader`.`documentno`='".$_GET['No']."' GROUP BY SalesLine.documentno, SalesLine.SampleID";
+      where `SalesHeader`.`documentno`='".$_GET['No']."' GROUP BY salesline.documentno, salesline.SampleID";
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_row($Result);
     $urlString=$myrow[17];
@@ -57,15 +57,15 @@ $SQL="select
     
     $SQL=sprintf("SELECT 
         stockmaster.barcode,
-        SalesLine.`description`,
+        salesline.`description`,
         `SalesLine`.Quantity,
         `SalesLine`.unitofmeasure as UOMDesc,
         `SalesLine`.UnitPrice as Sp
     FROM `salesheader`` 
-        join `salesline` on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
-        join stockmaster on stockmaster.itemcode=SalesLine.code
-        where SalesHeader.documentno='%s' and SalesHeader.documenttype=19 " ,$_GET['No']);
+        join `salesline` on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
+        join stockmaster on stockmaster.itemcode=salesline.code
+        where salesheader.documentno='%s' and salesheader.documenttype=19 " ,$_GET['No']);
      
     $Results=DB_query($SQL,$db);
     $lineItems = [];
