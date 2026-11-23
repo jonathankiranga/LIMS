@@ -12,7 +12,7 @@ $query = "SELECT
     dr.*, 
     tr.SampleID AS ResultSampleID,
     tr.resultsID
-FROM Sample_Tests st
+FROM sample_tests st
 JOIN sample_header sh ON st.HeaderID = sh.HeaderID
 JOIN debtors dr ON sh.CustomerID = dr.itemcode
 JOIN test_results tr ON sh.HeaderID = tr.HeaderID
