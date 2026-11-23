@@ -87,7 +87,7 @@ Function GetMytacks(){
     
    $sql = sprintf("SELECT `pkey` ,`userid` ,`datecreated`,`TaskOwner` ,`Taskname` ,`datedue`
       ,`Status` ,`Priority`,`frequency`,`taskdetails` ,`alertedbymail`
-  FROM `Tasks` where TaskOwner='%s' and `Status`<4",$_SESSION['UserID']);
+  FROM `tasks` where TaskOwner='%s' and `Status`<4",$_SESSION['UserID']);
     
    $Table='<table  class="table-striped table-bordered" style="font-size: 12px;"><tr>'
            . '<th>Task Name</th>'
@@ -120,7 +120,7 @@ function GetMyActivities(){
       
   $sql = sprintf("select `pkey`,`ActivityOwner`,`Activityname` ,`fromdue` ,`todue`,`Contact` ,`Status`
       ,`valueofbusiness`,`taskdetails`,`createdby`,`createdon`,`lastactivity`
-       FROM `NewActivity` where ActivityOwner='%s' and `Status`<5",$_SESSION['UserID']);
+       FROM `newactivity` where ActivityOwner='%s' and `Status`<5",$_SESSION['UserID']);
       
    $Table='<table class="table-striped table-bordered table-condensed" style="font-size: 12px;"><tr>'
            . '<th>Activity Name</th>'
@@ -1284,7 +1284,7 @@ Function CreateNewFinancialPeriod(){
             $monthName = date('F', strtotime($startDate));
             $newYear   = ($index==0)?1:0;
 
-            $SQLDATE[] = "INSERT INTO `FinancialPeriods` (`start_date`,`end_date`,`Name`,`newyear`,`closed`,`periodno`)
+            $SQLDATE[] = "INSERT INTO `financialperiods` (`start_date`,`end_date`,`Name`,`newyear`,`closed`,`periodno`)
                VALUES ('".$startDate."','".$endDate."','".$monthName."',".$newYear.",0,".$YearPeriod.")";
 
             if($index>0){
@@ -1312,7 +1312,7 @@ Function RollOverFinancialPeriods(){
     $SQLDATE=array();
     
     if(Is_date(ConvertSQLDate($Datevaluerow[0]))){
-    DB_System("UPDATE `FinancialPeriods` SET `closed`=1 ",$db);
+    DB_System("UPDATE `financialperiods` SET `closed`=1 ",$db);
     }
 }
 
