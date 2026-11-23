@@ -8,6 +8,7 @@ composer.phar
 config/local.php
 
 # Logs and temporary files
+/sessions/
 *.log
 tmp/
 cache/
