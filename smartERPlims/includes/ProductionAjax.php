@@ -50,7 +50,7 @@ While($row= DB_fetch_array($result)){
     $wwwusers[$user]=$row['realname'];
 }
 
-$result = DB_query("SELECT `Company`,`pkey` FROM `NewContacts`",$db);
+$result = DB_query("SELECT `Company`,`pkey` FROM `newcontacts``",$db);
 While($row= DB_fetch_array($result)){
     $pkey=(int)$row['pkey'];
     $NewContacts[$pkey]=$row['Company'];
@@ -146,7 +146,7 @@ function GetTasks(){
      global $db,$PriodnoArray ;
    
      $SQL=sprintf("SELECT `TaskOwner`,`Taskname`,`datedue`,`Status`,`Priority`,`frequency`,`taskdetails` 
-      ,DATEDIFF(`datedue`,NOW()) as Future  FROM `Tasks` where datedue between '%s' and '%s' 
+      ,DATEDIFF(`datedue`,NOW()) as Future  FROM `tasks`` where datedue between '%s' and '%s' 
       order by `TaskOwner`,`Priority`,`Status` asc", $PriodnoArray['fromDate'],$PriodnoArray['toDate']);
      
      $Activities=array();
@@ -233,7 +233,7 @@ function GetActivities(){
  
        $SQL=sprintf("select `pkey`,`ActivityOwner`,`Activityname`,`fromdue`,`todue`,`Contact`,`Status`
       ,`valueofbusiness`,`taskdetails`,`createdby`,`createdon`,`lastactivity`,DATEDIFF(`fromdue`,NOW()) as Future
-       FROM `NewActivity` where `todue` between '%s' and '%s'  order by `ActivityOwner`,`Status` desc ",$PriodnoArray['fromDate'],$PriodnoArray['toDate']);
+       FROM `newactivity`` where `todue` between '%s' and '%s'  order by `ActivityOwner`,`Status` desc ",$PriodnoArray['fromDate'],$PriodnoArray['toDate']);
 
       $Activities=array();
       $result=DB_query($SQL,$db);

@@ -27,15 +27,15 @@ class DimensionsBudget {
         Global $db;
         
         if(mb_strlen($dim)==0){
-         $SQL="SELECT `amount` FROM `Budgets` "
+         $SQL="SELECT `amount` FROM `budgets`` "
             . "where  `periodno`='".$this->FinancialPeriod."' and `dimecode2`='".$dim2."'";
                 
         }elseif(mb_strlen($dim2)==0){
-         $SQL="SELECT `amount` FROM `Budgets` "
+         $SQL="SELECT `amount` FROM `budgets`` "
             . "where  `periodno`='".$this->FinancialPeriod."' and `dimecode`='".$dim."'";
          
         } else {
-            $SQL="SELECT `amount` FROM `Budgets` "
+            $SQL="SELECT `amount` FROM `budgets`` "
                . " where  `periodno`='".$this->FinancialPeriod."' and `dimecode`='".$dim."' and `dimecode2`='".$dim2."'";
         }
         
@@ -51,7 +51,7 @@ class DimensionsBudget {
         
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount) as amount
-              FROM `PurchaseHeader` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_1='".$dim1."'
@@ -68,7 +68,7 @@ class DimensionsBudget {
         
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount)as  amount
-              FROM `PurchaseHeader` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_1='".$dim1."')";
@@ -84,7 +84,7 @@ class DimensionsBudget {
       
         $SQL="SELECT 
                   sum(PurchaseLine.invoiceamount) as  amount
-              FROM `PurchaseHeader` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
+              FROM `purchaseheader`` join PurchaseLine on PurchaseHeader.documenttype=PurchaseLine.documenttype 
                   and PurchaseHeader.documentno=PurchaseLine.documentno
                   where PurchaseHeader.released=1 and PurchaseHeader.documenttype=18 
                   and (PurchaseHeader.Dimension_2='".$dim2."')";
@@ -97,7 +97,7 @@ class DimensionsBudget {
         
     function GetExpenses1($dime1=''){
         Global $db;
-         $SQL="SELECT sum(`amount`) FROM `Generalledger` "
+         $SQL="SELECT sum(`amount`) FROM `generalledger`` "
             . " where docdate between '".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension`='".$dime1."' ";
           
@@ -109,7 +109,7 @@ class DimensionsBudget {
        
     function GetExpenses2($dime2=''){
         Global $db;
-          $SQL="SELECT sum(`amount`) FROM `Generalledger` "
+          $SQL="SELECT sum(`amount`) FROM `generalledger`` "
              . " where docdate between '".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension2`='".$dime2."'";
           
@@ -123,7 +123,7 @@ class DimensionsBudget {
     function GetExpensesBoth($dime1='',$dime2=''){
         Global $db;
         
-         $SQL="SELECT sum(`amount`) FROM `Generalledger` "
+         $SQL="SELECT sum(`amount`) FROM `generalledger`` "
                 . " where docdate between'".$this->StartDate."'  and '".$this->EndDate."' "
                  . " and `dimension`='".$dime1."' "
                  . " and `dimension2`='".$dime2."'";
