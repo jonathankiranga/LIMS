@@ -22,7 +22,7 @@ if(isset($_GET['new'])){
 if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
     $loadDocNo = mysqli_real_escape_string($db, $_POST['loadOrderNo']);
     $hdrSql = "SELECT docdate, customercode, customername, yourreference, currencycode, salespersoncode, QtyDiscount, locationcode
-               FROM `salesheader` WHERE documenttype=1 AND documentno='$loadDocNo' LIMIT 1";
+               FROM `salesheader`` WHERE documenttype=1 AND documentno='$loadDocNo' LIMIT 1";
     $hdrResult = DB_query($hdrSql, $db);
     if ($hdrRow = DB_fetch_array($hdrResult)) {
         $_POST['documentno'] = $loadDocNo;
@@ -37,7 +37,7 @@ if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
 
         $_SESSION['sales_orders'] = array();
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, sampleID
-                    FROM `salesline` WHERE documenttype=1 AND documentno='$loadDocNo' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline`` WHERE documenttype=1 AND documentno='$loadDocNo' AND code IS NOT NULL AND code != ''";
         $lineResult = DB_query($lineSql, $db);
         while ($line = DB_fetch_array($lineResult)) {
             $code = trim($line['code']);
@@ -80,7 +80,7 @@ if (isset($_POST['loadOrderNo']) && !empty($_POST['loadOrderNo'])) {
 if (isset($_POST['loadQuoteNo']) && !empty($_POST['loadQuoteNo'])) {
     $loadQuote = mysqli_real_escape_string($db, trim($_POST['loadQuoteNo']));
     $hdrSql = "SELECT docdate, customercode, customername, yourreference, currencycode, salespersoncode, QtyDiscount, locationcode
-               FROM `salesheader` WHERE documenttype=54 AND documentno='$loadQuote' LIMIT 1";
+               FROM `salesheader`` WHERE documenttype=54 AND documentno='$loadQuote' LIMIT 1";
     $hdrResult = DB_query($hdrSql, $db);
     if ($hdrRow = DB_fetch_array($hdrResult)) {
         $_POST['date'] = ConvertSQLDate($hdrRow['docdate']);
@@ -96,7 +96,7 @@ if (isset($_POST['loadQuoteNo']) && !empty($_POST['loadQuoteNo'])) {
 
         $_SESSION['sales_orders'] = array();
         $lineSql = "SELECT code, description, Quantity, UnitPrice, LineDiscountPercent, TAT, Partperunit
-                    FROM `salesline` WHERE documenttype=54 AND documentno='$loadQuote' AND code IS NOT NULL AND code != ''";
+                    FROM `salesline`` WHERE documenttype=54 AND documentno='$loadQuote' AND code IS NOT NULL AND code != ''";
         $lineResult = DB_query($lineSql, $db);
         while ($line = DB_fetch_array($lineResult)) {
             $code = trim($line['code']);
@@ -150,7 +150,7 @@ if(!isset($_SESSION['units'])){
             }
        }
 if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader``` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >'
       . '<img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Order') . '" alt="" />%s</a></p>',
@@ -369,8 +369,8 @@ $SQLstment="SELECT accountcode,bankName,BranchName,currency FROM `bankaccounts``
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='1'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='1'", $db);
+    DB_query("Delete from `salesline`` where documentno='".$DOC."' and `documenttype`='1'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='1'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }
