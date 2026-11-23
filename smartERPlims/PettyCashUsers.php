@@ -158,7 +158,7 @@ if (isset($SelectedUser)) {
                 </tr>';
        
         $BankObject='<tr><td>Default Bank:</td><td><Select name="Bank_Code"><option></option>';
-        $resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency` FROM `BankAccounts`", $db);
+        $resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency` FROM `bankaccounts``", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
@@ -182,7 +182,7 @@ include('includes/footer.inc');
 Function GetBank($Bank_Code){
     Global $db;
     
-    $resultindex = DB_query("SELECT `accountcode`,`bankName`,`currency` FROM `BankAccounts` where `accountcode`='".$Bank_Code."'", $db);
+    $resultindex = DB_query("SELECT `accountcode`,`bankName`,`currency` FROM `bankaccounts`` where `accountcode`='".$Bank_Code."'", $db);
     $row = DB_fetch_row($resultindex);
     return $row[1];
   

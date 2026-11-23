@@ -32,12 +32,12 @@ if(isset($_POST['Auto'])){
       ,`Accountno` as acctfolio
       ,`Grossamount` as amount
       ,`JournalNo` as journal
-      ,(`Grossamount`+ IFNULL((SELECT sum(`amount`) FROM `PaymentsAllocation` 
+      ,(`Grossamount`+ IFNULL((SELECT sum(`amount`) FROM `paymentsallocation`` 
          where `itemcode`=`SupplierStatement`.`Accountno` 
           and `date`=`SupplierStatement`.`date` 
           and `invoiceno`=`SupplierStatement`.`Documentno` 
           and `journalno`=`SupplierStatement`.`JournalNo`),0)) as Pamount
-      FROM `SupplierStatement` where `SupplierStatement`.`Accountno`='".$_POST['VendorID']."'";
+      FROM `supplierstatement`` where `SupplierStatement`.`Accountno`='".$_POST['VendorID']."'";
 
       
       $ResultIndex=DB_query($sql,$db);
@@ -94,17 +94,17 @@ function db_autoallocatevendors($accountno){
     $receiptsSQL = "SELECT
             (ss.Grossamount - IFNULL((
                 SELECT SUM(pa.amount)
-                FROM PaymentsAllocation pa
+                FROM `paymentsallocation` pa
                 WHERE pa.receiptjournal = ss.JournalNo
                   AND pa.itemcode = '" . $accountno . "'
             ),0)) AS AMOUNT2,
             ss.JournalNo,
             ss.Documentno
-        FROM SupplierStatement ss
+        FROM `supplierstatement` ss
         WHERE ss.Accountno = '" . $accountno . "'
           AND (ss.Grossamount - IFNULL((
                 SELECT SUM(pa.amount)
-                FROM PaymentsAllocation pa
+                FROM `paymentsallocation` pa
                 WHERE pa.receiptjournal = ss.JournalNo
                   AND pa.itemcode = '" . $accountno . "'
           ),0)) > 0
@@ -119,16 +119,16 @@ function db_autoallocatevendors($accountno){
         $invoicesSQL = "SELECT
                 (ss.Grossamount + IFNULL((
                     SELECT SUM(pa.amount)
-                    FROM PaymentsAllocation pa
+                    FROM `paymentsallocation` pa
                     WHERE pa.journalno = ss.JournalNo
                       AND pa.itemcode = '" . $accountno . "'
                 ),0)) AS AMOUNT2,
                 ss.JournalNo
-            FROM SupplierStatement ss
+            FROM `supplierstatement` ss
             WHERE ss.Accountno = '" . $accountno . "'
               AND (ss.Grossamount + IFNULL((
                     SELECT SUM(pa.amount)
-                    FROM PaymentsAllocation pa
+                    FROM `paymentsallocation` pa
                     WHERE pa.journalno = ss.JournalNo
                       AND pa.itemcode = '" . $accountno . "'
               ),0)) < 0
@@ -140,20 +140,20 @@ function db_autoallocatevendors($accountno){
             $journalNoInv  = DB_escape_string($invoiceRow['JournalNo']);
 
             if(($amountReceipt + $amountInvoice) > 0){
-                DB_query("INSERT INTO PaymentsAllocation
+                DB_query("INSERT INTO `paymentsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, Date, Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', (Grossamount * -1), '" . $journalReceipt . "'
-                    FROM SupplierStatement
+                    FROM `supplierstatement`
                     WHERE JournalNo = '" . $journalNoInv . "'", $db);
 
                 $amountReceipt = $amountReceipt + $amountInvoice;
             } else {
-                DB_query("INSERT INTO PaymentsAllocation
+                DB_query("INSERT INTO `paymentsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, Date, Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', " . $amountReceipt . ", '" . $journalReceipt . "'
-                    FROM SupplierStatement
+                    FROM `supplierstatement`
                     WHERE JournalNo = '" . $journalNoInv . "'", $db);
 
                 $amountReceipt = $amountReceipt + $amountInvoice;
