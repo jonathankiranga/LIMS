@@ -24,9 +24,9 @@ SELECT
     ST.HeaderID,
     ST.disposal_timestamp  
 FROM sample_tests ST
-JOIN Sample_Header SH 
+JOIN sample_header SH 
     ON SH.HeaderID = ST.HeaderID
-JOIN TestStandards ts 
+JOIN teststandards ts 
     ON ST.StandardID = ts.StandardID 
 WHERE ST.SampleID LIKE CONCAT('%', ?, '%') 
 LIMIT ?, ?";
