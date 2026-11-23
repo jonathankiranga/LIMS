@@ -6,13 +6,13 @@ Global $db;
 $sql = "SELECT
         IFNULL((
             SELECT SUM(gl.amount * gl.ExchangeRate)
-            FROM Generalledger gl
+            FROM `generalledger` gl
             WHERE gl.accountcode = acct.accno
               AND gl.period < " . (int)$prd . "
         ),0) AS debit,
         IFNULL((
             SELECT SUM(gl.amount * gl.ExchangeRate)
-            FROM Generalledger gl
+            FROM `generalledger` gl
             WHERE gl.balaccountcode = acct.accno
               AND gl.period < " . (int)$prd . "
         ),0) AS credit,
