@@ -139,7 +139,7 @@ function getbalance($stcode,$location,$UOM=''){
    Function GetwoTank(){
     global $db;
     
-    $ResultIndex=DB_query("select tankname, stockmaster.descrip from ProductionUnit "
+    $ResultIndex=DB_query("select tankname, stockmaster.descrip from `productionunit` "
             . "join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode  ", $db);
     while($value=DB_fetch_array($ResultIndex)){
         if($_POST['wotank']==trim($value['tankname'])){
@@ -255,7 +255,7 @@ $itemArray=array(
          $tankClass=new tankClass() ;
          $tankClass->update_tank_balance();
          
-         $sql=sprintf("SELECT IFNULL(units,0) FROM `productionunit` 
+         $sql=sprintf("SELECT IFNULL(units,0) FROM `productionunit`` 
               where tankname='%s' and itemcode='%s'",$tank,$itemcode);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
@@ -271,7 +271,7 @@ $itemArray=array(
          $tankClass=new tankClass() ;
          $tankClass->update_tank_balance();
          
-         $sql=sprintf("SELECT balance FROM `productionunit` 
+         $sql=sprintf("SELECT balance FROM `productionunit`` 
               where tankname='%s' and itemcode='%s'",$tank,$itemcode);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
@@ -286,7 +286,7 @@ $itemArray=array(
                 function update_tank_balance(){
                     global $db;
 
-                    $sql="SELECT tankname FROM `productionunit`";
+                    $sql="SELECT tankname FROM `productionunit``";
                        $ResultIndex = DB_query($sql,$db);
                        while($dbrows= DB_fetch_array($ResultIndex)){
                            $this->rows1[]=$dbrows;
@@ -307,7 +307,7 @@ $itemArray=array(
                        }
                        
                         foreach ($this->rowsunits as $tankcode => $balance) {
-                          $sql = sprintf("update ProductionUnit set units=(%f) 
+                          $sql = sprintf("update `productionunit` set units=(%f) 
                           where ProductionUnit.tankname= '%s'",$balance,$tankcode); 
                           
                           $ResultIndex = DB_query($sql,$db);
