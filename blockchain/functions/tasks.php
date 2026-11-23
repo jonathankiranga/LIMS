@@ -260,8 +260,8 @@ class EventManager
             FROM sample_header sh
             LEFT JOIN sample_tests st ON st.HeaderID = sh.HeaderID
             LEFT JOIN test_results tr ON tr.TestID = st.TestID
-            LEFT JOIN TestStandards ts ON ts.StandardID = tr.StandardID
-            LEFT JOIN TestParameters tp
+            LEFT JOIN teststandards ts ON ts.StandardID = tr.StandardID
+            LEFT JOIN testparameters tp
                 ON tp.ParameterID = tr.ParameterID
                AND tp.StandardID = tr.StandardID
             WHERE sh.DocumentNo = ?
