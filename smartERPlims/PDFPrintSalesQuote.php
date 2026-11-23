@@ -266,11 +266,11 @@ if(isset($_GET['No'])){
            ,`debtors`.`phone`
            ,`debtors`.`contact`
            ,`SalesHeader`.`externaldocumentno` as BankCode2
-           ,SalesHeader.`locationcode` as BankCode
-           ,SalesHeader.paymentterms
+           ,salesheader.`locationcode` as BankCode
+           ,salesheader.paymentterms
            ,`picture`
         from `salesheader`` 
-        left join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+        left join `salesline` on `SalesHeader`.`documentno`=salesline.`documentno` 
         left join debtors on `SalesHeader`.`customercode`=debtors.itemcode
         left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
         where `SalesHeader`.`documenttype`='54' 
@@ -305,33 +305,33 @@ if(isset($_GET['No'])){
     // ALTER TABLE `salesline`` ADD COLUMN LineDiscountPercent DECIMAL(5,2) DEFAULT 0 AFTER TAT;
     // ALTER TABLE `salesheader`` ADD COLUMN QtyDiscount DECIMAL(5,2) DEFAULT 0;
     $SQL=Sprintf("SELECT 
-        SalesLine.code as barcode
-       ,SalesHeader.docdate
-       ,SalesLine.description 
-       ,SalesLine.Quantity
-       ,SalesLine.unitofmeasure
-       ,SalesLine.UnitPrice as Sp
-       ,SalesHeader.documentno
-       ,SalesHeader.customercode
-       ,SalesLine.invoiceamount
-       ,SalesHeader.currencycode
-       ,SalesLine.vatamount
-       ,(SalesLine.invoiceamount-SalesLine.vatamount) as netamt
-       ,SalesHeader.documenttype
-       ,SalesLine.vatrate
-       ,SalesLine.totalchargedcontainers
-       ,SalesLine.partperunit
-       ,SalesLine.code as itemcode
-       ,SalesLine.TAT
-       ,IFNULL(SalesLine.LineDiscountPercent, 0) as discountpercent
-       ,IFNULL(SalesHeader.QtyDiscount, 0) as headerdiscount
-       ,IFNULL(SalesHeader.pricingmode, '{}') as pricingmode
-       ,IFNULL(SalesLine.category, '') as stdgroup
+        salesline.code as barcode
+       ,salesheader.docdate
+       ,salesline.description 
+       ,salesline.Quantity
+       ,salesline.unitofmeasure
+       ,salesline.UnitPrice as Sp
+       ,salesheader.documentno
+       ,salesheader.customercode
+       ,salesline.invoiceamount
+       ,salesheader.currencycode
+       ,salesline.vatamount
+       ,(salesline.invoiceamount-salesline.vatamount) as netamt
+       ,salesheader.documenttype
+       ,salesline.vatrate
+       ,salesline.totalchargedcontainers
+       ,salesline.partperunit
+       ,salesline.code as itemcode
+       ,salesline.TAT
+       ,IFNULL(salesline.LineDiscountPercent, 0) as discountpercent
+       ,IFNULL(salesheader.QtyDiscount, 0) as headerdiscount
+       ,IFNULL(salesheader.pricingmode, '{}') as pricingmode
+       ,IFNULL(salesline.category, '') as stdgroup
     FROM `salesheader`` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
-        and SalesHeader.documenttype=54  
-        where SalesHeader.documentno='%s' ",$_GET['No']);
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
+        and salesheader.documenttype=54  
+        where salesheader.documentno='%s' ",$_GET['No']);
     
     $ResultIndex=DB_query($SQL,$db);
     
@@ -372,7 +372,7 @@ if(isset($_GET['No'])){
     }
 
     // Determine the actual pricing mode for each Test Standard group. Forced selections
-    // are stored in SalesHeader.pricingmode; Auto quotes are inferred from saved line discounts.
+    // are stored in salesheader.pricingmode; Auto quotes are inferred from saved line discounts.
     $groupIndexes = [];
     foreach ($lineItems as $i => $item) {
         $group = trim((string)($item['stdgroup'] ?? ''));
@@ -703,9 +703,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
     from `salesheader`` join `salesline` on 
-    `SalesHeader`.`documentno`=SalesLine.`documentno` 
+    `SalesHeader`.`documentno`=salesline.`documentno` 
     where `SalesHeader`.`documenttype`='54' 
     group by 
     `SalesHeader`.`documentno`

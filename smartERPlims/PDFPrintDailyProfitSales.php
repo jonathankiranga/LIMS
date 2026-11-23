@@ -37,14 +37,14 @@ if(isset($_POST['salesreport'])){
       ,sum(`SalesLine`.`invoiceamount`) as Sales
       ,sum(`stockledger`.`stockvalue`) as cost
   FROM `salesheader``` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype
-        and (SalesHeader.documenttype=12 or SalesHeader.documenttype=1)
-        join `stockmaster` on `stockmaster`.itemcode=SalesLine.code
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype
+        and (salesheader.documenttype=12 or salesheader.documenttype=1)
+        join `stockmaster` on `stockmaster`.itemcode=salesline.code
         join `stockledger` 
-        on `stockledger`.itemcode=SalesLine.code 
-        and `stockledger`.`invref`=SalesLine.documentno
-        where SalesHeader.`docdate` 
+        on `stockledger`.itemcode=salesline.code 
+        and `stockledger`.`invref`=salesline.documentno
+        where salesheader.`docdate` 
         between cast('%s 00:00:00' as smalldatetime) 
         and cast('%s 23:59:59' as smalldatetime) 
         group by `SalesHeader`.`documentno`

@@ -242,7 +242,7 @@ if(isset($_GET['sendNo'])){
     $pdf->Output($_SESSION['DatabaseName'] . '_INVOICE_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf','I');
     $pdf->__destruct();
     
-    DB_query("Update `salesheader`` set printed=1 where SalesHeader.documenttype=10 and SalesHeader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader`` set printed=1 where salesheader.documenttype=10 and salesheader.documentno='".$_GET['No']."'", $db);
       
 }else{
 
@@ -279,9 +279,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='10' ".    
       ((mb_strlen($_POST['CustomerID'])>0)?" and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":'').
       ((mb_strlen($_POST['documentno'])>0)?" and `SalesHeader`.`documentno` like '%".$_POST['documentno']."%'":'')."
@@ -431,39 +431,39 @@ function gethtmlbody($documentno) {
     // --- CALCULATIONS ---
     
     $SQL_Lines=SPrintf("SELECT 
-            SalesLine.SampleID as SampleID
+            salesline.SampleID as SampleID
             ,Container.`descrip` as containername
-            ,SalesHeader.docdate
-            ,GROUP_CONCAT(SalesLine.`description` SEPARATOR ', ') as description
+            ,salesheader.docdate
+            ,GROUP_CONCAT(salesline.`description` SEPARATOR ', ') as description
             ,1 as Quantity
-            ,SUM(SalesLine.UnitPrice) as Sp 
-            ,SalesHeader.`documentno`
-            ,SalesHeader.`customercode`
-            ,SUM(SalesLine.invoiceamount) as invoiceamount
-            ,SalesHeader.`currencycode`
-            ,SUM(SalesLine.vatamount) as vatamount
-            ,SUM(SalesLine.invoiceamount) - SUM(SalesLine.vatamount) as netamt
-            ,SalesHeader.`documenttype`
-            ,AVG(SalesLine.vatrate) as vatrate
-            ,SUM(IFNULL(SalesLine.totalchargedcontainers,0)) as totalchargedcontainers
-            ,SUM(IFNULL(SalesLine.shipping,0)) as shipping
-            ,SalesHeader.QtyDiscount
+            ,SUM(salesline.UnitPrice) as Sp 
+            ,salesheader.`documentno`
+            ,salesheader.`customercode`
+            ,SUM(salesline.invoiceamount) as invoiceamount
+            ,salesheader.`currencycode`
+            ,SUM(salesline.vatamount) as vatamount
+            ,SUM(salesline.invoiceamount) - SUM(salesline.vatamount) as netamt
+            ,salesheader.`documenttype`
+            ,AVG(salesline.vatrate) as vatrate
+            ,SUM(IFNULL(salesline.totalchargedcontainers,0)) as totalchargedcontainers
+            ,SUM(IFNULL(salesline.shipping,0)) as shipping
+            ,salesheader.QtyDiscount
             ,1 as partperunit
-            ,AVG(IFNULL(SalesLine.LineDiscountPercent,0)) as lineDiscount
-            ,IFNULL(SalesHeader.QtyDiscount,0) as headerDiscount
+            ,AVG(IFNULL(salesline.LineDiscountPercent,0)) as lineDiscount
+            ,IFNULL(salesheader.QtyDiscount,0) as headerDiscount
     FROM `salesheader``` 
-    join `salesline`  on SalesHeader.documentno=SalesLine.documentno 
-    and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=10
-    left join stockmaster Container on Container.itemcode=SalesLine.containercode
-    where SalesHeader.documentno='%s' GROUP BY
-      SalesLine.SampleID
+    join `salesline`  on salesheader.documentno=salesline.documentno 
+    and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=10
+    left join stockmaster Container on Container.itemcode=salesline.containercode
+    where salesheader.documentno='%s' GROUP BY
+      salesline.SampleID
     , Container.descrip
-    , SalesHeader.docdate
-    , SalesHeader.documentno
-    , SalesHeader.customercode
-    , SalesHeader.currencycode
-    , SalesHeader.documenttype
-    , SalesHeader.QtyDiscount",$documentno);
+    , salesheader.docdate
+    , salesheader.documentno
+    , salesheader.customercode
+    , salesheader.currencycode
+    , salesheader.documenttype
+    , salesheader.QtyDiscount",$documentno);
     $Results = DB_query($SQL_Lines, $db);
 
     $R1=0; $R3=0; $netLineTotal = 0; $lineItems = []; $headerDiscountPercent = 0;

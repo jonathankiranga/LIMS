@@ -35,14 +35,14 @@ if(isset($_POST['salesreport'])){
       ,`SalesHeader`.`customercode`
       ,`SalesHeader`.`customername`
       ,`SalesHeader`.`userid`
-      ,sum(SalesLine.invoiceamount) as invoiceamount
-      ,sum(SalesLine.vatamount) as vatamount
-      ,sum(SalesLine.invoiceamount-SalesLine.vatamount) as netamt
+      ,sum(salesline.invoiceamount) as invoiceamount
+      ,sum(salesline.vatamount) as vatamount
+      ,sum(salesline.invoiceamount-salesline.vatamount) as netamt
   FROM `SalesHeader` join SalesLine 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype
-        and SalesHeader.documenttype=13
-        where SalesHeader.`docdate` between '%s' and '%s' 
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype
+        and salesheader.documenttype=13
+        where salesheader.`docdate` between '%s' and '%s' 
         group by 
        `SalesHeader`.`documentno`
       ,`SalesHeader`.`userid`
