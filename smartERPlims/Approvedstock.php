@@ -27,7 +27,7 @@ if(isset($_GET['documentno'])){
     $SQL="select   `documentno`  ,`docdate`  ,`oderdate` ,`duedate` ,`postingdate` ,`customercode`
       ,`customername`,`yourreference`,`externaldocumentno` ,`locationcode`,`paymentterms`
       ,`postinggroup`  ,`currencycode` ,`printed` ,`released` ,`status`,`userid`  ,`Dimension_1` ,`Dimension_2`
-      from `SalesHeader`  where `documenttype`='40' and `documentno`='".$_GET['documentno']."'";
+      from `salesheader``  where `documenttype`='40' and `documentno`='".$_GET['documentno']."'";
     $Result=DB_query($SQL,$db);
     $rowselected = DB_fetch_row($Result);
     $_POST['documentno']=$rowselected[0];
@@ -37,7 +37,7 @@ if(isset($_GET['documentno'])){
     $_POST['DimensionOne']=$rowselected[16];
     $_POST['DimensionTwo']=$rowselected[17];
     
-    $Result=DB_query("select IFNULL(`released`,0) from `SalesHeader` where `documenttype`='40' and documentno='".$_POST['documentno']."'",$db);
+    $Result=DB_query("select IFNULL(`released`,0) from `salesheader`` where `documenttype`='40' and documentno='".$_POST['documentno']."'",$db);
     $rowselected = DB_fetch_row($Result);
     if($rowselected[0]==1){
         $_SESSION['DocumentPicking']=true;
@@ -126,7 +126,7 @@ $SQL="Select
       ,`SalesHeader`.`currencycode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `SalesHeader` 
+      from `salesheader`` 
       where `SalesHeader`.`documenttype`='40' and 
       (`SalesHeader`.`released` is null or `SalesHeader`.`released`=0)
      order by `SalesHeader`.`docdate` desc";

@@ -15,7 +15,7 @@ $DRamount=0; $CRamount=0; $Openbalance=0; $Difference=0;$Uncleared=0;
 $SQL = array() ;
 $banklist = array();
 
-$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts``", $db);
+$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts```", $db);
 while($row=DB_fetch_array($resultindex)){
     $banklist[trim($row['accountcode'])]=$row['bankName'].' '.$row['BranchName'].' '.$row['currency'];
 }
@@ -125,10 +125,10 @@ Function UpdateStatus(){
     if(isset($_POST['Cheq'])){
         foreach ($_POST['Cheq'] as $Journal => $value){
            if($_POST['check'][$Journal]=='on'  ||  $_POST['check2'][$Journal]=='on'){
-                $SQL="Update `BankTransactions` set cleared=1 where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+                $SQL="Update `banktransactions`` set cleared=1 where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
                 DB_query($SQL,$db);
             } else {
-               $SQL="Update  `BankTransactions` set cleared=NULL where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+               $SQL="Update `banktransactions`` set cleared=NULL where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
                DB_query($SQL,$db);
             }
        }
@@ -157,7 +157,7 @@ function constructBanks() {
         $resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,"
                 . "`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,"
                 . "`lastreconbalance`,`lastChequeno`,`PostingGroup` "
-                . " FROM `bankaccounts``", $db);
+                . " FROM `bankaccounts```", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
@@ -186,12 +186,12 @@ function CreateRow($D,$N,$M,$M2,$A,$Journal,$cleared){
     
     if($cleared==1 or $_POST['check'][$Journal]=='on'){
         $DRamount += $A ;
-        $SQL="Update  `BankTransactions` set cleared=1 where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+        $SQL="Update `banktransactions`` set cleared=1 where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
             DB_query($SQL,$db);
     
         }else{
         $Uncleared +=$A ;
-        $SQL="Update  `BankTransactions` set cleared=NULL where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+        $SQL="Update `banktransactions`` set cleared=NULL where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
             DB_query($SQL,$db);
         
         }
@@ -219,11 +219,11 @@ function CreateRow2($D,$N,$M,$M2,$A,$Journal,$cleared){
     
     if($cleared==1 or $_POST['check2'][$Journal]=='on'){
         $CRamount += $A ;
-        $SQL="Update  `BankTransactions` set cleared=1 where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+        $SQL="Update `banktransactions`` set cleared=1 where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
         DB_query($SQL,$db);
      }else{
         $Uncleared +=$A ;
-        $SQL="Update  `BankTransactions` set cleared=NULL where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+        $SQL="Update `banktransactions`` set cleared=NULL where `journal`='".$Journal."'  and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
         DB_query($SQL,$db);
      }
     
@@ -259,10 +259,10 @@ function SaveBankreconciliation(){
   if(isset($_POST['Cheq'])){
         foreach ($_POST['Cheq'] as $Journal => $value){
            if($_POST['check'][$Journal]=='on'  ||  $_POST['check2'][$Journal]=='on'){
-                $SQL="Update `BankTransactions` set reconciled='R' where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+                $SQL="Update `banktransactions`` set reconciled='R' where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
                 DB_query($SQL,$db);
             } else {
-               $SQL="Update  `BankTransactions` set cleared=NULL where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
+               $SQL="Update `banktransactions`` set cleared=NULL where `journal`='".$Journal."' and (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')";
                DB_query($SQL,$db);
             }
        }
@@ -271,7 +271,7 @@ function SaveBankreconciliation(){
     if(isset($_POST['bankstno'])){
         $state = 1;
         
-        $SQL[]="Update `BankAccounts` set "
+        $SQL[]="Update `bankaccounts`` set "
          . " `StatementNo` ='".($state + $_POST['bankstno'])."',"
          . " `lastreconcileddate` =iif('".FormatDateForSQL($_POST['date'])."'>`lastreconcileddate`,'".FormatDateForSQL($_POST['date'])."',`lastreconcileddate`) ,"
          . " `lastreconbalance` ='".$_POST['bankendbalance']."'"
@@ -296,7 +296,7 @@ function UpdateCashbook($SQLREC=array()){
     $Totaldebit=0;
     $TotalCredit=0;
     
-    $ResultIndex = DB_query("Select `DocDate`,`amount`,`journal`,`narrative` from `BankTransactions`  where (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')  and   (`BankTransactions`.`cleared` is NULL and `BankTransactions`.`DocDate`<='".FormatDateForSQL($_POST['date'])."') ",$db);
+    $ResultIndex = DB_query("Select `DocDate`,`amount`,`journal`,`narrative` from `banktransactions``  where (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."')  and   (`BankTransactions`.`cleared` is NULL and `BankTransactions`.`DocDate`<='".FormatDateForSQL($_POST['date'])."') ",$db);
     while($row=DB_fetch_array($ResultIndex)){
             $jornal = $row['journal'];
           
@@ -352,7 +352,7 @@ function UpdateCashbook($SQLREC=array()){
 Function GetClearedDB(){
     global $db,$statementstartdate,$PostingGroup;
     
-     $ResultIndex = DB_query("Select sum(`amount`) from `BankTransactions`"
+     $ResultIndex = DB_query("Select sum(`amount`) from `banktransactions``"
      . "  where (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."') and `cleared`=1 "
      . "  and `DocDate` <= '".$statementstartdate."'",$db);
    
@@ -363,7 +363,7 @@ Function GetClearedDB(){
 Function GetUnClearedDB(){
     global $db,$statementstartdate,$PostingGroup;
     
-     $ResultIndex = DB_query("Select sum(`amount`) from `BankTransactions`"
+     $ResultIndex = DB_query("Select sum(`amount`) from `banktransactions``"
      . "  where (`bankcode`='".$_POST['Bank_Code']."' or `bankcode`='".$PostingGroup."') "
      . "  and (`cleared`=0 or `cleared` is null)  "
      . "  and `DocDate` <= '".$statementstartdate."'",$db);
