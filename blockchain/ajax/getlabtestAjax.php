@@ -37,13 +37,13 @@ $query = "SELECT
         ST.HeaderID,
         TR.resultsID
     FROM sample_tests ST
-     join Sample_Header SH 
+     join sample_header SH 
         on ST.HeaderID = SH.HeaderID
      join `test_results` TR 
         on  ST.`TestID` = TR.`TestID`
-     JOIN TestStandards ts 
+     JOIN teststandards ts 
         ON TR.StandardID = ts.StandardID
-     JOIN TestParameters tp 
+     JOIN testparameters tp 
         ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
      JOIN samples_received sr 
         ON ST.SampleID = sr.sample_id   
