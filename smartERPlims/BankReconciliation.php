@@ -15,7 +15,7 @@ $DRamount=0; $CRamount=0; $Openbalance=0; $Difference=0;$Uncleared=0;
 $SQL = array() ;
 $banklist = array();
 
-$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `BankAccounts`", $db);
+$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts``", $db);
 while($row=DB_fetch_array($resultindex)){
     $banklist[trim($row['accountcode'])]=$row['bankName'].' '.$row['BranchName'].' '.$row['currency'];
 }
@@ -157,7 +157,7 @@ function constructBanks() {
         $resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,"
                 . "`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,"
                 . "`lastreconbalance`,`lastChequeno`,`PostingGroup` "
-                . " FROM `BankAccounts`", $db);
+                . " FROM `bankaccounts``", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
@@ -241,10 +241,10 @@ function Insert($StatementNo,$bankcode,$narration,$amount=''){
       $SQL="";
         
         if(mb_strlen($amount)>0){
-            $SQL=SPRINTF("INSERT INTO `BankReconciliation`(`StatementNo`,`bankcode`,`narration`,`amount`)
+            $SQL=SPRINTF("INSERT INTO `bankreconciliation``(`StatementNo`,`bankcode`,`narration`,`amount`)
             VALUES ('%s','%s','%s',%f)", $StatementNo,$bankcode,$narration,$amount);
         }else{
-             $SQL=SPRINTF("INSERT INTO `BankReconciliation`(`StatementNo`,`bankcode`,`narration`)
+             $SQL=SPRINTF("INSERT INTO `bankreconciliation``(`StatementNo`,`bankcode`,`narration`)
             VALUES ('%s','%s','%s')", $StatementNo,$bankcode,$narration);
         }
         

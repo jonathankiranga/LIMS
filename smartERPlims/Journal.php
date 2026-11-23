@@ -40,7 +40,7 @@ while ($r = DB_fetch_array($res)) {
     $personalAccounts['employee'][] = ['value' => trim($r['itemcode']), 'label' => trim($r['customer'])];
 }
 
-$res = DB_query("SELECT accountcode, bankName FROM BankAccounts ORDER BY bankName", $db);
+$res = DB_query("SELECT accountcode, bankName FROM `bankaccounts` ORDER BY bankName", $db);
 while ($r = DB_fetch_array($res)) {
     $personalAccounts['bank'][] = ['value' => trim($r['accountcode']), 'label' => trim($r['bankName'])];
 }
