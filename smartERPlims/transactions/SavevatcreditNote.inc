@@ -74,7 +74,7 @@ if($_SESSION['DocumentPosted']==true){
             $vatamount  = $_POST['vatamount'][$key];
             $grossamount = $_POST['grossamount'][$key];
           
-            $sql[] = sprintf("INSERT INTO SalesLine 
+            $sql[] = sprintf("INSERT INTO `salesline` 
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,locationcode,UOM) 
                 (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,documentno,UOM from SalesLine where entryno='%s')"
                 ,13,FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$salesprice,$vatamount,$grossamount ,$key);
@@ -161,7 +161,7 @@ function PostDebtors($period,$journal,$doc){
       ,SalesHeader.documenttype
       ,SalesHeader.postinggroup
       ,'%s'
-  FROM SalesHeader join SalesLine 
+  FROM `salesheader` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         where SalesLine.documentno='%s' and SalesLine.documenttype =13
@@ -230,7 +230,7 @@ function PostGL($period,$journal,$doc){
 
 
 Function CustomerStatemet($journal,$doc){
-    $sql=sprintf("INSERT INTO CustomerStatement
+    $sql=sprintf("INSERT INTO `customerstatement`
            (Date
            ,Documentno
            ,Documenttype

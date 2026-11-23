@@ -119,7 +119,7 @@ if($_SESSION['DocumentPosted']==true){
        $vatamount= $_POST['vatamount'][$key];
     }
     
-    $sql[] =  sprintf("INSERT INTO SalesLine
+    $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate,documentno ,code,description,unitofmeasure,Quantity,UnitPrice,vatamount ,invoiceamount,vatrate ,inclusive ,UOM)
      VALUES
            ('%s'  ,'%s'  ,'%s'  ,'%s' ,'%s'  ,'%s'  ,'%s' ,'%s'  ,'%s' ,'%s' ,'%s'  ,'%s' ,'%s')"
@@ -215,7 +215,7 @@ function PostDebtors($period,$journal,$doc){
       ,SalesHeader.documenttype
       ,SalesHeader.postinggroup
       ,'%s'
-  FROM SalesHeader join SalesLine 
+  FROM `salesheader` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         where SalesHeader.documentno='%s' 
@@ -338,7 +338,7 @@ function VATPostGL($period,$journal,$doc){
 }
 
 Function CustomerStatemet($journal,$doc){
-    $sql=sprintf("INSERT INTO CustomerStatement
+    $sql=sprintf("INSERT INTO `customerstatement`
            (Date
            ,Documentno
            ,Documenttype

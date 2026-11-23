@@ -54,7 +54,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
     $journal         = GetNextTransNo(0,$db);
     
     $sql=array();
-    $sql[]="INSERT INTO SalesHeader
+    $sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -109,7 +109,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                     released=1 where documentno='%s' and documenttype='1' ",$salesoderno);
                   
                
-               $sql[]= sprintf("INSERT INTO SalesLine
+               $sql[]= sprintf("INSERT INTO `salesline`
                        (documenttype,docdate,documentno ,code ,description
                        ,unitofmeasure ,Quantity,UnitPrice ,vatamount ,invoiceamount
                        ,vatrate ,inclusive,containerprice,containersunits
@@ -127,7 +127,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                                    ,'4',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                                    , 0 as fulqty,".(0-$looseUnits)." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
-                                 FROM SalesLine 
+                                 FROM `salesline` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
                         }elseif($_SESSION['productionTankStore'][$stcode]=="T"){
                                  $sql[] = sprintf("INSERT INTO tanktrans (tankname,units,uom,date,batchno,doctype,itemcode)
@@ -147,7 +147,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         ,'".$array['ContainerCode']."',SalesLine.documentno,SalesLine.invoiceamount
                         ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$array['ContainerQTY']).",0,SalesLine.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
-                        FROM SalesLine  where documentno='".$salesoderno."' and code='".$stcode."')";
+                        FROM `salesline`  where documentno='".$salesoderno."' and code='".$stcode."')";
                }
           }     
                  
@@ -160,7 +160,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         ,SalesLine.containercode,SalesLine.documentno,SalesLine.invoiceamount
                         ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$emptyunits).",0,SalesLine.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
-                        FROM SalesLine  where documentno='".$salesoderno."' and containercode='".$emptycode."')";
+                        FROM `salesline`  where documentno='".$salesoderno."' and containercode='".$emptycode."')";
                 
                     GetEmptiesFIFO($journal,$PeriodNo,$salesoderno,$emptycode,$emptyunits,$key);
                 }

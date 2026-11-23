@@ -62,7 +62,7 @@ $discount     = (float)($_POST['DiscountPercent'] ?? 0);
 
 // build SQL
 $sql[] = sprintf(
-    "INSERT INTO SalesHeader (
+    "INSERT INTO `salesheader` (
         documenttype, documentno, docdate, oderdate, duedate,
         customercode, customername, yourreference, coa_documentno,
         postinggroup, currencycode, salespersoncode, status,
@@ -224,7 +224,7 @@ foreach ($_SESSION['sales_orders'] as $line_No => $rows) {
             $values[]  = sqlVal($db, $qty);
         }
 
-        $insertSql = "INSERT INTO SalesLine (" . implode(", ", $columns) . ")
+        $insertSql = "INSERT INTO `salesline` (" . implode(", ", $columns) . ")
                       VALUES (" . implode(", ", $values) . ")";
 
         $sql[] = $insertSql;

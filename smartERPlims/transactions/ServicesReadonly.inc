@@ -21,7 +21,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO SalesHeader
+$sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -118,7 +118,7 @@ if($value>0){
        $vatamount= $_POST['vatamount'][$itemcode];
     }
     
-    $sql[] =  sprintf("INSERT INTO SalesLine
+    $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate,documentno
            ,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount
