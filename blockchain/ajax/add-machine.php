@@ -3,8 +3,8 @@
 require '../db_connection.php'; // Ensure this connects to your MySQLi instance
 // Check if data is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['machine_name'])) {
-    // Insert machine data into the Machines table
-    $insertQuery = "INSERT INTO Machines (machine_name) VALUES (?)";
+    // Insert machine data into the machines table
+    $insertQuery = "INSERT INTO machines (machine_name) VALUES (?)";
     $stmt = $conn->prepare($insertQuery);
     $stmt->bind_param("s", $_POST['machine_name']);
 
