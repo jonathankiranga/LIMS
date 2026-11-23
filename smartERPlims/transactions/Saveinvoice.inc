@@ -37,7 +37,7 @@ if($_SESSION['DocumentPosted']==true){
         $external_doc = $_SESSION['DocumentNo'];
     }
     
-    $sql[] ="insert into SalesHeader 
+    $sql[] ="insert into `salesheader` 
       (documenttype
       ,documentno
       ,docdate
@@ -82,7 +82,7 @@ if($_SESSION['DocumentPosted']==true){
       ,'".$journal ."'
       ,'0'
       ,picture
-      from SalesHeader 
+      from `salesheader` 
       where documentno='".$_SESSION['DocumentNo']."') ";
 
 $bank1 = trim($_POST['Bank_Code'] ?? '');
@@ -91,9 +91,9 @@ if ($bank2 !== '' && $bank2 === $bank1) {
     $bank2 = '';
 }
 <<<<<<< HEAD
-$sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
+$sql[] = "UPDATE `salesheader`` SET locationcode='" . $db->real_escape_string($bank1) . "', externaldocumentno='" . $db->real_escape_string($bank2) . "' WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
 =======
-$sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($bank1) . "', "
+$sql[] = "UPDATE `salesheader`` SET locationcode='" . $db->real_escape_string($bank1) . "', "
         . "externaldocumentno='" . $db->real_escape_string($bank2) . "' "
         . "WHERE documenttype='10' AND documentno='" . $db->real_escape_string($INVOICENO) . "'";
 >>>>>>> 9dd73ced43e182e896c61acca6bcfbbaa1de362b
@@ -141,7 +141,7 @@ $sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($ba
             $rowInclusive = isset($row['inclusive']) ? (int)((bool)$row['inclusive']) : (int)((bool)$VATinclusive);
 
             $sql[] = sprintf(
-                "INSERT INTO `salesline`
+                "INSERT INTO `salesline``
                    (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,
                     vatamount,invoiceamount,vatrate,inclusive,locationcode,partperunit,LineDiscountPercent,
                     shipping,packagescharge,PriceInPricelist,totalchargedcontainers,containercode,sampleID,TAT)
@@ -180,7 +180,7 @@ $sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($ba
     $sql[]=COGSPostGL($PeriodNo,$journal,$INVOICENO);
     $sql[]=CustomerStatemet($journal,$INVOICENO);
     
-    $checkResult = DB_query("SELECT COUNT(*) FROM `salesline` sl
+    $checkResult = DB_query("SELECT COUNT(*) FROM `salesline`` sl
         JOIN stockmaster sm ON sl.code = sm.itemcode
         JOIN inventorypostinggroup ipg ON ipg.code = sm.postinggroup
         WHERE sl.documentno = '".$_SESSION['DocumentNo']."'
@@ -213,7 +213,7 @@ $sql[] = "UPDATE `salesheader` SET locationcode='" . $db->real_escape_string($ba
             . ' stmt=' . $stmtIdx . '/' . $stmtCount
             . ' errno=' . $postErrNo . ' error=' . $postErrMsg . PHP_EOL, FILE_APPEND);
      }else{
-        DB_query("Update SalesHeader set released=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
+        DB_query("Update `salesheader` set released=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
         DB_Txn_Commit($db);
 
         $etimsResult = etimsSubmitInvoice(10, $INVOICENO);
@@ -298,7 +298,7 @@ function PostDebtors($period,$journal,$doc){
       ,SalesHeader.documenttype
       ,SalesHeader.postinggroup
       ,'%s'
-  FROM `salesheader` join SalesLine 
+  FROM `salesheader`` join `salesline` 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         where SalesHeader.documentno='%s' 
@@ -318,7 +318,7 @@ function PostDebtors($period,$journal,$doc){
 }
 
 function PostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -352,8 +352,8 @@ function PostGL($period,$journal,$doc){
       ,(rtrim(SalesLine.description))  as narration
       ,'".$_POST['DimensionOne']."' 
       ,'".$_POST['DimensionTwo']."'
-      from SalesHeader join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join SalesLine on SalesLine.documentno = SalesHeader.documentno 
+      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
+      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
       join stockmaster on SalesLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on SalesHeader.currencycode=currencies.currabrev
@@ -367,7 +367,7 @@ function PostGL($period,$journal,$doc){
 }
 
 function VATPostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -397,8 +397,8 @@ function VATPostGL($period,$journal,$doc){
       ,currencies.rate
       ,SalesHeader.customercode
       ,(rtrim(SalesLine.description))  as narration
-      from SalesHeader join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join SalesLine on SalesLine.documentno = SalesHeader.documentno 
+      from `salesheader` join postinggroups on SalesHeader.postinggroup=postinggroups.code
+      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
       join stockmaster on SalesLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on SalesHeader.currencycode=currencies.currabrev
@@ -432,8 +432,8 @@ Function CustomerStatemet($journal,$doc){
              ,'".$_POST['DimensionOne']."'
              ,'".$_POST['DimensionTwo']."' 
              ,SalesHeader.currencycode    
-             from SalesHeader
-             join SalesLine 
+             from `salesheader`
+             join `salesline` 
           on SalesLine.documentno = SalesHeader.documentno 
            where SalesHeader.documentno='%s' 
            Group by 
@@ -449,7 +449,7 @@ Function CustomerStatemet($journal,$doc){
 }
 
 function COGSPostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -483,9 +483,9 @@ function COGSPostGL($period,$journal,$doc){
       ,rtrim(SalesLine.description) as narration
       ,'".$_POST['DimensionOne']."'
       ,'".$_POST['DimensionTwo']."'
-      from SalesHeader 
+      from `salesheader` 
       join postinggroups on SalesHeader.postinggroup=postinggroups.code
-      join SalesLine on SalesLine.documentno = SalesHeader.documentno
+      join `salesline` on SalesLine.documentno = SalesHeader.documentno
       join stockmaster on SalesLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on SalesHeader.currencycode=currencies.currabrev

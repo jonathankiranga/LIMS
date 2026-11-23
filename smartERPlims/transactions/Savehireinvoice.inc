@@ -52,7 +52,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
     
     $sql=array();
      
-    $sql[]="INSERT INTO `assetsheader`
+    $sql[]="INSERT INTO `assetsheader``
            (documenttype
            ,documentno
            ,docdate
@@ -97,7 +97,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                $qty = $value;       
                $salesoderno= $_SESSION['DocumentNo'];
             
-               $sql[] = sprintf("Update FixedAssetsLine set
+               $sql[] = sprintf("Update `fixedassetsline` set
                 Qunatity_returned = IFNULL(Qunatity_returned,0) + %f,
                 Quantity_toinvoice = Qunatity_delivered-Qunatity_returned
                 where FixedAssetsLine.documentno='%s' 
@@ -105,9 +105,9 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                 and FixedAssetsLine.entryno = %s",$qty,$salesoderno,55,$key);
                     
                     
-                $sql[] =  sprintf("INSERT INTO `fixedassetsline`
+                $sql[] =  sprintf("INSERT INTO `fixedassetsline``
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM) 
-                (select '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM from FixedAssetsLine 
+                (select '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM from `fixedassetsline` 
                  where entryno=%s and documentno='%s' and documenttype='%s')","30",
                 FormatDateForSQL($_POST['date']),$INVOICENO,$qty,0,0,0,$key,$salesoderno,55 );
               
@@ -131,8 +131,8 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                                '" . _('Hired') . "',
                                (FixedAssetsLine.invoiceamount*currencies.rate),
                                '".($qty)."'
-                               FROM `fixedassetsline` 
-                               join AssetsHeader on AssetsHeader.documentno=FixedAssetsLine.documentno
+                               FROM `fixedassetsline`` 
+                               join `assetsheader` on AssetsHeader.documentno=FixedAssetsLine.documentno
                                join currencies on currencies.currabrev=AssetsHeader.currencycode
                                where FixedAssetsLine.documentno='".$salesoderno."' "
                             . " and FixedAssetsLine.code='".$stcode."' "

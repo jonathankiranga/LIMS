@@ -67,7 +67,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
     $journal         = GetNextTransNo(0,$db);
     
     $sql=array();
-    $sql[]="INSERT INTO `salesheader`
+    $sql[]="INSERT INTO `salesheader``
            (documenttype
            ,documentno
            ,docdate
@@ -97,7 +97,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
            ,'".$_SESSION['UserID']."'
            ,'".$PeriodNo."'
            ,vatinclusive
-           ,picture from SalesHeader where documentno='".$_SESSION['DocumentNo']."')" ;
+           ,picture from `salesheader` where documentno='".$_SESSION['DocumentNo']."')" ;
             
     
     foreach ($_POST['code'] as $key => $value) {
@@ -108,16 +108,16 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                $salesoderno= $_SESSION['DocumentNo'];
                // If the line was marked Done in the picking list, increment delivered qty
            $entryno_s = DB_escape_string($key);
-            $sql[] = "UPDATE `salesline` SET Qunatity_delivered = IFNULL(Qunatity_delivered,0) + " . $qty
+            $sql[] = "UPDATE `salesline`` SET Qunatity_delivered = IFNULL(Qunatity_delivered,0) + " . $qty
                 . ", Quantity_toinvoice = Quantity - (IFNULL(Qunatity_delivered,0) + " . $qty . ")"
                     . " WHERE entryno='" . $entryno_s . "'";
             
                
-                $sql[]= sprintf("Update SalesHeader set
+                $sql[]= sprintf("Update `salesheader` set
                     released=1 where documentno='%s' and documenttype='%s' ",$salesoderno,1);
                   
                
-                $sql[]= sprintf("INSERT INTO `salesline`
+                $sql[]= sprintf("INSERT INTO `salesline``
                         (documenttype,docdate,documentno ,code ,description
                         ,unitofmeasure ,Quantity,UnitPrice ,vatamount ,invoiceamount
                         ,vatrate ,inclusive,containerprice,containersunits
@@ -127,7 +127,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         UnitPrice,vatamount,invoiceamount,vatrate,inclusive,containerprice,
                         '%s',totalchargedcontainers,containercode,PartPerUnit,PriceInPricelist
                         ,SampleID,TAT
-                        from SalesLine where entryno=%s)" ,"19",$postingDate
+                        from `salesline` where entryno=%s)" ,"19",$postingDate
                        ,$INVOICENO , $qty,'0',$key);
              
                 
@@ -170,7 +170,7 @@ function getifsaved($Parent,$units){
     global $db;
     $return=array();
     
-    $SQL ="select ContainerQTY,ContainerCode from Containers where itemcode='".trim($Parent)."'" ;
+    $SQL ="select ContainerQTY,ContainerCode from `containers` where itemcode='".trim($Parent)."'" ;
     $results=DB_query($SQL ,$db);
     while($rows= DB_fetch_array($results)){
        $return[]= array('ContainerQTY'=>($units * $rows['ContainerQTY']),

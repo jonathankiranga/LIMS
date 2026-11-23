@@ -54,7 +54,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
     $journal         = GetNextTransNo(0,$db);
     
     $sql=array();
-    $sql[]="INSERT INTO `salesheader`
+    $sql[]="INSERT INTO `salesheader``
            (documenttype
            ,documentno
            ,docdate
@@ -82,7 +82,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
            ,'1'
            ,'".$_SESSION['UserID']."'
            ,'".$PeriodNo."'
-           ,vatinclusive from SalesHeader where documentno='".$_SESSION['DocumentNo']."')" ;
+           ,vatinclusive from `salesheader` where documentno='".$_SESSION['DocumentNo']."')" ;
             
     
     foreach ($_POST['subunits'] as $key => $value) {
@@ -98,18 +98,18 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                $emptyunits = $qty;
                $looseUnits = $qty * $partperunit;
                
-                  $sql[]= sprintf("Update SalesLine set
+                  $sql[]= sprintf("Update `salesline` set
                     Qunatity_replaced=(IFNULL(Qunatity_replaced,0)+ %f),
                     containersunits=(IFNULL(containersunits,0)+ %f)
                     where documentno='%s' and documenttype='%s' 
                     and entryno=%s",$qty,$emptyunits,$salesoderno,1,$key);
            
                
-                $sql[]= sprintf("Update SalesHeader set
+                $sql[]= sprintf("Update `salesheader` set
                     released=1 where documentno='%s' and documenttype='1' ",$salesoderno);
                   
                
-               $sql[]= sprintf("INSERT INTO `salesline`
+               $sql[]= sprintf("INSERT INTO `salesline``
                        (documenttype,docdate,documentno ,code ,description
                        ,unitofmeasure ,Quantity,UnitPrice ,vatamount ,invoiceamount
                        ,vatrate ,inclusive,containerprice,containersunits
@@ -117,7 +117,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                        (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,
                        0,(%f * PartPerUnit),vatrate,inclusive,containerprice,
                        '%s',totalchargedcontainers,containercode,PartPerUnit,PriceInPricelist 
-                       from SalesLine where entryno=%s)" ,"19",$postingDate
+                       from `salesline` where entryno=%s)" ,"19",$postingDate
                       ,$INVOICENO,$qty,$emptyunits,$CostOfItem,($qty*$CostOfItem),$key);
              
                         if($_SESSION['productionTankStore'][$stcode]=="S"){
@@ -127,7 +127,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                                    ,'4',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                                    , 0 as fulqty,".(0-$looseUnits)." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
-                                 FROM `salesline` 
+                                 FROM `salesline`` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
                         }elseif($_SESSION['productionTankStore'][$stcode]=="T"){
                                  $sql[] = sprintf("INSERT INTO tanktrans (tankname,units,uom,date,batchno,doctype,itemcode)
@@ -147,7 +147,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         ,'".$array['ContainerCode']."',SalesLine.documentno,SalesLine.invoiceamount
                         ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$array['ContainerQTY']).",0,SalesLine.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
-                        FROM `salesline`  where documentno='".$salesoderno."' and code='".$stcode."')";
+                        FROM `salesline``  where documentno='".$salesoderno."' and code='".$stcode."')";
                }
           }     
                  
@@ -160,7 +160,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                         ,SalesLine.containercode,SalesLine.documentno,SalesLine.invoiceamount
                         ,SalesLine.vatamount ,SalesLine.invoiceamount,".(0-$emptyunits).",0,SalesLine.UnitPrice
                         ,'".$EmptiesStore."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1  
-                        FROM `salesline`  where documentno='".$salesoderno."' and containercode='".$emptycode."')";
+                        FROM `salesline``  where documentno='".$salesoderno."' and containercode='".$emptycode."')";
                 
                     GetEmptiesFIFO($journal,$PeriodNo,$salesoderno,$emptycode,$emptyunits,$key);
                 }
@@ -221,7 +221,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
 
 
 function PostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -255,8 +255,8 @@ function PostGL($period,$journal,$doc){
       ,(rtrim(SalesLine.description)) as narration
       ,'".$_POST['DimensionOne']."' 
       ,'".$_POST['DimensionTwo']."'
-      from SalesHeader 
-      join SalesLine on SalesLine.documentno = SalesHeader.documentno 
+      from `salesheader` 
+      join `salesline` on SalesLine.documentno = SalesHeader.documentno 
       join stockmaster on SalesLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on SalesHeader.currencycode=currencies.currabrev
@@ -275,7 +275,7 @@ function getifsaved($Parent,$units){
     global $db;
     $return=array();
     
-    $SQL ="select ContainerQTY,ContainerCode from Containers where itemcode='".trim($Parent)."'" ;
+    $SQL ="select ContainerQTY,ContainerCode from `containers` where itemcode='".trim($Parent)."'" ;
     $results=DB_query($SQL ,$db);
     while($rows= DB_fetch_array($results)){
        $return[]= array('ContainerQTY'=>($units * $rows['ContainerQTY']),
