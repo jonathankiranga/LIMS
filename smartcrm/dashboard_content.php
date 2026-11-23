@@ -107,7 +107,7 @@ $CurrentScope = crm_scope_raw();
 
 $tasks = array();
 $SQL = "SELECT pkey, Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated
-        FROM Tasks" . crm_scope_where(array(crm_scope_owner_clause('TaskOwner'))) . "
+        FROM tasks" . crm_scope_where(array(crm_scope_owner_clause('TaskOwner'))) . "
         ORDER BY datecreated DESC
         LIMIT 200";
 $Result = DB_query($SQL, $db);
@@ -162,7 +162,7 @@ $CurrencySymbol = isset($CurrencySymbol) ? $CurrencySymbol : 'KSh ';
 <div id="smartcrm-shell">
     <div class="page-header">
         <div>
-            <h2>Tasks</h2>
+            <h2>tasks</h2>
             <p>Drag cards between stages to update task status.</p>
         </div>
         <div class="actions">
@@ -195,7 +195,7 @@ $CurrencySymbol = isset($CurrencySymbol) ? $CurrencySymbol : 'KSh ';
             <div class="sub">Value: <span id="statOppValue"><?php echo $CurrencySymbol . number_format($oppStats['value']); ?></span></div>
         </div>
         <div class="stat-card">
-            <h4>My Tasks</h4>
+            <h4>My tasks</h4>
             <div class="value" id="myTaskCount"><?php echo $myOpenTasks; ?></div>
             <div class="sub">Active (excludes completed)</div>
         </div>
