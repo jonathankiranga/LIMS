@@ -469,9 +469,9 @@ Function Sumlinedata($CustomerCode){
            . "`Salesline`.docdate ,"
            . "`Salesline`.code "
            . " from `salesline`` "
-           . " join `salesheader` on SalesHeader.documentno=`Salesline`.documentno "
-           . " and SalesHeader.documenttype=`Salesline`.documenttype "
-           . " where SalesHeader.`postinggroup`='".$CustomerCode."' "
+           . " join `salesheader` on salesheader.documentno=`Salesline`.documentno "
+           . " and salesheader.documenttype=`Salesline`.documenttype "
+           . " where salesheader.`postinggroup`='".$CustomerCode."' "
            . " and `Salesline`.`documenttype`='40' "
            . " and (`Salesline`.`containercode`='1' or `Salesline`.`containercode`='2')"
            . " order by `Salesline`.docdate asc";

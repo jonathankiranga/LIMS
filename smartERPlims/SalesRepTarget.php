@@ -81,9 +81,9 @@ function getsales($salesid,$periodid){
     $total=0;
     
     $sql=sprintf("Select 
-             sum(SalesLine.invoiceamount) as sales 
+             sum(salesline.invoiceamount) as sales 
              from `salesheader` 
-             join `salesline` on salesheader.documentno=SalesLine.documentno 
+             join `salesline` on salesheader.documentno=salesline.documentno 
              where salesheader.documenttype='10' 
              and salesheader.period=%s 
              and salesheader.salespersoncode='%s'",$periodid, $salesid);

@@ -24,7 +24,7 @@ $SQL="select
       ,`productionEmployee`.phone
       ,`productionEmployee`.`pinno` 
       from `salesheader`` 
-      join `salesline`` on SalesLine.`documentno` =`SalesLine`.`documentno`
+      join `salesline`` on salesline.`documentno` =`SalesLine`.`documentno`
       join `productionemployee`` on `SalesHeader`.`customercode`=`productionEmployee`.`code`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -44,17 +44,17 @@ $SQL="select
      
      $SQL=Sprintf("SELECT 
          stockmaster.barcode ,
-         SalesHeader.docdate ,
-         SalesLine.description ,
-         SalesLine.Quantity ,
-         SalesLine.unitofmeasure ,
+         salesheader.docdate ,
+         salesline.description ,
+         salesline.Quantity ,
+         salesline.unitofmeasure ,
         (case `SalesLine`.`PartPerUnit` when '1' then (UnitPrice * `SalesLine`.`PartPerUnit`) else (UnitPrice) end) as Sp , 
-        SalesLine.documentno,
-        SalesHeader.customercode ,
-        SalesHeader.documenttype 
+        salesline.documentno,
+        salesheader.customercode ,
+        salesheader.documenttype 
         FROM `salesheader`` 
-        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  
-        join stockmaster on stockmaster.itemcode=SalesLine.code where SalesLine.documentno='%s' ",$_GET['No']);
+        join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype  
+        join stockmaster on stockmaster.itemcode=salesline.code where salesline.documentno='%s' ",$_GET['No']);
      
      $FontSize = 12;
      $YPos = $firstrowpos-20;
@@ -119,7 +119,7 @@ $SQL="SELECT
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
       from `salesheader``
-      join `salesline`` on `SalesHeader`.documentno=SalesLine.`documentno` 
+      join `salesline`` on `SalesHeader`.documentno=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='40' and `SalesHeader`.`status`=2
       order by `SalesHeader`.`documentno` desc limit 50";
     $Result=DB_query($SQL,$db);
