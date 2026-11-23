@@ -21,8 +21,8 @@ $SQL="select
       ,`creditors`.country
       ,`creditors`.phone
       ,`creditors`.contact
-      from `AssetsHeader` 
-      join `FixedAssetsLine` on `AssetsHeader`.`documentno`=FixedAssetsLine.`documentno` 
+      from `assetsheader`` 
+      join `fixedassetsline`` on `AssetsHeader`.`documentno`=FixedAssetsLine.`documentno` 
       join `creditors` on `AssetsHeader`.`vendorcode`=`creditors`.`itemcode`
       where `AssetsHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -55,8 +55,8 @@ $SQL="select
         AssetsHeader.`vendorcode` ,
         AssetsHeader.`documenttype` ,
         `FixedAssetsLine`.`code`
-        FROM `assetsheader`  
-        join  FixedAssetsLine on AssetsHeader.`documentno`=FixedAssetsLine.`documentno` 
+        FROM `assetsheader``  
+        join `fixedassetsline` on AssetsHeader.`documentno`=FixedAssetsLine.`documentno` 
          where AssetsHeader.`documentno`='%s'  ",$_GET['No']);
      
      $FontSize = 12;
@@ -117,7 +117,7 @@ $SQL="Select
       ,`AssetsHeader`.`currencycode`
       ,`AssetsHeader`.`status`
       ,`AssetsHeader`.`userid` 
-       from  AssetsHeader join FixedAssetsLine on 
+       from `assetsheader` join `fixedassetsline` on 
       AssetsHeader.`documentno`=FixedAssetsLine.`documentno` 
       where AssetsHeader.documenttype='41'  
 	  order by `AssetsHeader`.`documentno` desc  limit ". $_SESSION['DefaultDisplayRecordsMax'] ."";
