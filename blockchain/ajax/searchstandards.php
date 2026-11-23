@@ -7,7 +7,7 @@ $conn->set_charset("utf8mb4");
 if (isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']); // Escape user input to prevent SQL injection
     // Fetch paginated records
-    $stmt = $conn->prepare("SELECT * FROM TestStandards WHERE StandardName LIKE CONCAT('%', ?, '%')  LIMIT 10");
+    $stmt = $conn->prepare("SELECT * FROM teststandards WHERE StandardName LIKE CONCAT('%', ?, '%')  LIMIT 10");
     $stmt->bind_param("s", $query);
     $stmt->execute();
     $result = $stmt->get_result();
