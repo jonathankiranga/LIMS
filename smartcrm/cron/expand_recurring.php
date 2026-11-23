@@ -1,6 +1,6 @@
 <?php
 /**
- * Expand recurring activities into Tasks when next_run is due.
+ * Expand recurring activities into tasks when next_run is due.
  * Run via CLI: php expand_recurring.php
  */
 if (php_sapi_name() !== 'cli') {
@@ -16,13 +16,13 @@ $now = new DateTime('now');
 
 $SQL = "
 SELECT ra.*, t.Taskname, t.Status, t.Priority, t.TaskOwner, t.taskdetails
-FROM RecurringActivities ra
-JOIN Tasks t ON t.pkey = ra.task_id
+FROM recurringactivities ra
+JOIN tasks t ON t.pkey = ra.task_id
 WHERE ra.next_run <= NOW()
 ";
 $Result = DB_query($SQL, $db, '', '', false, false);
 if ($Result === false) {
-    fwrite(STDERR, "DB error reading RecurringActivities\n");
+    fwrite(STDERR, "DB error reading recurringactivities\n");
     exit(1);
 }
 
@@ -52,7 +52,7 @@ while ($row = DB_fetch_array($Result)) {
 
         // Insert new task instance
         $SQLInsert = sprintf(
-            "INSERT INTO Tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated) VALUES ('%s','%d','%d','%s','%s','%s',NOW())",
+            "INSERT INTO tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated) VALUES ('%s','%d','%d','%s','%s','%s',NOW())",
             DB_escape_string($row['Taskname']),
             (int)$row['Status'],
             (int)$row['Priority'],
@@ -80,11 +80,11 @@ while ($row = DB_fetch_array($Result)) {
         }
 
         if ($deleteRec) {
-            DB_query("DELETE FROM RecurringActivities WHERE id=" . (int)$row['id'], $db);
+            DB_query("DELETE FROM recurringactivities WHERE id=" . (int)$row['id'], $db);
             $removed++;
         } else {
             $updateSQL = sprintf(
-                "UPDATE RecurringActivities SET next_run='%s'%s WHERE id=%d",
+                "UPDATE recurringactivities SET next_run='%s'%s WHERE id=%d",
                 DB_escape_string($nextRunStr),
                 $maxCount !== null ? ", max_count=" . (int)$maxCount : '',
                 (int)$row['id']
