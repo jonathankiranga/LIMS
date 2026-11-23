@@ -1016,16 +1016,21 @@ function TSDescription($sampleid){
 function sanitizeCoaRichText($html) {
     $html = (string)$html;
     $html = str_replace(array("\r\n", "\r"), "\n", $html);
-    // Collapse runs of excess line breaks to a single break without removing rich-text formatting.
-    $html = preg_replace('/(?:<br\s*\/?\s*>\s*){2,}/i', '<br>', $html);
-    // Remove empty paragraphs inserted by repeated Enter presses.
-    $html = preg_replace('/(?:<p>\s*(?:<br\s*\/?\s*>)?\s*<\/p>\s*)+/i', '', $html);
-    $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li>');
+
+    // Keep Quill paragraph and line-break structure. Render paragraphs as
+    // margin-free blocks so PDF layout does not inherit browser paragraph gaps.
+    $html = strip_tags($html, '<sup><sub><b><strong><i><em><u><br><p><div><ul><ol><li><h1><h2>');
+
     return preg_replace_callback('/<\/?([a-zA-Z0-9]+)(?:\s[^>]*)?>/', function ($m) {
         $tag = strtolower($m[1]);
-        $allowed = ['sup','sub','b','strong','i','em','u','br','p','div','ul','ol','li'];
+        $closing = (substr($m[0], 1, 1) === '/');
+        $allowed = array('sup','sub','b','strong','i','em','u','br','p','div','ul','ol','li','h1','h2');
         if (!in_array($tag, $allowed, true)) return '';
-        return (substr($m[0], 1, 1) === '/') ? '</' . $tag . '>' : '<' . $tag . '>';
+
+        if ($tag === 'p') return $closing ? '</div>' : '<div>';
+        if ($tag === 'h1' || $tag === 'h2') return $closing ? '</strong><br>' : '<strong>';
+
+        return $closing ? '</' . $tag . '>' : '<' . $tag . '>';
     }, $html);
 }
 
