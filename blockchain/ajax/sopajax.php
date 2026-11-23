@@ -2,8 +2,8 @@
 require '../db_connection.php'; // Ensure this connects to your MySQLi instance
 // Check if search parameters are provided
 $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
-// Prepare the SQL query to fetch SOPs based on the search query
-$query = "SELECT sop_id, title, description, document_url, version_number FROM SOPs WHERE title LIKE ? OR description LIKE ?";
+// Prepare the SQL query to fetch sops based on the search query
+$query = "SELECT sop_id, title, description, document_url, version_number FROM sops WHERE title LIKE ? OR description LIKE ?";
 $stmt = $conn->prepare($query);
 $searchTerm = '%' . $searchQuery . '%';
 $stmt->bind_param("ss", $searchTerm, $searchTerm);
