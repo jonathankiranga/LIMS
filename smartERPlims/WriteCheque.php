@@ -52,7 +52,7 @@ if(isset($_POST['BankCurrency'])){
                 DB_Txn_Rollback($db);
             }else{
                 DB_Txn_Commit($db);
-                DB_query("Update `BankAccounts` set `lastChequeno`=(`lastChequeno`+1) "
+                DB_query("Update `bankaccounts`` set `lastChequeno`=(`lastChequeno`+1) "
                         . " where `accountcode`='".$_POST['Bank_Code']."'", $db);
                 
                 $_SESSION[$selectedrec]=FALSE;
@@ -163,12 +163,12 @@ echo '<tr>';
         `paymentvoucherline`.`amount`,
         `paymentvoucherline`.`whtax`,
         `paymentvoucherheader`.`journal` as JournalNo,
-        (IFNULL((SELECT sum(`amount`) FROM `paymentsallocation``   where `receiptjournal`='".$selectedrec."'),0)) as Tamount
-        ,(IFNULL((SELECT sum(`amount`) FROM `paymentsallocation``  where `journalno`='".$selectedrec."'),0)) -  
-        (IFNULL((SELECT sum(`amount`) FROM `paymentsallocation``   where `receiptjournal`='".$selectedrec."'),0)) as Pamount
+        (IFNULL((SELECT sum(`amount`) FROM `paymentsallocation```   where `receiptjournal`='".$selectedrec."'),0)) as Tamount
+        ,(IFNULL((SELECT sum(`amount`) FROM `paymentsallocation```  where `journalno`='".$selectedrec."'),0)) -  
+        (IFNULL((SELECT sum(`amount`) FROM `paymentsallocation```   where `receiptjournal`='".$selectedrec."'),0)) as Pamount
       FROM `paymentvoucherheader` 
       join `paymentvoucherline` on `paymentvoucherheader`.`journal`=`paymentvoucherline`.`journal`
-      join SupplierStatement on `paymentvoucherline`.`invoice_journal`=`SupplierStatement`.`JournalNo`
+      join `supplierstatement` on `paymentvoucherline`.`invoice_journal`=`SupplierStatement`.`JournalNo`
       and `SupplierStatement`.Accountno=`paymentvoucherheader`.`itemcode`
       where `paymentvoucherheader`.`journal`='".$selectedrec."'  
       Group by
@@ -366,7 +366,7 @@ class Paymentvouchers  {
                   . "ChequePrinted=0,`Comments`='%s' "
                   . "where `journal`='%s'",$form['comments'],$form['pvjounal']);
          
-            $SQLARRAY[]="INSERT INTO `supplierstatement`` (`Date`,`Documentno`,`Documenttype`,`Accountno`,`Grossamount`,`JournalNo` ,`Currency`)
+            $SQLARRAY[]="INSERT INTO `supplierstatement``` (`Date`,`Documentno`,`Documenttype`,`Accountno`,`Grossamount`,`JournalNo` ,`Currency`)
             VALUES ('".FormatDateForSQL($form['date']) ."','". $form['documentno'] ."', 53 ,'". $form['VendorID']."',". $translatedamount .",'".$JourNal."','".$form['currencycode'] ."' )";
                     
             $SQLARRAY[]=SPRINTF("INSERT INTO `banktransactions`` (`bankcode`,`DocDate` ,`doctype` ,`DocumentNo`,`TransType`,`itemcode`,
@@ -379,13 +379,13 @@ class Paymentvouchers  {
             FormatDateForSQL($form['date']), $form['documentno'], "CR", $form['documentno'], $form['VendorID'],
             $translatedamount,0, $form['currencycode'],"Q", $JourNal, "Q", 0, 53,$form['postingGroups'], $PERIODNO);
 
-            $SQLARRAY[]=SPRINTF("Insert into `Generalledger` (`journalno` ,`Docdate` ,`period`,`DocumentNo`,`DocumentType`
+            $SQLARRAY[]=SPRINTF("Insert into `generalledger`` (`journalno` ,`Docdate` ,`period`,`DocumentNo`,`DocumentType`
             ,`accountcode`,`balaccountcode` ,`VATaccountcode` ,`amount`,`VATamount` ,`currencycode` ,`ExchangeRate`,`cutomercode`,`narration`) 
             values ('%s','%s',%f,'%s','%s','%s','%s','%s',%f,'%s','%s','%s','%s','%s') ",  $JourNal,FormatDateForSQL($form['date']),$PERIODNO,$form['documentno'],53,
               $form['postingGroups'],$form['BankPostingGroup'],"", $form['totalamount'],0,$form['currencycode'],$form['BankExchange'],
               $form['VendorID'],(trim($form['VendorName'])));
           
-         $SQLARRAY[]=SPRINTF("Insert into `Generalledger` (`journalno` ,`Docdate` ,`period`,`DocumentNo`,`DocumentType`
+         $SQLARRAY[]=SPRINTF("Insert into `generalledger`` (`journalno` ,`Docdate` ,`period`,`DocumentNo`,`DocumentType`
             ,`accountcode`,`balaccountcode` ,`VATaccountcode` ,`amount`,`VATamount` ,`currencycode` ,`ExchangeRate`,`cutomercode`,`narration`) 
             values ('%s','%s',%f,'%s','%s','%s','%s','%s',%f,'%s','%s','%s','%s','%s') ",  $JourNal,FormatDateForSQL($form['date']),$PERIODNO,$form['documentno'],53,
               $form['postingGroups'],$_SESSION['WithholdingTaxGlAccount'],"",$form['WithholdingTX'],0,$form['currencycode'],$form['BankExchange'],
@@ -393,19 +393,19 @@ class Paymentvouchers  {
           
              foreach ($form['topay'] as $invjournal => $valuetopay) {
                            
-                  $SQLARRAY[]= SPRINTF("insert into `PaymentsAllocation`
+                  $SQLARRAY[]= SPRINTF("insert into `paymentsallocation``
                   (`itemcode`,`date`,`invoiceno`,`journalno`,`doctype`,`receiptno`,`amount`,`receiptjournal`) 
                    (Select `Accountno`,`date`,`Documentno`,`JournalNo`,`Documenttype`,'%s',%s,'%s' 
-                   from `SupplierStatement` where `JournalNo`='%s') ", $form['documentno'],$valuetopay, $JourNal,$invjournal);
+                   from `supplierstatement`` where `JournalNo`='%s') ", $form['documentno'],$valuetopay, $JourNal,$invjournal);
               }
               
               
               foreach ($form['wtax'] as $invjournal => $valuetopay) {
                            
-                  $SQLARRAY[]= SPRINTF("insert into `PaymentsAllocation`
+                  $SQLARRAY[]= SPRINTF("insert into `paymentsallocation``
                   (`itemcode`,`date`,`invoiceno`,`journalno`,`doctype`,`receiptno`,`amount`,`receiptjournal`) 
                    (Select `Accountno`,`date`,`Documentno`,`JournalNo`,`Documenttype`,'%s',%s,'%s' 
-                   from `SupplierStatement` where `JournalNo`='%s') ", $form['documentno'],$valuetopay, $JourNal,$invjournal);
+                   from `supplierstatement`` where `JournalNo`='%s') ", $form['documentno'],$valuetopay, $JourNal,$invjournal);
              }
               
               
@@ -432,7 +432,7 @@ Class GetBankAccounts {
                                     ,`AccountNo`,`BranchCode`
                                     ,`BranchName`,`lastreconbalance`
                                     ,`lastChequeno`,`PostingGroup`
-                                    FROM `bankaccounts``", $db);
+                                    FROM `bankaccounts```", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $this->BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
@@ -454,7 +454,7 @@ Class GetBankAccounts {
         $resultindex=DB_query("SELECT `accountcode`,`bankName`,`BankAccounts`.`currency`,`lastreconcileddate`
                                      ,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`
                                      ,`lastChequeno`,`PostingGroup`,`currencies`.`rate`,`StatementNo`
-                                    FROM `bankaccounts`` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
+                                    FROM `bankaccounts``` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
                                     where `accountcode`='".$accountCode."'", $db);
         
         $row=DB_fetch_row($resultindex);
