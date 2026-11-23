@@ -66,7 +66,7 @@ $SQL="select
       ,SalesHeader.`documenttype`
       ,SalesLine.vatrate
       ,SalesLine.`totalchargedcontainers`
-  FROM `SalesHeader` join SalesLine  
+  FROM `salesheader`` join SalesLine  
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         and `SalesHeader`.`documenttype`='13'

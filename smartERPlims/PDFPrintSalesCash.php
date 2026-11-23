@@ -70,7 +70,7 @@ $SQL="select
       ,SalesLine.vatrate
       ,SalesLine.`totalchargedcontainers`
       ,SalesLine.`shipping`
-  FROM `SalesHeader` join SalesLine 
+  FROM `salesheader`` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=12
         join stockmaster on stockmaster.itemcode=SalesLine.code
