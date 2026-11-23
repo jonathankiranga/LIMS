@@ -17,7 +17,7 @@ class Requsets{
         global $db;
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -32,7 +32,7 @@ class Requsets{
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['location'][$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -44,7 +44,7 @@ class Requsets{
         global $db;
 
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -55,7 +55,7 @@ class Requsets{
              }
         } else {
             $this->productionTankStore="T";
-            $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+            $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
               $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['ProdStore']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
             }
@@ -160,7 +160,7 @@ function Getitems($itemcode,$qty,$uom,$sp=0,$batchrowid=0){
     
     Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -174,11 +174,11 @@ function Getitems($itemcode,$qty,$uom,$sp=0,$batchrowid=0){
       global $db;
        $return ='';
        
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$item);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$item);
          $ResultIndex = DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
        if($Stores[0]>0){
-            $sql=sprintf("SELECT balance FROM `productionunit` where tankname='%s' and itemcode='%s'",$store,$item);
+            $sql=sprintf("SELECT balance FROM `productionunit`` where tankname='%s' and itemcode='%s'",$store,$item);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
             $StockBalanceInloose = $row[0];
@@ -315,7 +315,7 @@ class Transfers{
         global $db;
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -330,7 +330,7 @@ class Transfers{
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$Postlocation[$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -342,7 +342,7 @@ class Transfers{
         global $db;
 
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -353,7 +353,7 @@ class Transfers{
              }
         } else {
             $this->productionTankStore="T";
-            $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+            $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
               $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['ProdStore']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
             }
@@ -449,7 +449,7 @@ class Transfers{
     
      Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -463,11 +463,11 @@ class Transfers{
       global $db;
        $return ='';
        
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$item);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$item);
          $ResultIndex = DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
        if($Stores[0]>0){
-            $sql=sprintf("SELECT balance FROM `productionunit` where tankname='%s' and itemcode='%s'",$store,$item);
+            $sql=sprintf("SELECT balance FROM `productionunit`` where tankname='%s' and itemcode='%s'",$store,$item);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
             $StockBalanceInloose = $row[0];
@@ -609,7 +609,7 @@ class StoreTankCls{
         
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -624,7 +624,7 @@ class StoreTankCls{
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['location'][$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -636,7 +636,7 @@ class StoreTankCls{
         global $db;
 
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -647,7 +647,7 @@ class StoreTankCls{
              }
         } else {
             $this->productionTankStore="T";
-            $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+            $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
               $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['ProdStore']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
             }
@@ -731,7 +731,7 @@ class StoreTankCls{
     
     Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -745,11 +745,11 @@ class StoreTankCls{
       global $db;
        $return ='';
        
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$item);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$item);
          $ResultIndex = DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
        if($Stores[0]>0){
-            $sql=sprintf("SELECT balance FROM `productionunit` where tankname='%s' and itemcode='%s'",$store,$item);
+            $sql=sprintf("SELECT balance FROM `productionunit`` where tankname='%s' and itemcode='%s'",$store,$item);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
             $StockBalanceInloose = $row[0];
@@ -838,7 +838,7 @@ class Decanter{
         global $db;
          
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -853,7 +853,7 @@ class Decanter{
            }
        }else{
            $this->tankStore="T";
-           $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                 $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['location'][$key]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
@@ -865,7 +865,7 @@ class Decanter{
         global $db;
 
         $line='';
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -876,7 +876,7 @@ class Decanter{
              }
         } else {
             $this->productionTankStore="T";
-            $ResultIndex=DB_query(sprintf("select tankname from ProductionUnit where itemcode='%s'",$ItemCode), $db);
+            $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
               $line .= sprintf('<option value="%s" %s >%s</option>',trim($value['tankname']),$_POST['ProdStore']==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
             }
@@ -938,7 +938,7 @@ class Decanter{
     
     Function IsTankOrStore($ItemCode){
         global $db;
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
@@ -952,11 +952,11 @@ class Decanter{
       global $db;
        $return ='';
        
-        $sql=sprintf("select count(*) from ProductionUnit where itemcode='%s'",$item);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$item);
          $ResultIndex = DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
        if($Stores[0]>0){
-            $sql=sprintf("SELECT balance FROM `productionunit` where tankname='%s' and itemcode='%s'",$store,$item);
+            $sql=sprintf("SELECT balance FROM `productionunit`` where tankname='%s' and itemcode='%s'",$store,$item);
             $ResultIndex = DB_query($sql,$db);
             $row = DB_fetch_row($ResultIndex);
             $StockBalanceInloose = $row[0];

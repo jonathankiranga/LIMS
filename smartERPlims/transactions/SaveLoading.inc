@@ -44,7 +44,7 @@ if($_SESSION['DocumentPicking']==true){
   
 if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0){
 
-$filter="SELECT documenttype FROM `salesheader` where documentno='".$_SESSION['DocumentNo']."'";
+$filter="SELECT documenttype FROM `salesheader`` where documentno='".$_SESSION['DocumentNo']."'";
 $ResultIndex= DB_query($filter,$db);
 $documenttypea = DB_fetch_row($ResultIndex);
 $documenttype = $documenttypea[0];
@@ -69,7 +69,7 @@ $documenttype = $documenttypea[0];
     $journal         = GetNextTransNo(0,$db);
     
     $sql=array();
-    $sql[]="INSERT INTO `salesheader`
+    $sql[]="INSERT INTO `salesheader``
            (documenttype
            ,documentno
            ,docdate
@@ -97,7 +97,7 @@ $documenttype = $documenttypea[0];
            ,'1'
            ,'".$_SESSION['UserID']."'
            ,'".$PeriodNo."'
-           ,vatinclusive from SalesHeader where documentno='".$_SESSION['DocumentNo']."')" ;
+           ,vatinclusive from `salesheader` where documentno='".$_SESSION['DocumentNo']."')" ;
             
     
     foreach ($_POST['subunits'] as $key => $value) {
@@ -111,13 +111,13 @@ $documenttype = $documenttypea[0];
                $looseUnits = $qty * $partperunit;
                $salesoderno = $_SESSION['DocumentNo'];
             
-               $sql[]= sprintf("Update SalesLine set
+               $sql[]= sprintf("Update `salesline` set
                     modified=(IFNULL(modified,0)+ %f)
                     where documentno='%s' and documenttype='%s' 
                     and entryno=%s",$qty,$salesoderno,$documenttype,$key);
                   
                
-              $sql[]= sprintf("INSERT INTO `salesline`
+              $sql[]= sprintf("INSERT INTO `salesline``
                        (documenttype,docdate,documentno ,code ,description
                        ,unitofmeasure ,Quantity,UnitPrice ,vatamount ,invoiceamount
                        ,vatrate ,inclusive,containerprice,containersunits
@@ -125,7 +125,7 @@ $documenttype = $documenttypea[0];
                        (select '%s','%s','%s',code,description,unitofmeasure,%f,
                        UnitPrice,vatamount,invoiceamount,vatrate,inclusive,containerprice,
                        '%s',totalchargedcontainers,containercode,PartPerUnit,PriceInPricelist 
-                       from SalesLine where entryno=%s)" ,"16",$postingDate
+                       from `salesline` where entryno=%s)" ,"16",$postingDate
                       ,$INVOICENO ,$qty,$emptyunits,$key);
                 
             }

@@ -56,7 +56,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
     $journal         = GetNextTransNo(0,$db);
     $sql=array();
     
-     $sql[] ="insert into SalesHeader 
+     $sql[] ="insert into `salesheader` 
       (documenttype
       ,documentno
       ,docdate
@@ -95,7 +95,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
       ,'".$_SESSION['UserID']."'
       ,'".$PeriodNo."'
       ,'".$VATinclusive ."'
-      from SalesHeader 
+      from `salesheader` 
       where documentno='".$_SESSION['DocumentNo']."') ";
    
     foreach ($_POST['subunits'] as $key => $value) {
@@ -111,7 +111,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                $partperunit=$_POST['partperunit'][$key];
                $looseUnits =$qty * $partperunit;
                 
-                $sql[] =sprintf("Update SalesLine set
+                $sql[] =sprintf("Update `salesline` set
                 Quantity=%f,
                 Qunatity_delivered = IFNULL(Qunatity_delivered,0)+ %f,
                 Quantity_toinvoice = Quantity-Qunatity_delivered,
@@ -120,9 +120,9 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                 and entryno=%s", $qty_ordered,$qty,$emptyunits,$salesoderno,'10',$key);
                     
                     
-                $sql[] = sprintf("INSERT INTO `salesline` 
+                $sql[] = sprintf("INSERT INTO `salesline`` 
                     (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,partperunit) 
-                  (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,partperunit from SalesLine where entryno='%s')"
+                  (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,partperunit from `salesline` where entryno='%s')"
                    ,'11',FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$salesprice,$vatamount,$grossamount,$key);
 
                
@@ -134,7 +134,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                                    ,'11',SalesLine.code ,SalesLine.documentno,SalesLine.invoiceamount ,SalesLine.vatamount,SalesLine.invoiceamount
                                    , 0 as fulqty,".$looseUnits." as loosqty,(SalesLine.UnitPrice/SalesLine.partperunit)
                                    ,'".$location."' ,'".$journal."' ,'".$PeriodNo."' ,'".$INVOICENO ."' ,1 
-                                 FROM `salesline` 
+                                 FROM `salesline`` 
                                  where documentno='".$salesoderno."' and code='".$stcode."' and entryno='".$key."')";
                         }elseif($_SESSION['productionTankStore'][$stcode]=="T"){
                                  $sql[] = sprintf("INSERT INTO tanktrans (tankname,units,uom,date,batchno,doctype,itemcode)
@@ -143,7 +143,7 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                         }
                
     
-                        $sql[]=SPRINTF("Insert into Generalledger
+                        $sql[]=SPRINTF("Insert into `generalledger`
                                         (journalno
                                         ,Docdate
                                         ,period
@@ -173,8 +173,8 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                                         ,currencies.rate
                                         ,SalesHeader.customercode
                                         ,CONCAT(RTRIM(SalesLine.description),' X ".$qty." ',SalesLine.unitofmeasure) as narration
-                                        from SalesHeader 
-                                        join SalesLine on SalesLine.documentno = SalesHeader.documentno 
+                                        from `salesheader` 
+                                        join `salesline` on SalesLine.documentno = SalesHeader.documentno 
                                         join stockmaster on SalesLine.code=stockmaster.itemcode
                                         join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
                                         join currencies on SalesHeader.currencycode=currencies.currabrev
@@ -220,10 +220,10 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                        ,'".$PeriodNo."'
                        ,'".$INVOICENO ."'
                        ,1 
-                FROM `salesline` 
+                FROM `salesline`` 
                 where entryno='".$key."' and code='".$emptycode."')";
                 
-                $sql[]=SPRINTF("Insert into Generalledger
+                $sql[]=SPRINTF("Insert into `generalledger`
                     (journalno
                     ,Docdate
                     ,period
@@ -253,8 +253,8 @@ if($_SESSION['somedetails']==0 AND $_SESSION['DocumentPicking']==false ){
                     ,currencies.rate
                     ,SalesHeader.customercode
                     ,CONCAT(RTRIM(stockmaster.descrip),' X ".$emptyunits." ',SalesLine.unitofmeasure)  as narration
-                    from SalesHeader 
-                    join SalesLine on SalesLine.documentno=SalesHeader.documentno 
+                    from `salesheader` 
+                    join `salesline` on SalesLine.documentno=SalesHeader.documentno 
                     join stockmaster on SalesLine.containercode=stockmaster.itemcode
                     join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
                     join currencies on SalesHeader.currencycode=currencies.currabrev

@@ -29,7 +29,7 @@ $sql=array();
  $imagesArray = json_decode($decodedString);
  $imagesArray2 = json_encode($imagesArray);
  
-$sql[]="INSERT INTO `salesheader`
+$sql[]="INSERT INTO `salesheader``
            (documenttype
            ,documentno
            ,docdate
@@ -86,7 +86,7 @@ foreach ($_SESSION['sales_orders'] as $lineno => $rows) {
     
     // Try to insert with discount column if it exists
     // If the column doesn't exist, an error will occur and the INSERT will fail
-    $sql[] =  sprintf("INSERT INTO `salesline`
+    $sql[] =  sprintf("INSERT INTO `salesline``
            (documenttype
            ,docdate
            ,documentno
@@ -171,8 +171,8 @@ if($_SESSION['savedsuccessfuly']==true){
       ,released
       ,status
       ,userid 
-      from SalesHeader 
-      join BankAccounts on BankAccounts.accountcode=SalesHeader.locationcode 
+      from `salesheader` 
+      join `bankaccounts` on BankAccounts.accountcode=SalesHeader.locationcode 
       where documenttype='54' and  documentno='".$_POST['documentno']."'";
     $Result=DB_query($SQL,$db);
     $row=DB_fetch_row($Result);
@@ -204,7 +204,7 @@ if($_SESSION['savedsuccessfuly']==true){
            ,Partperunit
            ,TAT
            ,LineDiscountPercent
-            from SalesLine where documenttype=54 and documentno='".$_POST['documentno']."'";
+            from `salesline` where documenttype=54 and documentno='".$_POST['documentno']."'";
     echo '<tr><td colspan="2">';
     
     echo '<table  class="table table-bordered"><thead><tr>'
