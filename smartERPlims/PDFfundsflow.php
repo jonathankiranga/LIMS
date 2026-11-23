@@ -64,7 +64,7 @@ Function CustomizedBalanceSheet(){
     include('includes/PDFStarter.php');
       
     $Result=DB_query("Select min(B.`start_date`),max(B.End_date)
-    from `FinancialPeriods` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
+    from `financialperiods`` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
     $finacialdates=DB_fetch_row($Result);   
     
     $pdf->addInfo('Title',_('Financial Reports'));
@@ -109,7 +109,7 @@ Function Showhtml(){
     include('includes/header.inc');
         
     $Result=DB_query("Select min(B.`start_date`),max(B.End_date)
-    from `FinancialPeriods` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
+    from `financialperiods`` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
     $finacialdates=DB_fetch_row($Result);   
     
     echo '<Div class="centre">Funds Flow statemet </DIV>'
@@ -320,7 +320,7 @@ class FundsFlowForYear {
         global $db;
         $periodNo = (int)$periodNo;
         $sql = "SELECT MIN(`start_date`) AS date_from, MAX(`end_date`) AS date_to
-                FROM `financialperiods``
+                FROM `financialperiods```
                 WHERE `periodno`=" . $periodNo;
         $result = DB_query($sql,$db);
         $row = DB_fetch_array($result);
@@ -547,7 +547,7 @@ class FinancialPeriods {
     Function __construct() {
         Global $db;
         $this->SelectObject='<tr><td>Select Year</td><td><select name="Financial_Periods">';
-        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `FinancialPeriods` Group by `periodno` order by `periodno` desc", $db);
+        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods`` Group by `periodno` order by `periodno` desc", $db);
         while($row=DB_fetch_array($ResultIndex)){
              $this->SelectObject .='<option value="'.$row['periodno'].'" '.(($_POST['Financial_Periods']==trim($row['periodno']))?'selected="selected"':'').'  >'.$row['year'].'</option>';
         }
