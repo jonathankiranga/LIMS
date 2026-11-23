@@ -6,25 +6,25 @@ $Title = _('Print Picking List');
 if(isset($_GET['No'])){
     
 $SQL="select 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid`
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid`
       ,`creditors`.email
       ,`creditors`.city
       ,`creditors`.postcode
       ,`creditors`.country
       ,`creditors`.phone
       ,`creditors`.contact
-      from `PurchaseHeader` 
-      join `PurchaseLine` on `PurchaseHeader`.`documentno`=`PurchaseLine`.`documentno`
-      join `creditors` on `PurchaseHeader`.`vendorcode`=`creditors`.`itemcode`
-      where `PurchaseHeader`.`documentno`='".$_GET['No']."'";
+      from `purchaseheader` 
+      join `purchaseline` on `purchaseheader`.`documentno`=`purchaseline`.`documentno`
+      join `creditors` on `purchaseheader`.`vendorcode`=`creditors`.`itemcode`
+      where `purchaseheader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_row($Result);
        
@@ -44,20 +44,20 @@ $SQL="select
          
      $SQL=Sprintf("SELECT 
          stockmaster.barcode ,
-         PurchaseHeader.docdate ,
-         PurchaseLine.`description` ,
-         PurchaseLine.`Quantity`,
-        `PurchaseLine`.PartPerUnit,
-        (case `PurchaseLine`.PartPerUnit when '1'  then (PurchaseLine.UnitPrice)  else (select `PurchaseLine`.PartPerUnit*PurchaseLine.UnitPrice) end) as Sp , 
+         purchaseheader.docdate ,
+         purchaseline.`description` ,
+         purchaseline.`Quantity`,
+        `purchaseline`.PartPerUnit,
+        (case `purchaseline`.PartPerUnit when '1'  then (purchaseline.UnitPrice)  else (select `purchaseline`.PartPerUnit*purchaseline.UnitPrice) end) as Sp , 
         `unitofmeasure` as UOMDesc ,
-        PurchaseHeader.`documentno` ,
-        PurchaseHeader.`vendorcode` ,
-        PurchaseHeader.`documenttype` 
-        FROM `PurchaseHeader` join PurchaseLine 
-        on PurchaseHeader.documentno=PurchaseLine.documentno 
-        and PurchaseHeader.documenttype=PurchaseLine.documenttype  
-        join stockmaster on stockmaster.itemcode=PurchaseLine.code 
-        where PurchaseHeader.`documentno`='%s' ",$_GET['No']);
+        purchaseheader.`documentno` ,
+        purchaseheader.`vendorcode` ,
+        purchaseheader.`documenttype` 
+        FROM `purchaseheader` join purchaseline 
+        on purchaseheader.documentno=purchaseline.documentno 
+        and purchaseheader.documenttype=purchaseline.documenttype  
+        join stockmaster on stockmaster.itemcode=purchaseline.code 
+        where purchaseheader.`documentno`='%s' ",$_GET['No']);
      
      $FontSize = 12;
      $YPos=$firstrowpos-20;
@@ -111,19 +111,19 @@ echo '<div class="container"><table class="table table-bordered"><tr>'
         . '</select><input type="submit" value="GO"/></td></tr></table></div>';
 
 $SQL="Select 
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      from `PurchaseHeader`  
-      where `PurchaseHeader`.`documenttype`='".$_POST['DocumentType']."' ".
-      ((isset($_POST['VendorID']) and mb_strlen($_POST['VendorID'])>0)?" and `PurchaseHeader`.`vendorcode`='".$_POST['VendorID']."'":'')."
-      order by  `PurchaseHeader`.`docdate` desc 
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      from `purchaseheader`  
+      where `purchaseheader`.`documenttype`='".$_POST['DocumentType']."' ".
+      ((isset($_POST['VendorID']) and mb_strlen($_POST['VendorID'])>0)?" and `purchaseheader`.`vendorcode`='".$_POST['VendorID']."'":'')."
+      order by  `purchaseheader`.`docdate` desc 
       limit  ". $_SESSION['DefaultDisplayRecordsMax'] ;
     $Result=DB_query($SQL,$db);
   
