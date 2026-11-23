@@ -25,8 +25,8 @@ $SQL="select
       ,`debtors`.contact
       ,`debtors`.middlen as pinno
       ,`SalesHeader`.`yourreference`
-      from `SalesHeader` 
-      join `SalesLine` on SalesLine.`documentno` =`SalesLine`.`documentno`
+      from `salesheader`` 
+      join `salesline`` on SalesLine.`documentno` =`SalesLine`.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -56,8 +56,8 @@ $SQL="select
         SalesLine.documentno,
         SalesHeader.customercode ,
         SalesHeader.documenttype 
-        FROM `salesheader` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno 
+        FROM `salesheader`` 
+        join `salesline` on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype  
         join stockmaster on stockmaster.itemcode=SalesLine.code 
         where SalesLine.documentno='%s' ",$_GET['No']);
@@ -123,8 +123,8 @@ $SQL="SELECT
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `SalesHeader`
-      join `SalesLine` on `SalesHeader`.documentno=SalesLine.`documentno` 
+      from `salesheader``
+      join `salesline`` on `SalesHeader`.documentno=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='40' and `SalesHeader`.`status`=2
       order by `SalesHeader`.`documentno` desc limit 50";
     $Result=DB_query($SQL,$db);
