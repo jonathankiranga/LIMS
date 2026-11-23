@@ -4,7 +4,7 @@ require '../db_connection.php'; // Ensure this connects to your MySQLi instance
 function getstandardname($StandardID) {
     global $conn;
 
-    $query = "SELECT StandardName FROM TestStandards WHERE StandardID = ?";
+    $query = "SELECT StandardName FROM teststandards WHERE StandardID = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $StandardID);
     $stmt->execute();
