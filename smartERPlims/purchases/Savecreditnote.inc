@@ -28,7 +28,7 @@ if($_SESSION['DocumentPicking']==false){
     
     $sql=array();
     
-    $sql[] ="insert into PurchaseHeader 
+    $sql[] ="insert into `purchaseheader` 
       (documenttype
       ,documentno
       ,docdate
@@ -62,7 +62,7 @@ if($_SESSION['DocumentPicking']==false){
       ,'".$_SESSION['UserID']."'
       ,'".$PeriodNo."'
       ,'".$VATinclusive ."'
-      from PurchaseHeader 
+      from `purchaseheader` 
       where documentno='".$_SESSION['DocumentNo']."') ";
 
     
@@ -85,18 +85,18 @@ if($_SESSION['DocumentPicking']==false){
          $fuqty=0;
     }
             
- $sql[]= sprintf("Update PurchaseLine set
+ $sql[]= sprintf("Update `purchaseline` set
       Qunatity_delivered= IFNULL(Qunatity_delivered,0)- %f,
       Quantity_toinvoice= Quantity-Qunatity_delivered
       where documentno='%s' and documenttype='%s' 
       and entryno=%s",$qty,$salesoderno,'20',$key);
               
 
-    $sql[] =sprintf("INSERT INTO `purchaseline`
+    $sql[] =sprintf("INSERT INTO `purchaseline``
     (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount
     ,invoiceamount,vatrate,inclusive,locationcode,partperunit) 
     (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,'%s',partperunit 
-    from PurchaseLine where PurchaseLine.entryno='%s')",'21',FormatDateForSQL($_POST['date']),$INVOICENO
+    from `purchaseline` where PurchaseLine.entryno='%s')",'21',FormatDateForSQL($_POST['date']),$INVOICENO
     ,$_POST['subunits'][$key] ,$_POST['salesprice'][$key] ,$_POST['vatamount'][$key] ,$_POST['grossamount'][$key],$_POST['location'][$key],$key);
               
         
@@ -122,7 +122,7 @@ if($_SESSION['DocumentPicking']==false){
            ,'".$PeriodNo."'
            ,'".$INVOICENO ."' 
            ,PurchaseLine.partperunit
-            FROM `purchaseline` where entryno='".$key."' and code='".$stcode."')";
+            FROM `purchaseline`` where entryno='".$key."' and code='".$stcode."')";
                 
          }
     }
@@ -140,7 +140,7 @@ if($_SESSION['DocumentPicking']==false){
     }else{
         DB_Txn_Commit($db);
     
-        DB_query("Update PurchaseHeader set status=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
+        DB_query("Update `purchaseheader` set status=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
  
         prnMsg('This DEBIT NOTE document '.$INVOICENO.' has been created'.'<a href="PDFPrintdebitnote.php?No='.$INVOICENO.'">DEBIT note Reports</a>');
          $_SESSION['DocumentPicking']=true;

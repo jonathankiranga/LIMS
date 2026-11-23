@@ -51,7 +51,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
     
     $sql=array();
      
-    $sql[]="INSERT INTO `assetsheader`
+    $sql[]="INSERT INTO `assetsheader``
            (documenttype
            ,documentno
            ,docdate
@@ -96,7 +96,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                $qty = $value;       
                $salesoderno= $_SESSION['DocumentNo'];
             
-               $sql[] = sprintf("Update FixedAssetsLine set
+               $sql[] = sprintf("Update `fixedassetsline` set
                 Qunatity_delivered = IFNULL(Qunatity_delivered,0) + %f,
                 Quantity_toinvoice = Quantity-Qunatity_delivered
                 where FixedAssetsLine.documentno='%s' 
@@ -104,9 +104,9 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                 and FixedAssetsLine.entryno = %s",$qty,$salesoderno,55,$key);
                     
                     
-                $sql[] =  sprintf("INSERT INTO `fixedassetsline`
+                $sql[] =  sprintf("INSERT INTO `fixedassetsline``
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM) 
-                (select '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM from FixedAssetsLine 
+                (select '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM from `fixedassetsline` 
                  where entryno=%s and documentno='%s' and documenttype='%s')","19",
                 FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$_POST['salesprice'][$key],
                 $_POST['vatamount'][$key],$_POST['grossamount'][$key],$key,$salesoderno,55 );
@@ -133,8 +133,8 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                                '" . _('Hired') . "',
                                (FixedAssetsLine.invoiceamount*currencies.rate),
                                '".($qty *-1)."'
-                               FROM `fixedassetsline` 
-                               join AssetsHeader on AssetsHeader.documentno=FixedAssetsLine.documentno
+                               FROM `fixedassetsline`` 
+                               join `assetsheader` on AssetsHeader.documentno=FixedAssetsLine.documentno
                                join currencies on currencies.currabrev=AssetsHeader.currencycode
                                where FixedAssetsLine.documentno='".$salesoderno."' "
                             . " and FixedAssetsLine.code='".$stcode."' "
@@ -164,7 +164,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
     } else {
         DB_Txn_Commit($db);
         
-         DB_query("Update AssetsHeader set released=1 where documentno='".$_SESSION['DocumentNo']."'",$db);
+         DB_query("Update `assetsheader` set released=1 where documentno='".$_SESSION['DocumentNo']."'",$db);
 
          $_SESSION['DocumentPicking']=true;
          $_SESSION['DocumentNo']=true;
@@ -210,7 +210,7 @@ function PostDebtors($period,$journal,$doc){
       ,AssetsHeader.documenttype
       ,AssetsHeader.postinggroup
       ,'%s'
-  FROM `assetsheader` join FixedAssetsLine
+  FROM `assetsheader`` join `fixedassetsline`
         on AssetsHeader.documentno=FixedAssetsLine.documentno 
         and AssetsHeader.documenttype=FixedAssetsLine.documenttype 
         where AssetsHeader.documentno='%s' 
@@ -232,7 +232,7 @@ function PostDebtors($period,$journal,$doc){
 
 function PostGL($period,$journal,$doc){
     
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -266,8 +266,8 @@ function PostGL($period,$journal,$doc){
       ,(rtrim(FixedAssetsLine.description))  as narration
        ,'".$_POST['DimensionOne']."' 
        ,'".$_POST['DimensionTwo']."'
-      from AssetsHeader join postinggroups on AssetsHeader.postinggroup=postinggroups.code
-      join FixedAssetsLine on FixedAssetsLine.documentno = AssetsHeader.documentno 
+      from `assetsheader` join postinggroups on AssetsHeader.postinggroup=postinggroups.code
+      join `fixedassetsline` on FixedAssetsLine.documentno = AssetsHeader.documentno 
       join fixedassets on FixedAssetsLine.code=fixedassets.assetid
       join fixedassetcategories on fixedassetcategories.categoryid=fixedassets.assetcategoryid
       join currencies on AssetsHeader.currencycode=currencies.currabrev
@@ -279,7 +279,7 @@ function PostGL($period,$journal,$doc){
 }
 
 function VATPostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -309,8 +309,8 @@ function VATPostGL($period,$journal,$doc){
       ,currencies.rate
       ,AssetsHeader.vendorcode
       ,(rtrim(FixedAssetsLine.description))  as narration
-      from AssetsHeader join postinggroups on AssetsHeader.postinggroup=postinggroups.code
-      join FixedAssetsLine on FixedAssetsLine.documentno = AssetsHeader.documentno 
+      from `assetsheader` join postinggroups on AssetsHeader.postinggroup=postinggroups.code
+      join `fixedassetsline` on FixedAssetsLine.documentno = AssetsHeader.documentno 
       join fixedassets on FixedAssetsLine.code=fixedassets.assetid
       join fixedassetcategories on fixedassetcategories.categoryid=fixedassets.assetcategoryid
       join currencies on AssetsHeader.currencycode=currencies.currabrev
@@ -342,8 +342,8 @@ Function CustomerStatemet($journal,$doc){
              ,'".$_POST['DimensionOne']."'
              ,'".$_POST['DimensionTwo']."' 
              ,AssetsHeader.currencycode    
-             from AssetsHeader 
-             join FixedAssetsLine on FixedAssetsLine.documentno = AssetsHeader.documentno 
+             from `assetsheader` 
+             join `fixedassetsline` on FixedAssetsLine.documentno = AssetsHeader.documentno 
            where AssetsHeader.documentno='%s' 
            Group by 
              AssetsHeader.docdate

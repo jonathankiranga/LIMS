@@ -22,7 +22,7 @@ if($_SESSION['DocumentPosted']==true){
   
     $sql=array();
     
-    $sql[] ="insert into PurchaseHeader 
+    $sql[] ="insert into `purchaseheader` 
       (documenttype
       ,documentno
       ,docdate
@@ -56,7 +56,7 @@ if($_SESSION['DocumentPosted']==true){
       ,'".$_SESSION['UserID']."'
       ,'".$PeriodNo."'
       ,'".$VATinclusive ."'
-      from PurchaseHeader 
+      from `purchaseheader` 
       where documentno='".$_SESSION['DocumentNo']."') ";
     
     foreach ($_POST['subunits'] as $key => $value) {
@@ -72,11 +72,11 @@ if($_SESSION['DocumentPosted']==true){
         $grossamount = $_POST['grossamount'][$key];
 
   
-           $sql[] =  sprintf("INSERT INTO `purchaseline`
+           $sql[] =  sprintf("INSERT INTO `purchaseline``
            (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount
            ,invoiceamount,vatrate,inclusive,locationcode,partperunit) 
            (select '%s','%s' ,'%s' ,code,description,unitofmeasure,Qunatity_delivered,%f,%f,%f,vatrate,inclusive,'%s',partperunit
-           from PurchaseLine where entryno='".$key."')"
+           from `purchaseline` where entryno='".$key."')"
            ,20
            ,FormatDateForSQL($_POST['date'])
            ,$INVOICENO
@@ -126,7 +126,7 @@ if($_SESSION['DocumentPosted']==true){
     }else{
         DB_Txn_Commit($db);
         prnMsg('This Purchase has successfully been posted in the General Ledger');
-        DB_query("Update PurchaseHeader set released=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
+        DB_query("Update `purchaseheader` set released=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
  
         $_SESSION['DocumentPosted']=true;
         unset($_SESSION['DocumentNo']);
@@ -168,7 +168,7 @@ function PostCreditors($period,$journal,$doc){
       ,PurchaseHeader.documenttype
       ,PurchaseHeader.postinggroup
       ,'%s'
-  FROM `purchaseheader` join PurchaseLine 
+  FROM `purchaseheader`` join `purchaseline` 
         on PurchaseHeader.documentno=PurchaseLine.documentno 
         and PurchaseHeader.documenttype=PurchaseLine.documenttype 
         where PurchaseHeader.documentno='%s' 
@@ -188,7 +188,7 @@ function PostCreditors($period,$journal,$doc){
 }
 
 function PostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -222,9 +222,9 @@ function PostGL($period,$journal,$doc){
       ,CONCAT(RTRIM(PurchaseLine.description),' X ',CAST(PurchaseLine.Quantity AS CHAR),' ',PurchaseLine.unitofmeasure) as narration
       ,'".trim($_POST['DimensionOne'])."'
       ,'".trim($_POST['DimensionTwo'])."'    
-      from PurchaseHeader 
+      from `purchaseheader` 
       join arpostinggroups on PurchaseHeader.postinggroup=arpostinggroups.code
-      join PurchaseLine on PurchaseLine.documentno = PurchaseHeader.documentno 
+      join `purchaseline` on PurchaseLine.documentno = PurchaseHeader.documentno 
       join stockmaster on PurchaseLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on PurchaseHeader.currencycode=currencies.currabrev
@@ -236,7 +236,7 @@ function PostGL($period,$journal,$doc){
 }
 
 function VATPostGL($period,$journal,$doc){
-    $sql=SPRINTF("Insert into Generalledger
+    $sql=SPRINTF("Insert into `generalledger`
       (journalno
       ,Docdate
       ,period
@@ -266,9 +266,9 @@ function VATPostGL($period,$journal,$doc){
       ,currencies.rate
       ,inventorypostinggroup.defaultgl_vat
       ,CONCAT(RTRIM(PurchaseLine.description),' X ',CAST(PurchaseLine.Quantity AS CHAR),' ',PurchaseLine.unitofmeasure) as narration
-      from PurchaseHeader 
+      from `purchaseheader` 
       join arpostinggroups on PurchaseHeader.postinggroup=arpostinggroups.code
-      join PurchaseLine on PurchaseLine.documentno = PurchaseHeader.documentno 
+      join `purchaseline` on PurchaseLine.documentno = PurchaseHeader.documentno 
       join stockmaster on PurchaseLine.code=stockmaster.itemcode
       join inventorypostinggroup on inventorypostinggroup.code=stockmaster.postinggroup
       join currencies on PurchaseHeader.currencycode=currencies.currabrev
@@ -300,8 +300,8 @@ Function SupplierStatemet($journal,$doc){
              ,'".$_POST['DimensionOne']."'
              ,'".$_POST['DimensionTwo']."'  
              ,PurchaseHeader.currencycode   
-             From PurchaseHeader
-             join PurchaseLine on PurchaseLine.documentno = PurchaseHeader.documentno 
+             From `purchaseheader`
+             join `purchaseline` on PurchaseLine.documentno = PurchaseHeader.documentno 
              where PurchaseHeader.documentno='%s' 
              Group By PurchaseHeader.docdate
              ,PurchaseHeader.documentno
