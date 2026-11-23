@@ -56,7 +56,7 @@ END//
 DELIMITER ;
 
 
--- Users Table (Stores user information)
+-- users Table (Stores user information)
 -- Table to store user information
 CREATE TABLE `users` (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -80,7 +80,7 @@ CREATE TABLE Password_Reset (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP,
     is_used TINYINT(1) DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)  ON DELETE RESTRICT
+    FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE RESTRICT
 );
 
 
@@ -128,7 +128,7 @@ CREATE TABLE testparameters (
     UpdatedAt DATETIME ON UPDATE CURRENT_TIMESTAMP,-- Record update timestamp
     UnitOfMeasure varchar(50);
     FOREIGN KEY (StandardID) REFERENCES teststandards(StandardID) ON DELETE RESTRICT ,
-    FOREIGN KEY (BaseID) REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT
+    FOREIGN KEY (BaseID) REFERENCES baseparameters(ParameterID) ON DELETE RESTRICT
 );
 
 
@@ -497,7 +497,7 @@ CREATE TABLE quote_items (
 ----- ADD a MASTER TABLE BASE FOR PARAMTER definations
 
 -- Test Parameters Table
-CREATE TABLE BaseParameters (
+CREATE TABLE baseparameters (
     ParameterID INT AUTO_INCREMENT PRIMARY KEY,
     ParameterName VARCHAR(255) NOT NULL,   -- Name of the parameter
     NeutralityID INT,   
@@ -507,7 +507,7 @@ CREATE TABLE BaseParameters (
  );
   
 ALTER TABLE `test_results`
-ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
+ADD COLUMN BaseID INT REFERENCES baseparameters(ParameterID) ON DELETE RESTRICT;
 
 ALTER TABLE `sample_tests`  ADD COLUMN BaseID INT ;
 
@@ -521,7 +521,7 @@ CREATE TABLE parametermatrix (
     UpdatedAt DATETIME ON UPDATE CURRENT_TIMESTAMP -- Record update timestamp
  );
 
-ALTER TABLE `testparameters` ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
+ALTER TABLE `testparameters` ADD COLUMN BaseID INT REFERENCES baseparameters(ParameterID) ON DELETE RESTRICT;
 ALTER TABLE `testparameters` ADD COLUMN matrixID INT REFERENCES parametermatrix(ParameterID) ON DELETE RESTRICT;
 
  
