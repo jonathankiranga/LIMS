@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $documentNo = isset($_GET['documentno']) ? trim($_GET['documentno']) : '';
 if ($documentNo !== '') {
-    $documentQuery = "SELECT DISTINCT st.SampleID FROM Sample_Tests st
+    $documentQuery = "SELECT DISTINCT st.SampleID FROM sample_tests st
         JOIN sample_header sh ON st.HeaderID = sh.HeaderID
         WHERE sh.DocumentNo = ?";
     $documentStmt = lims_prepare($documentQuery);
@@ -46,7 +46,7 @@ $query = "SELECT
     dr.*, 
     tr.SampleID AS ResultSampleID,
     tr.resultsID
-FROM Sample_Tests st
+FROM sample_tests st
 JOIN sample_header sh ON st.HeaderID = sh.HeaderID
 JOIN debtors dr ON sh.CustomerID = dr.itemcode
 JOIN test_results tr ON sh.HeaderID = tr.HeaderID
