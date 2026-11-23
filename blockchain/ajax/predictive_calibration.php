@@ -2,8 +2,8 @@
 require '../db_connection.php'; // Ensure this connects to your MySQLi instance
 
 $sql ="SELECT e.id, m.machine_name, e.last_calibration, e.predicted_calibration, e.deviation_trend, e.usage_hours
-FROM Equipment e
-JOIN Machines m ON e.machine_id = m.machine_id";
+FROM equipment e
+JOIN machines m ON e.machine_id = m.machine_id";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
