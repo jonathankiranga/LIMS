@@ -33,7 +33,7 @@ include('includes/header.inc');
     
   unset($_SESSION['stockmaster']) ;
      $SQL = "SELECT itemcode,barcode,descrip,container
-     from stockmaster where itemcode in (select `itemcode` from `ProductionUnit`) order by descrip";
+     from stockmaster where itemcode in (select `itemcode` from `productionunit``) order by descrip";
     $ResultIndex=DB_query($SQL,$db);
     while($row = DB_fetch_array($ResultIndex)){
         $code = trim($row['itemcode']);
@@ -43,7 +43,7 @@ include('includes/header.inc');
     
     unset($_SESSION['stockmasterP']) ;
     $SQL = "SELECT itemcode,barcode,descrip,container
-     from stockmaster where itemcode NOT In(select `itemcode` from `ProductionUnit`) order by descrip";
+     from stockmaster where itemcode NOT In(select `itemcode` from `productionunit``) order by descrip";
     $ResultIndex=DB_query($SQL,$db);
     while($row = DB_fetch_array($ResultIndex)){
         $code = trim($row['itemcode']);
@@ -196,8 +196,8 @@ Function Entry(){
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='40'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("Delete from `salesline`` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='40'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }
