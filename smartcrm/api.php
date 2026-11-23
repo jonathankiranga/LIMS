@@ -78,7 +78,7 @@ function find_or_create_contact($contactName)
         return array(null, false);
     }
     $safe = DB_escape_string($contactName);
-    $SQL = "SELECT pkey FROM NewContacts WHERE LOWER(Company)=LOWER('$safe') LIMIT 1";
+    $SQL = "SELECT pkey FROM newcontacts WHERE LOWER(Company)=LOWER('$safe') LIMIT 1";
     $Result = DB_query($SQL, $db, '', '', false, false);
     if ($Result !== false && DB_num_rows($Result) > 0) {
         $row = DB_fetch_array($Result);
@@ -87,10 +87,10 @@ function find_or_create_contact($contactName)
 
     $owner = crm_user_id();
     if ($owner === '') {
-        $insertSQL = "INSERT INTO NewContacts (Company) VALUES ('$safe')";
+        $insertSQL = "INSERT INTO newcontacts (Company) VALUES ('$safe')";
     } else {
         $safeOwner = DB_escape_string($owner);
-        $insertSQL = "INSERT INTO NewContacts (Company, owner) VALUES ('$safe', '$safeOwner')";
+        $insertSQL = "INSERT INTO newcontacts (Company, owner) VALUES ('$safe', '$safeOwner')";
     }
     $InsertResult = DB_query($insertSQL, $db, '', '', false, false);
     if ($InsertResult === false) {
@@ -299,7 +299,7 @@ function executeActions($db, $rule, $entity, $entityType) {
                 $dueDays = $act['due_days'] ?? 1;
                 $details = $act['details'] ?? '';
                 $assignedTo = $entity['assigned_to'] ?? 'admin';
-                $SQL = "INSERT INTO Tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
+                $SQL = "INSERT INTO tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
                         VALUES ('" . $db->real_escape_string($title) . "', '0', '1', '$assignedTo', DATE_ADD(CURDATE(), INTERVAL $dueDays DAY), 
                         '" . $db->real_escape_string($details) . "', NOW())";
                 DB_query($SQL, $db, '', '', false, false);
@@ -482,7 +482,7 @@ function get_contact_by_id($id)
     global $db;
     $id = (int)$id;
     if ($id <= 0) return null;
-    $SQL = "SELECT pkey, Company FROM NewContacts WHERE pkey=" . $id . " LIMIT 1";
+    $SQL = "SELECT pkey, Company FROM newcontacts WHERE pkey=" . $id . " LIMIT 1";
     $Result = DB_query($SQL, $db, '', '', false, false);
     if ($Result !== false && DB_num_rows($Result) > 0) {
         return DB_fetch_array($Result);
@@ -500,7 +500,7 @@ $dueDays = $dueDays < 1 ? 1 : $dueDays;
 
 if ($action === 'listContacts') {
     $contacts = array();
-    $SQL = "SELECT pkey, Company, owner FROM NewContacts"
+    $SQL = "SELECT pkey, Company, owner FROM newcontacts"
         . crm_scope_where(array(crm_scope_owner_clause('owner')))
         . " ORDER BY Company ASC LIMIT 500";
     $Result = DB_query($SQL, $db, '', '', false, false);
@@ -663,7 +663,7 @@ if ($action === 'createActivity') {
     $safePriority = (int)$priority;
     $safeDue      = $due !== '' ? DB_escape_string($due) : null;
 
-    // Quick add contact into NewContacts if provided.
+    // Quick add contact into newcontacts if provided.
     $contactId = null;
     $contactExisted = false;
     if ($contactIdInput > 0) {
@@ -699,7 +699,7 @@ if ($action === 'createActivity') {
     $safeDetails = DB_escape_string($composedDetails);
 
     $SQL = sprintf(
-        "INSERT INTO Tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated) VALUES ('%s','%s','%s','%s',%s,'%s',NOW())",
+        "INSERT INTO tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated) VALUES ('%s','%s','%s','%s',%s,'%s',NOW())",
         $safeTitle,
         $safeStatus,
         $safePriority,
@@ -744,7 +744,7 @@ if ($action === 'createActivity') {
             $untilSql = $recurUntil !== '' ? "'" . DB_escape_string($recurUntil) . "'" : 'NULL';
             $countSql = $recurCount !== null ? (int)$recurCount : 'NULL';
             $recSQL = sprintf(
-                "INSERT INTO RecurringActivities (task_id, every_n, unit, max_count, until_date, next_run) VALUES ('%d','%d','%s',%s,%s,'%s')",
+                "INSERT INTO recurringactivities (task_id, every_n, unit, max_count, until_date, next_run) VALUES ('%d','%d','%s',%s,%s,'%s')",
                 (int)$newId,
                 (int)$recurEvery,
                 DB_escape_string($recurUnit),
@@ -791,7 +791,7 @@ if ($action === 'listTasks') {
 
     $SQL = "SELECT pkey, Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated, lastactivity
             $selectExtra
-            FROM Tasks
+            FROM tasks
             $where
             ORDER BY datecreated DESC
             LIMIT 200";
@@ -831,7 +831,7 @@ if ($action === 'updateTaskStatus') {
     }
 
     $SQL = sprintf(
-        "UPDATE Tasks SET Status='%s', lastactivity=NOW() WHERE pkey='%s'",
+        "UPDATE tasks SET Status='%s', lastactivity=NOW() WHERE pkey='%s'",
         (int)$status,
         $id
     );
@@ -865,7 +865,7 @@ if ($action === 'saveTask') {
 
     if ($id > 0) {
         $SQL = sprintf(
-            "UPDATE Tasks SET Taskname='%s', Status='%s', Priority='%s', datedue='%s', taskdetails='%s', lastactivity=NOW() WHERE pkey='%s'",
+            "UPDATE tasks SET Taskname='%s', Status='%s', Priority='%s', datedue='%s', taskdetails='%s', lastactivity=NOW() WHERE pkey='%s'",
             DB_escape_string($title),
             (int)$status,
             (int)$priority,
@@ -875,7 +875,7 @@ if ($action === 'saveTask') {
         );
     } else {
         $SQL = sprintf(
-            "INSERT INTO Tasks (Taskname, Status, Priority, datedue, taskdetails, TaskOwner, datecreated, lastactivity) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', NOW(), NOW())",
+            "INSERT INTO tasks (Taskname, Status, Priority, datedue, taskdetails, TaskOwner, datecreated, lastactivity) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', NOW(), NOW())",
             DB_escape_string($title),
             (int)$status,
             (int)$priority,
@@ -2083,7 +2083,7 @@ if ($action === 'getWeeklyReport') {
     $oppOwnerClause = crm_scope_owner_clause('o.assigned_to');
     
     $tasksResult = DB_query("SELECT pkey, Taskname, Status, TaskOwner, datedue, taskdetails 
-                            FROM Tasks WHERE datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59'"
+                            FROM tasks WHERE datecreated BETWEEN '$safeStart' AND '$safeEnd 23:59:59'"
                             . ($taskOwnerClause !== '' ? " AND $taskOwnerClause" : '') . "
                             ORDER BY datecreated DESC LIMIT 20", $db, '', '', false, false);
     while ($row = DB_fetch_array($tasksResult)) {
@@ -2135,8 +2135,8 @@ if ($action === 'exportWeeklyReport') {
     fputcsv($output, array('Weekly Report: ' . $safeStart . ' to ' . $weekEnd));
     fputcsv($output, array(''));
     
-    fputcsv($output, array('Tasks Created'));
-    $tasksResult = DB_query("SELECT Taskname, Status, TaskOwner, datedue FROM Tasks WHERE datecreated BETWEEN '$safeStart' AND '$weekEnd 23:59:59'"
+    fputcsv($output, array('tasks Created'));
+    $tasksResult = DB_query("SELECT Taskname, Status, TaskOwner, datedue FROM tasks WHERE datecreated BETWEEN '$safeStart' AND '$weekEnd 23:59:59'"
         . ($taskOwnerClause !== '' ? " AND $taskOwnerClause" : ''), $db, '', '', false, false);
     fputcsv($output, array('Task Name', 'Status', 'Owner', 'Due Date'));
     while ($row = DB_fetch_array($tasksResult)) {
