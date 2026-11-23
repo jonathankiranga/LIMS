@@ -16,7 +16,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO PurchaseHeader
+$sql[]="INSERT INTO `purchaseheader`
            (documenttype
            ,documentno
            ,docdate
@@ -96,7 +96,7 @@ foreach ($_SESSION['Purchase_orders'] as $ids => $rows ) {
    
                
     //alter table PurchaseLine add discount float
-    $sql[] =  sprintf("INSERT INTO PurchaseLine
+    $sql[] =  sprintf("INSERT INTO `purchaseline`
            (documenttype
            ,docdate
            ,documentno

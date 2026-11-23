@@ -58,7 +58,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
     $sql=array();
     
     
-    $sql[]="INSERT INTO AssetsHeader
+    $sql[]="INSERT INTO `assetsheader`
            (documenttype
            ,documentno
            ,docdate
@@ -106,16 +106,16 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                $qty = $_POST['subunits'][$key];       
                $salesoderno= $_SESSION['DocumentNo'];
             
-               $Stepone = sprintf("UPDATE FixedAssetsLine SET
+               $Stepone = sprintf("UPDATE `fixedassetsline` SET
                 Qunatity_delivered = IFNULL(Qunatity_delivered,0) + %f,
                 Quantity_toinvoice = Quantity-Qunatity_delivered
                 WHERE documentno='%s' AND documenttype='%s' AND entryno=%s",$qty,$salesoderno,18,$key);
                 DB_query($Stepone,$db);
                     
                     
-                $sql[] =  sprintf("INSERT INTO FixedAssetsLine
+                $sql[] =  sprintf("INSERT INTO `fixedassetsline`
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM)
-                (SELECT '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM FROM FixedAssetsLine
+                (SELECT '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM FROM `fixedassetsline`
                  WHERE entryno=%s AND documentno='%s' AND documenttype='%s')","41",
                 FormatDateForSQL($_POST['date']),$INVOICENO,$qty,$_POST['salesprice'][$key],
                 $_POST['vatamount'][$key],$_POST['grossamount'][$key],$key,$salesoderno,18 );
@@ -142,8 +142,8 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                                '" . _('cost') . "',
                                (FixedAssetsLine.invoiceamount*currencies.rate),
                                '".$qty."'
-                               FROM FixedAssetsLine
-                               JOIN AssetsHeader ON AssetsHeader.documentno=FixedAssetsLine.documentno
+                               FROM `fixedassetsline`
+                               JOIN `assetsheader` ON AssetsHeader.documentno=FixedAssetsLine.documentno
                                JOIN currencies ON currencies.currabrev=AssetsHeader.currencycode
                                WHERE FixedAssetsLine.documentno='".$salesoderno."' "
                             . " AND FixedAssetsLine.code='".$stcode."' "
@@ -163,7 +163,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
         DB_Txn_Rollback($db);
         prnMsg('There was an Error , Contact your administrator','warn');
         
-        $undo = sprintf("UPDATE FixedAssetsLine SET
+        $undo = sprintf("UPDATE `fixedassetsline` SET
         Qunatity_delivered= IFNULL(Qunatity_delivered,0) - %f,
         Quantity_toinvoice= Quantity-Qunatity_delivered
         WHERE documentno='%s' AND documenttype='%s'
@@ -174,7 +174,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
         DB_Txn_Commit($db);
         prnMsg('This GRN document '.$INVOICENO.' has been created'.'<a href="PDFPrintAssetgrn.php?No='.$INVOICENO.'">GRN Reports</a>');
         
-         DB_query("UPDATE AssetsHeader SET released=1 WHERE documentno='".$_SESSION['DocumentNo']."'",$db);
+         DB_query("UPDATE `assetsheader` SET released=1 WHERE documentno='".$_SESSION['DocumentNo']."'",$db);
 
          $_SESSION['DocumentPicking']=true;
          $_SESSION['DocumentNo']=true;

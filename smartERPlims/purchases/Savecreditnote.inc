@@ -92,7 +92,7 @@ if($_SESSION['DocumentPicking']==false){
       and entryno=%s",$qty,$salesoderno,'20',$key);
               
 
-    $sql[] =sprintf("INSERT INTO PurchaseLine
+    $sql[] =sprintf("INSERT INTO `purchaseline`
     (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount
     ,invoiceamount,vatrate,inclusive,locationcode,partperunit) 
     (select '%s','%s','%s',code,description,unitofmeasure,%f,%f,%f,%f,vatrate,inclusive,'%s',partperunit 
@@ -122,7 +122,7 @@ if($_SESSION['DocumentPicking']==false){
            ,'".$PeriodNo."'
            ,'".$INVOICENO ."' 
            ,PurchaseLine.partperunit
-            FROM PurchaseLine where entryno='".$key."' and code='".$stcode."')";
+            FROM `purchaseline` where entryno='".$key."' and code='".$stcode."')";
                 
          }
     }
