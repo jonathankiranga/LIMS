@@ -34,7 +34,7 @@ if(isset($_GET['printthis'])){
       ,`SalesHeader`.`yourreference`
       ,`SalesHeader`.`printed`
       from `SalesHeader` 
-      join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      join SalesLine on `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documentno`='".$_GET['printthis']."'";
     $Result=DB_query($SQL,$db);
@@ -47,13 +47,13 @@ if(isset($_GET['printthis'])){
      $YPos=$firstrowpos;
      
      $SQL= Sprintf("SELECT 
-       SalesHeader.docdate,SalesLine.`description`,SalesLine.Quantity,`SalesLine`.UOM,
-       `SalesLine`.`unitofmeasure`,SalesHeader.`documentno`,SalesHeader.`customercode`,
-       `SalesHeader`.`customername`,SalesLine.PartPerUnit 
+       salesheader.docdate,salesline.`description`,salesline.Quantity,`SalesLine`.UOM,
+       `SalesLine`.`unitofmeasure`,salesheader.`documentno`,salesheader.`customercode`,
+       `SalesHeader`.`customername`,salesline.PartPerUnit 
     FROM `SalesHeader` 
-    join SalesLine on SalesHeader.documentno=SalesLine.documentno 
-    and SalesHeader.documenttype=SalesLine.documenttype 
-    where SalesHeader.documentno ='%s' ", $_GET['printthis']);
+    join SalesLine on salesheader.documentno=salesline.documentno 
+    and salesheader.documenttype=salesline.documenttype 
+    where salesheader.documentno ='%s' ", $_GET['printthis']);
     
      $Results=DB_query($SQL,$db);
      while($rows = DB_fetch_array($Results)){
@@ -114,9 +114,9 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      ,sum(SalesLine.`invoiceamount`) as OrderValue
+      ,sum(salesline.`invoiceamount`) as OrderValue
       from `SalesHeader` 
-      join SalesLine on  `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      join SalesLine on  `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' and (`SalesHeader`.`printed` is null or `SalesHeader`.`printed`=0)
        group by 
        `SalesHeader`.`documentno`
@@ -143,9 +143,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      ,sum(SalesLine.`invoiceamount`) as OrderValue
+      ,sum(salesline.`invoiceamount`) as OrderValue
       from `SalesHeader` join SalesLine on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' or `SalesHeader`.`documenttype`='40' 
        group by 
        `SalesHeader`.`documentno`

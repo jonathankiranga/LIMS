@@ -24,7 +24,7 @@ $SQL="select
       ,`debtors`.contact
       ,`SalesHeader`.`yourreference`
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documenttype`='32' 
       and `SalesHeader`.`documentno`='".$_GET['No']."'";
@@ -50,30 +50,30 @@ $SQL="select
      $SQL=Sprintf("SELECT 
        stockmaster.barcode
        ,Container.`descrip` as containername
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,SalesLine.Quantity,
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,salesline.Quantity,
        `SalesLine`.UOM,
-       SalesLine.UnitPrice as Sp ,
+       salesline.UnitPrice as Sp ,
 	  (case `SalesLine`.UOM when 'fulqty' 
-          then (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on stockmaster.units=`unit`.code  and stockmaster.itemcode=SalesLine.code) 
-	  else (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on `stockmaster`.`units`=`unit`.code  and stockmaster.itemcode=SalesLine.code)
+          then (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on stockmaster.units=`unit`.code  and stockmaster.itemcode=salesline.code) 
+	  else (select rtrim(`unit`.`descrip`) from `unit` join stockmaster on `stockmaster`.`units`=`unit`.code  and stockmaster.itemcode=salesline.code)
 	  end) as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesLine.vatamount
-      ,SalesLine.invoiceamount-SalesLine.vatamount as netamt
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`totalchargedcontainers`
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesline.vatamount
+      ,salesline.invoiceamount-salesline.vatamount as netamt
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`totalchargedcontainers`
   FROM `salesheader`` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=32
-        join stockmaster on stockmaster.itemcode=SalesLine.code
-        left join stockmaster Container on Container.itemcode=SalesLine.containercode
-        where SalesHeader.documentno='%s' ",$_GET['No']);
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=32
+        join stockmaster on stockmaster.itemcode=salesline.code
+        left join stockmaster Container on Container.itemcode=salesline.containercode
+        where salesheader.documentno='%s' ",$_GET['No']);
      
      $FontSize = 12;
      $YPos=$firstrowpos-20;
@@ -137,9 +137,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='32' 
        group by 
        `SalesHeader`.`documentno`

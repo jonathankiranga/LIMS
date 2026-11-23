@@ -25,7 +25,7 @@ $SQL="select
       ,`SalesHeader`.`yourreference`
       ,`SalesHeader`.`printed`
       from `SalesHeader` join SalesLine on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       where `SalesHeader`.`documenttype`='13' 
       and `SalesHeader`.`documentno`='".$_GET['No']."'";
@@ -49,30 +49,30 @@ $SQL="select
      
      
      $SQL=Sprintf("SELECT 
-       SalesLine.locationcode as INVOICE
+       salesline.locationcode as INVOICE
        ,Container.`descrip` as containername
-       ,SalesHeader.docdate
-       ,SalesLine.`description` 
-       ,SalesLine.Quantity,
+       ,salesheader.docdate
+       ,salesline.`description` 
+       ,salesline.Quantity,
        `SalesLine`.UOM,
-       SalesLine.UnitPrice as Sp ,
+       salesline.UnitPrice as Sp ,
        `SalesLine`.`unitofmeasure`  as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesLine.vatamount
-      ,SalesLine.invoiceamount - SalesLine.vatamount as netamt
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`totalchargedcontainers`
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesline.vatamount
+      ,salesline.invoiceamount - salesline.vatamount as netamt
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`totalchargedcontainers`
   FROM `SalesHeader` join SalesLine  
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
         and `SalesHeader`.`documenttype`='13'
-        join stockmaster on stockmaster.itemcode=SalesLine.code
-        left join stockmaster Container on Container.itemcode=SalesLine.containercode
-        where SalesHeader.documentno='%s' ",$_GET['No']);
+        join stockmaster on stockmaster.itemcode=salesline.code
+        left join stockmaster Container on Container.itemcode=salesline.containercode
+        where salesheader.documentno='%s' ",$_GET['No']);
      
      
      $FontSize = 12;
@@ -143,10 +143,10 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       ,`SalesHeader`.entryno
       from `SalesHeader` join SalesLine on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='13' 
        group by 
        `SalesHeader`.`documentno`

@@ -36,59 +36,59 @@ if(isset($_POST['Financial_Periods'])){
      If(isset($_POST['PrintCommision'])){
          $REPORTTYPE='1';
      $SQL=Sprintf("SELECT 
-       SalesHeader.`customername`
-      ,SalesHeader.`salespersoncode`
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,case SalesLine.`partperunit` when '1' then (SalesLine.Quantity) else (SalesLine.Quantity * SalesLine.`partperunit`)  end as Quantity
-      ,SalesLine.Quantity as QuantityAsSold,
-       SalesLine.UnitPrice as Sp ,
+       salesheader.`customername`
+      ,salesheader.`salespersoncode`
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,case salesline.`partperunit` when '1' then (salesline.Quantity) else (salesline.Quantity * salesline.`partperunit`)  end as Quantity
+      ,salesline.Quantity as QuantityAsSold,
+       salesline.UnitPrice as Sp ,
        `SalesLine`.unitofmeasure as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`PriceInPricelist`
-      ,SalesLine.`Increase`
-      ,SalesLine.`partperunit`
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`PriceInPricelist`
+      ,salesline.`Increase`
+      ,salesline.`partperunit`
   FROM `salesheader``` 
-        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
-        join `customerstatement`` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
+        join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype 
+        join `customerstatement`` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` between '%s' and '%s' 
-  and SalesHeader.`salespersoncode`='%s' 
-  and SalesHeader.documenttype=10  order by SalesHeader.`documentno`  asc ",$FromDate,$ToDate,$_POST['salespersoncode']);
+  and salesheader.`salespersoncode`='%s' 
+  and salesheader.documenttype=10  order by salesheader.`documentno`  asc ",$FromDate,$ToDate,$_POST['salespersoncode']);
     
 } else {
           
     $REPORTTYPE='2';
            
       $SQL=Sprintf("SELECT 
-       SalesHeader.`customername`
-      ,SalesHeader.`salespersoncode`
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,case SalesLine.`partperunit` when '1' then (SalesLine.Quantity) else (SalesLine.Quantity * SalesLine.`partperunit`) end as Quantity
-      ,SalesLine.Quantity as QuantityAsSold,
-       SalesLine.UnitPrice as Sp ,
-       SalesLine.unitofmeasure as UOMDesc
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`PriceInPricelist`
-      ,SalesLine.`Increase`
-      ,SalesLine.`partperunit`
+       salesheader.`customername`
+      ,salesheader.`salespersoncode`
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,case salesline.`partperunit` when '1' then (salesline.Quantity) else (salesline.Quantity * salesline.`partperunit`) end as Quantity
+      ,salesline.Quantity as QuantityAsSold,
+       salesline.UnitPrice as Sp ,
+       salesline.unitofmeasure as UOMDesc
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`PriceInPricelist`
+      ,salesline.`Increase`
+      ,salesline.`partperunit`
       ,CustomerStatement.JournalNo
   FROM `salesheader``` 
-        join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype 
-        join `customerstatement`` on `CustomerStatement`.`Documentno`=SalesHeader.`documentno` 
+        join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype 
+        join `customerstatement`` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` is null
-  and SalesHeader.`salespersoncode`='%s' 
-  and SalesHeader.documenttype=10  order by SalesHeader.docdate  DESC limit 500",$_POST['salespersoncode']);
+  and salesheader.`salespersoncode`='%s' 
+  and salesheader.documenttype=10  order by salesheader.docdate  DESC limit 500",$_POST['salespersoncode']);
          
      }
      

@@ -23,10 +23,10 @@ $SQL="select
       ,`debtors`.phone
       ,`debtors`.contact
       ,`SalesHeader`.`yourreference`
-      ,SalesHeader.`locationcode` as BankCode
+      ,salesheader.`locationcode` as BankCode
        ,`SalesHeader`.`picture`
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
       where `SalesHeader`.`documenttype`='1' 
@@ -53,27 +53,27 @@ $SQL="select
      
     
      $SQL=Sprintf("SELECT 
-       SalesLine.code as barcode
-      ,SalesHeader.docdate
-      ,SalesLine.`description` 
-      ,SalesLine.Quantity
+       salesline.code as barcode
+      ,salesheader.docdate
+      ,salesline.`description` 
+      ,salesline.Quantity
       ,`SalesLine`.`unitofmeasure`
-      ,SalesLine.UnitPrice as Sp 
-      ,SalesHeader.`documentno`
-      ,SalesHeader.`customercode`
-      ,SalesLine.invoiceamount
-      ,SalesHeader.`currencycode`
-      ,SalesLine.vatamount
-      ,(SalesLine.invoiceamount-SalesLine.vatamount) as netamt
-      ,SalesHeader.`documenttype`
-      ,SalesLine.vatrate
-      ,SalesLine.`totalchargedcontainers`
+      ,salesline.UnitPrice as Sp 
+      ,salesheader.`documentno`
+      ,salesheader.`customercode`
+      ,salesline.invoiceamount
+      ,salesheader.`currencycode`
+      ,salesline.vatamount
+      ,(salesline.invoiceamount-salesline.vatamount) as netamt
+      ,salesheader.`documenttype`
+      ,salesline.vatrate
+      ,salesline.`totalchargedcontainers`
       ,`SalesLine`.`partperunit`
   FROM `salesheader``` join `salesline` 
-        on SalesHeader.documentno=SalesLine.documentno 
-        and SalesHeader.documenttype=SalesLine.documenttype 
-        and SalesHeader.documenttype=1  
-        where SalesHeader.documentno='%s' ",$_GET['No']);
+        on salesheader.documentno=salesline.documentno 
+        and salesheader.documenttype=salesline.documenttype 
+        and salesheader.documenttype=1  
+        where salesheader.documentno='%s' ",$_GET['No']);
      
     
      $R1=0; $R2=0; $R3=0;
@@ -225,9 +225,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` join `salesline` on 
-      `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' 
        group by 
        `SalesHeader`.`documentno`
