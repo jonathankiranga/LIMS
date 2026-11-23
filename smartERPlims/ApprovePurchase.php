@@ -33,16 +33,16 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/s
 if(isset($_POST['confirm']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno']) && in_array((int)$_POST['documenttype'], array(18, 21, 24), true) && preg_match('/^[A-Za-z0-9._\\/-]{1,20}$/', $_POST['documentno'])){
     $approvalDocumentType = (int)$_POST['documenttype'];
     $approvalDocumentNo = trim($_POST['documentno']);
-    DB_query("UPDATE `PurchaseHeader` SET `released` = 1,`status`=2 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
-    DB_query("UPDATE `PurchaseLine` SET `completed` = 1 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `purchaseheader` SET `released` = 1,`status`=2 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `purchaseline` SET `completed` = 1 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
     unset($_POST);
 }
 
 if(isset($_POST['Reject']) && isset($_POST['documenttype']) && ctype_digit((string)$_POST['documenttype']) && isset($_POST['documentno']) && in_array((int)$_POST['documenttype'], array(18, 21, 24), true) && preg_match('/^[A-Za-z0-9._\\/-]{1,20}$/', $_POST['documentno'])){
     $approvalDocumentType = (int)$_POST['documenttype'];
     $approvalDocumentNo = trim($_POST['documentno']);
-    DB_query("UPDATE `PurchaseHeader` SET `released`=NULL,`status`=0 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
-    DB_query("UPDATE `PurchaseLine` SET `completed`=NULL where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `purchaseheader` SET `released`=NULL,`status`=0 where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
+    DB_query("UPDATE `purchaseline` SET `completed`=NULL where documenttype=".$approvalDocumentType." AND documentno='".$approvalDocumentNo."'", $db);
     prnMsg('Purchase Document :'.$_POST['documentno'].' has been Rejected.');
     unset($_POST);
 }
@@ -92,7 +92,7 @@ if(isset($documentno)){
       ,`freight` 
       ,`Dimension_1`
       ,`Dimension_2` 
-      from `PurchaseHeader`  where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
+      from `purchaseheader`  where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
  
     $Result=DB_query($SQL,$db);
     $row=DB_fetch_row($Result);
@@ -137,7 +137,7 @@ if(isset($documentno)){
            ,`vatamount`
            ,`invoiceamount`
            ,partperunit 
-           from `PurchaseLine` 
+           from `purchaseline` 
            where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
     $ResultIndex=DB_query($SQL,$db);
     while($myrow=DB_fetch_array($ResultIndex)){
@@ -179,18 +179,18 @@ if(isset($documentno)){
              . '</table>';
    
 $SQL="Select  
-       `PurchaseHeader`.`documentno`
-      ,`PurchaseHeader`.`docdate`
-      ,`PurchaseHeader`.`oderdate`
-      ,`PurchaseHeader`.`duedate`
-      ,`PurchaseHeader`.`vendorcode`
-      ,`PurchaseHeader`.`vendorname`
-      ,`PurchaseHeader`.`currencycode`
-      ,`PurchaseHeader`.`status`
-      ,`PurchaseHeader`.`userid` 
-      from `PurchaseHeader` 
-      where `PurchaseHeader`.`documenttype`='".$_POST['documenttype']."' 
-        and `PurchaseHeader`.`status`=1 order by `PurchaseHeader`.`docdate` desc";
+       `purchaseheader`.`documentno`
+      ,`purchaseheader`.`docdate`
+      ,`purchaseheader`.`oderdate`
+      ,`purchaseheader`.`duedate`
+      ,`purchaseheader`.`vendorcode`
+      ,`purchaseheader`.`vendorname`
+      ,`purchaseheader`.`currencycode`
+      ,`purchaseheader`.`status`
+      ,`purchaseheader`.`userid` 
+      from `purchaseheader` 
+      where `purchaseheader`.`documenttype`='".$_POST['documenttype']."' 
+        and `purchaseheader`.`status`=1 order by `purchaseheader`.`docdate` desc";
     $Result=DB_query($SQL,$db);
            
     Echo '<DIV class="container">'
