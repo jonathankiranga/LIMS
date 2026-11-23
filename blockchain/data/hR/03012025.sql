@@ -83,7 +83,7 @@ CREATE TABLE standard_methods (
 );
 
 
-ALTER TABLE `TestStandards` 
+ALTER TABLE `teststandards` 
 ADD COLUMN sm INT REFERENCES standard_methods(MethodID);
 
 --16022025
