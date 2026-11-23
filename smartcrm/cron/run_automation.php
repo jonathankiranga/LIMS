@@ -253,7 +253,7 @@ function executeActions($db, $actions, $entity, $entityType) {
                     $details = replaceTemplateVariables($act['details'] ?? '', $entity);
                     $assignedTo = $entity['assigned_to'] ?? 'admin';
                     
-                    $SQL = "INSERT INTO Tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
+                    $SQL = "INSERT INTO tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
                             VALUES (
                                 '" . DB_escape_string($title) . "', 
                                 '0', 
@@ -298,7 +298,7 @@ function executeActions($db, $actions, $entity, $entityType) {
                     $userId = $act['user_id'] ?? $entity['assigned_to'] ?? '';
                     $message = replaceTemplateVariables($act['message'] ?? 'You have a new task.', $entity);
                     
-                    $SQL = "INSERT INTO Tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
+                    $SQL = "INSERT INTO tasks (Taskname, Status, Priority, TaskOwner, datedue, taskdetails, datecreated)
                             VALUES (
                                 'Automation Alert: " . DB_escape_string($message) . "', 
                                 '0', 
