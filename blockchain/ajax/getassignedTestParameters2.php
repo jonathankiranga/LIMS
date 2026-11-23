@@ -15,9 +15,9 @@ SELECT
 FROM sample_tests ST
  join `test_results` TR 
     on  ST.`TestID` = TR.`TestID`
- JOIN TestStandards ts 
+ JOIN teststandards ts 
     ON TR.StandardID = ts.StandardID
- JOIN TestParameters tp 
+ JOIN testparameters tp 
     ON TR.ParameterID = tp.ParameterID AND TR.StandardID = tp.StandardID
  JOIN test_assignments ta 
     ON TR.resultsID = ta.resultsID   
