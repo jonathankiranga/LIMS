@@ -137,7 +137,7 @@ $html = '
       <th width="23%">Sample Name</th>
       <th width="30%">TEST Parameter</th>
       <th width="14%">RESULTS</th>
-      <th width="14%">USER</th>
+      <th width="14%">ANALYST</th>
     </tr>
   </thead>
   <tbody>';
