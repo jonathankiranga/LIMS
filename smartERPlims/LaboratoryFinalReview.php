@@ -56,17 +56,17 @@ echo '<tr><td colspan="4"><table class="table table-bordered">'
 $Ri=0;
 
 $SQL="SELECT 
-       `LabPostingDetail`.`SampleID`
-      ,`LabPostingDetail`.`SampleTypeID`
-      ,`LabPostingDetail`.`ParameterID`
-      ,`LabPostingDetail`.`Method`
-      ,`LabPostingDetail`.`Limits_min`
-      ,`LabPostingDetail`.`Limits_max`
-      ,`LabPostingDetail`.`Results`
+       `labpostingdetail`.`SampleID`
+      ,`labpostingdetail`.`SampleTypeID`
+      ,`labpostingdetail`.`ParameterID`
+      ,`labpostingdetail`.`Method`
+      ,`labpostingdetail`.`Limits_min`
+      ,`labpostingdetail`.`Limits_max`
+      ,`labpostingdetail`.`Results`
       ,`www_users`.`realname`
-      ,`LabPostingDetail`.`lastdatetime`
-  FROM `LabPostingDetail` 
-  left join `www_users` on `LabPostingDetail`.`lastuserid`=`www_users`.`userid`
+      ,`labpostingdetail`.`lastdatetime`
+  FROM `labpostingdetail` 
+  left join `www_users` on `labpostingdetail`.`lastuserid`=`www_users`.`userid`
   where `DocumentNo`='".$documentno."'";
  
       $ResultIndex = DB_query($SQL,$db);
@@ -157,7 +157,7 @@ Function SampleName($SampleTypeID){
 Function GetParameter($Id,$PID){
       Global $db;
       $SQL="SELECT  `Parameter` ,`Limits_min`,`Limits_max`,`Method`
-      FROM `LaboratoryStandards`  where `itemcode`='".$Id."'  and `ParameterID`='".$PID."'";
+      FROM `laboratorystandards`  where `itemcode`='".$Id."'  and `ParameterID`='".$PID."'";
       $ResultIndex = DB_query($SQL,$db);
       $return = DB_fetch_row($ResultIndex);
       
