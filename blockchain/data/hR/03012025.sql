@@ -1,6 +1,6 @@
 
 
-CREATE TABLE Machines (
+CREATE TABLE machines (
     machine_id INT AUTO_INCREMENT PRIMARY KEY,
     machine_name VARCHAR(255) NOT NULL
 );
@@ -14,28 +14,28 @@ CREATE TABLE controlsampleresults (
     measured_value DECIMAL(10, 2),
     deviation DECIMAL(10, 2), -- Measured - Known value
     result_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (equipment_id) REFERENCES Machines(machine_id)
+    FOREIGN KEY (equipment_id) REFERENCES machines(machine_id)
 );
 
 CREATE TABLE equipmentusage (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    equipment_id INT,               -- Foreign key to the Equipment table
+    equipment_id INT,               -- Foreign key to the equipment table
     usage_start_time DATETIME,
     usage_end_time DATETIME,
     duration_minutes INT,           -- Duration of equipment usage in minutes
     user VARCHAR(255),              -- User/Technician who used the equipment
     remarks TEXT,                   -- Additional comments
-    FOREIGN KEY (equipment_id) REFERENCES Machines(machine_id)
+    FOREIGN KEY (equipment_id) REFERENCES machines(machine_id)
 );
 
-CREATE TABLE Equipment (
+CREATE TABLE equipment (
     id INT PRIMARY KEY AUTO_INCREMENT,
     machine_id INT,
     last_calibration DATE,
     predicted_calibration DATE,
     deviation_trend VARCHAR(50),
     usage_hours INT,
-    FOREIGN KEY (machine_id) REFERENCES Machines(machine_id)  
+    FOREIGN KEY (machine_id) REFERENCES machines(machine_id)  
 );
 
 CREATE TABLE company_master (
