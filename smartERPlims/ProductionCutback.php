@@ -56,7 +56,7 @@ if(!isset($_SESSION['Stores'])){
 }   
 
 if(!isset($_SESSION['ProductionUnit'])){
-$ResultIndex=DB_query("select tankname, stockmaster.descrip from `ProductionUnit` "
+$ResultIndex=DB_query("select tankname, stockmaster.descrip from `productionunit`` "
             . "join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode  ", $db);
     while($value=DB_fetch_array($ResultIndex)){
             $_SESSION['ProductionUnit'][]=$row;

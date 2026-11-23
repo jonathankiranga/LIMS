@@ -99,7 +99,7 @@ if(isset($_POST['Save']) or isset($_POST['updateClose'])){
             } else {
                 DB_Txn_Commit($db);
                 $_SESSION['ThisIsAnewPC']++;
-                DB_query("Update `BankAccounts` set `lastChequeno`=`lastChequeno`+1 where `accountcode`='".$_POST['Bank_Code']."'", $db);
+                DB_query("Update `bankaccounts`` set `lastChequeno`=`lastChequeno`+1 where `accountcode`='".$_POST['Bank_Code']."'", $db);
             
                 if(isset($_POST['updateClose'])){
                      header('location:PetteyCash.php?New=1');
@@ -165,7 +165,7 @@ if(isset($_POST['submitnext'])){
     echo '<tr><td>Account Type</td><td><select name="accttype" required="required"  onchange="ReloadForm(Journal.update);">'; Accttype() ; echo '</select></td>';
                       
     if($_POST['transtype']==0){
-         $SQLstment=sprintf("SELECT `accountcode`,`bankName`,BranchName,currency  FROM `bankaccounts`` where `accountcode` <> '%s'",$_POST['Bank_Code']);
+         $SQLstment=sprintf("SELECT `accountcode`,`bankName`,BranchName,currency  FROM `bankaccounts``` where `accountcode` <> '%s'",$_POST['Bank_Code']);
                
          echo '<td>Select Bank to withdraw from :</td><td><Select name="Bank_Code2" required="required">';
                  
@@ -206,7 +206,7 @@ if(isset($_POST['submitnext'])){
        
          }elseif($_POST['accttype']==2){
              
-                $SQLstment=sprintf("SELECT `accountcode`,`bankName`,BranchName,currency FROM `bankaccounts`` where `accountcode` <> '%s'",$_POST['Bank_Code']);
+                $SQLstment=sprintf("SELECT `accountcode`,`bankName`,BranchName,currency FROM `bankaccounts``` where `accountcode` <> '%s'",$_POST['Bank_Code']);
                  echo '<td>Select Bank to Deposit To :</td>'
                 . '<td><Select name="Bank_Code2" onchange="ReloadForm(Journal.update);">';
 
