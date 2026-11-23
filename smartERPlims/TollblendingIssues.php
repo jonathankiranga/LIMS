@@ -68,9 +68,9 @@ $Saleslineinex=0;
         
         $sql = array();
         foreach ($_POST['allocate'] as $salesref => $batchno) {
-           $sql[] = "Update `ProductionMaster`  set `SalesHeader`=NULL  where `SalesHeader`= '".$salesref."'";
+           $sql[] = "Update `productionmaster``  set `SalesHeader`=NULL  where `SalesHeader`= '".$salesref."'";
            foreach ($batchno as $key => $value) {
-                           $sql[] = "Update `ProductionMaster`  set `SalesHeader`= '".$salesref."'  where `batchno`='".$key."'";
+                           $sql[] = "Update `productionmaster``  set `SalesHeader`= '".$salesref."'  where `batchno`='".$key."'";
             }
         }
 
@@ -348,7 +348,7 @@ echo '<table class="table-bordered table-condensed">'
      $Totals=0;
      $SQL=sprintf("select `documenttype`,`documentno`,`docdate`,`customercode`
            ,`customername`,`userid`
-           from SalesHeader where `postinggroup`='%s'",$_POST['CustomerID']);
+           from `salesheader` where `postinggroup`='%s'",$_POST['CustomerID']);
      $ResultIndex= DB_query($SQL,$db);
     while ($rowss= DB_fetch_array($ResultIndex)){
         $mydat[]=$rowss;
@@ -383,7 +383,7 @@ Function Getlinedata($DOC){
    global $db;
    $mydat=array();
    
-   $ResultIndex= DB_query("select * from `Salesline` where documentno='".$DOC."' and `documenttype`='40'  "
+   $ResultIndex= DB_query("select * from `salesline`` where documentno='".$DOC."' and `documenttype`='40'  "
            . " and (`containercode`='1' or `containercode`='2')  ", $db);
         while ($rowss= DB_fetch_array($ResultIndex)){
         $mydat[]=$rowss;
@@ -402,7 +402,7 @@ function MakepdfForstock(){
    $YPos = $Firstinvoicerow;
     $count = 0;$currentno=0;
     $SQL=sprintf("select `documenttype`,`documentno`,`docdate`,`customercode`,`customername`,`userid` "
-            . " from SalesHeader where `postinggroup`='%s'",$_POST['CustomerID']);
+            . " from `salesheader` where `postinggroup`='%s'",$_POST['CustomerID']);
     $ResultIndex= DB_query($SQL,$db);
     while($rowss= DB_fetch_array($ResultIndex)){
        $mydat[]=$rowss;
@@ -468,8 +468,8 @@ Function Sumlinedata($CustomerCode){
            . "`Salesline`.containercode,"
            . "`Salesline`.docdate ,"
            . "`Salesline`.code "
-           . " from `Salesline` "
-           . " join SalesHeader on SalesHeader.documentno=`Salesline`.documentno "
+           . " from `salesline`` "
+           . " join `salesheader` on SalesHeader.documentno=`Salesline`.documentno "
            . " and SalesHeader.documenttype=`Salesline`.documenttype "
            . " where SalesHeader.`postinggroup`='".$CustomerCode."' "
            . " and `Salesline`.`documenttype`='40' "
@@ -493,8 +493,8 @@ Function Sumlinedata($CustomerCode){
         `ProdcutionMasterLine`.`qty` as Quantity,
         `ProductionMaster`.`SalesHeader` ,
         `ProdcutionMasterLine`.`Batchno` 
-        from `ProdcutionMasterLine`
-        join `ProductionMaster` on `ProdcutionMasterLine`.`Batchno`=`ProductionMaster`.`Batchno` 
+        from `prodcutionmasterline``
+        join `productionmaster`` on `ProdcutionMasterLine`.`Batchno`=`ProductionMaster`.`Batchno` 
         join stockmaster on stockmaster.itemcode=ProdcutionMasterLine.`itemcode`
         where `ProductionMaster`.`itemcode`='".$value['code']."'"; 
       
@@ -527,8 +527,8 @@ Function Sumlinedata($CustomerCode){
 Function DeletePOS($DOC){
     global $db;
     
-    DB_query("Delete from `Salesline` where documentno='".$DOC."' and `documenttype`='40'", $db);
-    DB_query("delete from `SalesHeader` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("Delete from `salesline`` where documentno='".$DOC."' and `documenttype`='40'", $db);
+    DB_query("delete from `salesheader`` where documentno='".$DOC."' and `documenttype`='40'", $db);
     prnMsg('Order :'.$DOC.' has been Deleted.');
     unset($_POST);
 }
@@ -541,7 +541,7 @@ function Makepdf(){
 
    $YPos = $Firstinvoicerow;
    $Totals =0; $count = 0;$currentno=0;
-    $SQL=sprintf("select `documenttype`,`documentno`,`docdate`,`customercode`,`customername`,`userid` from SalesHeader where `postinggroup`='%s'",$_POST['CustomerID']);
+    $SQL=sprintf("select `documenttype`,`documentno`,`docdate`,`customercode`,`customername`,`userid` from `salesheader` where `postinggroup`='%s'",$_POST['CustomerID']);
     $ResultIndex= DB_query($SQL,$db);
     while($rowss= DB_fetch_array($ResultIndex)){
        $mydat[]=$rowss;
@@ -682,7 +682,7 @@ function getbachno($itemcode,$docref,$transdate){
           ,stockmaster.descrip
           ,`ProductionMaster`.`date`
           ,`ProductionMaster`.`SalesHeader`
-      FROM `productionmaster`` 
+      FROM `productionmaster``` 
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       where `ProductionMaster`.`itemcode`='%s' and (`ProductionMaster`.`date`
       between DATE_ADD('%s', INTERVAL -7 DAY) and DATE_ADD('%s', INTERVAL 1 DAY))
@@ -721,7 +721,7 @@ function getbachnoentry($itemcode,$transdate){
           ,`ProductionMaster`.`itemcode`  
           ,stockmaster.descrip
           ,`ProductionMaster`.`date`
-      FROM `productionmaster`` 
+      FROM `productionmaster``` 
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       where `ProductionMaster`.`itemcode`='%s' and (`ProductionMaster`.`date`
       between DATE_ADD('%s', INTERVAL -7 DAY) and DATE_ADD('%s', INTERVAL 1 DAY))

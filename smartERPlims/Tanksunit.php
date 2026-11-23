@@ -12,7 +12,7 @@ if(isset($_POST['submit'])){
 
 if(mb_strlen($_POST['CapacityUOM'])>0){
     if(!isset($_POST['editline'])){
-      $sql=sprintf("INSERT INTO `productionunit``
+      $sql=sprintf("INSERT INTO `productionunit```
            (`itemcode`
            ,`capacity`
            ,`tankname`
@@ -32,7 +32,7 @@ if(mb_strlen($_POST['CapacityUOM'])>0){
             ,$_POST['CapacityUOM']
             ,$_POST['status']);
     }else{
-        $sql=sprintf("Update `ProductionUnit` set `itemcode`='%s'
+        $sql=sprintf("Update `productionunit`` set `itemcode`='%s'
                             ,`capacity`=%f ,`tankname`='%s' ,`UOM`='loosqty' 
                             ,`CapacityUOM`='%s' ,status='%s' where `tankname`='%s'"
                             ,$_POST['itemcode']
@@ -57,7 +57,7 @@ if(isset($_GET['edit'])){
     echo '<input type="hidden" name="editline" value="' .$_GET['edit']. '" />';
 
     $results = DB_query("SELECT `itemcode`,`capacity`,`tankname`,`CapacityUOM`,`status` "
-            . "FROM `productionunit`` where `tankname`=".$_GET['edit'],$db);
+            . "FROM `productionunit``` where `tankname`=".$_GET['edit'],$db);
     
     $rows=DB_fetch_row($results);
     $_POST['itemcode']=$rows[0];
@@ -90,7 +90,7 @@ $sql="select `itemcode`
             ,`UOM`
             ,`CapacityUOM`
             ,`status`
-            from `ProductionUnit`";
+            from `productionunit``";
 
 $URL=htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');
   

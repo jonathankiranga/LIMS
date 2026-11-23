@@ -42,7 +42,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                             $INVOICENO       = GetNextTransNo(20,$db);
                             $sql=array();
 
-                            $sql[] ="insert into `PurchaseHeader` 
+                            $sql[] ="insert into `purchaseheader`` 
                               (`documenttype`
                               ,`documentno`
                               ,`docdate`
@@ -76,7 +76,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                               ,'".$_SESSION['UserID']."'
                               ,'".$PeriodNo."'
                               ,'".$VATinclusive ."'
-                              from `AssetsHeader` 
+                              from `assetsheader`` 
                               where documentno='".$_SESSION['DocumentNo']."') ";
 
                             foreach ($_POST['subunits'] as $key => $value) {
@@ -115,7 +115,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                                             FROM fixedassets
                                             WHERE assetid = '" . $stcode . "'";
 
-                                        $sql[] =sprintf("INSERT INTO `purchaseline``
+                                        $sql[] =sprintf("INSERT INTO `purchaseline```
                                                (`documenttype`,
                                                `docdate`,
                                                `documentno`,
@@ -143,7 +143,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                                                `inclusive`,
                                                '%s',
                                                `UOM`
-                                               from FixedAssetsLine where `entryno`='".$key."')"
+                                               from `fixedassetsline` where `entryno`='".$key."')"
                                                ,20
                                                ,FormatDateForSQL($_POST['date'])
                                                ,$INVOICENO
@@ -176,7 +176,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                             } else {
                                 DB_Txn_Commit($db);
                                 prnMsg('This Purchase has successfully been posted');
-                                DB_query("Update AssetsHeader set `released`=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
+                                DB_query("Update `assetsheader` set `released`=2 where documentno='".$_SESSION['DocumentNo']."'",$db);
 
                                 $_SESSION['DocumentPosted']=true;
                                 unset($_SESSION['DocumentNo']);
@@ -206,8 +206,8 @@ $filter="SELECT
            ,`AssetsHeader`.`postinggroup`
            ,`AssetsHeader`.`currencycode`
            ,`AssetsHeader`.`vatinclusive`
-       FROM `assetsheader`` 
-       join FixedAssetsLine on `AssetsHeader`.`documentno`=`FixedAssetsLine`.`documentno`
+       FROM `assetsheader``` 
+       join `fixedassetsline` on `AssetsHeader`.`documentno`=`FixedAssetsLine`.`documentno`
        where `AssetsHeader`.`documentno`='".$_POST['documentno']."' and  `AssetsHeader`.`documenttype`='41' ";
 
     $ResultIndex= DB_query($filter, $db);
@@ -288,7 +288,7 @@ $Slaqry ="SELECT
     ,`FixedAssetsLine`.`vatrate` 
     ,`FixedAssetsLine`.`inclusive`
     ,`FixedAssetsLine`.`UOM`
-  FROM `fixedassetsline`
+  FROM `fixedassetsline``
   where `FixedAssetsLine`.`documentno`='".$_POST['documentno']."' "
  . " and `FixedAssetsLine`.`documenttype`='41' ";
 
@@ -414,7 +414,7 @@ include('includes/footer.inc');
           ,PurchaseHeader.`documenttype`
           ,PurchaseHeader.`postinggroup`
           ,'%s'
-      FROM `purchaseheader`` join PurchaseLine 
+      FROM `purchaseheader``` join `purchaseline` 
             on PurchaseHeader.documentno=PurchaseLine.documentno 
             and PurchaseHeader.documenttype=PurchaseLine.documenttype 
             where PurchaseHeader.documentno='%s' 
@@ -435,7 +435,7 @@ include('includes/footer.inc');
     }
 
     function PostGL($period,$journal,$doc){
-        $sql=SPRINTF("Insert into `Generalledger`
+        $sql=SPRINTF("Insert into `generalledger``
           (`journalno`
           ,`Docdate`
           ,`period`
@@ -469,8 +469,8 @@ include('includes/footer.inc');
           ,(rtrim(PurchaseLine.`description`) +'X'+CAST(PurchaseLine.`Quantity` as nvarchar(10)) ) as narration
           ,'".trim($_POST['DimensionOne'])."'
           ,'".trim($_POST['DimensionTwo'])."'    
-          from PurchaseHeader join `arpostinggroups` on `PurchaseHeader`.`postinggroup`=`arpostinggroups`.`code`
-          join PurchaseLine on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
+          from `purchaseheader` join `arpostinggroups` on `PurchaseHeader`.`postinggroup`=`arpostinggroups`.`code`
+          join `purchaseline` on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
           join fixedassets on `PurchaseLine`.`code`=fixedassets.assetid
           join `fixedassetcategories` on fixedassets.`assetcategoryid`=`fixedassetcategories`.`categoryid` 
           join `currencies` on `PurchaseHeader`.`currencycode`=`currencies`.`currabrev`
@@ -482,7 +482,7 @@ include('includes/footer.inc');
     }
 
     function VATPostGL($period,$journal,$doc){
-        $sql=SPRINTF("Insert into `Generalledger`
+        $sql=SPRINTF("Insert into `generalledger``
           (`journalno`
           ,`Docdate`
           ,`period`
@@ -512,8 +512,8 @@ include('includes/footer.inc');
           ,`currencies`.`rate`
           ,`fixedassetcategories`.defaultgl_vat_act
           ,(rtrim(PurchaseLine.`description`) +' X '+CAST(PurchaseLine.`Quantity` as nvarchar(10)) )  as narration
-          from PurchaseHeader join `arpostinggroups` on `PurchaseHeader`.`postinggroup`=`arpostinggroups`.`code`
-          join PurchaseLine on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
+          from `purchaseheader` join `arpostinggroups` on `PurchaseHeader`.`postinggroup`=`arpostinggroups`.`code`
+          join `purchaseline` on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
           join fixedassets on `PurchaseLine`.`code`=fixedassets.assetid
           join `fixedassetcategories` on fixedassets.`assetcategoryid`=`fixedassetcategories`.`categoryid` 
           join `currencies` on `PurchaseHeader`.`currencycode`=`currencies`.`currabrev`
@@ -545,8 +545,8 @@ include('includes/footer.inc');
                  ,'".$_POST['DimensionOne']."'
                  ,'".$_POST['DimensionTwo']."'  
                  ,PurchaseHeader.`currencycode`   
-                 From PurchaseHeader
-                 join PurchaseLine on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
+                 From `purchaseheader`
+                 join `purchaseline` on `PurchaseLine`.`documentno` = `PurchaseHeader`.`documentno` 
                  where PurchaseHeader.documentno='%s' 
                  Group By PurchaseHeader.`docdate`
                  ,PurchaseHeader.documentno
