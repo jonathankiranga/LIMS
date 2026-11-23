@@ -13,7 +13,7 @@ $errors = [];
 foreach ($deleted as $sid) {
     $sid = intval($sid);
     if ($sid > 0) {
-        if (!$conn->query("DELETE FROM TestStandards WHERE StandardID=$sid")) {
+        if (!$conn->query("DELETE FROM teststandards WHERE StandardID=$sid")) {
             $errors[] = "Failed to delete StandardID $sid: " . $conn->error;
         }
     }
@@ -37,10 +37,10 @@ foreach ($standards as $s) {
         if (empty($code)) {
             $code = 'STD-' . str_pad($id, 4, '0', STR_PAD_LEFT);
         }
-        $sql = "UPDATE TestStandards SET StandardCode='$code', StandardName='$name', Description='$desc', 
+        $sql = "UPDATE teststandards SET StandardCode='$code', StandardName='$name', Description='$desc', 
                 ApplicableRegulation='$reg', sm=$smVal, UpdatedAt='$now' WHERE StandardID=$id";
     } else {
-        $sql = "INSERT INTO TestStandards (StandardCode, StandardName, Description, ApplicableRegulation, sm, CreatedAt) 
+        $sql = "INSERT INTO teststandards (StandardCode, StandardName, Description, ApplicableRegulation, sm, CreatedAt) 
                 VALUES ('$code', '$name', '$desc', '$reg', $smVal, '$now')";
     }
 
@@ -48,7 +48,7 @@ foreach ($standards as $s) {
         $newId = ($id > 0) ? $id : $conn->insert_id;
         if (empty($code)) {
             $autoCode = 'STD-' . str_pad($newId, 4, '0', STR_PAD_LEFT);
-            $conn->query("UPDATE TestStandards SET StandardCode='$autoCode' WHERE StandardID=$newId");
+            $conn->query("UPDATE teststandards SET StandardCode='$autoCode' WHERE StandardID=$newId");
         }
         $saved++;
     } else {
