@@ -24,7 +24,7 @@ $POSclass->Getitems($_POST['stockitemcode'],
 
 echo '<td>Trade Discount</td><td colspan="11"><select  name="TradeDiscount"><option></option>';
 
-$ResultIndex=DB_query(sprintf("SELECT Rate,QTY,rowid FROM Discouts where QTY<='%s'",$_SESSION['TotalInvoiceQty']), $db);
+$ResultIndex=DB_query(sprintf("SELECT Rate,QTY,rowid FROM `discouts` where QTY<='%s'",$_SESSION['TotalInvoiceQty']), $db);
 
 while($row=DB_fetch_array($ResultIndex)){
    echo sprintf('<option value="%s" %s >%f</option>',

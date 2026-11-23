@@ -10,7 +10,7 @@ if (!$db) {
 }
 
 $sql = "SELECT sm.itemcode, sm.descrip, sm.units,
-    (SELECT price FROM PriceList 
+    (SELECT price FROM `pricelist` 
      WHERE stockcode = sm.itemcode 
        AND (customerCode IS NULL OR customerCode = '') 
        AND approved = 1 

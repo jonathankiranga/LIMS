@@ -29,7 +29,7 @@ if (!$testInfo) {
 }
 
 // Get current PriceList price
-$priceStmt = mysqli_prepare($db, "SELECT price FROM PriceList WHERE stockcode = ? AND (customerCode IS NULL OR customerCode = '') AND approved = 1 LIMIT 1");
+$priceStmt = mysqli_prepare($db, "SELECT price FROM `pricelist` WHERE stockcode = ? AND (customerCode IS NULL OR customerCode = '') AND approved = 1 LIMIT 1");
 mysqli_stmt_bind_param($priceStmt, 's', $testCode);
 mysqli_stmt_execute($priceStmt);
 $priceResult = mysqli_stmt_get_result($priceStmt);
