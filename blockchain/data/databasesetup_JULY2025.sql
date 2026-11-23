@@ -512,8 +512,8 @@ ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
 ALTER TABLE `sample_tests`  ADD COLUMN BaseID INT ;
 
  
--- ParameterMatrix Table 31.07.2025
-CREATE TABLE ParameterMatrix (
+-- parametermatrix Table 31.07.2025
+CREATE TABLE parametermatrix (
     ParameterID INT AUTO_INCREMENT PRIMARY KEY,
     ParameterName VARCHAR(255) NOT NULL,   -- Name of the parameter
     ParentID INT,   
@@ -522,7 +522,7 @@ CREATE TABLE ParameterMatrix (
  );
 
 ALTER TABLE `testparameters` ADD COLUMN BaseID INT REFERENCES BaseParameters(ParameterID) ON DELETE RESTRICT;
-ALTER TABLE `testparameters` ADD COLUMN matrixID INT REFERENCES ParameterMatrix(ParameterID) ON DELETE RESTRICT;
+ALTER TABLE `testparameters` ADD COLUMN matrixID INT REFERENCES parametermatrix(ParameterID) ON DELETE RESTRICT;
 
  
 
