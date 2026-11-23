@@ -302,8 +302,8 @@ if(isset($_GET['No'])){
     
     // Get line items and calculate maxTAT, including discount
     // Note: LineDiscountPercent column should be added to SalesLine table:
-    // ALTER TABLE SalesLine ADD COLUMN LineDiscountPercent DECIMAL(5,2) DEFAULT 0 AFTER TAT;
-    // ALTER TABLE SalesHeader ADD COLUMN QtyDiscount DECIMAL(5,2) DEFAULT 0;
+    // ALTER TABLE `salesline` ADD COLUMN LineDiscountPercent DECIMAL(5,2) DEFAULT 0 AFTER TAT;
+    // ALTER TABLE `salesheader` ADD COLUMN QtyDiscount DECIMAL(5,2) DEFAULT 0;
     $SQL=Sprintf("SELECT 
         SalesLine.code as barcode
        ,SalesHeader.docdate
@@ -327,7 +327,7 @@ if(isset($_GET['No'])){
        ,IFNULL(SalesHeader.QtyDiscount, 0) as headerdiscount
        ,IFNULL(SalesHeader.pricingmode, '{}') as pricingmode
        ,IFNULL(SalesLine.category, '') as stdgroup
-    FROM SalesHeader join SalesLine 
+    FROM `salesheader` join SalesLine 
         on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         and SalesHeader.documenttype=54  
@@ -437,12 +437,12 @@ if(isset($_GET['No'])){
     
     // Get bank details
     $GetbankSql = "SELECT `bankName`,`currency`,`AccountNo`,`BranchCode`,`BranchName`,`AcctName`,`bankCode`,`swiftcode`
-        FROM BankAccounts where `accountcode`='".$Bankcode."'";
+        FROM `bankaccounts` where `accountcode`='".$Bankcode."'";
     $BankResult = DB_query($GetbankSql,$db);
     $BankRow = DB_fetch_row($BankResult);
     
     $GetbankSql2 = "SELECT `bankName`,`currency`,`AccountNo`,`BranchCode`,`BranchName`,`AcctName`,`bankCode`,`swiftcode`
-        FROM BankAccounts where `accountcode`='".$Bankcode2."'";
+        FROM `bankaccounts` where `accountcode`='".$Bankcode2."'";
     $BankResult2 = DB_query($GetbankSql2,$db);
     $BankRow2 = DB_fetch_row($BankResult2);
     

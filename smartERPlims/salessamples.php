@@ -24,7 +24,7 @@ include('includes/header.inc');
  }
  
  if(isset($_POST['confirmOrder'])){
-    DB_query("UPDATE `SalesHeader` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `salesheader`` SET `status`=1, `released`=1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     
     echo sprintf('<p class="page_title_text"><a id="'.$_SESSION['CompleteDocument'].'" href="%s?No=%s" >
       <img src="'.$RootPath.'/css/'.$Theme.'/images/pdf.png" title="' . _('Print Sales Samples') . '" alt="" />%s</a></p>',
@@ -55,7 +55,7 @@ include('includes/header.inc');
 
    
  if(!isset($_SESSION['Stores'])){
-    $REsults = DB_query('SELECT `code`,`Storename` FROM `Stores`', $db);
+    $REsults = DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -73,7 +73,7 @@ include('includes/header.inc');
          
                 If($_SESSION['SINGLEUSER']=='Singleuser'){
                     include('transactions/postSampleIssues.inc');  
-                    DB_query("UPDATE `SalesHeader` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
+                    DB_query("UPDATE `salesheader`` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
                     include('transactions/SaveSampleIssues.inc'); 
                 }else{
                     include('transactions/requstSampleIssues.inc');  

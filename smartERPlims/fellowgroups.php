@@ -49,22 +49,22 @@ if(isset($_POST['save'])){
              VALUES  ('%s',%f ,'%s' ,'".$date ."','%s',17,'%s')",$_POST['location'],$Adjustby,'loosqty',$_POST['DocNo'],$_POST['StockID']);
     */
        
-    $SQLARRAY[]="Delete FROM `SupplierStatement` where `Documenttype`='".$_POST['Documenttype']."' and `JournalNo` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
+    $SQLARRAY[]="Delete FROM `supplierstatement`` where `Documenttype`='".$_POST['Documenttype']."' and `JournalNo` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
     $SQLARRAY[]="Delete FROM `creditorsledger` where `systypes_1`='".$_POST['Documenttype']."' and `journal` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
     
-    $SQLARRAY[]="Delete FROM `BankTransactions` where `doctype`='".$_POST['Documenttype']."' and  `journal` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
-    $SQLARRAY[]="Delete FROM `Generalledger` where `journalno` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
+    $SQLARRAY[]="Delete FROM `banktransactions`` where `doctype`='".$_POST['Documenttype']."' and  `journal` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
+    $SQLARRAY[]="Delete FROM `generalledger`` where `journalno` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
     
-    $SQLARRAY[]="Delete FROM `CustomerStatement` where `JournalNo` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
+    $SQLARRAY[]="Delete FROM `customerstatement`` where `JournalNo` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
     $SQLARRAY[]="Delete FROM `debtorsledger` where `journal` in (select `journal` FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."')";
     
     $SQLARRAY[]="Delete FROM `pettdoc` where `petteycashno`='".$_POST['DocumentNO']."'";
    
-    $SQLARRAY[]="Delete FROM `PurchaseLine` where `documentno` ='".$_POST['DocumentNO']."'";
-    $SQLARRAY[]="Delete FROM `PurchaseHeader` where `documentno` ='".$_POST['DocumentNO']."'";
+    $SQLARRAY[]="Delete FROM `purchaseline`` where `documentno` ='".$_POST['DocumentNO']."'";
+    $SQLARRAY[]="Delete FROM `purchaseheader`` where `documentno` ='".$_POST['DocumentNO']."'";
    
-    $SQLARRAY[]="Delete FROM `SalesLine` where `documentno` ='".$_POST['DocumentNO']."'";
-    $SQLARRAY[]="Delete FROM `SalesHeader` where `documentno` ='".$_POST['DocumentNO']."'";
+    $SQLARRAY[]="Delete FROM `salesline`` where `documentno` ='".$_POST['DocumentNO']."'";
+    $SQLARRAY[]="Delete FROM `salesheader`` where `documentno` ='".$_POST['DocumentNO']."'";
     
      $rowcount=0;
     DB_Txn_Begin($db);

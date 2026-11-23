@@ -23,7 +23,7 @@ if(isset($_GET['ref'])){
 
 if(isset($_POST['delete']) and $_POST['delete']=='Delete Document for ever'){
     /* An order with any delivered quantity must not be deleted. */
-    $delivCheck = DB_fetch_row(DB_query("SELECT COUNT(*) FROM SalesLine WHERE documentno='".$db->real_escape_string($_POST['documentno'])."' AND documenttype=1 AND IFNULL(Qunatity_delivered,0)>0", $db));
+    $delivCheck = DB_fetch_row(DB_query("SELECT COUNT(*) FROM `salesline` WHERE documentno='".$db->real_escape_string($_POST['documentno'])."' AND documenttype=1 AND IFNULL(Qunatity_delivered,0)>0", $db));
     if((int)$delivCheck[0] == 0){
      $sql= sprintf("delete from SalesLine where `documentno`='%s' "
              . " and `SalesLine`.`documenttype`='1' ",$_POST['documentno']);
@@ -56,7 +56,7 @@ $filter="SELECT
            ,`vatinclusive`
            ,shipping
            ,packagescharge
-       FROM `SalesHeader` 
+       FROM `salesheader`` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -169,7 +169,7 @@ $savedBank2Inv = $_POST['Bank_Code2'] ?? '';
 if ($savedBank1Inv === '' || $savedBank2Inv === '') {
     $origDoc = $_SESSION['DocumentNo'] ?? ($_POST['documentno'] ?? '');
     if ($origDoc !== '') {
-        $bq = DB_query("SELECT locationcode, externaldocumentno FROM SalesHeader WHERE documentno='" . mysqli_real_escape_string($db, $origDoc) . "' LIMIT 1", $db);
+        $bq = DB_query("SELECT locationcode, externaldocumentno FROM `salesheader` WHERE documentno='" . mysqli_real_escape_string($db, $origDoc) . "' LIMIT 1", $db);
         if ($br = DB_fetch_row($bq)) {
             if ($savedBank1Inv === '') $savedBank1Inv = $br[0] ?? '';
             if ($savedBank2Inv === '') $savedBank2Inv = $br[1] ?? '';
@@ -583,7 +583,7 @@ function computeInvoiceLines($db, $documentno, $VATinclusive, $IsTaxed, $post = 
         ,`Qunatity_delivered`,`UnitPrice`
         ,`vatrate`,`inclusive`,`partperunit`,`containercode`
         ,`totalchargedcontainers`,`PriceInPricelist`,`LineDiscountPercent`,`SampleID`,`TAT`
-      FROM `SalesLine`
+      FROM `salesline``
       WHERE `documentno`='" . $db->real_escape_string($documentno) . "'
         AND `code` IS NOT NULL AND `code` != ''
         AND IFNULL(`Qunatity_delivered`,0) > 0
