@@ -35,7 +35,7 @@ $SQL="SELECT
  EnterbillHeaders.`journalno`,
  EnterbillHeaders.VendorID,
  creditors.customer
- FROM `EnterbillHeaders` 
+ FROM `enterbillheaders`` 
  join creditors on creditors.itemcode=EnterbillHeaders.VendorID 
  where `documentno`='".$enterbillno."'";
  $ResultIndex = DB_query($SQL,$db);
@@ -58,7 +58,7 @@ Preparecolums(1);
   $Running =0;$VATRunning=0;
   
   $SQL="SELECT `documenttype`,`documentno`,`journalno`,`account`,`vatamount`,`grossamount`
-  FROM `EnterbillsLines` where `documentno`='" .$enterbillno. "'";
+  FROM `enterbillslines`` where `documentno`='" .$enterbillno. "'";
   $ResultIndex = DB_query($SQL,$db);
  
   while($Row = DB_fetch_array($ResultIndex)){
@@ -150,7 +150,7 @@ echo '<form>
       $SQL='SELECT 
          EnterbillHeaders.`date`,`documenttype`,`documentno`,
          `narration`,`journalno`,VendorID,creditors.customer
-         FROM `EnterbillHeaders` join creditors on creditors.itemcode=EnterbillHeaders.VendorID 
+         FROM `enterbillheaders`` join creditors on creditors.itemcode=EnterbillHeaders.VendorID 
          order by EnterbillHeaders.`date` desc limit 1000';
       $ResultIndex=DB_query($SQL, $db);
       while($row=DB_fetch_array($ResultIndex)){
