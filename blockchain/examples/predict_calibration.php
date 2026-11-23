@@ -10,7 +10,7 @@ $sql = "SELECT
     DATE_FORMAT(Cs.result_timestamp, '%Y-%m') AS month, 
     AVG(Cs.deviation) AS avg_deviation 
 FROM 
-    ControlSampleResults Cs
+    controlsampleresults Cs
 JOIN 
     machines ma ON ma.machine_id = Cs.equipment_id
 WHERE 
