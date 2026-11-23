@@ -92,7 +92,7 @@ $mypost=array('PartPerUnit'=>1,'unitofmeasure'=>$si,
     } else {
         DB_Txn_Commit($db);
       
-        DB_query("update SalesHeader set released=1  where documenttype='40' and documentno='".$_POST['documentno']."'",$db);
+        DB_query("update `salesheader` set released=1  where documenttype='40' and documentno='".$_POST['documentno']."'",$db);
         if (!empty($_SESSION['IssuedSerials'])) {
             $_SESSION['DocumentSerials'][$_POST['documentno']] = $_SESSION['IssuedSerials'];
         }

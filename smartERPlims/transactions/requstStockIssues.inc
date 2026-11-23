@@ -30,7 +30,7 @@ $journal     = GetNextTransNo(0,$db);
 $sql=array();
     
 
-$sql[]="INSERT INTO SalesHeader
+$sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -91,7 +91,7 @@ $ResultIndex = DB_query("SELECT
     $grossamount = $rowvalue['netamount'];
                
                
-    $sql[] =  sprintf("INSERT INTO SalesLine
+    $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate ,documentno,code,description ,unitofmeasure
            ,Quantity ,UnitPrice ,vatamount,invoiceamount,vatrate,inclusive
            ,containerprice,containersunits,totalchargedcontainers ,containercode,PartPerUnit)

@@ -27,7 +27,7 @@ $sqldate     = FormatDateForSQL($_POST['date']);
 $sql=array();
     
 
-$sql[]="INSERT INTO SalesHeader
+$sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -81,7 +81,7 @@ $sql[]="INSERT INTO SalesHeader
     $salesoderno = $_SESSION['DocumentNo'];
     $QTY         = (float)($rowvalue['packSize']*$rowvalue['quantity']);
     
-    $sql[] =  sprintf("INSERT INTO SalesLine
+    $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate,documentno,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive
            ,containerprice,containersunits,totalchargedcontainers,containercode,PartPerUnit)
@@ -109,7 +109,7 @@ $sql[]="INSERT INTO SalesHeader
     $stcode      = $rowvalue['itemcodeTwo'];
     $salesoderno = $_SESSION['DocumentNo'];
     
-     $sql[] =  sprintf("INSERT INTO SalesLine
+     $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate,documentno,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive
            ,containerprice,containersunits,totalchargedcontainers,containercode,PartPerUnit)
@@ -138,7 +138,7 @@ $sql[]="INSERT INTO SalesHeader
     $stockname = trim($stkmaster[2]);
     $si        = $stkmaster[3];
     
-     $sql[] =  sprintf("INSERT INTO SalesLine
+     $sql[] =  sprintf("INSERT INTO `salesline`
            (documenttype,docdate,documentno,code,description,unitofmeasure
            ,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive
            ,containerprice,containersunits,totalchargedcontainers,containercode,PartPerUnit)
@@ -166,7 +166,7 @@ $sql[]="INSERT INTO SalesHeader
     } else {
         DB_Txn_Commit($db);
       
-        DB_query("UPDATE SalesHeader SET released=1 WHERE documenttype='40' and documentno='".$_POST['documentno']."'",$db);
+        DB_query("UPDATE `salesheader` SET released=1 WHERE documenttype='40' and documentno='".$_POST['documentno']."'",$db);
         prnMsg(sprintf('<a href="PDFPrintRequisition.php?No=%s">Print Document:%s</a>',$_POST['documentno'],$_POST['documentno']),'info');
     }
     
