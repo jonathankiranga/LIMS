@@ -26,7 +26,7 @@ if(isset($_POST['submit'])){
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '<br /></p>';
 echo '<div class="centre"><code>When the system calculates days to deduct from salary when absent, it looks at the off days and working days.</code></div>';
 
-$sql = "SELECT Dayoftheweek, isworkingday FROM Dayoftheweeks ORDER BY CASE Dayoftheweek 
+$sql = "SELECT Dayoftheweek, isworkingday FROM dayoftheweeks ORDER BY CASE Dayoftheweek 
         WHEN 'Sunday' THEN 0 WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 
         WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 END";
 $result = DB_query($sql, $db);
@@ -35,7 +35,7 @@ if(DB_num_rows($result) == 0) {
     $defaultDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     $workingDays = [0, 1, 1, 1, 1, 1, 0];
     foreach($defaultDays as $i => $day) {
-        $insertSql = "INSERT INTO Dayoftheweeks (Dayoftheweek, isworkingday) VALUES ('$day', " . $workingDays[$i] . ")";
+        $insertSql = "INSERT INTO dayoftheweeks (Dayoftheweek, isworkingday) VALUES ('$day', " . $workingDays[$i] . ")";
         DB_query($insertSql, $db);
     }
     $result = DB_query($sql, $db);
