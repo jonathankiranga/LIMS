@@ -63,7 +63,7 @@ $SQL="Select
       ,AssetsHeader.`documenttype`
       ,FixedAssetsLine.vatrate
       ,FixedAssetsLine.`code`
-  FROM `AssetsHeader` 
+  FROM `assetsheader`` 
         join FixedAssetsLine on AssetsHeader.documentno=FixedAssetsLine.documentno 
         and AssetsHeader.documenttype=FixedAssetsLine.documenttype 
         and AssetsHeader.documenttype='55'

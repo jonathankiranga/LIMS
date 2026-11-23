@@ -379,7 +379,7 @@ function getiamge($ref){
     global $host,$database,$DBUser,$DBPassword;
     $dbimage = new mysqli($host, $DBUser, $DBPassword, $database);
  
-    $SQL=sprintf("SELECT `picture` FROM `SalesHeader` where documentno='%s'",trim($ref));
+    $SQL=sprintf("SELECT `picture` FROM `salesheader`` where documentno='%s'",trim($ref));
      $Result=DB_query($SQL,$dbimage);
       $myrow=DB_fetch_row($Result);
     $urlString=$myrow[0];
@@ -412,7 +412,7 @@ function gethtmlbody($documentno) {
             sh.userid, d.email, d.city, d.postcode, d.country, d.phone, d.contact,
             sh.yourreference, sh.externaldocumentno as BankCode2, sh.printed, d.middlen,
             sh.packagescharge, sh.picture, sh.locationcode as BankCode
-            FROM SalesHeader sh
+            FROM `salesheader` sh
             JOIN debtors d ON sh.customercode = d.itemcode
             LEFT JOIN salesrepsinfo rep ON rep.code = sh.salespersoncode
             WHERE sh.documenttype = '10' AND sh.documentno = '" . $documentno . "' 
@@ -451,7 +451,7 @@ function gethtmlbody($documentno) {
             ,1 as partperunit
             ,AVG(IFNULL(SalesLine.LineDiscountPercent,0)) as lineDiscount
             ,IFNULL(SalesHeader.QtyDiscount,0) as headerDiscount
-    FROM `SalesHeader` 
+    FROM `salesheader`` 
     join SalesLine  on SalesHeader.documentno=SalesLine.documentno 
     and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=10
     left join stockmaster Container on Container.itemcode=SalesLine.containercode
@@ -597,7 +597,7 @@ function gethtmlbody($documentno) {
     $bankQueries = [$Bankcode, $Bankcode2];
     foreach($bankQueries as $code) {
         if(!$code) continue;
-        $bSql = "SELECT bankName, currency, AccountNo, BranchCode, BranchName, AcctName, swiftcode FROM BankAccounts WHERE accountcode='".$code."'";
+        $bSql = "SELECT bankName, currency, AccountNo, BranchCode, BranchName, AcctName, swiftcode FROM `bankaccounts` WHERE accountcode='".$code."'";
         $bRes = DB_query($bSql, $db);
         if($bank = DB_fetch_array($bRes)) {
             $html .= '<td width="50%" style="padding:5px; border-right:1px solid #ccc;">

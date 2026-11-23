@@ -55,7 +55,7 @@ $SQL="select
         AssetsHeader.`vendorcode` ,
         AssetsHeader.`documenttype` ,
         `FixedAssetsLine`.`code`
-        FROM AssetsHeader  
+        FROM `assetsheader`  
         join  FixedAssetsLine on AssetsHeader.`documentno`=FixedAssetsLine.`documentno` 
          where AssetsHeader.`documentno`='%s'  ",$_GET['No']);
      

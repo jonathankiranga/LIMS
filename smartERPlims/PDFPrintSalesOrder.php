@@ -81,7 +81,7 @@ $SQL="select
       ,IFNULL(SalesLine.TAT,0) as TAT
       ,IFNULL(SalesLine.LineDiscountPercent,0) as lineDiscount
       ,IFNULL(SalesHeader.QtyDiscount,0) as headerDiscount
-  FROM `SalesHeader` 
+  FROM `salesheader`` 
         join SalesLine on SalesHeader.documentno=SalesLine.documentno  and SalesHeader.documenttype=SalesLine.documenttype and SalesHeader.documenttype=1
         join stockmaster on stockmaster.itemcode=SalesLine.code
         left join stockmaster Container on Container.itemcode=SalesLine.containercode
@@ -354,7 +354,7 @@ function getiamge($ref){
 //   $dbimage = odbc_connect("Driver={SQL Server};Server=$host;Database=$database;",trim($DBUser),trim($DBPassword));
     $dbimage = new mysqli($host, $DBUser, $DBPassword, $database);
  
-    $SQL=sprintf("SELECT `picture` FROM `SalesHeader` where documentno='%s'",trim($ref));
+    $SQL=sprintf("SELECT `picture` FROM `salesheader`` where documentno='%s'",trim($ref));
      $Result=DB_query($SQL,$dbimage);
       $myrow=DB_fetch_row($Result);
     $urlString=$myrow[0];
