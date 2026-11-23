@@ -51,7 +51,7 @@ $PeriodNo = GetPeriod($_POST['date'],$db,true);
 
 $sql=array();
 
-$sql[]="INSERT INTO AssetsHeader
+$sql[]="INSERT INTO `assetsheader`
            (documenttype
            ,documentno
            ,docdate
@@ -129,7 +129,7 @@ foreach ($_POST['grossamount'] as $itemcode => $value ) {
        $vatamount = $_POST['vatamount'][$itemcode];
     }
     
-    $sql[] =  sprintf("INSERT INTO FixedAssetsLine
+    $sql[] =  sprintf("INSERT INTO `fixedassetsline`
            (documenttype,docdate,documentno,code ,description,unitofmeasure,Quantity
            ,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM)
      VALUES

@@ -52,7 +52,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
     
     $sql=array();
      
-    $sql[]="INSERT INTO AssetsHeader
+    $sql[]="INSERT INTO `assetsheader`
            (documenttype
            ,documentno
            ,docdate
@@ -105,7 +105,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                 and FixedAssetsLine.entryno = %s",$qty,$salesoderno,55,$key);
                     
                     
-                $sql[] =  sprintf("INSERT INTO FixedAssetsLine
+                $sql[] =  sprintf("INSERT INTO `fixedassetsline`
                 (documenttype,docdate,documentno,code,description,unitofmeasure,Quantity,UnitPrice,vatamount,invoiceamount,vatrate,inclusive,UOM) 
                 (select '%s','%s','%s',code,description,unitofmeasure,'%s','%s','%s','%s',vatrate,inclusive,UOM from FixedAssetsLine 
                  where entryno=%s and documentno='%s' and documenttype='%s')","30",
@@ -131,7 +131,7 @@ if($_SESSION['somedetails'] == 0 AND $_SESSION['DocumentPicking']==false){
                                '" . _('Hired') . "',
                                (FixedAssetsLine.invoiceamount*currencies.rate),
                                '".($qty)."'
-                               FROM FixedAssetsLine 
+                               FROM `fixedassetsline` 
                                join AssetsHeader on AssetsHeader.documentno=FixedAssetsLine.documentno
                                join currencies on currencies.currabrev=AssetsHeader.currencycode
                                where FixedAssetsLine.documentno='".$salesoderno."' "
