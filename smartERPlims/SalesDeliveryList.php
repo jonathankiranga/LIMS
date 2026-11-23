@@ -34,8 +34,8 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
-      from `salesheader`` join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      sum(salesline.`invoiceamount`) as OrderValue
+      from `salesheader`` join `salesline` on `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='10'  ".    
         (isset($_POST['CustomerID'])?" and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":'')."
       group by 

@@ -21,9 +21,9 @@ $SQL="select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
-      sum(SalesLine.`invoiceamount`) as OrderValue
+      sum(salesline.`invoiceamount`) as OrderValue
       from `salesheader`` 
-      join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      join `salesline` on `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' 
       and `SalesHeader`.`released`=1 and `SalesHeader`.`status`=2
       group by 

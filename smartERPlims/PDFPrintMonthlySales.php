@@ -317,10 +317,10 @@ function GetQtyForPeriod($itemcode=""){
         $toDate = ConvertSQLDate($customDate);
         $periodno = GetPeriod($toDate,$db,false);
         
-        $SQL = "select sum(SalesLine.`invoiceamount`) as OrderValue
-      ,sum(SalesLine.`Quantity` * SalesLine.`PartPerUnit`) as `Quantity`
+        $SQL = "select sum(salesline.`invoiceamount`) as OrderValue
+      ,sum(salesline.`Quantity` * salesline.`PartPerUnit`) as `Quantity`
       from `SalesHeader` 
-      join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      join SalesLine on `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='10' and `SalesLine`.`code`='".$itemcode."' 
       and `SalesHeader`.`period` ='".$periodno."'";
          $ResultIndex = DB_query($SQL,$db);
@@ -344,10 +344,10 @@ function GetValueForPeriod($itemcode=""){
         $periodno = GetPeriod($toDate,$db,false);
         
          $SQL = "select 
-             sum(SalesLine.`invoiceamount`) as OrderValue
-             ,sum(SalesLine.`Quantity` * SalesLine.`PartPerUnit`) as `Quantity`
+             sum(salesline.`invoiceamount`) as OrderValue
+             ,sum(salesline.`Quantity` * salesline.`PartPerUnit`) as `Quantity`
       from `SalesHeader` 
-      join SalesLine on `SalesHeader`.`documentno`=SalesLine.`documentno` 
+      join SalesLine on `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='10' and `SalesLine`.`code`='".$itemcode."' 
       and `SalesHeader`.`period` ='".$periodno."'";
          $ResultIndex = DB_query($SQL,$db);
