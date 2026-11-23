@@ -25,8 +25,8 @@ $SQL="select
       ,`debtors`.contact
       ,`SalesHeader`.`documentno` as jobcard
       ,`SalesHeader`.`picture` 
-      from `SalesHeader`
-      join `SalesLine` on `SalesHeader`.`documentno`=`SalesLine`.`documentno`
+      from `salesheader``
+      join `salesline`` on `SalesHeader`.`documentno`=`SalesLine`.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
       where `SalesHeader`.`documentno`='".$_GET['No']."' GROUP BY SalesLine.documentno, SalesLine.SampleID";
     $Result=DB_query($SQL,$db);
@@ -61,8 +61,8 @@ $SQL="select
         `SalesLine`.Quantity,
         `SalesLine`.unitofmeasure as UOMDesc,
         `SalesLine`.UnitPrice as Sp
-    FROM `SalesHeader` 
-        join SalesLine on SalesHeader.documentno=SalesLine.documentno 
+    FROM `salesheader`` 
+        join `salesline` on SalesHeader.documentno=SalesLine.documentno 
         and SalesHeader.documenttype=SalesLine.documenttype 
         join stockmaster on stockmaster.itemcode=SalesLine.code
         where SalesHeader.documentno='%s' and SalesHeader.documenttype=19 " ,$_GET['No']);
@@ -227,7 +227,7 @@ $SQL="SELECT
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
       ,`SalesHeader`.`picture` 
-      from `SalesHeader` 
+      from `salesheader`` 
       where `SalesHeader`.`documenttype`='19' 
       order by `SalesHeader`.`documentno` desc limit 50";
     $Result=DB_query($SQL,$db);
@@ -267,7 +267,7 @@ function getiamge($ref){
     global $host,$database,$DBUser,$DBPassword;
    $dbimage = new mysqli($host, $DBUser, $DBPassword, $database);
   
-    $SQL=sprintf("SELECT `picture` FROM `SalesHeader` where documentno='%s'",trim($ref));
+    $SQL=sprintf("SELECT `picture` FROM `salesheader`` where documentno='%s'",trim($ref));
      $Result=DB_query($SQL,$dbimage);
       $myrow=DB_fetch_row($Result);
     $urlString=$myrow[0];

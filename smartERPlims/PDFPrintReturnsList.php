@@ -22,8 +22,8 @@ $SQL="select
       ,`debtors`.country
       ,`debtors`.phone
       ,`debtors`.contact
-      from `SalesHeader` 
-      join `SalesLine` on `SalesHeader`.`documentno`=SalesLine.`documentno`
+      from `salesheader`` 
+      join `salesline`` on `SalesHeader`.`documentno`=SalesLine.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -54,8 +54,8 @@ $SQL="select
                    SalesHeader.`documentno` , 
                    SalesHeader.`customercode` , 
                    SalesHeader.`documenttype` 
-                   FROM `SalesHeader` 
-                   join SalesLine on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  and SalesHeader.documenttype='11' 
+                   FROM `salesheader`` 
+                   join `salesline` on SalesHeader.documentno=SalesLine.documentno and SalesHeader.documenttype=SalesLine.documenttype  and SalesHeader.documenttype='11' 
                    left join stockmaster on stockmaster.itemcode=SalesLine.code 
                    where SalesHeader.documentno='%s' ",$_GET['No']);
      
@@ -120,8 +120,8 @@ $SQL="Select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `SalesHeader` 
-      join SalesLine on `SalesHeader`.documentno=SalesLine.`documentno`  
+      from `salesheader`` 
+      join `salesline` on `SalesHeader`.documentno=SalesLine.`documentno`  
       where `SalesHeader`.`documenttype`='11' 
       order by `SalesHeader`.`docdate` desc";
     $Result=DB_query($SQL,$db);
