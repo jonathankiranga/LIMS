@@ -10,7 +10,7 @@ if(isset($_POST['Batchno'])){
 }
 
 if(isset($_POST['update'])){
- $SQL=sprintf("update `ProductionMaster` "
+ $SQL=sprintf("update `productionmaster`` "
                  . " set `labparam1`='%s',"
                  . "`labparam2`='%s',"
                  . "`labparam3`='%s',"
@@ -41,7 +41,7 @@ if(isset($BatchNo)){
        `labparam3` as Parameter_3,
        `labparam4` as Parameter_4,
        `labparam5` as Parameter_5 "
-    . " from `ProductionMaster` "
+    . " from `productionmaster`` "
     . " where `Batchno`='".$BatchNo."' ";
     $ResultIndex = DB_query($sql,$db);
     $rowlab = DB_fetch_row($ResultIndex);
@@ -95,7 +95,7 @@ if(isset($BatchNo)){
        `labparam3` as Parameter_3,
        `labparam4` as Parameter_4,
        `labparam5` as Parameter_5 
-       from `ProductionMaster` order by `date` desc limit 100 ";
+       from `productionmaster`` order by `date` desc limit 100 ";
     $ResultIndex = DB_query($sql,$db);
     
     echo '<table class="table table-bordered"><tr>'
