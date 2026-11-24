@@ -22,8 +22,8 @@ $SQL="select
       ,`debtors`.country
       ,`debtors`.phone
       ,`debtors`.contact
-      from `salesheader`` 
-      join `salesline`` on `SalesHeader`.`documentno`=salesline.`documentno`
+      from `salesheader` 
+      join `salesline` on `SalesHeader`.`documentno`=salesline.`documentno`
       join `debtors` on `SalesHeader`.`customercode`=`debtors`.`itemcode`
       where `SalesHeader`.`documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
@@ -54,7 +54,7 @@ $SQL="select
                    salesheader.`documentno` , 
                    salesheader.`customercode` , 
                    salesheader.`documenttype` 
-                   FROM `salesheader`` 
+                   FROM `salesheader` 
                    join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype  and salesheader.documenttype='11' 
                    left join stockmaster on stockmaster.itemcode=salesline.code 
                    where salesheader.documentno='%s' ",$_GET['No']);
@@ -120,7 +120,7 @@ $SQL="Select
       ,`SalesHeader`.`salespersoncode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `salesheader`` 
+      from `salesheader` 
       join `salesline` on `SalesHeader`.documentno=salesline.`documentno`  
       where `SalesHeader`.`documenttype`='11' 
       order by `SalesHeader`.`docdate` desc";
