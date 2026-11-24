@@ -42,7 +42,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                             $INVOICENO       = GetNextTransNo(20,$db);
                             $sql=array();
 
-                            $sql[] ="insert into `purchaseheader`` 
+                            $sql[] ="insert into `purchaseheader` 
                               (`documenttype`
                               ,`documentno`
                               ,`docdate`
@@ -76,7 +76,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                               ,'".$_SESSION['UserID']."'
                               ,'".$PeriodNo."'
                               ,'".$VATinclusive ."'
-                              from `assetsheader`` 
+                              from `assetsheader` 
                               where documentno='".$_SESSION['DocumentNo']."') ";
 
                             foreach ($_POST['subunits'] as $key => $value) {
@@ -115,7 +115,7 @@ if(isset($_POST['submit']) and $_POST['submit']=='Enter Delivery Details and Con
                                             FROM fixedassets
                                             WHERE assetid = '" . $stcode . "'";
 
-                                        $sql[] =sprintf("INSERT INTO `purchaseline```
+                                        $sql[] =sprintf("INSERT INTO `purchaseline`
                                                (`documenttype`,
                                                `docdate`,
                                                `documentno`,
@@ -206,7 +206,7 @@ $filter="SELECT
            ,`AssetsHeader`.`postinggroup`
            ,`AssetsHeader`.`currencycode`
            ,`AssetsHeader`.`vatinclusive`
-       FROM `assetsheader``` 
+       FROM `assetsheader` 
        join `fixedassetsline` on `AssetsHeader`.`documentno`=`FixedAssetsLine`.`documentno`
        where `AssetsHeader`.`documentno`='".$_POST['documentno']."' and  `AssetsHeader`.`documenttype`='41' ";
 
@@ -288,7 +288,7 @@ $Slaqry ="SELECT
     ,`FixedAssetsLine`.`vatrate` 
     ,`FixedAssetsLine`.`inclusive`
     ,`FixedAssetsLine`.`UOM`
-  FROM `fixedassetsline``
+  FROM `fixedassetsline`
   where `FixedAssetsLine`.`documentno`='".$_POST['documentno']."' "
  . " and `FixedAssetsLine`.`documenttype`='41' ";
 
@@ -414,7 +414,7 @@ include('includes/footer.inc');
           ,PurchaseHeader.`documenttype`
           ,PurchaseHeader.`postinggroup`
           ,'%s'
-      FROM `purchaseheader``` join `purchaseline` 
+      FROM `purchaseheader` join `purchaseline` 
             on PurchaseHeader.documentno=PurchaseLine.documentno 
             and PurchaseHeader.documenttype=PurchaseLine.documenttype 
             where PurchaseHeader.documentno='%s' 
@@ -435,7 +435,7 @@ include('includes/footer.inc');
     }
 
     function PostGL($period,$journal,$doc){
-        $sql=SPRINTF("Insert into `generalledger``
+        $sql=SPRINTF("Insert into `generalledger`
           (`journalno`
           ,`Docdate`
           ,`period`
@@ -482,7 +482,7 @@ include('includes/footer.inc');
     }
 
     function VATPostGL($period,$journal,$doc){
-        $sql=SPRINTF("Insert into `generalledger``
+        $sql=SPRINTF("Insert into `generalledger`
           (`journalno`
           ,`Docdate`
           ,`period`
@@ -525,7 +525,7 @@ include('includes/footer.inc');
     }
 
     Function SupplierStatemet($journal,$doc){
-        $sql=sprintf("INSERT INTO `supplierstatement``
+        $sql=sprintf("INSERT INTO `supplierstatement`
                (`Date`
                ,`Documentno`
                ,`Documenttype`
