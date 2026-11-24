@@ -695,12 +695,12 @@ CREATE TABLE [dbo].[currencies](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Dayoftheweeks]    Script Date: 07/04/2026 11:45:37 ******/
+/****** Object:  Table [dbo].[dayoftheweeks]    Script Date: 07/04/2026 11:45:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Dayoftheweeks](
+CREATE TABLE [dbo].[dayoftheweeks](
 	[Dayoftheweek] [varchar](50) NOT NULL,
 	[isworkingday] [bit] NULL,
  CONSTRAINT [IX_Dayoftheweek] UNIQUE NONCLUSTERED 
@@ -1822,7 +1822,7 @@ CREATE PROCEDURE [dbo].[GetDOWdateofreturn](@checkdate smalldatetime, @outparam 
             BEGIN
                    Declare @isworkingday bit,@holiday varchar(50)
                    
-                    SELECT @isworkingday=[isworkingday]  FROM [Dayoftheweeks] where [Dayoftheweek]=@DateName
+                    SELECT @isworkingday=[isworkingday]  FROM [dayoftheweeks] where [Dayoftheweek]=@DateName
                    
                     SELECT @holiday = [name] from [prlspecialdays] where day=datepart(d,@CurrentDate) 
                     and month=datepart(m,@CurrentDate)
@@ -1974,7 +1974,7 @@ CREATE PROCEDURE [dbo].[MakeTimedataReady]
                    Declare @isworkingday bit,@holiday varchar(50)
                    
                     SELECT @isworkingday=[isworkingday] 
-                    FROM [Dayoftheweeks] where [Dayoftheweek]=@DateName
+                    FROM [dayoftheweeks] where [Dayoftheweek]=@DateName
                    
                     if(@isworkingday=1) 
                     begin
@@ -2149,7 +2149,7 @@ insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loans / Bal
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount,LoanBalance) 
-(select @auto, Prlproducts.description, @pfno, 'N', 
+(select @auto, prlproducts.description, @pfno, 'N', 
 prlloantrans.amount ,
 case when prlstaffloans.[saving]=1 then
     prlstaffloans.principal+sum(prlloantrans.amount) 
@@ -2158,18 +2158,18 @@ else
 end
 from prlloantrans  
 join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode=Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode=prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19  and prlloantrans.amount>0  
-    group by Prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
+    group by prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loan Interest :',@pfno,'N')
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount) 
-(select @auto, '% on '+Prlproducts.description, @pfno, 'N', prlloantrans.interest  
+(select @auto, '% on '+prlproducts.description, @pfno, 'N', prlloantrans.interest  
 from prlloantrans  join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode = Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode = prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19 and prlloantrans.interest>0)
 
 
@@ -2403,7 +2403,7 @@ insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loans / Bal
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount,LoanBalance) 
-(select @auto, Prlproducts.description, @pfno, 'N', 
+(select @auto, prlproducts.description, @pfno, 'N', 
 prlloantrans.amount ,
 case when prlstaffloans.[saving]=1 then
     prlstaffloans.principal+sum(prlloantrans.amount) 
@@ -2412,18 +2412,18 @@ else
 end
 from prlloantrans  
 join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode=Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode=prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19  and prlloantrans.amount>0  
-    group by Prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
+    group by prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loan Interest :',@pfno,'N')
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount) 
-(select @auto, '% on '+Prlproducts.description, @pfno, 'N', prlloantrans.interest  
+(select @auto, '% on '+prlproducts.description, @pfno, 'N', prlloantrans.interest  
 from prlloantrans  join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode = Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode = prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19 and prlloantrans.interest>0)
 
 
@@ -2658,7 +2658,7 @@ insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loans / Bal
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount,LoanBalance) 
-(select @auto, Prlproducts.description, @pfno, 'N', 
+(select @auto, prlproducts.description, @pfno, 'N', 
 prlloantrans.amount ,
 case when prlstaffloans.[saving]=1 then
     prlstaffloans.principal+sum(prlloantrans.amount) 
@@ -2667,18 +2667,18 @@ else
 end
 from prlloantrans  
 join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode=Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode=prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19  and prlloantrans.amount>0  
-    group by Prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
+    group by prlproducts.description,prlstaffloans.principal,prlloantrans.amount,prlstaffloans.saving)
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format) values (@auto,'Less Loan Interest :',@pfno,'N')
 
 set @auto = @auto+1;
 insert into @payslips (ItemId,Notes,Pfno,Format,amount) 
-(select @auto, '% on '+Prlproducts.description, @pfno, 'N', prlloantrans.interest  
+(select @auto, '% on '+prlproducts.description, @pfno, 'N', prlloantrans.interest  
 from prlloantrans  join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-join Prlproducts on prlstaffloans.deductcode = Prlproducts.code 
+join prlproducts on prlstaffloans.deductcode = prlproducts.code 
 where prlloantrans.pfno = @pfno and prlloantrans.payroll_id=19 and prlloantrans.interest>0)
 
 
@@ -2860,9 +2860,9 @@ insert into @masterroll
    from prlloantrans 
    join prlemployeemaster on prlemployeemaster.pf_no=prlloantrans.pfno
    full join prlstaffloans on prlloantrans.loanindex = prlstaffloans.loanindex 
-   join Prlproducts on prlstaffloans.deductcode=Prlproducts.code 
+   join prlproducts on prlstaffloans.deductcode=prlproducts.code 
    where prlloantrans.payroll_id=''  
-   and Prlproducts.code='10' 
+   and prlproducts.code='10' 
        and (prlstaffloans.[saving]=0 or prlstaffloans.[saving] is null) 
        and  prlloantrans.amount > 0
     Group by prlemployeemaster.idno, 
@@ -3533,8 +3533,8 @@ insert into @masterroll
    from prlstaffloans
    join prlemployeemaster on prlemployeemaster.pf_no=prlstaffloans.pfno
    join prlloantrans on prlloantrans.loanindex = prlstaffloans.loanindex 
-   join Prlproducts on prlstaffloans.deductcode=Prlproducts.code 
-   where prlloantrans.payroll_id='11' and Prlproducts.code='2' and   
+   join prlproducts on prlstaffloans.deductcode=prlproducts.code 
+   where prlloantrans.payroll_id='11' and prlproducts.code='2' and   
             prlstaffloans.[saving]=1 
     Group by prlemployeemaster.idno, 
     prlemployeemaster.fname,
@@ -3647,7 +3647,7 @@ CREATE PROCEDURE [dbo].[SetExpecteddateofreturn]
             BEGIN
                    Declare @isworkingday bit,@holiday varchar(50)
                    
-                   SELECT @isworkingday=[isworkingday] FROM [Dayoftheweeks] where [Dayoftheweek]=@DateName
+                   SELECT @isworkingday=[isworkingday] FROM [dayoftheweeks] where [Dayoftheweek]=@DateName
                    SELECT @holiday = [name] from [prlspecialdays] where day=datepart(d,@CurrentDate) and month=datepart(m,@CurrentDate)
 
                    if(@isworkingday is null or @isworkingday=0)   select @LastWorkingDay = DATEADD (D,1,@LastWorkingDay) ;
