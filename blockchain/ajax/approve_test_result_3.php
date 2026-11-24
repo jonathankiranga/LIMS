@@ -280,6 +280,7 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                 )
             )";
         }
+        $sql .= " FOR UPDATE";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
