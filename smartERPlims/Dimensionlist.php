@@ -48,16 +48,16 @@ if($_POST['fid']=='dval'){
  
     if($_POST['Parent']==''){
         if(isset($_POST['codeedit'])){
-            DB_query("Update `dimensions`` set parent=NULL,`Dimension`='".$_POST['Dimension']."',`Blocked`='".$_POST['Blocked']."' where code='".$_POST['codeedit']."' and id='".$_POST['id']."'", $db);
+            DB_query("Update `dimensions` set parent=NULL,`Dimension`='".$_POST['Dimension']."',`Blocked`='".$_POST['Blocked']."' where code='".$_POST['codeedit']."' and id='".$_POST['id']."'", $db);
         }else{
-            DB_query("insert into `dimensions`` (parent,`Dimension`,`Blocked`,`code`,`id`)"
+            DB_query("insert into `dimensions` (parent,`Dimension`,`Blocked`,`code`,`id`)"
                     . " values (NULL,'".$_POST['Dimension']."',".$_POST['Blocked'].",'".$_POST['code']."','".$_POST['id']."')", $db);
         }
     }else{
         if(isset($_POST['codeedit'])){
-        DB_query("Update `dimensions`` set parent='".$_POST['Parent']."',`Dimension`='".$_POST['Dimension']."',`Blocked`='".$_POST['Blocked']."' where code='".$_POST['codeedit']."' and id='".$_POST['id']."'", $db);
+        DB_query("Update `dimensions` set parent='".$_POST['Parent']."',`Dimension`='".$_POST['Dimension']."',`Blocked`='".$_POST['Blocked']."' where code='".$_POST['codeedit']."' and id='".$_POST['id']."'", $db);
         }else{
-        DB_query("insert into `dimensions`` (parent,`Dimension`,`Blocked`,`code`,`id`)"
+        DB_query("insert into `dimensions` (parent,`Dimension`,`Blocked`,`code`,`id`)"
                 . " values ('".$_POST['Parent']."','".$_POST['Dimension']."',".$_POST['Blocked'].",'".$_POST['code']."','".$_POST['id']."')", $db);
         }
     }
@@ -70,7 +70,7 @@ if($_POST['fid']=='dval'){
 
 if(isset($idtype)){
   
-$ResultIndex=DB_query("SELECT `Dimension_type` FROM `dimensionsetup`` where id='".$idtype."'", $db);
+$ResultIndex=DB_query("SELECT `Dimension_type` FROM `dimensionsetup` where id='".$idtype."'", $db);
 $rows=DB_fetch_row($ResultIndex);
                     
 echo '<p class="page_title_text">'. ' ' .$rows[0] . '</p>';
@@ -82,7 +82,7 @@ echo '<input type="hidden" name="fid" value="dval" />';
 
     if(isset($editcode)){
         echo '<input type="hidden" name="codeedit" value="' .$editcode. '" />';
-        $ResultIndex=DB_query("SELECT `code`,`Dimension`,`Blocked` FROM `dimensions`` where id='".$idtype."' and code='".$editcode."'", $db);
+        $ResultIndex=DB_query("SELECT `code`,`Dimension`,`Blocked` FROM `dimensions` where id='".$idtype."' and code='".$editcode."'", $db);
         $rows=DB_fetch_row($ResultIndex);
             $_POST['code']=$rows[0];
             $_POST['Dimension']=$rows[1];
@@ -113,7 +113,7 @@ echo '<input type="hidden" name="fid" value="dval" />';
     }
     echo '<div><input type="submit" name="submit" value="Update"/></div></div></form>';
 
-    $ResultIndex=DB_query("SELECT `code`,`Dimension`,`Blocked` FROM `dimensions`` where id='".$idtype."'", $db);
+    $ResultIndex=DB_query("SELECT `code`,`Dimension`,`Blocked` FROM `dimensions` where id='".$idtype."'", $db);
     
     echo '<P><table class="table table-bordered"><tr><th colspan="3">Dimension Values</th></tr>'
     . '<tr><td>Code</td><td>Name</td><td>Status</td></tr>';
@@ -133,7 +133,7 @@ echo '<input type="hidden" name="fid" value="dval" />';
         
         echo '<input type="hidden" name="idedit" value="' .$editid. '" />';
 
-        $ResultIndex=DB_query("SELECT `id`,`Dimension_type`,`Blocked` FROM `dimensionsetup`` where id='".$editid."'", $db);
+        $ResultIndex=DB_query("SELECT `id`,`Dimension_type`,`Blocked` FROM `dimensionsetup` where id='".$editid."'", $db);
         $rows=DB_fetch_row($ResultIndex);
             $_POST['id']=$rows[0];
             $_POST['Dimension_type']=$rows[1];
@@ -155,7 +155,7 @@ function getparents($dimensionID){
     global $db;
     
     $combo = '<select name="Parent"><option></option>';
-    $sql="SELECT `code`,`Dimension`,`Blocked` FROM `dimensions`` where id='$dimensionID' and `level` is null"; 
+    $sql="SELECT `code`,`Dimension`,`Blocked` FROM `dimensions` where id='$dimensionID' and `level` is null"; 
     $ResultIndex = DB_query($sql,$db);
     while($row=DB_fetch_array($ResultIndex)){
         if(isset($_POST['Parent'])){
