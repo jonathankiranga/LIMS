@@ -15,7 +15,7 @@ $DRamount=0; $CRamount=0; $Openbalance=0; $Difference=0;$Uncleared=0;
 $SQL = array() ;
 $banklist = array();
 
-$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts``", $db);
+$resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`,`lastChequeno`,`PostingGroup`   FROM `bankaccounts`", $db);
 while($row=DB_fetch_array($resultindex)){
     $banklist[trim($row['accountcode'])]=$row['bankName'].' '.$row['BranchName'].' '.$row['currency'];
 }
@@ -108,7 +108,7 @@ $tableObject.= '<table class="register display" style="width:100%">'
       ,`exchangerate`
       ,IFNULL(`cleared`,0) AS `cleared`
       ,`BankTransactions`.`reconciled`
-  FROM `banktransactions`` 
+  FROM `banktransactions` 
   left join `systypes_1` on `BankTransactions`.`doctype`=`systypes_1`.typeid 
   where (`bankcode`='".$_POST['Bank_Code']."')  order by `DocDate` Asc";
  $ResultIndex=DB_query($SQL,$db);
@@ -164,7 +164,7 @@ function constructBanks() {
         $resultindex=DB_query("SELECT `accountcode`,`bankName`,`currency`,"
                 . "`lastreconcileddate`,`AccountNo`,`BranchCode`,`BranchName`,"
                 . "`lastreconbalance`,`lastChequeno`,`PostingGroup` "
-                . " FROM `bankaccounts``", $db);
+                . " FROM `bankaccounts`", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
