@@ -64,7 +64,7 @@ Function CustomizedBalanceSheet(){
     include('includes/PDFStarter.php');
       
     $Result=DB_query("Select min(B.`start_date`),max(B.End_date)
-    from `financialperiods`` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
+    from `financialperiods` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
     $finacialdates=DB_fetch_row($Result);   
     
     $pdf->addInfo('Title',_('Financial Reports'));
@@ -109,7 +109,7 @@ Function Showhtml(){
     include('includes/header.inc');
         
     $Result=DB_query("Select min(B.`start_date`),max(B.End_date)
-    from `financialperiods`` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
+    from `financialperiods` B where B.periodno='".$_POST['Financial_Periods']."'",$db);
     $finacialdates=DB_fetch_row($Result);   
     
     echo '<Div class="centre">Funds Flow statemet </DIV>'
@@ -320,7 +320,7 @@ class FundsFlowForYear {
         global $db;
         $periodNo = (int)$periodNo;
         $sql = "SELECT MIN(`start_date`) AS date_from, MAX(`end_date`) AS date_to
-                FROM `financialperiods```
+                FROM `financialperiods`
                 WHERE `periodno`=" . $periodNo;
         $result = DB_query($sql,$db);
         $row = DB_fetch_array($result);
@@ -333,7 +333,7 @@ class FundsFlowForYear {
         $lastPeriod = $yearPeriod - 12;
 
         $setupSql = "SELECT `".$fromField."` AS code_from, `".$toField."` AS code_to
-                     FROM `accountsetup``
+                     FROM `accountsetup`
                      LIMIT 1";
         $setupResult = DB_query($setupSql,$db);
         $setupRow = DB_fetch_array($setupResult);
@@ -356,31 +356,31 @@ class FundsFlowForYear {
                     acct.`Sale_Purchase_Neither`,
                     acct.`accno`,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate <= '".$toDate."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate BETWEEN '".$fromDate."' AND '".$toDate."')
                     END AS debit,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate <= '".$toDate."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate BETWEEN '".$fromDate."' AND '".$toDate."')
                     END AS credit,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate <= '".$lastTo."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.accountcode=acct.accno AND gl.Docdate BETWEEN '".$lastFrom."' AND '".$lastTo."')
                     END AS debit_last,
                     CASE WHEN acct.`balance_income`=0 THEN
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate <= '".$lastTo."')
                     ELSE
-                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger`` gl
+                        (SELECT SUM(gl.amount * gl.`ExchangeRate`) FROM `generalledger` gl
                          WHERE gl.balaccountcode=acct.accno AND gl.Docdate BETWEEN '".$lastFrom."' AND '".$lastTo."')
                     END AS credit_last,
                     acct.`Calculation`
@@ -547,7 +547,7 @@ class FinancialPeriods {
     Function __construct() {
         Global $db;
         $this->SelectObject='<tr><td>Select Year</td><td><select name="Financial_Periods">';
-        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods`` Group by `periodno` order by `periodno` desc", $db);
+        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods` Group by `periodno` order by `periodno` desc", $db);
         while($row=DB_fetch_array($ResultIndex)){
              $this->SelectObject .='<option value="'.$row['periodno'].'" '.(($_POST['Financial_Periods']==trim($row['periodno']))?'selected="selected"':'').'  >'.$row['year'].'</option>';
         }
