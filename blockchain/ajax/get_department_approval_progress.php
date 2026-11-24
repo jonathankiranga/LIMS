@@ -50,7 +50,7 @@ $sql = "
                 )
             ) AS Department
         FROM test_results tr
-        WHERE tr.StatusID IN (0, 1, 2, 3)
+        WHERE tr.StatusID IN (0, 1, 2, 3, 4)
     ) x
     INNER JOIN sample_header sh ON sh.HeaderID = x.HeaderID
     GROUP BY x.HeaderID, x.SampleID, sh.DocumentNo, sh.Date
