@@ -36,7 +36,7 @@ if(isset($_POST['salesreport'])){
       ,`stockmaster`.`descrip`
       ,sum(`SalesLine`.`invoiceamount`) as Sales
       ,sum(`stockledger`.`stockvalue`) as cost
-  FROM `salesheader``` join `salesline` 
+  FROM `salesheader` join `salesline` 
         on salesheader.documentno=salesline.documentno 
         and salesheader.documenttype=salesline.documenttype
         and (salesheader.documenttype=12 or salesheader.documenttype=1)
