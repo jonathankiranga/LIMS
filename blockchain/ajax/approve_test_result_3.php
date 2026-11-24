@@ -276,6 +276,12 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
                         WHERE base_tp.BaseID = tr.ParameterID
                           AND base_tp.StandardID = tr.StandardID
                           AND base_tp.Category = ?
+                          AND (
+                              SELECT COUNT(DISTINCT category_check.Category)
+                              FROM testparameters category_check
+                              WHERE category_check.BaseID = tr.ParameterID
+                                AND category_check.StandardID = tr.StandardID
+                          ) = 1
                     )
                 )
             )";
