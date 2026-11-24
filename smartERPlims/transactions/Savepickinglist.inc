@@ -67,7 +67,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
     $journal         = GetNextTransNo(0,$db);
     
     $sql=array();
-    $sql[]="INSERT INTO `salesheader``
+    $sql[]="INSERT INTO `salesheader`
            (documenttype
            ,documentno
            ,docdate
@@ -108,7 +108,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                $salesoderno= $_SESSION['DocumentNo'];
                // If the line was marked Done in the picking list, increment delivered qty
            $entryno_s = DB_escape_string($key);
-            $sql[] = "UPDATE `salesline`` SET Qunatity_delivered = IFNULL(Qunatity_delivered,0) + " . $qty
+            $sql[] = "UPDATE `salesline` SET Qunatity_delivered = IFNULL(Qunatity_delivered,0) + " . $qty
                 . ", Quantity_toinvoice = Quantity - (IFNULL(Qunatity_delivered,0) + " . $qty . ")"
                     . " WHERE entryno='" . $entryno_s . "'";
             
@@ -117,7 +117,7 @@ if($somedetails==0 AND $_SESSION['DocumentPicking']==false and $invoicerrors==0)
                     released=1 where documentno='%s' and documenttype='%s' ",$salesoderno,1);
                   
                
-                $sql[]= sprintf("INSERT INTO `salesline``
+                $sql[]= sprintf("INSERT INTO `salesline`
                         (documenttype,docdate,documentno ,code ,description
                         ,unitofmeasure ,Quantity,UnitPrice ,vatamount ,invoiceamount
                         ,vatrate ,inclusive,containerprice,containersunits
