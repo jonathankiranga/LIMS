@@ -324,7 +324,15 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
         }
 
         $placeholders = implode(',', array_fill(0, count($testIDs), '?'));
-        $sql = "UPDATE sample_tests SET datetestended = NOW() WHERE TestID IN ($placeholders)";
+        $sql = "UPDATE sample_tests
+                SET datetestended = NOW()
+                WHERE TestID IN ($placeholders)
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM test_results remaining
+                      WHERE remaining.TestID = sample_tests.TestID
+                        AND remaining.StatusID NOT IN (3, 4)
+                  )";
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare completion update: '.$conn->error);
 
