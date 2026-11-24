@@ -14,7 +14,7 @@ $thispage = htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');
 }
     
 $StoreArray=array();
-$REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
+$REsults=DB_query('SELECT `code`,`Storename` FROM `stores`', $db);
 while($rows=  DB_fetch_array($REsults)){
     $StoreArray[]=$rows;
 }
@@ -108,7 +108,7 @@ $sql="SELECT IFNULL(sum(fulqty * partperunit),0) + IFNULL(sum(loosqty),0) as loo
                 
 if($_POST['stockbalance']>=0){
         
-         $SQL[]=SPRINTF("Insert into `generalledger``
+         $SQL[]=SPRINTF("Insert into `generalledger`
          (`journalno`,`Docdate` ,`period`,`DocumentNo`,`DocumentType`,`accountcode`,`balaccountcode`,`VATaccountcode`
          ,`amount`,`VATamount`,`currencycode`,`ExchangeRate`,`narration`)
          (select
@@ -135,7 +135,7 @@ if($_POST['stockbalance']>=0){
                        
       }elseif($_POST['stockbalance']<0){
           
-            $SQL[]=SPRINTF("Insert into `generalledger``
+            $SQL[]=SPRINTF("Insert into `generalledger`
              (`journalno`,`Docdate` ,`period`,`DocumentNo`,`DocumentType`,`accountcode`,`balaccountcode`,`VATaccountcode`
              ,`amount`,`VATamount`,`currencycode`,`ExchangeRate`,`narration`)
              (select
@@ -194,7 +194,7 @@ if(isset($StockID)){
     if(IsTankOrStore(trim($StockID))=="S"){
         $StockBalanceInloose = getbalanceBYDATE(trim($StockID),$Location,$date,'loosqty');
        
-       $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
+       $REsults=DB_query('SELECT `code`,`Storename` FROM `stores`', $db);
        $STOREline ='<select name="location" required="required" onchange="ReloadForm(inventory.refresh)"><option></option>';
        while($rows=DB_fetch_array($REsults)){
           $CODE = trim($rows['code']);
@@ -206,7 +206,7 @@ if(isset($StockID)){
          
         $StockBalanceInloose = getTankbalanceBYDATE($Location,trim($StockID),$date);
         
-        $ResultIndex=DB_query(sprintf("select tankname from `productionunit`` where itemcode='%s'",trim($StockID)), $db);
+        $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",trim($StockID)), $db);
          $STOREline ='<select name="location" required="required" onchange="ReloadForm(inventory.refresh)"><option></option>';
          while($value=DB_fetch_array($ResultIndex)){
                $CODE = trim($value['tankname']);
@@ -295,14 +295,14 @@ include('includes/footer.inc');
 
 Function IsTankOrStore($ItemCode){
    global $db;
-        $sql=sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         $ResultIndex=DB_query($sql, $db);
         $Stores = DB_fetch_row($ResultIndex);
         
        if($Stores[0]==0){
           $tankStore="S";
        }else{
-             $ResultIndex=DB_query(sprintf("select tankname from `productionunit`` where itemcode='%s'",$ItemCode), $db);
+             $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
              $Tanks = DB_fetch_row($ResultIndex);
              $tankStore=$Tanks[0];
        }
