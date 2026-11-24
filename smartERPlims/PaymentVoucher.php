@@ -196,12 +196,12 @@ if(isset($selectedrec) and (mb_strlen($selectedrec)>0)){
 $sql="SELECT `Date`,`Documentno`,`Documenttype`,`Accountno`
       ,`Grossamount`,`JournalNo`,`Dimension_One` ,`Dimension_Two`
       ,(SELECT 
-         IFNULL(sum(`amount`),0) FROM `paymentsallocation``` 
+         IFNULL(sum(`amount`),0) FROM `paymentsallocation` 
          where `itemcode`=`SupplierStatement`.`Accountno` 
           and `date`=`SupplierStatement`.`date` 
           and `invoiceno`=`SupplierStatement`.`Documentno` 
           and `journalno`=`SupplierStatement`.`JournalNo`) as Pamount
-      FROM `supplierstatement``` where
+      FROM `supplierstatement` where
       `SupplierStatement`.`Accountno`='".$SelectedCustomer."'";
 
     
@@ -337,7 +337,7 @@ class Classpaymentvoucher {
            `PostingGroup`,
            `currencies`.`rate`,
            `StatementNo`
-            FROM `bankaccounts``  join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
+            FROM `bankaccounts`  join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
             where `accountcode`='".$accountCode."'", $db);
         
         $row=DB_fetch_row($resultindex);
@@ -470,7 +470,7 @@ class Classpaymentvoucher {
             `currencies`.`rate`,
             `SupplierStatement`.`whtax`,
             `SupplierStatement`.Documentno
-            FROM `supplierstatement``` 
+            FROM `supplierstatement` 
             join creditors on itemcode=Accountno
             left join `currencies` on `currencies`.`currabrev`=creditors.curr_cod 
             where `Accountno`='%s' and `JournalNo`='%s' ",$this->CustomerID,$journal);
@@ -539,7 +539,7 @@ Class klassbanksAccounts {
                                      ,`AccountNo`,`BranchCode`
                                      ,`BranchName`,`lastreconbalance`
                                      ,`lastChequeno`,`PostingGroup`
-                                    FROM `bankaccounts``", $db);
+                                    FROM `bankaccounts`", $db);
         while($row=DB_fetch_array($resultindex)){
             if(Isset($_POST['Bank_Code'])){
                 $this->BankObject .= '<option value="'.$row['accountcode'].'"  '.((trim($_POST['Bank_Code'])==trim($row['accountcode']))?'selected="selected"':'').'>'.$row['bankName'].' '.$row['BranchName'].' '.$row['currency'].'</option>';
@@ -561,7 +561,7 @@ Class klassbanksAccounts {
         $resultindex=DB_query("SELECT `accountcode`,`bankName`,`BankAccounts`.`currency`,`lastreconcileddate`
                                      ,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`
                                      ,`lastChequeno`,`PostingGroup`,`currencies`.`rate`,`StatementNo`
-                                    FROM `bankaccounts`` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
+                                    FROM `bankaccounts` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
                                     where `accountcode`='".$accountCode."'", $db);
         
         $row=DB_fetch_row($resultindex);
