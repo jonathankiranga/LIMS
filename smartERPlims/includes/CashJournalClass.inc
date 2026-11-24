@@ -20,7 +20,7 @@ class cashjournalentries {
     function GetBankDetails($accountCode) {
         global $db;
         $resultindex = DB_query("SELECT `BankAccounts`.`currency`,`currencies`.`rate`
-            FROM `bankaccounts`` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
+            FROM `bankaccounts` join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
             WHERE `accountcode`='" . $accountCode . "'", $db);
         $row = DB_fetch_row($resultindex);
         $BankArray['currency'] = $row[0];
@@ -58,7 +58,7 @@ class cashjournalentries {
                     WHERE `itemcode`='" . $acount . "'";
                 break;
             case 3:
-                $SQL = "SELECT `PostingGroup` FROM `bankaccounts`` WHERE accountcode='" . $acount . "'";
+                $SQL = "SELECT `PostingGroup` FROM `bankaccounts` WHERE accountcode='" . $acount . "'";
                 break;
             default:
                 return '';
@@ -87,7 +87,7 @@ class cashjournalentries {
             $amount = (float)$row['amount'];
 
             // JournalEntries INSERT — Account = BalAccount = bankPG (identifies as cash journal)
-            $this->JournalArray[] = sprintf("INSERT INTO `journalentries``
+            $this->JournalArray[] = sprintf("INSERT INTO `journalentries`
                 (`Docdate`,`JournalNo`,`Currency`,`Dimension_1`,`Dimension_2`,`Account`,`BalAccount`,`transtype`,`itemcode`,`narration`,`amount`)
                 VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%f)",
                 FormatDateForSQL($_POST['date']), $_POST['JournalNo'], $_POST['currency'],
@@ -99,7 +99,7 @@ class cashjournalentries {
             $BankD = $this->GetBankDetails($bankcode);
             $Conrate = $this->getrates($BankD['currency'], $_POST['currency']);
 
-            $this->JournalArray[] = sprintf("INSERT INTO `banktransactions``
+            $this->JournalArray[] = sprintf("INSERT INTO `banktransactions`
                 (`bankcode`,`DocDate`,`doctype`,`DocumentNo`,`TransType`,`journal`,`amount`,`narrative`,`exchangerate`,`itemcode`)
                 VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
                 $bankcode, FormatDateForSQL($_POST['date']), '0',
@@ -120,7 +120,7 @@ class cashjournalentries {
                     $credit = $bankPG;
                 }
 
-                $this->JournalArray[] = sprintf("INSERT INTO `generalledger``
+                $this->JournalArray[] = sprintf("INSERT INTO `generalledger`
                     (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                     `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode`,
                     `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -132,7 +132,7 @@ class cashjournalentries {
                     $_POST['comments'], '0', '', '0',
                     $_POST['DimensionOne'] ?? '', $_POST['DimensionTwo'] ?? '');
 
-                $this->JournalArray[] = sprintf("INSERT INTO `banktransactions``
+                $this->JournalArray[] = sprintf("INSERT INTO `banktransactions`
                     (`bankcode`,`DocDate`,`doctype`,`DocumentNo`,`TransType`,`journal`,`amount`,`narrative`,`exchangerate`,`itemcode`)
                     VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
                     $itemcode, FormatDateForSQL($_POST['date']), '0',
@@ -153,7 +153,7 @@ class cashjournalentries {
                     $credit = $bankPG;
                 }
 
-                $this->JournalArray[] = sprintf("INSERT INTO `generalledger``
+                $this->JournalArray[] = sprintf("INSERT INTO `generalledger`
                     (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                     `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode`,
                     `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -166,7 +166,7 @@ class cashjournalentries {
                     $_POST['comments'], '0', '', '0',
                     $_POST['DimensionOne'] ?? '', $_POST['DimensionTwo'] ?? '');
 
-                $this->JournalArray[] = sprintf("INSERT INTO `customerstatement``
+                $this->JournalArray[] = sprintf("INSERT INTO `customerstatement`
                     (`Date`,`Documentno`,`Documenttype`,`Accountno`,`Grossamount`,`JournalNo`,`Dimension_One`,`Dimension_Two`,`Currency`)
                     VALUES ('%s','%s','%s','%s',%f,'%s','%s','%s','%s')",
                     FormatDateForSQL($_POST['date']), $_POST['JournalNo'], '0', $itemcode,
@@ -194,7 +194,7 @@ class cashjournalentries {
                     $credit = $bankPG;
                 }
 
-                $this->JournalArray[] = sprintf("INSERT INTO `generalledger``
+                $this->JournalArray[] = sprintf("INSERT INTO `generalledger`
                     (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                     `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode`,
                     `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -207,7 +207,7 @@ class cashjournalentries {
                     $_POST['comments'], '0', '', '0',
                     $_POST['DimensionOne'] ?? '', $_POST['DimensionTwo'] ?? '');
 
-                $this->JournalArray[] = sprintf("INSERT INTO `supplierstatement``
+                $this->JournalArray[] = sprintf("INSERT INTO `supplierstatement`
                     (`Date`,`Documentno`,`Documenttype`,`Accountno`,`Grossamount`,`JournalNo`,`Dimension_One`,`Dimension_Two`,`Currency`)
                     VALUES ('%s','%s','%s','%s',%f,'%s','%s','%s','%s')",
                     FormatDateForSQL($_POST['date']), $_POST['JournalNo'], '0', $itemcode,
