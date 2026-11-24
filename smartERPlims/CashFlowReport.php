@@ -63,7 +63,7 @@ while ($row = DB_fetch_array($ResultIndex)) {
  }
  
  $_SESSION['bankaccounts']=array();
- $ResultIndex=DB_query("SELECT `accountcode` FROM `bankaccounts```", $db);
+ $ResultIndex=DB_query("SELECT `accountcode` FROM `bankaccounts`", $db);
  while ($row = DB_fetch_array($ResultIndex)) {
     $_SESSION['bankaccounts'][] = trim($row['accountcode']);
  }
@@ -75,7 +75,7 @@ while ($row = DB_fetch_array($ResultIndex)) {
  $_SESSION['Financial_Periods']=$_POST['Financial_Periods'];
   
             $ResultIndex=DB_query(sprintf("SELECT `start_date`,`end_date`,`Name`,`periodno`  
-            FROM `financialperiods``` where `periodno`='%s' order by start_date asc",$_SESSION['Financial_Periods']), $db);
+            FROM `financialperiods` where `periodno`='%s' order by start_date asc",$_SESSION['Financial_Periods']), $db);
 
             while ($row = DB_fetch_array($ResultIndex)) {
                  $Querry[]=$row;
@@ -102,7 +102,7 @@ Function Getdata($Querry){
     /*Querry`start_date`,Querry`end_date`,Querry`Name`,`periodno`*/
     Global $db,$DocyTypes,$OrderOfDisplay,$acct,$myCashflowhtml,$Generalledger;
     $sql="Select MIn(`start_date`),MAX(`end_date`)
-    from `financialperiods`` where `periodno`='".$_SESSION['Financial_Periods']."'";
+    from `financialperiods` where `periodno`='".$_SESSION['Financial_Periods']."'";
    
     $ResultIndex=DB_System($sql,$db);
     $daterange=DB_fetch_row($ResultIndex);
@@ -171,7 +171,7 @@ Function InComingFunds(){
             $MonthName = trim($Querryvalue['Name']);
              
         $SQL=sprintf("select `bankcode`,`DocDate`,`doctype`,`DocumentNo`,`TransType`,`itemcode`,`journal`,`amount` 
-        from `banktransactions`` where `DocDate` between '%s' and '%s' and (`amount` > 0) order by `DocDate` asc ",
+        from `banktransactions` where `DocDate` between '%s' and '%s' and (`amount` > 0) order by `DocDate` asc ",
                 $Querryvalue["start_date"],$Querryvalue["end_date"]);
             $REsults = DB_query($SQL,$db);
             while($bankTransrow = DB_fetch_array($REsults)){
@@ -196,7 +196,7 @@ $end_date=$Querryvalue["end_date"];
 $Lamount=$paidOut;
 DrillReceivables($journal,$MonthName,$paidOut,$Querryvalue);
   /*
- $sql=sprintf("SELECT `journalno` FROM `receiptsallocation`` where receiptjournal='%s'",$journal);
+ $sql=sprintf("SELECT `journalno` FROM `receiptsallocation` where receiptjournal='%s'",$journal);
  $ResultIndex=DB_query($sql,$db);
  $ReceiptsAllocation=DB_fetch_row($ResultIndex);
   if(isset($ReceiptsAllocation[0])){
@@ -365,7 +365,7 @@ Function OutGoingFunds(){
        foreach ($Querry as $key => $Querryvalue) {
            
         $SQL=sprintf("select `bankcode`,`DocDate`,`doctype`,`DocumentNo`,`TransType`,`itemcode`,`journal`,`amount` 
-             from `banktransactions`` where `DocDate` between '%s' and '%s' and (`amount` < 0) order by `DocDate` asc ",  $Querryvalue["start_date"],$Querryvalue["end_date"]);
+             from `banktransactions` where `DocDate` between '%s' and '%s' and (`amount` < 0) order by `DocDate` asc ",  $Querryvalue["start_date"],$Querryvalue["end_date"]);
             $REsults = DB_query($SQL,$db);
             while($rows = DB_fetch_array($REsults)){
                 GetFinnerDetails($rows,$Querryvalue);
@@ -398,7 +398,7 @@ function Drillgl($journal,$typ,$MonthName,$paidOut,$Querryvalue){
  
    $Lamount=$paidOut;
  /*
-  $ResultIndex=DB_query(sprintf("SELECT `journalno` FROM `paymentsallocation`` where receiptjournal='%s'",$journal),$db);
+  $ResultIndex=DB_query(sprintf("SELECT `journalno` FROM `paymentsallocation` where receiptjournal='%s'",$journal),$db);
   $PaymentsAllocation=DB_fetch_row($ResultIndex);
   if(isset($PaymentsAllocation[0])){
        $journal=trim($PaymentsAllocation[0]);
