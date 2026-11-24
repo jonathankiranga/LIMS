@@ -37,7 +37,7 @@ if(isset($_GET['No'])){
       ,`released`
       ,`status`
       ,`userid`
-      from `salesheader``  where `documenttype`='10' and `documentno`='".$_GET['No']."'";
+      from `salesheader`  where `documenttype`='10' and `documentno`='".$_GET['No']."'";
     $Result=DB_query($SQL,$db);
     
   
@@ -79,7 +79,7 @@ if(isset($_GET['No'])){
            ,`vatamount`
            ,`invoiceamount`
            ,PartPerUnit 
-           from `salesline`` 
+           from `salesline` 
            where `documenttype`=10 and `documentno`='".$_GET['No']."'";
     
    
@@ -123,7 +123,7 @@ $SQL="select
       ,`SalesHeader`.`userid` 
       ,sum(SalesLine.`invoiceamount`) as OrderValue
       ,`SalesHeader`.printed
-      from `salesheader`` 
+      from `salesheader` 
       join `salesline` on `SalesHeader`.`documentno`=SalesLine.`documentno` 
       where `SalesHeader`.`documenttype`='10' and `SalesLine`.`code`='".$StockID."' 
       and `SalesHeader`.`docdate` between  dateadd(m,-24,NOW()) and (NOW() +24)
