@@ -318,12 +318,12 @@ function renderDepartmentProgress(data){
     }).join('');
 
     var body = document.querySelector('#departmentProgressTable tbody');
-    var partial = (data.results || []).filter(function(sample){ return !sample.ReadyForFinalApproval; });
-    if (!partial.length) {
-        body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No samples are waiting for another department.</td></tr>';
+    var progressRows = data.results || [];
+    if (!progressRows.length) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No samples have reached departmental approval yet.</td></tr>';
         return;
     }
-    body.innerHTML = partial.map(function(sample){
+    body.innerHTML = progressRows.map(function(sample){
         var completed = Number(sample.DepartmentApprovedResults || 0);
         var total = Number(sample.TotalTests || 0);
         return '<tr>' +
@@ -332,7 +332,7 @@ function renderDepartmentProgress(data){
             '<td>' + departmentApprovalCell(sample.ChemicalStatus, sample.ChemicalApprovedBy, sample.ChemicalApprovedAt) + '</td>' +
             '<td>' + departmentApprovalCell(sample.MicrobiologyStatus, sample.MicrobiologyApprovedBy, sample.MicrobiologyApprovedAt) + '</td>' +
             '<td>' + completed + ' of ' + total + ' tests department-approved</td>' +
-            '<td>' + (Number(sample.BlockedResults || 0) > 0 ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-warning text-dark">Waiting for department</span>') + '</td>' +
+            '<td>' + (sample.ReadyForFinalApproval ? '<span class="badge bg-success">Ready for final approval</span>' : (Number(sample.BlockedResults || 0) > 0 ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-warning text-dark">Waiting for department</span>')) + '</td>' +
             '</tr>';
     }).join('');
 }
