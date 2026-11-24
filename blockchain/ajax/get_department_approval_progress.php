@@ -15,19 +15,19 @@ $sql = "
         x.HeaderID,
         x.SampleID,
         sh.DocumentNo,
-        sh.Date,
+        sh.`Date`,
         COUNT(*) AS TotalTests,
         SUM(CASE WHEN x.StatusID = 2 THEN 1 ELSE 0 END) AS PendingResults,
         SUM(CASE WHEN x.StatusID = 3 THEN 1 ELSE 0 END) AS DepartmentApprovedResults,
-        SUM(CASE WHEN x.StatusID NOT IN (2, 3) THEN 1 ELSE 0 END) AS BlockedResults,
+        SUM(CASE WHEN x.StatusID IS NULL OR x.StatusID NOT IN (2, 3) THEN 1 ELSE 0 END) AS BlockedResults,
         SUM(CASE WHEN x.Department = 'chemical' THEN 1 ELSE 0 END) AS ChemicalTotal,
         SUM(CASE WHEN x.Department = 'chemical' AND x.StatusID = 2 THEN 1 ELSE 0 END) AS ChemicalPending,
         SUM(CASE WHEN x.Department = 'chemical' AND x.StatusID = 3 THEN 1 ELSE 0 END) AS ChemicalApproved,
-        SUM(CASE WHEN x.Department = 'chemical' AND x.StatusID NOT IN (2, 3) THEN 1 ELSE 0 END) AS ChemicalBlocked,
+        SUM(CASE WHEN x.Department = 'chemical' AND (x.StatusID IS NULL OR x.StatusID NOT IN (2, 3)) THEN 1 ELSE 0 END) AS ChemicalBlocked,
         SUM(CASE WHEN x.Department = 'microbiological' THEN 1 ELSE 0 END) AS MicrobiologyTotal,
         SUM(CASE WHEN x.Department = 'microbiological' AND x.StatusID = 2 THEN 1 ELSE 0 END) AS MicrobiologyPending,
         SUM(CASE WHEN x.Department = 'microbiological' AND x.StatusID = 3 THEN 1 ELSE 0 END) AS MicrobiologyApproved,
-        SUM(CASE WHEN x.Department = 'microbiological' AND x.StatusID NOT IN (2, 3) THEN 1 ELSE 0 END) AS MicrobiologyBlocked
+        SUM(CASE WHEN x.Department = 'microbiological' AND (x.StatusID IS NULL OR x.StatusID NOT IN (2, 3)) THEN 1 ELSE 0 END) AS MicrobiologyBlocked
     FROM (
         SELECT
             tr.HeaderID,
@@ -50,7 +50,6 @@ $sql = "
                 )
             ) AS Department
         FROM test_results tr
-        WHERE tr.StatusID IN (0, 1, 2, 3, 4)
     ) x
     INNER JOIN sample_header sh ON sh.HeaderID = x.HeaderID
     GROUP BY x.HeaderID, x.SampleID, sh.DocumentNo, sh.Date
