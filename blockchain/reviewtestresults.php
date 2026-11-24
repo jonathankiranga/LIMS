@@ -294,13 +294,20 @@ function approvalStatusBadge(status){
     var color = status === 'Approved' ? 'success' : (status === 'Blocked' ? 'danger' : (status === 'Not required' ? 'secondary' : 'warning'));
     return '<span class="badge bg-' + color + '">' + esc(status) + '</span>';
 }
-function departmentApprovalCell(status, approver, approvedAt){
+function departmentApprovalCell(status, approver, approvedAt, approvedCount, totalCount, pendingCount){
     var html = approvalStatusBadge(status);
-    if (status === 'Approved' && (approver || approvedAt)) {
+    if (Number(totalCount || 0) > 0) {
         html += '<div class="small text-muted mt-1">' +
-            (approver ? 'By ' + esc(approver) : '') +
-            (approver && approvedAt ? '<br>' : '') +
-            (approvedAt ? esc(approvedAt) : '') + '</div>';
+            Number(approvedCount || 0) + ' of ' + Number(totalCount || 0) + ' tests approved';
+        if (Number(pendingCount || 0) > 0) {
+            html += '<br>' + Number(pendingCount) + ' still pending';
+        }
+        if (status === 'Approved' && (approver || approvedAt)) {
+            html += '<br>' + (approver ? 'By ' + esc(approver) : '') +
+                (approver && approvedAt ? ' · ' : '') +
+                (approvedAt ? esc(approvedAt) : '');
+        }
+        html += '</div>';
     }
     return html;
 }
@@ -329,8 +336,8 @@ function renderDepartmentProgress(data){
         return '<tr>' +
             '<td>' + esc(sample.DocumentNo || '') + '</td>' +
             '<td><strong>' + esc(sample.SampleID || '') + '</strong></td>' +
-            '<td>' + departmentApprovalCell(sample.ChemicalStatus, sample.ChemicalApprovedBy, sample.ChemicalApprovedAt) + '</td>' +
-            '<td>' + departmentApprovalCell(sample.MicrobiologyStatus, sample.MicrobiologyApprovedBy, sample.MicrobiologyApprovedAt) + '</td>' +
+            '<td>' + departmentApprovalCell(sample.ChemicalStatus, sample.ChemicalApprovedBy, sample.ChemicalApprovedAt, sample.ChemicalApproved, sample.ChemicalTotal, sample.ChemicalPending) + '</td>' +
+            '<td>' + departmentApprovalCell(sample.MicrobiologyStatus, sample.MicrobiologyApprovedBy, sample.MicrobiologyApprovedAt, sample.MicrobiologyApproved, sample.MicrobiologyTotal, sample.MicrobiologyPending) + '</td>' +
             '<td>' + completed + ' of ' + total + ' tests department-approved</td>' +
             '<td>' + (sample.ReadyForFinalApproval ? '<span class="badge bg-success">Ready for final approval</span>' : (Number(sample.BlockedResults || 0) > 0 ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-warning text-dark">Waiting for department</span>')) + '</td>' +
             '</tr>';
