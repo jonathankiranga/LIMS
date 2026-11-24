@@ -2,7 +2,7 @@
 
 Function GetNextTransNo ($TransType, &$odb){
     global $db;
-    /* SQL to get the next transaction number these are maintained in the table SysTypes - Transaction Types
+    /* SQL to get the next transaction number these are maintained in the table systypes_1 - Transaction Types
 Also updates the transaction number
 
 10 sales invoice
@@ -29,7 +29,7 @@ etc
 
 Function GetPrevWONo ($no){
 global $db;
-/* SQL to undo transaction number these are maintained in the table SysTypes - Transaction Types
+/* SQL to undo transaction number these are maintained in the table systypes_1 - Transaction Types
 Also updates the transaction number
 
 10 sales invoice
