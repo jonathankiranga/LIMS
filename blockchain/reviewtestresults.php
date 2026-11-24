@@ -134,6 +134,28 @@ table.wr-table.dataTable tbody tr:hover { background: #f8fbfd; }
 .quill-editor .ql-toolbar { border-radius: 4px 4px 0 0; }
 </style>
 <i class="fas fa-project-diagram"></i>Audit Lab Result Workflow
+<div class="container mt-4">
+    <h5 class="mb-3">Departmental Approval Progress</h5>
+    <div id="approvalProgressSummary" class="row g-3 mb-3">
+        <div class="col-12 text-muted">Loading departmental approval progress...</div>
+    </div>
+    <div class="table-responsive mb-4">
+        <table class="wr-table" id="departmentProgressTable">
+            <thead>
+                <tr>
+                    <th>Sample Batch No</th>
+                    <th>Sample ID</th>
+                    <th>Chemical Department</th>
+                    <th>Microbiology Department</th>
+                    <th>Departmental Progress</th>
+                    <th>Final Approval</th>
+                </tr>
+            </thead>
+            <tbody><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+        </table>
+    </div>
+    <h5 class="mb-3">Ready for Final Approval</h5>
+</div>
 <!-- Button to trigger modal -->
 <div class="container mt-4">
     <div class="grid-container">
@@ -268,7 +290,88 @@ function wrRenderPage(){const tb=document.querySelector('#testResultsTable tbody
 function wrRenderPager(tp,count){const box=document.getElementById('pagination');if(!box)return;let h='<span style="margin-right:8px;color:#17324d;font-size:13px;">'+count+' sample(s) - Page '+wrPage+' of '+tp+'</span>';h+='<button type="button"'+(wrPage===1?' disabled':'')+' onclick="wrGo('+(wrPage-1)+')">&#8592; Prev</button>';let a=Math.max(1,wrPage-4),z=Math.min(tp,a+9);if(z<tp&&z-a<9)a=Math.max(1,z-9);for(let i=a;i<=z;i++)h+='<button type="button" class="'+(i===wrPage?'active':'')+'" onclick="wrGo('+i+')">'+i+'</button>';if(z<tp)h+='<span style="color:#17324d;margin-left:4px;">&hellip;</span>';h+='<button type="button"'+(wrPage===tp?' disabled':'')+' onclick="wrGo('+(wrPage+1)+')">Next &#8594;</button>';box.innerHTML=h;}
 function wrGo(p){wrPage=p;wrRenderPage();}
 function searchTable(){const i=document.getElementById('searchInput');wrQuery=i?i.value.trim().toLowerCase():'';wrPage=1;wrRenderPage();}
-function fetchTestResults(flag){const tb=document.querySelector('#testResultsTable tbody');tb.innerHTML='<tr><td colspan="7" class="text-center">Loading...</td></tr>';fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1&wholeSample=1').then(r=>r.json()).then(data=>{if(!data.success){wrRows=[];wrResults=[];const message=data.message||'No pending sample blocks were returned.';tb.innerHTML='<tr><td colspan="7" class="text-center">'+esc(message)+'</td></tr>';wrRenderPager(1,0);return;}wrResults=data.results||[];wrRows=[];wrResults.forEach((sample,index)=>{const tests=sample.tests||[];const names=tests.map(t=>'<li>'+esc(t.ParameterName)+'</li>').join('');const summary=tests.map(t=>'<span class="result-badge"><b>'+esc(t.ParameterName)+':</b> '+esc(resultValue(t))+'</span>').join('');const row=document.createElement('tr');row.innerHTML='<td><button class="btn btn-primary btn-sm" onclick="openApprovalModal('+index+')"><i class="fas fa-tasks"></i> Review / Approve</button></td><td>'+(index+1)+'</td><td>'+esc(sample.DocumentNo||'')+'</td><td><strong>'+esc(sample.SampleID||'')+'</strong></td><td>'+esc((sample.Date||'').split(' ')[0])+'</td><td>'+tests.length+'</td><td><ul class="test-list">'+names+'</ul><div>'+summary+'</div></td>';wrRows.push(row);});wrPage=1;wrRenderPage();}).catch(err=>{console.error(err);tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">Error loading results.</td></tr>';});}
+function approvalStatusBadge(status){
+    var color = status === 'Approved' ? 'success' : (status === 'Blocked' ? 'danger' : (status === 'Not required' ? 'secondary' : 'warning'));
+    return '<span class="badge bg-' + color + '">' + esc(status) + '</span>';
+}
+function renderDepartmentProgress(data){
+    var summary = data.summary || {};
+    var cards = [
+        ['Awaiting departments', summary.awaitingDepartments || 0, 'Samples with departmental work outstanding'],
+        ['Ready for final approval', summary.readyForFinalApproval || 0, 'All result rows approved by their departments'],
+        ['Chemical completed', summary.chemicalCompletedWaiting || 0, 'Waiting for microbiology'],
+        ['Microbiology completed', summary.microbiologyCompletedWaiting || 0, 'Waiting for chemical']
+    ];
+    document.getElementById('approvalProgressSummary').innerHTML = cards.map(function(card){
+        return '<div class="col-md-3"><div class="border rounded p-3 h-100"><div class="h3 mb-1">' + Number(card[1]) +
+            '</div><div class="fw-bold">' + esc(card[0]) + '</div><small class="text-muted">' + esc(card[2]) + '</small></div></div>';
+    }).join('');
+
+    var body = document.querySelector('#departmentProgressTable tbody');
+    var partial = (data.results || []).filter(function(sample){ return !sample.ReadyForFinalApproval; });
+    if (!partial.length) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No samples are waiting for another department.</td></tr>';
+        return;
+    }
+    body.innerHTML = partial.map(function(sample){
+        var completed = Number(sample.DepartmentApprovedResults || 0);
+        var total = Number(sample.TotalTests || 0);
+        return '<tr>' +
+            '<td>' + esc(sample.DocumentNo || '') + '</td>' +
+            '<td><strong>' + esc(sample.SampleID || '') + '</strong></td>' +
+            '<td>' + approvalStatusBadge(sample.ChemicalStatus) + '</td>' +
+            '<td>' + approvalStatusBadge(sample.MicrobiologyStatus) + '</td>' +
+            '<td>' + completed + ' of ' + total + ' tests department-approved</td>' +
+            '<td>' + (Number(sample.BlockedResults || 0) > 0 ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-warning text-dark">Waiting for department</span>') + '</td>' +
+            '</tr>';
+    }).join('');
+}
+function fetchTestResults(flag){
+    const tb=document.querySelector('#testResultsTable tbody');
+    tb.innerHTML='<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+    fetch('ajax/get_department_approval_progress.php',{cache:'no-store'})
+        .then(function(response){return response.json();})
+        .then(function(progress){
+            if(!progress.success) throw new Error(progress.message || 'Unable to load departmental approval progress.');
+            renderDepartmentProgress(progress);
+            var ready = {};
+            (progress.results || []).forEach(function(sample){
+                if(sample.ReadyForFinalApproval) ready[String(sample.HeaderID)] = true;
+            });
+            return fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1&wholeSample=1')
+                .then(function(response){return response.json();})
+                .then(function(data){
+                    if(!data.success){
+                        wrRows=[];wrResults=[];
+                        tb.innerHTML='<tr><td colspan="7" class="text-center">No samples are ready for final approval.</td></tr>';
+                        wrRenderPager(1,0);
+                        return;
+                    }
+                    wrResults=(data.results || []).filter(function(sample){return ready[String(sample.HeaderID)] === true;});
+                    wrRows=[];
+                    if(!wrResults.length){
+                        tb.innerHTML='<tr><td colspan="7" class="text-center">No samples are ready for final approval. Samples awaiting departmental approval are listed above.</td></tr>';
+                        wrRenderPager(1,0);
+                        return;
+                    }
+                    wrResults.forEach(function(sample,index){
+                        const tests=sample.tests||[];
+                        const names=tests.map(function(t){return '<li>'+esc(t.ParameterName)+'</li>';}).join('');
+                        const summary=tests.map(function(t){return '<span class="result-badge"><b>'+esc(t.ParameterName)+':</b> '+esc(resultValue(t))+'</span>';}).join('');
+                        const row=document.createElement('tr');
+                        row.innerHTML='<td><button class="btn btn-primary btn-sm" onclick="openApprovalModal('+index+')"><i class="fas fa-tasks"></i> Review / Approve</button></td><td>'+(index+1)+'</td><td>'+esc(sample.DocumentNo||'')+'</td><td><strong>'+esc(sample.SampleID||'')+'</strong></td><td>'+esc((sample.Date||'').split(' ')[0])+'</td><td>'+tests.length+'</td><td><ul class="test-list">'+names+'</ul><div>'+summary+'</div></td>';
+                        wrRows.push(row);
+                    });
+                    wrPage=1;
+                    wrRenderPage();
+                });
+        })
+        .catch(function(error){
+            console.error('Error loading final approval dashboard:',error);
+            tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">'+esc(error.message || 'Error loading approval dashboard.')+'</td></tr>';
+            document.querySelector('#departmentProgressTable tbody').innerHTML='<tr><td colspan="6" class="text-center text-danger">Unable to load departmental progress.</td></tr>';
+        });
+}).catch(err=>{console.error(err);tb.innerHTML='<tr><td colspan="7" class="text-center text-danger">Error loading results.</td></tr>';});}
 async function openApprovalModal(index){const sample=wrResults[index];if(!sample)return;document.getElementById('blockHeaderID').value=sample.HeaderID||'';document.getElementById('blockSampleID').value=sample.SampleID||'';document.getElementById('blockDocumentNo').value=sample.DocumentNo||'';document.getElementById('blockTestCount').value=(sample.tests||[]).length;document.getElementById('approvalStatus').value='';const body=document.getElementById('sampleTestsBody');body.innerHTML='';(sample.tests||[]).forEach((t,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #e5edf5;">'+(i+1)+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;"><strong>'+esc(t.ParameterName||'')+'</strong>'+(t.ParamCategory?'<br><small>'+esc(t.ParamCategory)+'</small>':'')+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc(resultValue(t))+'</td><td style="padding:8px;border-bottom:1px solid #e5edf5;">'+esc('Limits: '+(t.Limits||'N/A')+' | Unit: '+(t.UnitOfMeasure||'N/A'))+'</td>';body.appendChild(tr);});const editors={ResultsInterpretation:'ResultsInterpretationEditor',StatementOfConformity:'StatementOfConformityEditor',Notes:'NotesEditor'};Object.values(editors).forEach(id=>{if(window.quillInstances[id]){window.quillInstances[id].enable(true);window.quillInstances[id].root.setAttribute('contenteditable','true');window.quillInstances[id].root.innerHTML='';}});updateCoaLivePreview();const modal=bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));modal.show();try{const url='ajax/sample_coa_text.php?SampleID='+encodeURIComponent(sample.SampleID||'')+'&HeaderID='+encodeURIComponent(sample.HeaderID||'');const response=await fetch(url,{cache:'no-store'});const data=await response.json();if(!data.success)throw new Error(data.message||'Unable to load saved COA text.');Object.keys(editors).forEach(key=>{var editor=window.quillInstances[editors[key]];if(editor){editor.enable(true);editor.root.setAttribute('contenteditable','true');editor.root.innerHTML=coaEditorHtml((data.texts&&data.texts[key]!=null)?String(data.texts[key]):'');editor.enable(true);editor.root.setAttribute('contenteditable','true');}});updateCoaLivePreview();}catch(error){console.error('Failed to preload COA text:',error);toastr.error('Could not preload Notes, Interpretation and Statement of Conformity. '+(error.message||''));}}
 async function generateResultsInterpretation(){
     var sampleID=document.getElementById('blockSampleID').value;
