@@ -46,7 +46,7 @@ $filter="SELECT
            ,`postinggroup`
            ,`currencycode`
            ,`vatinclusive`
-       FROM `assetsheader``` 
+       FROM `assetsheader` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -115,7 +115,7 @@ $VATinclusive = $debtorsrow[8];
 $IsTaxed= $debtorsrow[9];
 
 if(isset($_GET['line'])) {
-   $results = DB_query("Delete from `fixedassetsline`` where `entryno`='".$_GET['line']."'",$db);
+   $results = DB_query("Delete from `fixedassetsline` where `entryno`='".$_GET['line']."'",$db);
 }
       
 
@@ -141,7 +141,7 @@ $SQL="SELECT
       ,`vatrate`
       ,`inclusive`
       ,UOM
-  FROM `fixedassetsline```   where `documentno`='".$_POST['documentno']."'";
+  FROM `fixedassetsline`   where `documentno`='".$_POST['documentno']."'";
 
 
 $ResultIndex = DB_query($SQL, $db);
