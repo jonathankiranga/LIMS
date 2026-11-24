@@ -33,7 +33,7 @@ function _getAccountRange($prefix)
 {
     global $db;
     $prefix = mysqli_real_escape_string($db, $prefix);
-    $sql    = "SELECT `{$prefix}from`, `{$prefix}to` FROM `accountsetup`` LIMIT 1";
+    $sql    = "SELECT `{$prefix}from`, `{$prefix}to` FROM `accountsetup` LIMIT 1";
     $result = DB_query($sql, $db);
     $row    = DB_fetch_array($result);
     if (!$row) {
@@ -190,16 +190,16 @@ class TradingAccountbyMonth
     {
         return "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.period = '$escapedPeriod')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.period <= '$escapedPeriod')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.period = '$escapedPeriod')
             END AS credit";
     }
@@ -270,9 +270,9 @@ class TradingAccountbyMonth
 
         // Opening stock: always uses period < current (regardless of balance_income)
         $glCols = "
-            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
              WHERE gl.accountcode = acct.accno AND gl.period < '$escapedPeriod') AS debit,
-            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+            (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
              WHERE gl.balaccountcode = acct.accno AND gl.period < '$escapedPeriod') AS credit";
 
         $sql = "SELECT ReportCode, accdesc, balance_income, ReportStyle,
@@ -601,30 +601,30 @@ class TradingAccountForYear
 
         $glCurrent = "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS credit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS debit_Last,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS credit_Last";
 
@@ -1004,7 +1004,7 @@ class FinancialPeriods
         global $db;
         $this->SelectObject = '<tr><td>Select Year</td><td><select name="Financial_Periods">';
         $ResultIndex = DB_query("SELECT periodno, MAX(end_date) AS year
-                                 FROM `financialperiods``
+                                 FROM `financialperiods`
                                  GROUP BY periodno
                                  ORDER BY periodno DESC", $db);
         while ($row = DB_fetch_array($ResultIndex)) {
@@ -1160,10 +1160,10 @@ class SaveReceipt extends ShowBankAccounts{
     function GetPaidinvoices($journal,$amount=0){
         if($amount>0){
                 $this->checkbalance += $amount;
-                $this->JournalArray[]=SPRINTF("insert into `receiptsallocation``
+                $this->JournalArray[]=SPRINTF("insert into `receiptsallocation`
                         (`itemcode`,`date`,`invoiceno`,`journalno`,`doctype`,`receiptno`,`amount`,`receiptjournal`) 
                          (Select `Accountno`,`date`,`Documentno`,`JournalNo`,`Documenttype`,'%s',%f,'%s' 
-                         from `customerstatement`` where `JournalNo`='%s') ",
+                         from `customerstatement` where `JournalNo`='%s') ",
                         $this->documentno,
                         (0-$amount),
                         $this->Receipt_Journal,
@@ -1185,7 +1185,7 @@ class SaveReceipt extends ShowBankAccounts{
     function PostToAccounts(){
         $this->totalamount= $this->checkbalance;
        
-          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement```
+          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement`
                                 (`Date`
                                 ,`Documentno`
                                 ,`Documenttype`
@@ -1239,7 +1239,7 @@ class SaveReceipt extends ShowBankAccounts{
                             $this->BankArray['currency']);
         
         
-        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions``
+        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions`
                                     (`bankcode`
                                     ,`DocDate`
                                     ,`doctype`
@@ -1308,7 +1308,7 @@ class SaveReceipt extends ShowBankAccounts{
         
         
         
-             $this->JournalArray[]=SPRINTF("Insert into `generalledger``
+             $this->JournalArray[]=SPRINTF("Insert into `generalledger`
                                     (`journalno`
                                     ,`Docdate`
                                     ,`period`
@@ -1442,7 +1442,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
     function PostToAccounts(){
         
         
-          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement```
+          $this->JournalArray[] =sprintf("INSERT INTO `customerstatement`
                                 (`Date`
                                 ,`Documentno`
                                 ,`Documenttype`
@@ -1496,7 +1496,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
         
         
         
-        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions``
+        $this->JournalArray[]=SPRINTF("INSERT INTO `banktransactions`
                                     (`bankcode`
                                     ,`DocDate`
                                     ,`doctype`
@@ -1565,7 +1565,7 @@ class SavePrepaymentReceipt extends ShowBankAccounts {
         
         
         
-             $this->JournalArray[]=SPRINTF("Insert into `generalledger``
+             $this->JournalArray[]=SPRINTF("Insert into `generalledger`
                                     (`journalno`
                                     ,`Docdate`
                                     ,`period`
@@ -1662,7 +1662,7 @@ class Savepaymentvoucher {
             `accountcode`,`bankName`,`BankAccounts`.`currency`,`lastreconcileddate`
            ,`AccountNo`,`BranchCode`,`BranchName`,`lastreconbalance`
            ,`lastChequeno`,`PostingGroup`,`currencies`.`rate`,`StatementNo`
-            FROM `bankaccounts`` 
+            FROM `bankaccounts` 
             join `currencies` on `BankAccounts`.`currency`=`currencies`.`currabrev`
             where `accountcode`='".$accountCode."'", $db);
         
@@ -1791,7 +1791,7 @@ class Savepaymentvoucher {
             `Dimension_One` ,
             `Dimension_Two` ,
             `currencies`.`rate`
-            FROM `supplierstatement`` left join `currencies`
+            FROM `supplierstatement` left join `currencies`
             on `currencies`.`currabrev`=`SupplierStatement`.`Currency`
             where `Accountno`='%s' and `JournalNo`='%s' ",  $this->CustomerID,$journal);
             
@@ -2055,30 +2055,30 @@ class BalancesheetForYear
         // Use _buildGLColumns pattern but with explicit period boundaries
         $glCols = "
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS debit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$cce')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$ccs' AND '$cce')
             END AS credit,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.accountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS debit_Last,
 
             CASE acct.balance_income
-                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 0 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate <= '$lle')
-                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger`` gl
+                WHEN 1 THEN (SELECT SUM(gl.amount * gl.ExchangeRate) FROM `generalledger` gl
                              WHERE gl.balaccountcode = acct.accno AND gl.Docdate BETWEEN '$lls' AND '$lle')
             END AS credit_Last";
 
