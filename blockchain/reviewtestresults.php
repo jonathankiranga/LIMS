@@ -294,6 +294,16 @@ function approvalStatusBadge(status){
     var color = status === 'Approved' ? 'success' : (status === 'Blocked' ? 'danger' : (status === 'Not required' ? 'secondary' : 'warning'));
     return '<span class="badge bg-' + color + '">' + esc(status) + '</span>';
 }
+function departmentApprovalCell(status, approver, approvedAt){
+    var html = approvalStatusBadge(status);
+    if (status === 'Approved' && (approver || approvedAt)) {
+        html += '<div class="small text-muted mt-1">' +
+            (approver ? 'By ' + esc(approver) : '') +
+            (approver && approvedAt ? '<br>' : '') +
+            (approvedAt ? esc(approvedAt) : '') + '</div>';
+    }
+    return html;
+}
 function renderDepartmentProgress(data){
     var summary = data.summary || {};
     var cards = [
@@ -319,8 +329,8 @@ function renderDepartmentProgress(data){
         return '<tr>' +
             '<td>' + esc(sample.DocumentNo || '') + '</td>' +
             '<td><strong>' + esc(sample.SampleID || '') + '</strong></td>' +
-            '<td>' + approvalStatusBadge(sample.ChemicalStatus) + '</td>' +
-            '<td>' + approvalStatusBadge(sample.MicrobiologyStatus) + '</td>' +
+            '<td>' + departmentApprovalCell(sample.ChemicalStatus, sample.ChemicalApprovedBy, sample.ChemicalApprovedAt) + '</td>' +
+            '<td>' + departmentApprovalCell(sample.MicrobiologyStatus, sample.MicrobiologyApprovedBy, sample.MicrobiologyApprovedAt) + '</td>' +
             '<td>' + completed + ' of ' + total + ' tests department-approved</td>' +
             '<td>' + (Number(sample.BlockedResults || 0) > 0 ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-warning text-dark">Waiting for department</span>') + '</td>' +
             '</tr>';
