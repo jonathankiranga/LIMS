@@ -23,12 +23,12 @@ $Arraysystypes=array();
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' .$Title .'" alt="" />' . ' ' . $Title . '</p>';
 
 if(isset($_POST['confirm'])){
-    DB_query("UPDATE `salesheader`` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
+    DB_query("UPDATE `salesheader` SET `status` = 2 where documentno='".$_POST['documentno']."'", $db);
     unset($_POST);
 }
 
 if(isset($_POST['Reject'])){
-    DB_query("UPDATE `salesheader`` SET `status` = 0 where documentno='".$_POST['documentno']."'", $db);
+    DB_query("UPDATE `salesheader` SET `status` = 0 where documentno='".$_POST['documentno']."'", $db);
     unset($_POST);
 }
 
@@ -59,7 +59,7 @@ echo '<input type="hidden" name="documentno" value="'. $documentno.'" />'
     $SQL="select  `documentno` ,`docdate` ,`oderdate` ,`duedate` ,`postingdate` ,`customercode`
       ,`customername` ,`yourreference` ,`externaldocumentno`  ,`locationcode` ,`paymentterms`
       ,`postinggroup`  ,`currencycode`  ,`printed`  ,`released`  ,`status`  ,`userid`  ,`Dimension_1` ,`Dimension_2`
-      from `salesheader`` where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
+      from `salesheader` where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
      
     $Result = DB_query($SQL,$db);
     $row = DB_fetch_row($Result);
@@ -91,7 +91,7 @@ echo '<input type="hidden" name="documentno" value="'. $documentno.'" />'
     
     $SQL="select   `documenttype` ,`docdate`,`documentno` ,`code` ,`description`
            ,`unitofmeasure` ,`Quantity` ,`UnitPrice` ,`vatamount` ,`invoiceamount` ,PartPerUnit 
-           from `salesline``  where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
+           from `salesline`  where `documenttype`='".$documenttype."' and `documentno`='".$documentno."'";
    
     $ResultIndex=DB_query($SQL,$db);
     while($myrow=DB_fetch_array($ResultIndex)){
@@ -142,7 +142,7 @@ $SQL="Select
       ,`SalesHeader`.`currencycode`
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` 
-      from `salesheader`` 
+      from `salesheader` 
       where `SalesHeader`.`documenttype`='".$_POST['documenttype']."' 
         and `SalesHeader`.`status`=1 order by `SalesHeader`.`docdate` desc";
     $Result=DB_query($SQL,$db);
@@ -194,7 +194,7 @@ $id1 = $DimensionRow[2];
 $id2 = $DimensionRow[3];
 $Dimesion_one="Not selected";
 
-    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions`` where `id`='".$id1."'  and code='".$budget."' order by Dimension", $db);
+    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions` where `id`='".$id1."'  and code='".$budget."' order by Dimension", $db);
     while($row = DB_fetch_array($DRows)){
         $Dimesion_one=$row['Dimension'];
     }
@@ -221,7 +221,7 @@ $id2 = $DimensionRow[3];
 
 $Dimesion_one="Not selected";
 
-    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions`` where `id`='".$id2."'  and code='".$budget."' order by Dimension", $db);
+    $DRows = DB_query("SELECT  ltrim(rtrim(`Code`)) as Code,`Dimension` FROM `dimensions` where `id`='".$id2."'  and code='".$budget."' order by Dimension", $db);
     while($row = DB_fetch_array($DRows)){
         $Dimesion_one=$row['Dimension'];
     }
