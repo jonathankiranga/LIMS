@@ -91,11 +91,11 @@ while ($row = $result->fetch_assoc()) {
     }
 
     /*
-     * HeaderID is part of the grouping key. The UI still presents one
-     * block for each SampleID, while preventing two headers with a reused
-     * SampleID from being mixed.
+     * Group by both HeaderID and SampleID. A single registration header can
+     * contain multiple samples, and their approval decisions must remain
+     * independent.
      */
-    $key = (string)$row['HeaderID'];
+    $key = (string)$row['HeaderID'] . '|' . (string)$row['SampleID'];
 
     if (!isset($groups[$key])) {
         $groups[$key] = [
