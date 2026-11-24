@@ -53,9 +53,9 @@ if(isset($_POST['Financial_Periods'])){
       ,salesline.`PriceInPricelist`
       ,salesline.`Increase`
       ,salesline.`partperunit`
-  FROM `salesheader``` 
+  FROM `salesheader` 
         join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype 
-        join `customerstatement`` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
+        join `customerstatement` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` between '%s' and '%s' 
   and salesheader.`salespersoncode`='%s' 
   and salesheader.documenttype=10  order by salesheader.`documentno`  asc ",$FromDate,$ToDate,$_POST['salespersoncode']);
@@ -83,9 +83,9 @@ if(isset($_POST['Financial_Periods'])){
       ,salesline.`Increase`
       ,salesline.`partperunit`
       ,CustomerStatement.JournalNo
-  FROM `salesheader``` 
+  FROM `salesheader` 
         join `salesline` on salesheader.documentno=salesline.documentno and salesheader.documenttype=salesline.documenttype 
-        join `customerstatement`` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
+        join `customerstatement` on `CustomerStatement`.`Documentno`=salesheader.`documentno` 
   where `CustomerStatement`.`Datewhenpaid` is null
   and salesheader.`salespersoncode`='%s' 
   and salesheader.documenttype=10  order by salesheader.docdate  DESC limit 500",$_POST['salespersoncode']);
@@ -290,7 +290,7 @@ Function selectlast(){
 FUNCTION PaymentsAllocations ($journal ,$Accountno ){
    global $db;
     
-   $sql= sprintf("select sum(amount) FROM `receiptsallocation`` "
+   $sql= sprintf("select sum(amount) FROM `receiptsallocation` "
            . "  where `journalno`='%s' and `itemcode`='%s' ",$journal,$Accountno);
   
    $ResultIndex=DB_query($sql,$db);
