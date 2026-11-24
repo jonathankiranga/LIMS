@@ -18,7 +18,7 @@ $i=1;
 
 $Da=array();
 
-$ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `DimensionSetUp`', $db);
+$ResultIndex=DB_query('SELECT `id`,`Dimension_type` FROM `dimensionsetup`', $db);
 while($rows=DB_fetch_array($ResultIndex)){
     $Da[$rows['id']]= $rows['Dimension_type'];
 }
