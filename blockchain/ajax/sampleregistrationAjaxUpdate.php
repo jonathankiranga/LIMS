@@ -1,493 +1,375 @@
 <?php
-require_once '../db_connection.php'; 
-require_once '../functions/functions.php'; // Include PHPMailer via Composer
-require_once '../functions/tasks.php'; // Include PHPMailer via Composer
-require_once 'getrefferencesfunction.inc'; 
- // Ensure it's a POST request
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- $username     = $_POST['username'];
- $user_id      = $_POST['user_id'];
- $dir          = "userkeys/$user_id";
- $privateKeyPath = "$dir/private_key.pem";
-    if (file_exists($privateKeyPath)) { // Check if the file exists
-    $privateKey = file_get_contents($privateKeyPath); // Read the file content
-    if ($privateKey !== false) {
-        $publicKey = file_get_contents("$dir/public_key.pem");
-    } else {
-       echo json_encode(['success' => false, 'message' => 'Error: Unable to read private key file']);
-       exit;
-    }
-} else {
-    // Handle error: File does not exist
-     echo json_encode(['success' => false, 'message' => 'Error: Private key file does not exist.']);
-     exit;
-}
+require_once '../db_connection.php';
+require_once '../functions/functions.php';
+require_once '../functions/tasks.php';
+require_once 'getrefferencesfunction.inc';
 
-// Collect required fields
-$requiredFields = [
-    'date' => $_POST['date'] ?? null,
-    'batch No' => $_POST['documentno'] ?? null,
-    'customer Name' => $_POST['CustomerName'] ?? null,
-    'customerId' => $_POST['CustomerID'] ?? null,
-    'sampled By' => $_POST['sampledby'] ?? null,
-    'sampling Method' => $_POST['SamplingMethod'] ?? null,
-    'sampling Date' => $_POST['samplingdate'] ?? null,
-    'order No' => $_POST['Orderno'] ?? null
-];
+header('Content-Type: application/json; charset=utf-8');
 
-// Check for any missing fields
-$missingFields = [];
-foreach ($requiredFields as $field => $value) {
-    if (empty($value) && $value !== '0') { // Check if value is empty or null, excluding zero as valid
-        $missingFields[] = $field;
-    }
-}
-
-// Respond if there are missing fields
-if (!empty($missingFields)) {
-    echo json_encode([
-        'status' => 'error',
-        'success' => false,
-        'message' => 'Missing required fields: ' . implode(', ', $missingFields)
-    ]);
-    exit; // Stop further processing
-}
-
-$uploadDir = '../uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
-}
-// Retrieve form fields
-$date           = $_POST['date'] ?? null;
-$documentNo     = $_POST['batchno'] ?? null;
-$customerName   = $_POST['CustomerName'] ?? null;
-$customerId     = $_POST['CustomerID'] ?? null;
-$sampledBy      = $_POST['sampledby'] ?? null;
-$samplingMethod = $_POST['SamplingMethod'] ?? null;
-$samplingDate   = $_POST['samplingdate'] ?? null;
-$orderNo        = $_POST['Orderno'] ?? null;
-$rowsposted     = $_POST['tablecount'] ?? 0;
-$HeaderID       = $_POST['HeaderID'] ?? 0;
- 
-// sample header
-$samplehaeder = [
-'documentno' => $documentNo,
-'HeaderID' => $HeaderID,
-'date' => $date,
-'customerName' => $customerName,
-'customerId' => $customerId,
-'sampledBy' => $sampledBy,
-'samplingMethod' => $samplingMethod,
-'samplingDate' => $samplingDate,
-'orderNo' => $orderNo,
-'User_name' => $username ,
-'tablecount' => $rowsposted
-];
-
-    if ($date && $samplingDate) {
-    // Convert to DateTime objects
-    $registrationDate = new DateTime($date);
-    $sampleDate = new DateTime($samplingDate);
-    // Compare dates
-    if ($sampleDate > $registrationDate) {
-            // Sampling date is earlier than registration date
-            echo json_encode([
-                'success' => false,
-                'message' => 'The sampling date cannot be later than the registration date.'
-            ]);
-            exit; // Stop further processing
-    }    
-        
-  } else {
-        // Handle missing dates
-        echo json_encode([
-            'success' => false,
-            'message' => 'Both registration date and sampling date are required.'
-        ]);
-        exit;
-    }
-     
-    $samples=array();
-    $parameterData=array();
-   
-    for ($i = 0; $i < ($rowsposted); $i++) {
-        $TestID         =(int) $_POST['rowindex'][$i];
-        $sampletype     =(int) $_POST['standard_id'][$i];
-        $matrix_id      =(int) $_POST['matrix_id'][$i];  //new
-        $samplesCount   =(int) $_POST['samples'][$i];  // new config
-        $sku            = $_POST['kit_units'][$i];
-        $batchNo        = $_POST['batch_no'][$i];
-        $batchSize      = $_POST['batch_size'][$i];
-        $mandate        = $_POST['date_mfg'][$i];
-        $expDate        = $_POST['date_exp'][$i];
-        $SampleID       = $_POST['SampleID'][$i];
-        $externalSample = $_POST['sample_source'][$i];
-        $sampleName = $_POST['sample_name'][$i] ?? null;
-        $sampleMethod = $_POST['sample_method'][$i] ?? null;
-        $conditionOfSample = $_POST['condition_of_sample'][$i] ?? null;
-        $chilledDateExp = $_POST['chilled_date_exp'][$i] ?? null;
-        $frozenDateExp = $_POST['frozen_date_exp'][$i] ?? null;
-        $sampleFileKey  = $_FILES["sample_images"];
-   // Handle file upload if provided
-          $uploadedFile     = null;
-         if (isset($sampleFileKey['name'][$i]) && $sampleFileKey['error'][$i] === UPLOAD_ERR_OK) {
-            $originalFileName = $sampleFileKey['name'][$i];
-            $fileExtension    = pathinfo($originalFileName, PATHINFO_EXTENSION); // Extract file extension
-            $newFileName      = $SampleID. '.' . $fileExtension;
-            $destination      = "../uploads/$newFileName"  ;
-            if(move_uploaded_file($sampleFileKey['tmp_name'][$i],$destination)){
-               $uploadedFile = $destination;
-            }
-          }
-$parameterData[$i] = [
-                'HeaderID'       => $HeaderID ,
-                'TestID'         => $TestID,  
-                'SampleID'       => $SampleID,
-                'sampleType'     => $sampletype,
-                'matrixID'       => $matrix_id ,
-                'sku'            => $sku,
-                'batchNo'        => $batchNo,
-                'batchSize'      => $batchSize,
-                'mandate'        => $mandate,
-                'expDate'        => $expDate,
-                'externalSample' => $externalSample ,  
-                'sampleFileKey'  => $uploadedFile,
-                'User_name'      => $username,
-                'samplesCount'   => $samplesCount,
-                'sample_name' => $sampleName,
-                'sample_method' => $sampleMethod,
-                'condition_of_sample' => $conditionOfSample,
-                'chilled_date_exp' => $chilledDateExp,
-                'frozen_date_exp' => $frozenDateExp
-            ];
-              
-         for ($smpcnt = 0; $smpcnt < ($samplesCount); $smpcnt++) {
-               
-            if(mb_strlen($matrix_id)>0){
-                $FilteredParameters = gettestparametersFromTestID($TestID,$sampletype,$matrix_id);}
-            else { 
-                $FilteredParameters = getALLtestparametersFromTestID($TestID,$sampletype);
-                    // If front-end sent explicit selected_params for this row, prefer them
-                    if (isset($_POST['selected_params'][$i]) && is_array($_POST['selected_params'][$i])) {
-                        $paramsFromFrontend = [];
-                        foreach ($_POST['selected_params'][$i] as $rowParam) {
-                            // allow either associative or simple arrays from frontend
-                            $parameterId = isset($rowParam['parameterId']) ? (int)$rowParam['parameterId'] : (isset($rowParam['ParameterID']) ? (int)$rowParam['ParameterID'] : null);
-                            $standardId  = isset($rowParam['standardId']) ? $rowParam['standardId'] : (isset($rowParam['StandardID']) ? $rowParam['StandardID'] : null);
-                            $baseId      = isset($rowParam['baseId']) ? (int)$rowParam['baseId'] : (isset($rowParam['BaseID']) ? (int)$rowParam['BaseID'] : null);
-
-                            if ($parameterId !== null) {
-                                $paramsFromFrontend[] = [
-                                    'ParameterID' => $parameterId,
-                                    'StandardID'  => $standardId,
-                                    'BaseID'      => $baseId
-                                ];
-                            }
-                        }
-                        if (!empty($paramsFromFrontend)) {
-                            $FilteredParameters = $paramsFromFrontend;
-                        }
-                    }
-            }
-              foreach ($FilteredParameters as $parameter) {
-                  $testData[$i][$smpcnt][] = [
-                      'resultsID'   => $resultsID,
-                      'HeaderID'    => $HeaderID ,
-                      'TestID'      => $TestID,  
-                      'parameterId' => $parameter['ParameterID'],        
-                      'sampleType'  => $parameter['StandardID'],
-                      'sampleNo'    => $parameter['SampleID'],
-                      'User_name'   => $username,
-                      'BasePID'     => $parameter['BaseID']
-                  ];
-              }
-
-         } 
-
-
-}
-        
-
-
-    //here is the log_transaction_metadata($mysqli, $blockId, $recordId,$tablename)
-    $lastBlockQuery = $conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");
-    $lastBlock = $lastBlockQuery->fetch_assoc();
-    $previousHash = $lastBlock ? $lastBlock['current_hash'] : str_repeat("0", 64);
-     
-    $mergedData = array_merge($samplehaeder,$parameterData,$testData);
-    $data = $mergedData[0];
-    $dataString = implode('|', array_values($data)) . '|' . $previousHash;
-    $current_hash = hash('sha256',$dataString);
-    $digital_signature = signData($current_hash,$privateKey);
-    // Collect the previous block hash (for linking to previous block in the chain)
-    $encryptdata = encryptPrivateKey($dataString,$privateKey);
-    $conn->autocommit(0);
-    try {
-   
-        $stmt = $conn->prepare("INSERT INTO `blockchain_ledger`(`timestamp`,`previous_hash`,`current_hash`,`digital_signature`,encrypted_data,`status`,`userid`)"
-                . " VALUES (CURRENT_TIMESTAMP, ?, ?, ?,?, 'active',?)");
-        $stmt->bind_param("sssss",$previousHash,$current_hash,$digital_signature,$encryptdata,$user_id);
-        $stmt->execute();
-        $blockId = $conn->insert_id;
-        $stmt->close();
-         
-                
-        $stmt = $conn->prepare("UPDATE sample_header SET  "
-                . "Date=?, CustomerName=?,CustomerID=?, SampledBy=?, SamplingMethod=?, "
-                . "SamplingDate=?,  OrderNo=?,  User_name=?  where HeaderID=?");
-        if (!$stmt) {
-            echo json_encode(['success' => false,'message' => "Prepare statement sample_header failed: " . $conn->error]);
-            exit; // Stop further processing
-        }
-        
-        $stmt->bind_param("ssssssssi", 
-                $date, $customerName,$customerId, $sampledBy, $samplingMethod, $samplingDate,$orderNo,$username,$HeaderID);
-        
-    // Execute the statement
-        if ($stmt->execute()) {
-            log_transaction_metadata($conn,$blockId,$HeaderID,'sample_header') ;
-        }else{
-             echo json_encode(['success' => false,'message' => "Error executing statement sample_header: " . $stmt->error]);
-              $stmt->close();
-              exit; // Stop further processing
-        }
-        
-        $stmt->close();
-          
-        $stmt = $conn->prepare("
-            INSERT INTO `sample_tests` (
-                SampleID, StandardID, SampleFileKey, SKU, BatchNo, BatchSize, ManufactureDate, ExpDate, ExternalSample, User_name, BaseID,  HeaderID, TestID,
-                sample_name, sample_method, condition_of_sample, chilled_date_of_expiry, frozen_date_of_expiry
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            ON DUPLICATE KEY UPDATE
-                SampleID = VALUES(SampleID),
-                StandardID = VALUES(StandardID),
-                SampleFileKey = VALUES(SampleFileKey),
-                SKU = VALUES(SKU),
-                BatchNo = VALUES(BatchNo),
-                BatchSize = VALUES(BatchSize),
-                ManufactureDate = VALUES(ManufactureDate),
-                ExpDate = VALUES(ExpDate),
-                ExternalSample = VALUES(ExternalSample),
-                User_name = VALUES(User_name),
-                BaseID = VALUES(BaseID),
-                sample_name = VALUES(sample_name),
-                sample_method = VALUES(sample_method),
-                condition_of_sample = VALUES(condition_of_sample),
-                chilled_date_of_expiry = VALUES(chilled_date_of_expiry),
-                frozen_date_of_expiry = VALUES(frozen_date_of_expiry)
-              ");
-
-        
-        $stmt2 = $conn->prepare("
-            INSERT INTO `sample_tests` (
-                SampleID, StandardID, SKU, BatchNo, BatchSize,ManufactureDate, ExpDate, ExternalSample, User_name, BaseID, HeaderID, TestID,
-                sample_name, sample_method, condition_of_sample, chilled_date_of_expiry, frozen_date_of_expiry
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            ON DUPLICATE KEY UPDATE
-                SampleID = VALUES(SampleID),
-                StandardID = VALUES(StandardID),
-                SKU = VALUES(SKU),
-                BatchNo = VALUES(BatchNo),
-                BatchSize = VALUES(BatchSize),
-                ManufactureDate = VALUES(ManufactureDate),
-                ExpDate = VALUES(ExpDate),
-                ExternalSample = VALUES(ExternalSample),
-                User_name = VALUES(User_name),
-                BaseID = VALUES(BaseID),
-                sample_name = VALUES(sample_name),
-                sample_method = VALUES(sample_method),
-                condition_of_sample = VALUES(condition_of_sample),
-                chilled_date_of_expiry = VALUES(chilled_date_of_expiry),
-                frozen_date_of_expiry = VALUES(frozen_date_of_expiry)
-              ");
-
-        if (!$stmt) {
-              echo json_encode(['success' => false,'message' => "Prepare statement sample_tests failed : " . $conn->error]);
-              exit; // Stop further processing
-        }
-              
-         $teststmt = $conn->prepare("INSERT INTO `test_results`"
-                 . " (`TestID`,`HeaderID`,`SampleID`,`StandardID`,`ParameterID`,`User_name`,`StatusID`,`BaseID`) "
-                 . " values  (?,?,?,?,?,?,1,?)  ON DUPLICATE KEY UPDATE
-                TestID = VALUES(TestID),
-                HeaderID = VALUES(HeaderID),
-                SampleID = VALUES(SampleID),
-                StandardID = VALUES(StandardID),
-                ParameterID = VALUES(ParameterID),
-                BaseID = VALUES(BaseID)");
-        if (!$teststmt) {
-            echo json_encode([ 'success' => false,'message' => "Prepare statement test_results failed: " . $conn->error ]);
-            exit; // Stop further processing
-        }
-         
-        foreach ($parameterData as $id => $datarows) {
-             
-          if($datarows['sampleFileKey']==null){
-              
-                
-            $stmt2->bind_param("sississssiiiii",$datarows['SampleID'],$datarows['sampleType'],
-            $datarows['sku'], $datarows['batchNo'], $datarows['batchSize'],
-            $datarows['mandate'],$datarows['expDate'],$datarows['externalSample'],$datarows['User_name'],
-            $datarows['matrixID'],$HeaderID,$TestID,
-            $datarows['sample_name'],$datarows['sample_method'],$datarows['condition_of_sample'],
-            $datarows['chilled_date_exp'],$datarows['frozen_date_exp']);
-           // Execute the statement
-            if ($stmt2->execute()) {
-                      foreach ($testData[$id] as $aID => $testdatachild) {
-                               // $SampleID = GetNextLabrefNo('19');
-                                foreach ($testdatachild as $ri => $tedata) {
-
-                                  if($tedata['resultsID']==null){
-                                   
-                                     $teststmt->bind_param("iisiisi",
-                                     $TestID,$HeaderID,$tedata['SampleID'],$tedata['sampleType'],
-                                     $tedata['parameterId'],$tedata['User_name'],$tedata['BasePID']);
-
-                                        if (!$teststmt->execute()) {
-                                          echo json_encode(['success' => false, 'message' => "Error executing statement test_results: $SampleID " . $teststmt->error ]);
-                                          exit; // Stop further processing
-                                        }
-                                  }
-
-                                }
-                }
-            }else{
-                      echo json_encode(['success' => false,'message' => "Error executing statement sample_2tests: $SampleID" . $stmt2->error]);
-                      exit; // Stop further processing
-            }
-                
-          }else{
-                
-            $stmt->bind_param("sisssissssiiiii",$datarows['SampleID'],$datarows['sampleType'],
-            $datarows['sampleFileKey'], $datarows['sku'], $datarows['batchNo'], $datarows['batchSize'],
-            $datarows['mandate'],$datarows['expDate'],$datarows['externalSample'],$datarows['User_name'],
-            $datarows['matrixID'],$HeaderID,$TestID,
-            $datarows['sample_name'],$datarows['sample_method'],$datarows['condition_of_sample'],
-            $datarows['chilled_date_exp'],$datarows['frozen_date_exp']);
-            // Execute the statement
-            if ($stmt->execute()) {
-                foreach ($testData[$id] as $aID => $testdatachild) {
-                      // $SampleID = GetNextLabrefNo('19');
-                    foreach ($testdatachild as $ri => $tedata) {
-                      
-                      if($tedata['resultsID']==null){
-                         
-                         $teststmt->bind_param("iisiisi",$TestID,$HeaderID,$tedata['SampleID'],$tedata['sampleType'],
-                         $tedata['parameterId'],$tedata['User_name'],$tedata['BasePID']);
-                       
-                            if (!$teststmt->execute()) {
-                              echo json_encode(['success' => false, 'message' => "Error executing statement test_results: $SampleID " . $teststmt->error ]);
-                              exit; // Stop further processing
-                            }
-                      }
-                      
-                    }
-                }
-            }else{
-                    echo json_encode(['success' => false,'message' => "Error executing statement sample_tests: $SampleID" . $stmt->error]);
-                  exit; // Stop further processing
-            }
-            
-        }
-
-       
-             
-        }
-         
-        $teststmt->close();
-        $stmt->close();
- 
-
-// Trigger the "test_approved" event
-    // Log successful action
-    logAction($conn, 'INSERT', $documentNo, $current_hash,$user_id , 'SUCCESS');
-} catch (Exception $e) {
-    // If there's an error, rollback and log the error
-    $conn->rollback();
-    logAction($conn, 'INSERT', $documentNo, $current_hash,$user_id , 'FAILED', $e->getMessage());
-} finally {
-    $conn->commit();
-}
-    
-    
-} else {
-     echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
+function editRegistrationResponse($success, $message, $extra = array()) {
+    echo json_encode(array_merge(array(
+        'success' => $success,
+        'status' => $success ? 'success' : 'error',
+        'message' => $message
+    ), $extra));
     exit;
 }
 
-$conn->autocommit(1);
-// Close the database connection
-$conn->close();
-
-echo json_encode(['success' => true,'message' => "Edit Registration no: $documentNo Successful"  ]);
- 
-foreach ($samplehaeder as $key => $value) {
-    foreach ($samplehaeder[$value['tablecount']] as $key2 => $value2) {
-        foreach ($testData[$value['tablecount']][$value2['samplesCount']] as $key3 => $row) {
-            if (!empty($row['sampleType'])) {
-                
-                $hid = (int)$row['HeaderID'];
-                $tid = (int)$row['TestID'];
-        
-                $key = $hid . ':' . $tid;
-                $standardIdsFromUser[$key][] = (int)$row['sampleType']; // StandardID
-                
-            }
-        }
-  }
+function editRegistrationDate($value) {
+    $value = trim((string)$value);
+    if ($value === '') return null;
+    $timestamp = strtotime($value);
+    return $timestamp === false ? null : date('Y-m-d', $timestamp);
 }
 
-foreach ($standardIdsFromUser as $k => $arr) {
-    $selectedByPair[$k] = array_values(array_unique($arr, SORT_NUMERIC));
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    editRegistrationResponse(false, 'Invalid request method.');
 }
-// Remove duplicates just in case
 
-$conn->begin_transaction();
+$username = trim((string)($_POST['username'] ?? ''));
+$userId = trim((string)($_POST['user_id'] ?? ''));
+$headerId = isset($_POST['HeaderID']) ? (int)$_POST['HeaderID'] : 0;
+$documentNo = trim((string)($_POST['batchno'] ?? $_POST['documentno'] ?? ''));
+$date = editRegistrationDate($_POST['date'] ?? '');
+$samplingDate = editRegistrationDate($_POST['samplingdate'] ?? '');
+$customerName = trim((string)($_POST['CustomerName'] ?? ''));
+$customerId = trim((string)($_POST['CustomerID'] ?? ''));
+$sampledBy = trim((string)($_POST['sampledby'] ?? ''));
+$samplingMethod = trim((string)($_POST['SamplingMethod'] ?? ''));
+$orderNo = trim((string)($_POST['Orderno'] ?? ''));
+
+if ($username === '' || $userId === '' || $headerId < 1) {
+    editRegistrationResponse(false, 'Your session or registration reference is missing. Reload the registration and try again.');
+}
+
+$required = array(
+    'Registration date' => $date,
+    'Sampling date' => $samplingDate,
+    'Client name' => $customerName,
+    'Client account' => $customerId,
+    'Sampled by' => $sampledBy,
+    'Sampling method' => $samplingMethod,
+    'Customer LPO number' => $orderNo
+);
+$missing = array();
+foreach ($required as $label => $value) {
+    if ($value === null || $value === '') $missing[] = $label;
+}
+if ($missing) {
+    editRegistrationResponse(false, 'Complete the following fields: ' . implode(', ', $missing));
+}
+if (strtotime($samplingDate) > strtotime($date)) {
+    editRegistrationResponse(false, 'The sampling date cannot be later than the registration date.');
+}
+
+$testIds = $_POST['rowindex'] ?? array();
+$sampleIds = $_POST['SampleID'] ?? array();
+$standardIds = $_POST['standard_id'] ?? array();
+$matrixIds = $_POST['matrix_id'] ?? array();
+$kitUnits = $_POST['standard_kit_units'] ?? array();
+$batchNos = $_POST['product_batch_no'] ?? array();
+$batchSizes = $_POST['batch_size'] ?? array();
+$manufactureDates = $_POST['date_of_manufacture'] ?? array();
+$expiryDates = $_POST['date_of_expiry'] ?? array();
+$chilledDates = $_POST['chilled_date_of_expiry'] ?? array();
+$frozenDates = $_POST['frozen_date_of_expiry'] ?? array();
+$sampleSources = $_POST['sample_source'] ?? array();
+$sampleNames = $_POST['sample_name'] ?? array();
+$sampleMethods = $_POST['sample_method'] ?? array();
+$conditions = $_POST['condition_of_sample'] ?? array();
+
+$rowCount = is_array($testIds) ? count($testIds) : 0;
+if ($rowCount < 1 || !is_array($sampleIds) || count($sampleIds) !== $rowCount) {
+    editRegistrationResponse(false, 'No valid sample rows were submitted. Reload the registration and try again.');
+}
+
+$headerStmt = $conn->prepare("SELECT HeaderID, DocumentNo FROM sample_header WHERE HeaderID = ? LIMIT 1");
+if (!$headerStmt) editRegistrationResponse(false, 'Could not validate registration: ' . $conn->error);
+$headerStmt->bind_param('i', $headerId);
+if (!$headerStmt->execute()) editRegistrationResponse(false, 'Could not validate registration: ' . $headerStmt->error);
+$headerResult = $headerStmt->get_result();
+$header = $headerResult ? $headerResult->fetch_assoc() : null;
+$headerStmt->close();
+
+if (!$header) editRegistrationResponse(false, 'The selected registration no longer exists.');
+$documentNo = $header['DocumentNo'];
+
+$uploadDir = '../uploads/';
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+    editRegistrationResponse(false, 'The sample image upload directory is unavailable.');
+}
+
+$uploadedFiles = array();
+$transactionStarted = false;
 
 try {
-    foreach ($selectedByPair as $key => $stds) {
-        list($HeaderID, $TestID) = explode(':', $key);
-        $HeaderID = (int)$HeaderID;
-        $TestID = (int)$TestID;
+    if (!$conn->begin_transaction()) {
+        throw new Exception('Could not start the registration update transaction: ' . $conn->error);
+    }
+    $transactionStarted = true;
 
-        // Build placeholders for the NOT IN list
-        $placeholders = implode(',', array_fill(0, count($stds), '?'));
-        $sql = "DELETE FROM test_results
-                WHERE HeaderID=? AND TestID=? 
-                AND StandardID NOT IN ($placeholders)";
+    $headerUpdate = $conn->prepare(
+        "UPDATE sample_header
+         SET Date = ?, CustomerName = ?, CustomerID = ?, SampledBy = ?,
+             SamplingMethod = ?, SamplingDate = ?, OrderNo = ?, User_name = ?
+         WHERE HeaderID = ?"
+    );
+    if (!$headerUpdate) throw new Exception('Preparing registration update failed: ' . $conn->error);
+    $headerUpdate->bind_param(
+        'ssssssssi',
+        $date, $customerName, $customerId, $sampledBy,
+        $samplingMethod, $samplingDate, $orderNo, $username, $headerId
+    );
+    if (!$headerUpdate->execute()) throw new Exception('Updating registration details failed: ' . $headerUpdate->error);
+    $headerUpdate->close();
 
-        $stmt = $conn->prepare($sql);
+    $sampleLookup = $conn->prepare(
+        "SELECT TestID, SampleID, StandardID, BaseID, SampleFileKey
+         FROM sample_tests
+         WHERE TestID = ? AND HeaderID = ?
+         LIMIT 1"
+    );
+    if (!$sampleLookup) throw new Exception('Preparing sample validation failed: ' . $conn->error);
 
-        // Merge params: HeaderID, TestID, then all StandardIDs
-        $params = array_merge([$HeaderID, $TestID], $stds);
-        $types = str_repeat('i', count($params)); // all integers
+    $sampleUpdate = $conn->prepare(
+        "UPDATE sample_tests
+         SET SKU = ?, BatchNo = ?, BatchSize = ?, ManufactureDate = ?, ExpDate = ?,
+             chilled_date_of_expiry = ?, frozen_date_of_expiry = ?,
+             ExternalSample = ?, sample_name = ?, sample_method = ?,
+             condition_of_sample = ?, User_name = ?, StandardID = ?, BaseID = ?
+         WHERE TestID = ? AND HeaderID = ? AND SampleID = ?"
+    );
+    if (!$sampleUpdate) throw new Exception('Preparing sample update failed: ' . $conn->error);
 
-        // Bind dynamically. Try modern splat first, fallback to call_user_func_array for older PHP
-        if (method_exists($stmt, 'bind_param')) {
-            // modern PHP (5.6+)
-            $bound = @ $stmt->bind_param($types, ...$params);
-            if ($bound === false) {
-                // fallback for older PHP versions: build references
-                $refs = [];
-                foreach ($params as $idx => $val) {
-                    $refs[$idx] = &$params[$idx];
-                }
-                array_unshift($refs, $types);
-                call_user_func_array([$stmt, 'bind_param'], $refs);
-            }
+    $resultCheck = $conn->prepare("SELECT COUNT(*) AS result_count FROM test_results WHERE TestID = ? AND HeaderID = ?");
+    if (!$resultCheck) throw new Exception('Preparing result protection check failed: ' . $conn->error);
+
+    $resultInsert = $conn->prepare(
+        "INSERT IGNORE INTO test_results
+         (TestID, HeaderID, SampleID, StandardID, ParameterID, User_name, StatusID, BaseID)
+         VALUES (?, ?, ?, ?, ?, ?, 1, ?)"
+    );
+    if (!$resultInsert) throw new Exception('Preparing missing-parameter insert failed: ' . $conn->error);
+
+    $existingRowIds = array();
+    $ledgerRows = array();
+    for ($i = 0; $i < $rowCount; $i++) {
+        $testId = isset($testIds[$i]) ? (int)$testIds[$i] : 0;
+        $sampleId = trim((string)($sampleIds[$i] ?? ''));
+        $standardId = isset($standardIds[$i]) ? (int)$standardIds[$i] : 0;
+        $matrixId = isset($matrixIds[$i]) ? (int)$matrixIds[$i] : 0;
+
+        if ($testId < 1 || $sampleId === '' || $standardId < 1) {
+            throw new Exception('A sample row is missing its TestID, SampleID or standard. Reload the registration before saving.');
+        }
+        if (isset($existingRowIds[$testId])) {
+            throw new Exception('The same sample row was submitted more than once.');
+        }
+        $existingRowIds[$testId] = true;
+
+        $sampleLookup->bind_param('ii', $testId, $headerId);
+        if (!$sampleLookup->execute()) throw new Exception('Checking sample row failed: ' . $sampleLookup->error);
+        $sampleResult = $sampleLookup->get_result();
+        $existing = $sampleResult ? $sampleResult->fetch_assoc() : null;
+        if (!$existing || (string)$existing['SampleID'] !== $sampleId) {
+            throw new Exception('A sample row does not belong to this registration. Reload the page before saving.');
         }
 
-        $stmt->execute();
-        $stmt->close();
+        $oldStandardId = (int)$existing['StandardID'];
+        $oldMatrixId = (int)$existing['BaseID'];
+        $resultCheck->bind_param('ii', $testId, $headerId);
+        if (!$resultCheck->execute()) throw new Exception('Checking existing test results failed: ' . $resultCheck->error);
+        $countResult = $resultCheck->get_result()->fetch_assoc();
+        $hasResults = (int)($countResult['result_count'] ?? 0) > 0;
+
+        if (($standardId !== $oldStandardId || $matrixId !== $oldMatrixId) && $hasResults) {
+            throw new Exception(
+                'Standard or matrix changes are blocked for sample ' . $sampleId .
+                ' because test-result records already exist. Existing results have been protected.'
+            );
+        }
+
+        $sku = (string)($kitUnits[$i] ?? '');
+        $batchNo = (string)($batchNos[$i] ?? '');
+        $batchSize = (isset($batchSizes[$i]) && $batchSizes[$i] !== '') ? (int)$batchSizes[$i] : null;
+        $manufactureDate = editRegistrationDate($manufactureDates[$i] ?? '');
+        $expiryDate = editRegistrationDate($expiryDates[$i] ?? '');
+        $chilledDate = editRegistrationDate($chilledDates[$i] ?? '');
+        $frozenDate = editRegistrationDate($frozenDates[$i] ?? '');
+        $sampleSource = (string)($sampleSources[$i] ?? '');
+        $sampleName = (string)($sampleNames[$i] ?? '');
+        $sampleMethod = (string)($sampleMethods[$i] ?? '');
+        $condition = (string)($conditions[$i] ?? '');
+
+        if ($manufactureDate && $expiryDate && strtotime($expiryDate) <= strtotime($manufactureDate)) {
+            throw new Exception('Expiry date must be later than manufacture date for sample ' . $sampleId . '.');
+        }
+
+        $sampleFileKey = $existing['SampleFileKey'];
+        if (isset($_FILES['sample_images']['error'][$i]) &&
+            $_FILES['sample_images']['error'][$i] === UPLOAD_ERR_OK) {
+            $tmpName = $_FILES['sample_images']['tmp_name'][$i];
+            $originalName = $_FILES['sample_images']['name'][$i] ?? '';
+            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            $allowed = array('jpg', 'jpeg', 'png', 'gif');
+            if (!in_array($extension, $allowed, true)) {
+                throw new Exception('Unsupported image type for sample ' . $sampleId . '. Use JPG, PNG or GIF.');
+            }
+            $safeSampleId = preg_replace('/[^A-Za-z0-9_-]/', '_', $sampleId);\n            $newFileName = $safeSampleId . '_' . date('YmdHis') . '_' . substr(sha1(uniqid('', true)), 0, 8) . '.' . $extension;
+            $destination = $uploadDir . $newFileName;
+            if (!move_uploaded_file($tmpName, $destination)) {
+                throw new Exception('The image for sample ' . $sampleId . ' could not be uploaded.');
+            }
+            $uploadedFiles[] = $destination;
+            $sampleFileKey = $destination;
+        }
+
+        $sampleUpdate->bind_param(
+            'ssisssssssssiiiis',
+            $sku, $batchNo, $batchSize, $manufactureDate, $expiryDate,
+            $chilledDate, $frozenDate, $sampleSource, $sampleName, $sampleMethod,
+            $condition, $username, $standardId, $matrixId, $testId, $headerId, $sampleId
+        );
+        if (!$sampleUpdate->execute()) {
+            throw new Exception('Updating sample ' . $sampleId . ' failed: ' . $sampleUpdate->error);
+        }
+
+        if ($sampleFileKey !== $existing['SampleFileKey']) {
+            $imageUpdate = $conn->prepare(
+                "UPDATE sample_tests SET SampleFileKey = ? WHERE TestID = ? AND HeaderID = ? AND SampleID = ?"
+            );
+            if (!$imageUpdate) throw new Exception('Preparing image update failed: ' . $conn->error);
+            $imageUpdate->bind_param('siis', $sampleFileKey, $testId, $headerId, $sampleId);
+            if (!$imageUpdate->execute()) throw new Exception('Saving sample image failed: ' . $imageUpdate->error);
+            $imageUpdate->close();
+        }
+
+        $ledgerRows[] = array(
+            'TestID' => $testId,
+            'SampleID' => $sampleId,
+            'StandardID' => $standardId,
+            'BaseID' => $matrixId,
+            'SKU' => $sku,
+            'BatchNo' => $batchNo,
+            'BatchSize' => $batchSize,
+            'ManufactureDate' => $manufactureDate,
+            'ExpDate' => $expiryDate,
+            'ChilledExpiry' => $chilledDate,
+            'FrozenExpiry' => $frozenDate,
+            'ExternalSample' => $sampleSource,
+            'sample_name' => $sampleName,
+            'sample_method' => $sampleMethod,
+            'condition_of_sample' => $condition,
+            'SampleFileKey' => $sampleFileKey
+        );
+
+        if (!$hasResults) {
+            if ($matrixId > 0) {
+                $availableParameters = gettestparameters($standardId, $matrixId);
+            } else {
+                $availableParameters = getALLtestparametersFromTestID($testId, $standardId);
+            }
+
+            $selectedKey = 'selected_params_' . ($i + 1);
+            $selectedIds = isset($_POST[$selectedKey]) && is_array($_POST[$selectedKey])
+                ? array_map('intval', $_POST[$selectedKey]) : array();
+
+            foreach ($availableParameters as $parameter) {
+                $parameterId = (int)($parameter['ParameterID'] ?? 0);
+                $parameterStandardId = (int)($parameter['StandardID'] ?? $standardId);
+                $baseId = isset($parameter['BaseID']) ? (int)$parameter['BaseID'] : 0;
+                if ($parameterId < 1 || $parameterStandardId !== $standardId) continue;
+                if ($selectedIds && $standardId !== $oldStandardId && !in_array($parameterId, $selectedIds, true)) continue;
+
+                $resultInsert->bind_param(
+                    'iisiisi',
+                    $testId, $headerId, $sampleId, $standardId,
+                    $parameterId, $username, $baseId
+                );
+                if (!$resultInsert->execute()) {
+                    throw new Exception('Adding a test parameter for sample ' . $sampleId . ' failed: ' . $resultInsert->error);
+                }
+            }
+        }
+    }
+
+    $sampleLookup->close();
+    $sampleUpdate->close();
+    $resultCheck->close();
+    $resultInsert->close();
+
+    // Add a signed blockchain ledger record when this user's key is available.
+    $ledgerHash = '';
+    $keyDirectory = 'userkeys/' . $userId;
+    $privateKeyPath = $keyDirectory . '/private_key.pem';
+    if (is_file($privateKeyPath) && is_readable($privateKeyPath)) {
+        $privateKey = file_get_contents($privateKeyPath);
+        if ($privateKey !== false && $privateKey !== '') {
+            $lastBlockQuery = $conn->query("SELECT current_hash FROM blockchain_ledger ORDER BY block_id DESC LIMIT 1");
+            if (!$lastBlockQuery) throw new Exception('Reading the blockchain ledger failed: ' . $conn->error);
+            $lastBlock = $lastBlockQuery->fetch_assoc();
+            $previousHash = $lastBlock ? $lastBlock['current_hash'] : str_repeat('0', 64);
+            $payload = json_encode(array(
+                'action' => 'sample_registration_updated',
+                'HeaderID' => $headerId,
+                'DocumentNo' => $documentNo,
+                'registration' => array(
+                    'Date' => $date,
+                    'CustomerName' => $customerName,
+                    'CustomerID' => $customerId,
+                    'SampledBy' => $sampledBy,
+                    'SamplingMethod' => $samplingMethod,
+                    'SamplingDate' => $samplingDate,
+                    'OrderNo' => $orderNo
+                ),
+                'samples' => $ledgerRows,
+                'updated_by' => $username,
+                'updated_at' => date('Y-m-d H:i:s')
+            ), JSON_UNESCAPED_UNICODE);
+            $currentHash = hash('sha256', $payload . '|' . $previousHash);
+            $ledgerHash = $currentHash;
+            $signature = signData($currentHash, $privateKey);
+            if ($signature !== false) {
+                $encryptedData = encryptPrivateKey($payload . '|' . $previousHash, $privateKey);
+                $ledger = $conn->prepare(
+                    "INSERT INTO blockchain_ledger (timestamp, previous_hash, current_hash, digital_signature, encrypted_data, status, userid)
+                     VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, 'active', ?)"
+                );
+                if (!$ledger) throw new Exception('Preparing blockchain ledger entry failed: ' . $conn->error);
+                $ledger->bind_param('sssss', $previousHash, $currentHash, $signature, $encryptedData, $userId);
+                if (!$ledger->execute()) throw new Exception('Writing blockchain ledger entry failed: ' . $ledger->error);
+                $blockId = $conn->insert_id;
+                $ledger->close();
+                log_transaction_metadata($conn, $blockId, $headerId, 'sample_header');
+            }
+        }
+    }
+
+    if (function_exists('logAction')) {
+        logAction($conn, 'UPDATE', $documentNo, $ledgerHash, $userId, 'SUCCESS');
     }
 
     $conn->commit();
-} catch (Exception $e) {
-    $conn->rollback();
-    // handle/log error as appropriate
-    throw $e;
+    $transactionStarted = false;
+    editRegistrationResponse(true, 'Registration ' . $documentNo . ' updated successfully.', array(
+        'HeaderID' => $headerId,
+        'rows_updated' => $rowCount
+    ));
+} catch (Throwable $e) {
+    if ($transactionStarted) {
+        $conn->rollback();
+    }
+    foreach ($uploadedFiles as $uploadedFile) {
+        if (is_file($uploadedFile)) @unlink($uploadedFile);
+    }
+    if (function_exists('logAction')) {
+        try {
+            logAction($conn, 'UPDATE', $documentNo, isset($ledgerHash) ? $ledgerHash : '', $userId, 'FAILED', $e->getMessage());
+        } catch (Throwable $logError) {
+            error_log('Sample registration failure audit could not be written: ' . $logError->getMessage());
+        }
+    }
+    editRegistrationResponse(false, $e->getMessage());
+} finally {
+    $conn->close();
 }
-
-?>
-

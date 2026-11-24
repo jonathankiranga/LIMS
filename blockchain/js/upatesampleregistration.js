@@ -65,12 +65,12 @@ $(document).ready(function () {
                     data.data.header.forEach(header => {
                         $('#batchnoID').val(batchNo);
                         $('#HeaderID').val(docNo);
-                        $('#date').val(new Date(header.Date.split(' ')[0]).toISOString().split('T')[0]);
+                        $('#date').val(dateFieldValue(header.Date));
                         $('#CustomerName').val(header.CustomerName || '');
                         $('#CustomerID').val(header.CustomerID || '');
                         $('#sampledby').val(header.SampledBy || '');
                         $('#SamplingMethod').val(header.SamplingMethod || '');
-                        $('#samplingdate').val(new Date(header.SamplingDate.split(' ')[0]).toISOString().split('T')[0]);
+                        $('#samplingdate').val(dateFieldValue(header.SamplingDate));
                         $('#Orderno').val(header.OrderNo || '');
                     });
 
@@ -81,35 +81,35 @@ $(document).ready(function () {
 
                         const tmpPath = row.SampleFileKey || 'images/no-image.png';
                         let imagePath = tmpPath.replace('../', '');
-                        const date_of_manufacture = row.date_of_manufacture ? new Date(row.date_of_manufacture.split(' ')[0]).toISOString().split('T')[0] : '';
-                        const date_of_expiry = row.date_of_expiry ? new Date(row.date_of_expiry.split(' ')[0]).toISOString().split('T')[0] : '';
-                        const chilled_date_of_expiry = row.chilled_date_of_expiry ? new Date(row.chilled_date_of_expiry.split(' ')[0]).toISOString().split('T')[0] : '';
-                        const frozen_date_of_expiry = row.frozen_date_of_expiry ? new Date(row.frozen_date_of_expiry.split(' ')[0]).toISOString().split('T')[0] : '';
+                        const date_of_manufacture = dateFieldValue(row.date_of_manufacture);
+                        const date_of_expiry = dateFieldValue(row.date_of_expiry);
+                        const chilled_date_of_expiry = dateFieldValue(row.chilled_date_of_expiry);
+                        const frozen_date_of_expiry = dateFieldValue(row.frozen_date_of_expiry);
 
                         const tr = `
                             <tr class="main-row">
                                 <td>
-                                    <input type="hidden" id="SampleID_${irow}" name="SampleID[]" value="${row.SampleID}" />
-                                    <input type="hidden" id="rowindex_${irow}" name="rowindex[]" value="${row.TestID}" />
-                                    <input type="text" id="StandardName_${irow}" value="${row.standardname || ''}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm" />
-                                    <input type="hidden" id="StandardID_${irow}" value="${row.StandardID || ''}" name="standard_id[]" />
+                                    <input type="hidden" id="SampleID_${irow}" name="SampleID[]" value="${escapeRegistrationValue(row.SampleID)}" />
+                                    <input type="hidden" id="rowindex_${irow}" name="rowindex[]" value="${escapeRegistrationValue(row.TestID)}" />
+                                    <input type="text" id="StandardName_${irow}" value="${escapeRegistrationValue(row.standardname || '')}" name="StandardName[]" autocomplete="off" onkeyup="handleStandardInput(event)" class="form-control form-control-sm" />
+                                    <input type="hidden" id="StandardID_${irow}" value="${escapeRegistrationValue(row.StandardID || '')}" name="standard_id[]" />
                                 </td>
                                 <td>
-                                    <input type="text" id="MatrixName_${irow}" value="${row.matrixname || ''}" name="MatrixName[]" autocomplete="off" onkeyup="handleMatrixInput(event)" class="form-control form-control-sm"
+                                    <input type="text" id="MatrixName_${irow}" value="${escapeRegistrationValue(row.matrixname || '')}" name="MatrixName[]" autocomplete="off" onkeyup="handleMatrixInput(event)" class="form-control form-control-sm"
                                         onmouseenter="showPreview(event, document.getElementById('StandardID_${irow}').value)" onmouseleave="hidePreview(event)" />
-                                    <input type="hidden" id="MatrixID_${irow}" value="${row.BaseID || ''}" name="matrix_id[]" />
+                                    <input type="hidden" id="MatrixID_${irow}" value="${escapeRegistrationValue(row.BaseID || '')}" name="matrix_id[]" />
                                 </td>
                                 <td>
-                                    <input type="number" id="samples_${irow}" value="${row.samples || ''}" name="samples[]" class="form-control form-control-sm" min="1" />
+                                    <input type="number" id="samples_${irow}" value="1" readonly name="samples[]" class="form-control form-control-sm" min="1" />
                                 </td>
                                 <td>
-                                    <input type="text" placeholder="Enter SKU units" value="${row.standard_kit_units || ''}" id="standard_kit_units_${irow}" name="standard_kit_units[]" class="form-control form-control-sm"/>
+                                    <input type="text" placeholder="Enter SKU units" value="${escapeRegistrationValue(row.standard_kit_units || '')}" id="standard_kit_units_${irow}" name="standard_kit_units[]" class="form-control form-control-sm"/>
                                 </td>
                                 <td>
-                                    <input type="text" id="product_batch_no_${irow}" value="${row.product_batch_no || ''}" name="product_batch_no[]" class="form-control form-control-sm" />
+                                    <input type="text" id="product_batch_no_${irow}" value="${escapeRegistrationValue(row.product_batch_no || '')}" name="product_batch_no[]" class="form-control form-control-sm" />
                                 </td>
                                 <td>
-                                    <input type="number" id="batch_size_${irow}" value="${row.batch_size || ''}" name="batch_size[]" class="form-control form-control-sm" />
+                                    <input type="number" id="batch_size_${irow}" value="${escapeRegistrationValue(row.batch_size || '')}" name="batch_size[]" class="form-control form-control-sm" />
                                 </td>
                                 <td>
                                     <input type="date" id="date_of_manufacture_${irow}" value="${date_of_manufacture}" name="date_of_manufacture[]" class="form-control form-control-sm" />
@@ -124,17 +124,17 @@ $(document).ready(function () {
                                     <input type="date" id="frozen_date_of_expiry_${irow}" value="${frozen_date_of_expiry}" name="frozen_date_of_expiry[]" class="form-control form-control-sm" />
                                 </td>
                                 <td>
-                                    <img src="${imagePath}" alt="Sample Image" class="thumb-preview" data-full="${imagePath}">
-                                    <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/gif" name="sample_images[]" class="form-control-file" />
+                                    <img src="${escapeRegistrationValue(imagePath)}" alt="Sample Image" class="thumb-preview" data-full="${escapeRegistrationValue(imagePath)}">
+                                    <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/png,image/gif" name="sample_images[]" class="form-control-file" />
                                 </td>
                                 <td>
-                                    <input type="text" id="sample_source_${irow}" value="${row.sample_source || ''}" name="sample_source[]" class="form-control form-control-sm" onkeyup="handleSampleSourceInput(event)" />
+                                    <input type="text" id="sample_source_${irow}" value="${escapeRegistrationValue(row.sample_source || '')}" name="sample_source[]" class="form-control form-control-sm" onkeyup="handleSampleSourceInput(event)" />
                                 </td>
                                 <td>
-                                    <input type="text" id="sample_name_${irow}" value="${row.sample_name || ''}" name="sample_name[]" class="form-control form-control-sm" />
+                                    <input type="text" id="sample_name_${irow}" value="${escapeRegistrationValue(row.sample_name || '')}" name="sample_name[]" class="form-control form-control-sm" />
                                 </td>
                                 <td>
-                                    <input type="text" id="sample_method_${irow}" value="${row.sample_method || ''}" name="sample_method[]" class="form-control form-control-sm" />
+                                    <input type="text" id="sample_method_${irow}" value="${escapeRegistrationValue(row.sample_method || '')}" name="sample_method[]" class="form-control form-control-sm" />
                                 </td>
                                 <td>
                                     <select id="condition_of_sample_${irow}" name="condition_of_sample[]" class="form-control form-control-sm">
@@ -147,7 +147,7 @@ $(document).ready(function () {
                                     </select>
                                 </td>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-danger removeRow" title="Remove row"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="button" class="btn btn-secondary removeRow" title="Sample removal is handled by the cancellation workflow"><i class="fas fa-ban"></i></button>
                                 </td>
                             </tr>`;
 
@@ -218,16 +218,13 @@ $(document).ready(function () {
 
     // Row removal handler
     document.getElementById('sampleTable').addEventListener('click', function (e) {
-        if (e.target.classList.contains('removeRow')) {
+        if (e.target.closest && e.target.closest('.removeRow')) {
             const mainRows = document.querySelectorAll('#sampleRows tr.main-row');
-            if (mainRows.length > 1) {
-                const tr = e.target.closest('tr');
-                const rowId = tr.querySelector('input[name="rowindex[]"]').value;
-                const paramsTr = document.getElementById(`params_row_${rowId}`);
-                if (paramsTr) paramsTr.remove();
-                tr.remove();
-                reindexSampleRows();
-                updateRegistrationSummary();
+            e.preventDefault();
+            if (typeof toastr !== 'undefined') {
+                toastr.warning('Sample rows cannot be deleted from this editor. Use the sample cancellation workflow so existing results and audit history are preserved.');
+            } else {
+                alert('Sample rows cannot be deleted from this editor. Use the sample cancellation workflow.');
             }
         }
     });
@@ -295,48 +292,12 @@ $(document).ready(function () {
         $submitBtns.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
 
         const form = this;
-        // Build FormData from the form directly to ensure file inputs are captured
-        let formData = new FormData(form);
-
-        // Ensure HeaderID and batchno are present (some browsers/inputs may not include them)
-        if (!formData.get('HeaderID')) {
-            formData.append('HeaderID', document.getElementById('HeaderID') ? document.getElementById('HeaderID').value : '');
-        }
-        if (!formData.get('batchno')) {
-            formData.append('batchno', document.getElementById('batchnoID') ? document.getElementById('batchnoID').value : '');
-        }
-
-        // If params hidden inputs are dynamically created they are already inside the form; avoid appending duplicate arrays
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            formData.append(key, value);
-        }
-
-        // Add new fields to formData
-        document.querySelectorAll('#sampleRows tr.main-row').forEach((row, idx) => {
-            formData.append('rowindex[]', idx);
-            formData.append('standard_id[]', row.querySelector('[name="standard_id[]"]').value);
-            formData.append('matrix_id[]', row.querySelector('[name="matrix_id[]"]').value);
-            formData.append('samples[]', row.querySelector('[name="samples[]"]').value);
-            formData.append('kit_units[]', row.querySelector('[name="standard_kit_units[]"]').value);
-            formData.append('batch_no[]', row.querySelector('[name="product_batch_no[]"]').value);
-            formData.append('batch_size[]', row.querySelector('[name="batch_size[]"]').value);
-            formData.append('date_mfg[]', row.querySelector('[name="date_of_manufacture[]"]').value);
-            formData.append('date_exp[]', row.querySelector('[name="date_of_expiry[]"]').value);
-            formData.append('chilled_date_exp[]', row.querySelector('[name="chilled_date_of_expiry[]"]').value);
-            formData.append('frozen_date_exp[]', row.querySelector('[name="frozen_date_of_expiry[]"]').value);
-            formData.append('sample_source[]', row.querySelector('[name="sample_source[]"]').value);
-            formData.append('sample_name[]', row.querySelector('[name="sample_name[]"]').value);
-            formData.append('sample_method[]', row.querySelector('[name="sample_method[]"]').value);
-            formData.append('condition_of_sample[]', row.querySelector('[name="condition_of_sample[]"]').value);
-
-            const fileInput = row.querySelector('[name="sample_images[]"]');
-            if (fileInput && fileInput.files.length) {
-                formData.append('sample_images[]', fileInput.files[0]);
-            }
-        });
+        const formData = new FormData(form);
+        formData.set('username', localStorage.getItem('username') || '');
+        formData.set('user_id', localStorage.getItem('user_id') || localStorage.getItem('userid') || '');
+        // FormData(form) already contains every sample field and selected image.
+        // Do not append duplicate arrays: they break sample-row alignment.
+        formData.set('tablecount', String(document.querySelectorAll('#sampleRows tr.main-row').length));
 
         $.ajax({
             url: 'ajax/sampleregistrationAjaxUpdate.php',
@@ -425,7 +386,7 @@ function addSampleRow() {
             <input type="date" id="frozen_date_of_expiry_${irow}" name="frozen_date_of_expiry[]" class="form-control form-control-sm" />
         </td>
         <td>
-            <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/gif" name="sample_images[]" class="form-control-file" />
+            <input type="file" id="sample_image_${irow}" accept="image/jpeg,image/png,image/gif" name="sample_images[]" class="form-control-file" />
         </td>
         <td>
             <input type="text" id="sample_source_${irow}" name="sample_source[]" class="form-control form-control-sm" onkeyup="handleSampleSourceInput(event)" />
@@ -470,7 +431,7 @@ function addParamsRow(irow, parameters = []) {
     paramsRow.id = `params_row_${irow}`;
     paramsRow.style.display = 'none';
     paramsRow.innerHTML = `
-        <td colspan="15">
+        <td colspan="16">
             <div id="params_container_${irow}"></div>
         </td>
     `;
@@ -536,8 +497,6 @@ function reindexSampleRows() {
                 mat.setAttribute('onmouseleave', 'hidePreview(event)');
             }
 
-            const rowIndexInput = tr.querySelector('input[name="rowindex[]"]');
-            if (rowIndexInput) rowIndexInput.value = i;
         } else if (tr.classList.contains('params-row') && currentMainRow) {
             tr.id = `params_row_${i}`;
             const container = tr.querySelector('div');
@@ -597,6 +556,7 @@ async function handleMatrixInput(event) {
     const dropdownId = 'dropdown_' + inputId;
     const hiddenFieldId = inputId.replace('Name', 'ID');
     const rowNum = inputId.split('_')[1];
+    document.getElementById(hiddenFieldId).value = '';
     const paramsRow = document.getElementById(`params_row_${rowNum}`);
 
     // Remove previous dropdowns
@@ -665,6 +625,7 @@ async function handleStandardInput(event) {
     const dropdownId = 'dropdown_' + inputId;
     const hiddenFieldId = inputId.replace('Name', 'ID');
     const rowNum = inputId.split('_')[1];
+    document.getElementById(hiddenFieldId).value = '';
 
     const existingDropdown = document.getElementById(dropdownId);
     if (existingDropdown) {
@@ -831,7 +792,9 @@ function validateSampleRows() {
 
     rows.forEach((row, idx) => {
         const std = row.querySelector('input[name="StandardName[]"]');
+        const stdId = row.querySelector('input[name="standard_id[]"]');
         const mat = row.querySelector('input[name="MatrixName[]"]');
+        const matId = row.querySelector('input[name="matrix_id[]"]');
         const samples = row.querySelector('input[name="samples[]"]');
         const kit = row.querySelector('input[name="standard_kit_units[]"]');
         const productBatch = row.querySelector('input[name="product_batch_no[]"]');
@@ -850,8 +813,8 @@ function validateSampleRows() {
             el.classList.remove('is-invalid');
         };
 
-        if (!std || !std.value.trim()) markInvalid(std); else markValid(std);
-//        if (!mat || !mat.value.trim()) markInvalid(mat); else markValid(mat);
+        if (!std || !std.value.trim() || !stdId || !stdId.value) markInvalid(std); else markValid(std);
+        if (mat && mat.value.trim() && (!matId || !matId.value)) markInvalid(mat); else markValid(mat);
         if (!samples || !samples.value || parseInt(samples.value, 10) < 1) markInvalid(samples); else markValid(samples);
         if (!kit || !kit.value.trim()) markInvalid(kit); else markValid(kit);
         if (!productBatch || !productBatch.value.trim()) markInvalid(productBatch); else markValid(productBatch);
@@ -884,15 +847,34 @@ function validateSampleRows() {
 }
 
 // Update registration summary
+function dateFieldValue(value) {
+    if (!value) return '';
+    const text = String(value);
+    return text.length >= 10 ? text.substring(0, 10) : '';
+}
+
+function escapeRegistrationValue(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+        const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return entities[char];
+    });
+}
+
 function updateRegistrationSummary() {
     const rows = document.querySelectorAll('#sampleRows tr.main-row');
     let totalRows = rows.length;
-    let totalSamples = 0;
+    const sampleIds = new Set();
+    let unsavedSampleRows = 0;
     rows.forEach(row => {
-        const samplesEl = row.querySelector('input[name="samples[]"]');
-        const n = samplesEl ? parseInt(samplesEl.value, 10) || 0 : 0;
-        totalSamples += n;
+        const sampleIdEl = row.querySelector('input[name="SampleID[]"]');
+        const sampleId = sampleIdEl ? String(sampleIdEl.value || '').trim() : '';
+        if (sampleId) {
+            sampleIds.add(sampleId);
+        } else {
+            unsavedSampleRows++;
+        }
     });
+    const totalSamples = sampleIds.size + unsavedSampleRows;
 
     document.getElementById('tablecount').value = totalRows;
     const out = document.getElementById('registrationsumary');

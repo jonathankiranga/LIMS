@@ -339,3 +339,292 @@ body {
 #samplehtml * {
     overflow: hidden !important;
 }
+
+/* ===== Sample registration editor layout ===== */
+.edit-registration-page {
+    min-height: 100vh;
+    padding: 28px 18px;
+    background: #f3f6fa;
+    color: #1f2937;
+}
+.edit-registration-shell {
+    width: 100%;
+    max-width: 1560px;
+    margin: 0 auto;
+}
+.edit-registration-card {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e1e7ef;
+    border-radius: 14px;
+    box-shadow: 0 10px 35px rgba(28, 45, 70, .08);
+}
+.edit-registration-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px 32px;
+    color: #fff;
+    background: linear-gradient(115deg, #172f55, #254d7d);
+}
+.edit-registration-heading .eyebrow {
+    margin: 0 0 6px;
+    color: #c8d8eb;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+}
+.edit-registration-heading h1 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+    line-height: 1.2;
+}
+.edit-registration-heading .heading-description {
+    margin: 8px 0 0;
+    color: #e0eaf5;
+    font-size: 14px;
+}
+.heading-mark {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 23px;
+}
+.registration-section {
+    padding: 26px 32px;
+    border-bottom: 1px solid #e8edf3;
+}
+.section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.section-heading h2 {
+    margin: 0;
+    color: #1d3555;
+    font-size: 18px;
+    font-weight: 700;
+}
+.section-heading p {
+    margin: 4px 0 0;
+    color: #718096;
+    font-size: 13px;
+}
+.section-step {
+    color: #9aa9bb;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+.registration-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px 20px;
+}
+.field-group {
+    min-width: 0;
+}
+.field-group-wide {
+    grid-column: span 2;
+}
+.field-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #42536a;
+    font-size: 12px;
+    font-weight: 700;
+}
+.field-group input,
+.field-group select,
+.field-group .select2-container .select2-selection {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 11px;
+    border: 1px solid #d7e0ea;
+    border-radius: 7px;
+    background: #fff;
+    color: #25364b;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+.field-group input:focus,
+.field-group select:focus {
+    border-color: #5485bd;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(65, 125, 190, .12);
+}
+.field-group .select2-container {
+    width: 100% !important;
+}
+.field-group .select2-container--default .select2-selection--single {
+    height: 40px;
+    border: 1px solid #d7e0ea;
+    border-radius: 7px;
+}
+.field-group .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    padding-left: 11px;
+    font-size: 13px;
+}
+.field-group .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+}
+.registration-summary {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin: 0 0 14px;
+    padding: 11px 14px;
+    border: 1px solid #e2eaf2;
+    border-radius: 8px;
+    background: #f7f9fc;
+    color: #41536a;
+    font-size: 13px;
+    font-weight: 600;
+}
+.sample-table-scroll {
+    max-height: 520px;
+    overflow: auto;
+    border: 1px solid #dfe6ee;
+    border-radius: 9px;
+}
+#sampleTable {
+    min-width: 2200px;
+    margin: 0;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    box-shadow: none;
+    font-size: 12px;
+}
+#sampleTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    min-width: 125px;
+    padding: 11px 10px;
+    border: 0;
+    border-right: 1px solid rgba(255,255,255,.12);
+    background: #263f61;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+#sampleTable tbody td {
+    min-width: 125px;
+    padding: 8px;
+    border: 0;
+    border-right: 1px solid #e7edf3;
+    border-bottom: 1px solid #e7edf3;
+    background: #fff;
+    vertical-align: middle;
+}
+#sampleTable tbody tr:nth-child(even) td {
+    background: #f9fbfd;
+}
+#sampleTable tbody tr:hover td {
+    background: #f0f6fc;
+}
+#sampleTable input,
+#sampleTable select {
+    min-width: 112px;
+    min-height: 34px;
+    padding: 6px 8px;
+    border: 1px solid #d8e1eb;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 12px;
+}
+#sampleTable input[type="file"] {
+    max-width: 190px;
+    padding: 5px;
+}
+#sampleTable .thumb-preview {
+    display: block;
+    max-width: 48px;
+    max-height: 48px;
+    margin-bottom: 6px;
+    border-radius: 5px;
+}
+#sampleTable .removeRow {
+    min-width: 34px;
+    min-height: 32px;
+    padding: 5px 9px;
+}
+#sampleTable .params-row td {
+    background: #f2f6fb !important;
+}
+#sampleTable .params-row label {
+    margin: 4px 12px 4px 0;
+    color: #344b66;
+    font-size: 12px;
+}
+.registration-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 32px;
+    background: #fbfcfe;
+}
+.registration-actions p {
+    max-width: 760px;
+    margin: 0;
+    color: #718096;
+    font-size: 12px;
+}
+.registration-actions .btn-primary {
+    min-width: 160px;
+    padding: 11px 18px;
+    border: 0;
+    border-radius: 7px;
+    background: #245b91;
+    color: #fff;
+    font-weight: 700;
+}
+.registration-actions .btn-primary:hover {
+    background: #1b4774;
+}
+.registration-actions .btn-primary:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+@media (max-width: 900px) {
+    .registration-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 600px) {
+    .edit-registration-page {
+        padding: 10px;
+    }
+    .edit-registration-heading,
+    .registration-section,
+    .registration-actions {
+        padding: 20px 16px;
+    }
+    .registration-fields {
+        grid-template-columns: 1fr;
+    }
+    .field-group-wide {
+        grid-column: span 1;
+    }
+    .registration-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .registration-actions .btn-primary {
+        width: 100%;
+    }
+}
