@@ -37,7 +37,7 @@ if(isset($_POST['salesreport'])){
       ,sum(salesline.invoiceamount) as invoiceamount
       ,sum(salesline.vatamount) as vatamount
       ,sum(salesline.invoiceamount-salesline.vatamount) as netamt
-  FROM `salesheader``` join `salesline` 
+  FROM `salesheader` join `salesline` 
         on salesheader.documentno=salesline.documentno 
         and salesheader.documenttype=salesline.documenttype
         and salesheader.documenttype=10
