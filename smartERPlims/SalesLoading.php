@@ -49,7 +49,7 @@ $filter="SELECT
            ,`currencycode`
            ,`salespersoncode`
            ,`vatinclusive`
-       FROM `salesheader``` 
+       FROM `salesheader` 
        where `documentno`='".$_POST['documentno']."'";
 $ResultIndex= DB_query($filter, $db);
 $rowresults = DB_fetch_row($ResultIndex);
@@ -147,7 +147,7 @@ $query="SELECT
       ,`inclusive`
       ,`SalesLine`.`partperunit`
       ,`stockmaster`.`averagestock`
-  FROM `salesline```` 
+  FROM `salesline` 
   join `stockmaster` on `SalesLine`.code=`stockmaster`.itemcode
  where `documentno`='".$_POST['documentno']."'";
  
@@ -257,7 +257,7 @@ Function IsTankOrStore($ItemCode){
     global $db;
     
     $stcode = trim($ItemCode);
-    $sql = sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
+    $sql = sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
     $ResultIndex=DB_query($sql,$db);
     $Stores = DB_fetch_row($ResultIndex);
    if($Stores[0]==0){
@@ -274,19 +274,19 @@ Function StoreTankCMB($id,$ItemCode){
 
         $line='';
         $line .='<select name="location['.$id.']" required="required">';
-        $sql=sprintf("select count(*) from `productionunit`` where itemcode='%s'",$ItemCode);
+        $sql=sprintf("select count(*) from `productionunit` where itemcode='%s'",$ItemCode);
         
         $ResultIndex=DB_query($sql, $db);
         $Stores= DB_fetch_row($ResultIndex);
        if($Stores[0]==0){
           $_SESSION['productionTankStore'][$stcode]="S";
-           $REsults=DB_query('SELECT `code`,`Storename` FROM `stores``', $db);
+           $REsults=DB_query('SELECT `code`,`Storename` FROM `stores`', $db);
            while($rows= DB_fetch_array($REsults)){
                 $line .= sprintf('<option value="%s" %s>%s</option>',trim($rows['code']),$_POST['location'][$id]==trim($rows['code'])?'selected="selected"':'',$rows['Storename']);
             }
        }else{
           $_SESSION['productionTankStore'][$stcode]="T";
-           $ResultIndex=DB_query(sprintf("select tankname from `productionunit`` where itemcode='%s'",$ItemCode), $db);
+           $ResultIndex=DB_query(sprintf("select tankname from `productionunit` where itemcode='%s'",$ItemCode), $db);
             while($value=DB_fetch_array($ResultIndex)){
                    $line .= sprintf('<option value="%s" %s>%s</option>',trim($value['tankname']),$_POST['location'][$id]==trim($value['tankname'])?'selected="selected"':'',$value['tankname']);
            }
