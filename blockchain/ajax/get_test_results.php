@@ -25,9 +25,26 @@ $sql = "
     JOIN sample_header sp ON tr.HeaderID = sp.HeaderID
     LEFT JOIN testparameters tp
       ON tp.StandardID = tr.StandardID
-     AND (
-          tp.ParameterID = tr.ParameterID
-          OR tp.BaseID = tr.ParameterID
+     AND tp.ParameterID = COALESCE(
+          (
+              SELECT exact_tp.ParameterID
+              FROM testparameters exact_tp
+              WHERE exact_tp.ParameterID = tr.ParameterID
+                AND exact_tp.StandardID = tr.StandardID
+              LIMIT 1
+          ),
+          (
+              SELECT MIN(base_tp.ParameterID)
+              FROM testparameters base_tp
+              WHERE base_tp.BaseID = tr.ParameterID
+                AND base_tp.StandardID = tr.StandardID
+                AND (
+                    SELECT COUNT(DISTINCT category_check.Category)
+                    FROM testparameters category_check
+                    WHERE category_check.BaseID = tr.ParameterID
+                      AND category_check.StandardID = tr.StandardID
+                ) = 1
+          )
      )
     LEFT JOIN teststandards ts ON ts.StandardID = tr.StandardID
     LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
@@ -74,11 +91,11 @@ while ($row = $result->fetch_assoc()) {
     }
 
     /*
-     * HeaderID is part of the grouping key. The UI still presents one
-     * block for each SampleID, while preventing two headers with a reused
-     * SampleID from being mixed.
+     * Group by both HeaderID and SampleID. A single registration header can
+     * contain multiple samples, and their approval decisions must remain
+     * independent.
      */
-    $key = (string)$row['HeaderID'];
+    $key = (string)$row['HeaderID'] . '|' . (string)$row['SampleID'];
 
     if (!isset($groups[$key])) {
         $groups[$key] = [
