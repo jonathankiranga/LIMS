@@ -14,7 +14,7 @@ $SQL="SELECT
       ,BankAccounts.currency
       ,BankAccounts.bankName
       ,`currencies`.hundredsname
-   FROM `banktransactions``` join `bankaccounts` on 
+   FROM `banktransactions` join `bankaccounts` on 
   BankTransactions.bankcode=BankAccounts.accountcode 
   join currencies on BankAccounts.currency=`currencies`.`currabrev`
      where journal='".$_GET['PVNUMBER']."'";
@@ -58,7 +58,7 @@ $PaperSize='A5_Landscape';
     $YPos= $Firstinvoicerow;
     
     $SQL="SELECT `date`,`invoiceno`,abs(`amount`) as amount
-        FROM `paymentsallocation`` where 
+        FROM `paymentsallocation` where 
         `receiptjournal`='".$_GET['PVNUMBER']."'";
     
     $ResultIndex = DB_query($SQL,$db);
@@ -80,7 +80,7 @@ $PaperSize='A5_Landscape';
     $pdf->OutputD($_SESSION['DatabaseName'] . '_Remittance_' .$docno. '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    $SQL="Update `banktransactions`` set  `ChequePrinted`=1 where journal='".$_GET['PVNUMBER']."'";
+    $SQL="Update `banktransactions` set  `ChequePrinted`=1 where journal='".$_GET['PVNUMBER']."'";
     DB_query($SQL,$db);
     
 }else{
@@ -113,7 +113,7 @@ $PaperSize='A5_Landscape';
       ,`narrative`
       ,BankAccounts.currency
       ,BankAccounts.bankName
-  FROM `banktransactions``` join `bankaccounts` on BankTransactions.bankcode=BankAccounts.accountcode 
+  FROM `banktransactions` join `bankaccounts` on BankTransactions.bankcode=BankAccounts.accountcode 
    where doctype=53 or ChequePrinted=0 
   order by `DocDate` desc limit 50" ;
   
