@@ -24,16 +24,16 @@ if($_POST['submit']=="Enter Delivery Details and Confirm Order"){
 }
     
 if(isset($_POST['confirm'])){
-    DB_query("UPDATE `assetsheader``` SET `released` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
-    DB_query("UPDATE `fixedassetsline``` SET `completed` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `assetsheader` SET `released` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
+    DB_query("UPDATE `fixedassetsline` SET `completed` = 1 where documentno='".$_SESSION['CompleteDocument']."'", $db);
     prnMsg('Purchase order :'.$_SESSION['CompleteDocument'].' has been saved.'
          . ' Click Here to Print'.'<a href="PurchaseAssetsList.php?No='.$_SESSION['CompleteDocument'].'">Print Purchase order '.$_SESSION['CompleteDocument'].'</a>');
     unset($_POST);
 }
 
 if(isset($_POST['Delete'])){
-    DB_query("Delete from `fixedassetsline`` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
-    DB_query("delete from `assetsheader`` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
+    DB_query("Delete from `fixedassetsline` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
+    DB_query("delete from `assetsheader` where documentno='".$_SESSION['CompleteDocument']."' and `documenttype`='18'", $db);
     prnMsg('Purchase order :'.$_SESSION['CompleteDocument'].' has been Deleted.');
     unset($_POST);
 }
