@@ -44,7 +44,7 @@ if(!isset($_SESSION['Stores'])){
     $REsults=DB_query('SELECT '
             . '`code`,'
             . '`Storename` '
-            . 'FROM `stores``', $db);
+            . 'FROM `stores`', $db);
     $x=0;
     while($row= DB_fetch_array($REsults)){
         $_SESSION['Stores'][$x]=$row;
@@ -53,7 +53,7 @@ if(!isset($_SESSION['Stores'])){
 }   
 
 if(!isset($_SESSION['ProductionUnit'])){
-$ResultIndex=DB_query("select tankname, stockmaster.descrip from `productionunit`` "
+$ResultIndex=DB_query("select tankname, stockmaster.descrip from `productionunit` "
             . "join stockmaster on ProductionUnit.itemcode=stockmaster.itemcode  ", $db);
     while($value=DB_fetch_array($ResultIndex)){
             $_SESSION['ProductionUnit'][]=$row;
@@ -103,7 +103,7 @@ function getstocklist(){
       ,`www_users`.`realname`
       ,`ProductionMaster`.`itemcode`
       ,stockmaster.descrip
-  FROM `productionmaster``
+  FROM `productionmaster`
       join stockmaster on stockmaster.itemcode=`ProductionMaster`.`itemcode`
       left join `www_users` on `ProductionMaster`.`userid`=`www_users`.`userid`
       where (modified is  null) or (modified=0) order by date desc";
