@@ -25,7 +25,7 @@ $SQL="select
       ,`SalesHeader`.`yourreference`   
       ,salesheader.`locationcode` as BankCode
       ,`SalesHeader`.`picture`
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
            left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
@@ -81,7 +81,7 @@ $SQL="select
       ,IFNULL(salesline.TAT,0) as TAT
       ,IFNULL(salesline.LineDiscountPercent,0) as lineDiscount
       ,IFNULL(salesheader.QtyDiscount,0) as headerDiscount
-  FROM `salesheader``` 
+  FROM `salesheader` 
         join `salesline` on salesheader.documentno=salesline.documentno  and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=1
         join stockmaster on stockmaster.itemcode=salesline.code
         left join stockmaster Container on Container.itemcode=salesline.containercode
@@ -235,7 +235,7 @@ $SQL="select
     $pdf->__destruct();
     
     
-    DB_query("Update `salesheader`` set printed=1 where salesheader.documenttype=1 and salesheader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader` set printed=1 where salesheader.documenttype=1 and salesheader.documentno='".$_GET['No']."'", $db);
     
 }else{
 
@@ -261,7 +261,7 @@ if(isset($_GET['unprintedonly'])){
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(salesline.`invoiceamount`) as OrderValue
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' and (`SalesHeader`.`printed` is null or `SalesHeader`.`printed`=0)
        group by 
@@ -290,7 +290,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(salesline.`invoiceamount`) as OrderValue
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' 
        group by 
@@ -354,7 +354,7 @@ function getiamge($ref){
 //   $dbimage = odbc_connect("Driver={SQL Server};Server=$host;Database=$database;",trim($DBUser),trim($DBPassword));
     $dbimage = new mysqli($host, $DBUser, $DBPassword, $database);
  
-    $SQL=sprintf("SELECT `picture` FROM `salesheader``` where documentno='%s'",trim($ref));
+    $SQL=sprintf("SELECT `picture` FROM `salesheader` where documentno='%s'",trim($ref));
      $Result=DB_query($SQL,$dbimage);
       $myrow=DB_fetch_row($Result);
     $urlString=$myrow[0];
