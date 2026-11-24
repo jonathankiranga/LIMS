@@ -27,12 +27,18 @@ $sql = "
         SUM(CASE WHEN x.Department = 'microbiological' THEN 1 ELSE 0 END) AS MicrobiologyTotal,
         SUM(CASE WHEN x.Department = 'microbiological' AND x.StatusID = 2 THEN 1 ELSE 0 END) AS MicrobiologyPending,
         SUM(CASE WHEN x.Department = 'microbiological' AND x.StatusID = 3 THEN 1 ELSE 0 END) AS MicrobiologyApproved,
-        SUM(CASE WHEN x.Department = 'microbiological' AND (x.StatusID IS NULL OR x.StatusID NOT IN (2, 3)) THEN 1 ELSE 0 END) AS MicrobiologyBlocked
+        SUM(CASE WHEN x.Department = 'microbiological' AND (x.StatusID IS NULL OR x.StatusID NOT IN (2, 3)) THEN 1 ELSE 0 END) AS MicrobiologyBlocked,
+        GROUP_CONCAT(DISTINCT CASE WHEN x.Department = 'chemical' AND x.StatusID = 3 THEN u.full_name END ORDER BY u.full_name SEPARATOR ', ') AS ChemicalApprovedBy,
+        MAX(CASE WHEN x.Department = 'chemical' AND x.StatusID = 3 THEN x.updated_at END) AS ChemicalApprovedAt,
+        GROUP_CONCAT(DISTINCT CASE WHEN x.Department = 'microbiological' AND x.StatusID = 3 THEN u.full_name END ORDER BY u.full_name SEPARATOR ', ') AS MicrobiologyApprovedBy,
+        MAX(CASE WHEN x.Department = 'microbiological' AND x.StatusID = 3 THEN x.updated_at END) AS MicrobiologyApprovedAt
     FROM (
         SELECT
             tr.HeaderID,
             tr.SampleID,
             tr.StatusID,
+            tr.approvedby,
+            tr.updated_at,
             COALESCE(
                 (
                     SELECT exact_tp.Category
@@ -52,6 +58,7 @@ $sql = "
         FROM test_results tr
     ) x
     INNER JOIN sample_header sh ON sh.HeaderID = x.HeaderID
+    LEFT JOIN users u ON u.user_id = x.approvedby
     GROUP BY x.HeaderID, x.SampleID, sh.DocumentNo, sh.Date
     HAVING SUM(CASE WHEN x.StatusID = 3 THEN 1 ELSE 0 END) > 0
     ORDER BY sh.Date DESC, x.HeaderID DESC
