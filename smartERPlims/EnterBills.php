@@ -417,13 +417,13 @@ class journalentries {
             $Cust = $this->GetSupplierCurrency($_POST['VendorID']);
          $Conrate = $this->ExtractRate($_POST['currencycode']);
              
-         $this->JournalArray[] = sprintf("INSERT INTO `enterbillheaders``
+         $this->JournalArray[] = sprintf("INSERT INTO `enterbillheaders`
           (`date`,`documenttype`,`documentno`,`narration`,`journalno`,whtax,VendorID) VALUES ('%s','%s','%s','%s','%s','%s','%s')",
           FormatDateForSQL($_POST['date']),($_SESSION['Grossamounttotal']>0?'23':'21'),$_POST['documentno'],
           $_POST['reference'].$_POST['comments'],$JOURNAL,$_POST['withholdtax'],$_POST['VendorID']);
  
          
-        $this->JournalArray[] = sprintf("INSERT INTO `supplierstatement``
+        $this->JournalArray[] = sprintf("INSERT INTO `supplierstatement`
          (`Date`,`Documentno` ,`Documenttype` ,`Accountno`,`Grossamount` ,`JournalNo`,`Dimension_One`,`Dimension_Two`,`Currency`,whtax) VALUES
          ('%s','%s','%s' ,'%s' ,%f ,'%s' ,'%s' ,'%s' ,'%s','%s')",
          FormatDateForSQL($_POST['date']),$_POST['documentno'],($_SESSION['Grossamounttotal']>0?'23':'21'),$_POST['VendorID'],(0-$_SESSION['Grossamounttotal']),
@@ -441,7 +441,7 @@ class journalentries {
            $assetIdVal = isset($row['assetid']) && $row['assetid'] > 0 ? $row['assetid'] : 'NULL';
            
            if($row['Grossamount']>0){
-           $this->JournalArray[]= sprintf("INSERT INTO `generalledger``
+           $this->JournalArray[]= sprintf("INSERT INTO `generalledger`
            (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
            `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
            `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -451,7 +451,7 @@ class journalentries {
             $_POST['currencycode'], $Conrate,'',$_POST['VendorID'],'',0,$_POST['reference'].$_POST['comments'],
                    '0','','0',$_POST['DimensionOne'],$_POST['DimensionTwo'],$assetIdVal );
            }else{
-                $this->JournalArray[]= sprintf("INSERT INTO `generalledger``
+                $this->JournalArray[]= sprintf("INSERT INTO `generalledger`
            (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
            `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
            `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -464,7 +464,7 @@ class journalentries {
            if(mb_strlen($row['defaultgl_vat'])>2){
                
                if($row['vatamount']>0){
-                $this->JournalArray[]= sprintf("INSERT INTO `generalledger``
+                $this->JournalArray[]= sprintf("INSERT INTO `generalledger`
                  (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                   `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
                   `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -474,7 +474,7 @@ class journalentries {
                   $_POST['currencycode'], $Conrate,'',$_POST['VendorID'],'',0,
                   $_POST['reference'].$_POST['comments'],'0','','0',$_POST['DimensionOne'],$_POST['DimensionTwo'],$assetIdVal );
                }else{
-                  $this->JournalArray[]= sprintf("INSERT INTO `generalledger``
+                  $this->JournalArray[]= sprintf("INSERT INTO `generalledger`
                  (`journalno`,`Docdate`,`period`,`DocumentNo`,`DocumentType`,`accountcode`,
                   `balaccountcode`,`amount`,`currencycode`,`ExchangeRate`,`cutomercode`,`suppliercode` ,
                   `bankcode`,`reconcilled`,`narration`,`ExchangeRateDiff`,`VATaccountcode`,`VATamount`,
@@ -489,12 +489,12 @@ class journalentries {
           
            $assetIdLine = ($assetIdVal === 'NULL') ? 'NULL' : $assetIdVal;
            if($row['vatamount']>0){
-                    $this->JournalArray[] = sprintf("INSERT INTO `enterbillslines``
+                    $this->JournalArray[] = sprintf("INSERT INTO `enterbillslines`
                    (`documenttype`,`documentno`,`journalno`,`account`,`vatamount`,`grossamount`,`assetid`)
                     VALUES ('%s','%s' ,'%s' ,'%s' ,%f ,%f,%s)",($_SESSION['Grossamounttotal']>0?'23':'21')
                    , $_POST['documentno'],$JOURNAL,$row['account'],$row['vatamount'],$row['Grossamount'],$assetIdLine);
               } else {
-                    $this->JournalArray[] = sprintf("INSERT INTO `enterbillslines``
+                    $this->JournalArray[] = sprintf("INSERT INTO `enterbillslines`
                    (`documenttype`,`documentno`,`journalno`,`account`,`vatamount`,`grossamount`,`assetid`)
                     VALUES ('%s','%s' ,'%s' ,'%s' ,%f ,%f,%s)",($_SESSION['Grossamounttotal']>0?'23':'21')
                    , $_POST['documentno'],$JOURNAL,$row['account'],0,$row['Grossamount'],$assetIdLine);  
