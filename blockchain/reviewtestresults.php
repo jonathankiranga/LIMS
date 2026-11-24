@@ -346,7 +346,7 @@ function fetchTestResults(flag){
             renderDepartmentProgress(progress);
             var ready = {};
             (progress.results || []).forEach(function(sample){
-                if(sample.ReadyForFinalApproval) ready[String(sample.HeaderID)] = true;
+                if(sample.ReadyForFinalApproval) ready[String(sample.HeaderID) + '|' + String(sample.SampleID)] = true;
             });
             return fetch('ajax/get_test_results.php?statusID='+encodeURIComponent(flag)+'&groupBySample=1&wholeSample=1')
                 .then(function(response){return response.json();})
@@ -357,7 +357,7 @@ function fetchTestResults(flag){
                         wrRenderPager(1,0);
                         return;
                     }
-                    wrResults=(data.results || []).filter(function(sample){return ready[String(sample.HeaderID)] === true;});
+                    wrResults=(data.results || []).filter(function(sample){return ready[String(sample.HeaderID) + '|' + String(sample.SampleID)] === true;});
                     wrRows=[];
                     if(!wrResults.length){
                         tb.innerHTML='<tr><td colspan="7" class="text-center">No samples are ready for final approval. Samples awaiting departmental approval are listed above.</td></tr>';
