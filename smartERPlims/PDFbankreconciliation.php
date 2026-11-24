@@ -21,7 +21,7 @@ $PageNumber = 0;
 PaymentHeader();
 
     $SQL="SELECT `StatementNo`,`bankcode`,`narration`,`amount`"
-        . " FROM `bankreconciliation``"
+        . " FROM `bankreconciliation`"
         . "  where `StatementNo`='".$_GET['id']."' "
         . "and `bankcode`='".$_GET['bankcode']."'"; ;
     $ResultIndex=DB_query($SQL,$db);
@@ -62,7 +62,7 @@ $pdf->__destruct();
        `BankReconciliation`.`StatementNo`
       ,`BankReconciliation`.bankcode
       ,BankAccounts.bankName
-  FROM `bankreconciliation`` 
+  FROM `bankreconciliation` 
   join `bankaccounts` on `BankReconciliation`.bankcode=BankAccounts.accountcode
   order by `BankReconciliation`.`StatementNo` desc" ;
   
@@ -93,8 +93,8 @@ Function PaymentHeader(){
   $SQL="SELECT `BankReconciliation`.`StatementNo`,
 	    `BankReconciliation`.`bankcode`,
 	    `BankAccounts`.`bankName`
-       FROM `bankreconciliation`` 
-       join `bankaccounts`` on `BankReconciliation`.`bankcode`=`BankAccounts`.`accountcode`
+       FROM `bankreconciliation` 
+       join `bankaccounts` on `BankReconciliation`.`bankcode`=`BankAccounts`.`accountcode`
        where `BankReconciliation`.`StatementNo`='".$_GET['id']."' "
           . " and `BankReconciliation`.`bankcode`='".$_GET['bankcode']."' limit 1";
        
