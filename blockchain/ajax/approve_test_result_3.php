@@ -97,14 +97,12 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
     $statusMap=[1=>4,4=>0]; if(!isset($statusMap[$approvalStatus])){echo json_encode(['success'=>false,'message'=>'Invalid sample review decision.']);exit;}
     $statusID=$statusMap[$approvalStatus]; $conn->begin_transaction();
     try {
-        // test_results is authoritative for this workflow. Do not depend on
-        // sample_tests, which is no longer populated by current registration.
-        // Lock the exact pending result rows for this HeaderID + SampleID.
-        $stmt = $conn->prepare("SELECT tr.resultsID, tr.TestID
+        // Lock every result in this sample block. Final approval is allowed only
+        // after every required departmental result has reached StatusID 3.
+        $stmt = $conn->prepare("SELECT tr.resultsID, tr.TestID, tr.StatusID
                                 FROM test_results tr
                                 WHERE tr.HeaderID = ?
                                   AND tr.SampleID = ?
-                                  AND tr.StatusID = 3
                                 FOR UPDATE");
         if (!$stmt) throw new Exception('Failed to prepare sample review lookup: ' . $conn->error);
         $stmt->bind_param('is', $headerID, $sampleID);
@@ -112,25 +110,37 @@ if (isset($_POST['reviewBlockApproval']) && (int)$_POST['reviewBlockApproval'] =
         $rs = $stmt->get_result();
         $resultIDs = [];
         $testIDs = [];
+        $notReadyCount = 0;
         while ($r = $rs->fetch_assoc()) {
+            if ((int)$r['StatusID'] !== 3) {
+                $notReadyCount++;
+                continue;
+            }
             $resultIDs[] = (int)$r['resultsID'];
             $testIDs[] = (int)$r['TestID'];
         }
         $stmt->close();
 
         if (!$resultIDs) {
-            throw new Exception('No pending review results were found for this sample block (HeaderID ' . $headerID . ', SampleID ' . $sampleID . ', StatusID 3).');
+            throw new Exception('No department-approved results were found for this sample block.');
+        }
+        if ($notReadyCount > 0) {
+            throw new Exception('Final approval is not available. ' . $notReadyCount . ' test result(s) are still awaiting departmental approval, reanalysis, or resolution.');
         }
 
-        // Update only the exact sample block; avoid changing other samples
-        // that happen to share the same HeaderID.
-        $stmt = $conn->prepare("UPDATE test_results
-                                SET approvedby = ?, StatusID = ?
-                                WHERE HeaderID = ?
-                                  AND SampleID = ?
-                                  AND StatusID = 3");
+        // Update only the exact locked result rows. Never use SampleID alone
+        // for the final transition.
+        $placeholders = implode(',', array_fill(0, count($resultIDs), '?'));
+        $sql = "UPDATE test_results
+                SET approvedby = ?, StatusID = ?
+                WHERE resultsID IN ($placeholders)
+                  AND StatusID = 3";
+        $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare sample review update: ' . $conn->error);
-        $stmt->bind_param('siis', $userID, $statusID, $headerID, $sampleID);
+        $bind = array_merge(['si' . str_repeat('i', count($resultIDs)), $userID, $statusID], $resultIDs);
+        $refs = [];
+        foreach ($bind as $k => $v) $refs[$k] = &$bind[$k];
+        call_user_func_array([$stmt, 'bind_param'], $refs);
         if (!$stmt->execute()) throw new Exception('Failed to update sample review block: ' . $stmt->error);
         $updated = $stmt->affected_rows;
         $stmt->close();
@@ -238,62 +248,79 @@ if (isset($_POST['blockApproval']) && (int)$_POST['blockApproval'] === 1) {
     $conn->begin_transaction();
 
     try {
-        $sql = "SELECT DISTINCT tr.TestID
+        // Resolve each result to one authoritative parameter category. Prefer
+        // an exact ParameterID + StandardID match; use BaseID only when no
+        // exact parameter row exists. This prevents a shared BaseID from
+        // making the same result eligible for both departments.
+        $sql = "SELECT tr.resultsID, tr.TestID
                 FROM test_results tr
-                JOIN testparameters tp
-                  ON tp.ParameterID = tr.ParameterID
-                 AND tp.StandardID = tr.StandardID
                 WHERE tr.HeaderID = ?
                   AND tr.SampleID = ?
                   AND tr.StatusID = 2";
         if (!$isAdminApproval) {
-            $sql .= " AND tp.Category = ?";
+            $sql .= " AND (
+                EXISTS (
+                    SELECT 1 FROM testparameters tp
+                    WHERE tp.ParameterID = tr.ParameterID
+                      AND tp.StandardID = tr.StandardID
+                      AND tp.Category = ?
+                )
+                OR (
+                    NOT EXISTS (
+                        SELECT 1 FROM testparameters exact_tp
+                        WHERE exact_tp.ParameterID = tr.ParameterID
+                          AND exact_tp.StandardID = tr.StandardID
+                    )
+                    AND EXISTS (
+                        SELECT 1 FROM testparameters base_tp
+                        WHERE base_tp.BaseID = tr.ParameterID
+                          AND base_tp.StandardID = tr.StandardID
+                          AND base_tp.Category = ?
+                    )
+                )
+            )";
         }
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare sample lookup: '.$conn->error);
-
         if ($isAdminApproval) {
             $stmt->bind_param('is', $headerID, $sampleID);
         } else {
-            $stmt->bind_param('iss', $headerID, $sampleID, $department);
+            $stmt->bind_param('isss', $headerID, $sampleID, $department, $department);
         }
-
         if (!$stmt->execute()) throw new Exception('Failed to load sample tests: '.$stmt->error);
 
         $rs = $stmt->get_result();
+        $resultIDs = [];
         $testIDs = [];
-        while ($r = $rs->fetch_assoc()) $testIDs[] = (int)$r['TestID'];
+        while ($r = $rs->fetch_assoc()) {
+            $resultIDs[] = (int)$r['resultsID'];
+            $testIDs[] = (int)$r['TestID'];
+        }
         $stmt->close();
 
-        if (!$testIDs) throw new Exception('No pending tests were found for this sample block.');
+        if (!$resultIDs) throw new Exception('No pending tests were found for this sample block and department.');
 
-        $sql = "UPDATE test_results tr
-                JOIN testparameters tp
-                  ON tp.ParameterID = tr.ParameterID
-                 AND tp.StandardID = tr.StandardID
-                SET tr.`$level` = ?, tr.StatusID = ?
-                WHERE tr.HeaderID = ?
-                  AND tr.SampleID = ?
-                  AND tr.StatusID = 2";
-        if (!$isAdminApproval) {
-            $sql .= " AND tp.Category = ?";
-        }
-
+        // Update only the result IDs selected for this department. The other
+        // department's StatusID 2 rows cannot be included by a broad sample update.
+        $placeholders = implode(',', array_fill(0, count($resultIDs), '?'));
+        $sql = "UPDATE test_results
+                SET `$level` = ?, StatusID = ?
+                WHERE resultsID IN ($placeholders)
+                  AND StatusID = 2";
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception('Failed to prepare block update: '.$conn->error);
-
-        if ($isAdminApproval) {
-            $stmt->bind_param('siss', $userID, $statusID, $headerID, $sampleID);
-        } else {
-            $stmt->bind_param('sisss', $userID, $statusID, $headerID, $sampleID, $department);
-        }
-
+        $bind = array_merge(['si' . str_repeat('i', count($resultIDs)), $userID, $statusID], $resultIDs);
+        $refs = [];
+        foreach ($bind as $k => $v) $refs[$k] = &$bind[$k];
+        call_user_func_array([$stmt, 'bind_param'], $refs);
         if (!$stmt->execute()) throw new Exception('Failed to update sample block: '.$stmt->error);
         $updated = $stmt->affected_rows;
         $stmt->close();
 
-        if ($updated <= 0) throw new Exception('No test results were updated.');
+        if ($updated !== count($resultIDs)) {
+            throw new Exception('Department approval changed during processing. Expected ' . count($resultIDs) . ' result row(s), updated ' . $updated . '. No partial department approval was committed.');
+        }
 
         $placeholders = implode(',', array_fill(0, count($testIDs), '?'));
         $sql = "UPDATE sample_tests SET datetestended = NOW() WHERE TestID IN ($placeholders)";
