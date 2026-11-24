@@ -242,7 +242,7 @@ if(isset($_GET['sendNo'])){
     $pdf->Output($_SESSION['DatabaseName'] . '_INVOICE_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf','I');
     $pdf->__destruct();
     
-    DB_query("Update `salesheader`` set printed=1 where salesheader.documenttype=10 and salesheader.documentno='".$_GET['No']."'", $db);
+    DB_query("Update `salesheader` set printed=1 where salesheader.documenttype=10 and salesheader.documentno='".$_GET['No']."'", $db);
       
 }else{
 
@@ -280,7 +280,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(salesline.`invoiceamount`) as OrderValue
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='10' ".    
       ((mb_strlen($_POST['CustomerID'])>0)?" and `SalesHeader`.`customercode`='".$_POST['CustomerID']."'":'').
@@ -352,7 +352,7 @@ Function GetDeliveries($INVOICEno){
     
     $SQL="SELECT 
         `SalesHeader`.`externaldocumentno` as salesorder
-      from `salesheader`` where `SalesHeader`.`documenttype`='10'
+      from `salesheader` where `SalesHeader`.`documenttype`='10'
       and `SalesHeader`.`documentno`='".$INVOICEno."' limit 1";
     $Result=DB_query($SQL,$db);
     $myrow=DB_fetch_row($Result);
@@ -361,7 +361,7 @@ Function GetDeliveries($INVOICEno){
     $array=array();
     $SQL="select
         `SalesHeader`.`documentno` as deleiveries
-      from `salesheader`` where `SalesHeader`.`documenttype`='19' 
+      from `salesheader` where `SalesHeader`.`documenttype`='19' 
       and `SalesHeader`.`yourreference`='".$ref."'";
     $Result=DB_query($SQL,$db);
     while($myrow= DB_fetch_array($Result)){
@@ -379,7 +379,7 @@ function getiamge($ref){
     global $host,$database,$DBUser,$DBPassword;
     $dbimage = new mysqli($host, $DBUser, $DBPassword, $database);
  
-    $SQL=sprintf("SELECT `picture` FROM `salesheader``` where documentno='%s'",trim($ref));
+    $SQL=sprintf("SELECT `picture` FROM `salesheader` where documentno='%s'",trim($ref));
      $Result=DB_query($SQL,$dbimage);
       $myrow=DB_fetch_row($Result);
     $urlString=$myrow[0];
@@ -412,7 +412,7 @@ function gethtmlbody($documentno) {
             sh.userid, d.email, d.city, d.postcode, d.country, d.phone, d.contact,
             sh.yourreference, sh.externaldocumentno as BankCode2, sh.printed, d.middlen,
             sh.packagescharge, sh.picture, sh.locationcode as BankCode
-            FROM `salesheader`` sh
+            FROM `salesheader` sh
             JOIN debtors d ON sh.customercode = d.itemcode
             LEFT JOIN salesrepsinfo rep ON rep.code = sh.salespersoncode
             WHERE sh.documenttype = '10' AND sh.documentno = '" . $documentno . "' 
@@ -451,7 +451,7 @@ function gethtmlbody($documentno) {
             ,1 as partperunit
             ,AVG(IFNULL(salesline.LineDiscountPercent,0)) as lineDiscount
             ,IFNULL(salesheader.QtyDiscount,0) as headerDiscount
-    FROM `salesheader``` 
+    FROM `salesheader` 
     join `salesline`  on salesheader.documentno=salesline.documentno 
     and salesheader.documenttype=salesline.documenttype and salesheader.documenttype=10
     left join stockmaster Container on Container.itemcode=salesline.containercode
