@@ -48,11 +48,13 @@ $sql = "
                     LIMIT 1
                 ),
                 (
-                    SELECT base_tp.Category
+                    SELECT CASE
+                        WHEN COUNT(DISTINCT base_tp.Category) = 1 THEN MIN(base_tp.Category)
+                        ELSE NULL
+                    END
                     FROM testparameters base_tp
                     WHERE base_tp.BaseID = tr.ParameterID
                       AND base_tp.StandardID = tr.StandardID
-                    LIMIT 1
                 )
             ) AS Department
         FROM test_results tr
