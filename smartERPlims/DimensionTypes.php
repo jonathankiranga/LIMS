@@ -41,9 +41,9 @@ if(isset($_GET['editid'])){
 
 if($_POST['fid']=='dty'){
     if(isset($_POST['idedit'])){
-        DB_query("Update `DimensionSetUp` set Dimension_type='".$_POST['Dimension_type']."'  where id='".$_POST['idedit']."'", $db);
+        DB_query("Update `dimensionsetup` set Dimension_type='".$_POST['Dimension_type']."'  where id='".$_POST['idedit']."'", $db);
     }else{
-         DB_query("insert into `DimensionSetUp` (Dimension_type) values ('".$_POST['Dimension_type']."')", $db);
+         DB_query("insert into `dimensionsetup` (Dimension_type) values ('".$_POST['Dimension_type']."')", $db);
     }
     unset($_POST);
     unset($editcode);
@@ -64,7 +64,7 @@ if($_POST['fid']=='dval'){
 
 if(isset($idtype)){
   
-$ResultIndex=DB_query("SELECT `Dimension_type` FROM `DimensionSetUp` where id='".$idtype."'", $db);
+$ResultIndex=DB_query("SELECT `Dimension_type` FROM `dimensionsetup` where id='".$idtype."'", $db);
 $rows=DB_fetch_row($ResultIndex);
                     
 echo '<p class="page_title_text">'. ' ' .$rows[0] . '</p>';
@@ -127,7 +127,7 @@ echo '<input type="hidden" name="fid" value="dval" />';
         
         echo '<input type="hidden" name="idedit" value="' .$editid. '" />';
 
-        $ResultIndex4=DB_query("SELECT `id`,`Dimension_type`,`Blocked` FROM `DimensionSetUp` where id='".$editid."'", $db);
+        $ResultIndex4=DB_query("SELECT `id`,`Dimension_type`,`Blocked` FROM `dimensionsetup` where id='".$editid."'", $db);
         $rows=DB_fetch_row($ResultIndex4);
             $_POST['id']=$rows[0];
             $_POST['Dimension_type']=$rows[1];
@@ -143,7 +143,7 @@ echo '<input type="hidden" name="fid" value="dval" />';
     
 }else{
     
-    $ResultIndex5=DB_query('SELECT `id`,`Dimension_type` FROM `DimensionSetUp`', $db);
+    $ResultIndex5=DB_query('SELECT `id`,`Dimension_type` FROM `dimensionsetup`', $db);
     
     echo '<table class="table table-bordered"><tr><th>Dimension Type</th></tr>';
     while($rows=DB_fetch_array($ResultIndex5)){
