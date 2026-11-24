@@ -153,7 +153,7 @@ function Getamount($dim){
                `periodno`
               ,`dimecode`
               ,`amount`
-           FROM `budgets``` where 
+           FROM `budgets` where 
            `periodno`='". $period."'  "
                  . " and `dimecode`='".$dim."' "
                  . " and `dimecode2`='".$_POST['projectcode']."'";
@@ -162,7 +162,7 @@ function Getamount($dim){
               `periodno`
              ,`dimecode`
              ,sum(`amount`)
-          FROM `budgets``` where 
+          FROM `budgets` where 
           `periodno`='". $period."'"
                 . " and `dimecode`='".$dim."'"
                 . " group by `periodno`,`dimecode`";
@@ -180,7 +180,7 @@ function createbudget(){
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-         $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
+         $sql[]="insert into `budgets` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
               . " values ('".$_POST['Financial_Periods']."','".$dimcode."','".$budget."','".$_POST['projectcode']."')";
         }
     }
@@ -204,23 +204,23 @@ function updatebudget(){
     
     
  if(mb_strlen($_POST['projectcode'])>0){
-    $sql[]="Delete from `budgets`` "
+    $sql[]="Delete from `budgets` "
             . " where `periodno`='".$_POST['fperiod']."' "
             . " and `dimecode2`='".$_POST['projectcode']."'";
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-            $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
+            $sql[]="insert into `budgets` (`periodno`,`dimecode`,`amount`,`dimecode2`) "
           . " values ('".$_POST['fperiod']."','".$dimcode."','".$budget."','".$_POST['projectcode']."')";
         }
     }
     
  } else {
-   $sql[]="Delete from `budgets``  where `periodno`='".$_POST['fperiod']."' ";
+   $sql[]="Delete from `budgets`  where `periodno`='".$_POST['fperiod']."' ";
     
     foreach ($_POST['amount'] as $dimcode => $budget) {
         if($budget>0){
-            $sql[]="insert into `budgets`` (`periodno`,`dimecode`,`amount`) "
+            $sql[]="insert into `budgets` (`periodno`,`dimecode`,`amount`) "
           . " values ('".$_POST['fperiod']."','".$dimcode."','".$budget."')";
         }
     }
@@ -244,7 +244,7 @@ function  Getyearselect(){
          Global $db;
          
         $SelectObject='<td>Select Year as the ID</td><td><select name="Financial_Periods">';
-        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods`` Group by `periodno` order by `periodno` desc", $db);
+        $ResultIndex=DB_query("Select `periodno`,MAX(`end_date`) as year from `financialperiods` Group by `periodno` order by `periodno` desc", $db);
         while($row=DB_fetch_array($ResultIndex)){
              $SelectObject .='<option value="'.$row['periodno'].'" '.(($_POST['Financial_Periods']==trim($row['periodno']))?'selected="selected"':'').'  >'.$row['year'].'</option>';
         }
