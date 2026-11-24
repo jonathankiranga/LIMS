@@ -23,7 +23,7 @@ $SQL="Select
       ,`debtors`.contact
       ,`AssetsHeader`.`yourreference`
       ,`AssetsHeader`.`printed`
-      from `assetsheader`` join `fixedassetsline` on 
+      from `assetsheader` join `fixedassetsline` on 
       `AssetsHeader`.`documentno`=FixedAssetsLine.`documentno` 
       join `debtors` on `AssetsHeader`.`vendorcode`=`debtors`.itemcode
       where (`AssetsHeader`.`documenttype`='55')
@@ -63,7 +63,7 @@ $SQL="Select
       ,AssetsHeader.`documenttype`
       ,FixedAssetsLine.vatrate
       ,FixedAssetsLine.`code`
-  FROM `assetsheader``` 
+  FROM `assetsheader` 
         join `fixedassetsline` on AssetsHeader.documentno=FixedAssetsLine.documentno 
         and AssetsHeader.documenttype=FixedAssetsLine.documenttype 
         and AssetsHeader.documenttype='55'
@@ -122,7 +122,7 @@ $SQL="Select
     $pdf->OutputD($_SESSION['DatabaseName'] . '_Purchase_' . $_GET['No'] . '_' . date('Y-m-d').'.pdf');
     $pdf->__destruct();
     
-    DB_query("Update `assetsheader`` set printed=1 where AssetsHeader.documenttype=55 "
+    DB_query("Update `assetsheader` set printed=1 where AssetsHeader.documenttype=55 "
             . " and AssetsHeader.documentno='".$_GET['No']."'", $db);
 }else{
 
@@ -146,7 +146,7 @@ $SQL="select
       ,`AssetsHeader`.`userid` 
       ,sum(FixedAssetsLine.`invoiceamount`) as OrderValue
       ,`AssetsHeader`.printed
-      from `assetsheader`` join `fixedassetsline` on 
+      from `assetsheader` join `fixedassetsline` on 
       `AssetsHeader`.`documentno`=FixedAssetsLine.`documentno` 
       where `AssetsHeader`.`documenttype`='55' 
        group by 
