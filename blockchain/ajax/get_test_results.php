@@ -27,7 +27,15 @@ $sql = "
       ON tp.StandardID = tr.StandardID
      AND (
           tp.ParameterID = tr.ParameterID
-          OR tp.BaseID = tr.ParameterID
+          OR (
+              tp.BaseID = tr.ParameterID
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM testparameters exact_tp
+                  WHERE exact_tp.ParameterID = tr.ParameterID
+                    AND exact_tp.StandardID = tr.StandardID
+              )
+          )
      )
     LEFT JOIN teststandards ts ON ts.StandardID = tr.StandardID
     LEFT JOIN baseparameters bp ON tp.BaseID = bp.ParameterID
