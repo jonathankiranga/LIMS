@@ -113,11 +113,11 @@ $sql="SELECT `Date`
       ,`JournalNo`
       ,`Dimension_One`
       ,`Dimension_Two`
-      ,IFNULL((SELECT sum(`amount`) FROM `receiptsallocation`` 
+      ,IFNULL((SELECT sum(`amount`) FROM `receiptsallocation` 
          where `itemcode`=`CustomerStatement`.`Accountno` 
           and `invoiceno`=`CustomerStatement`.`Documentno` 
           and `journalno`=`CustomerStatement`.`JournalNo`),0) as Pamount
-      FROM `customerstatement`` where `CustomerStatement`.`Accountno`='".$SelectedCustomer."'";
+      FROM `customerstatement` where `CustomerStatement`.`Accountno`='".$SelectedCustomer."'";
 
 
 Echo '<tr><td colspan="4">'
