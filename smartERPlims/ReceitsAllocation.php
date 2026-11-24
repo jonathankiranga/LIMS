@@ -11,7 +11,7 @@ include('includes/chartbalancing.inc'); // To get the currency name from the cur
     }
     
     if(isset($_POST['resetaccount'])){
-       DB_query("Delete from `receiptsallocation`` where  `itemcode`='".$_POST['CustomerID']."'", $db);
+       DB_query("Delete from `receiptsallocation` where  `itemcode`='".$_POST['CustomerID']."'", $db);
     }
     
     if(isset($_POST['Auto'])){
@@ -36,11 +36,11 @@ include('includes/chartbalancing.inc'); // To get the currency name from the cur
       ,`Accountno`
       ,`Grossamount`
       ,`JournalNo`
-      ,(`Grossamount`+ IFNULL((SELECT sum(`amount`) FROM `receiptsallocation``` 
+      ,(`Grossamount`+ IFNULL((SELECT sum(`amount`) FROM `receiptsallocation` 
          where `itemcode`=`CustomerStatement`.`Accountno` 
           and `invoiceno`=`CustomerStatement`.`Documentno` 
           and `journalno`=`CustomerStatement`.`JournalNo`),0)) as Pamount
-      FROM `customerstatement`` 
+      FROM `customerstatement` 
       where `CustomerStatement`.`Accountno`='".$_POST['CustomerID']."'";
 
       $ResultIndex=DB_query($sql,$db);
@@ -96,7 +96,7 @@ function db_autoallocatedebtors($accountno){
     $receiptsSQL = "SELECT
             (cs.Grossamount - IFNULL((
                 SELECT SUM(ra.amount)
-                FROM `receiptsallocation`` ra
+                FROM `receiptsallocation` ra
                 WHERE ra.receiptjournal = cs.JournalNo
                   AND ra.itemcode = '" . $accountno . "'
             ),0)) AS AMOUNT2,
@@ -107,7 +107,7 @@ function db_autoallocatedebtors($accountno){
         WHERE cs.Accountno = '" . $accountno . "'
           AND (cs.Grossamount - IFNULL((
                 SELECT SUM(ra.amount)
-                FROM `receiptsallocation`` ra
+                FROM `receiptsallocation` ra
                 WHERE ra.receiptjournal = cs.JournalNo
                   AND ra.itemcode = '" . $accountno . "'
           ),0)) < 0
@@ -123,7 +123,7 @@ function db_autoallocatedebtors($accountno){
         $invoicesSQL = "SELECT
                 (cs.Grossamount + IFNULL((
                     SELECT SUM(ra.amount)
-                    FROM `receiptsallocation`` ra
+                    FROM `receiptsallocation` ra
                     WHERE ra.journalno = cs.JournalNo
                       AND ra.itemcode = '" . $accountno . "'
                 ),0)) AS AMOUNT2,
@@ -132,7 +132,7 @@ function db_autoallocatedebtors($accountno){
             WHERE cs.Accountno = '" . $accountno . "'
               AND (cs.Grossamount + IFNULL((
                     SELECT SUM(ra.amount)
-                    FROM `receiptsallocation`` ra
+                    FROM `receiptsallocation` ra
                     WHERE ra.journalno = cs.JournalNo
                       AND ra.itemcode = '" . $accountno . "'
               ),0)) > 0
@@ -144,7 +144,7 @@ function db_autoallocatedebtors($accountno){
             $journalNoInv  = DB_escape_string($invoiceRow['JournalNo']);
 
             if(($amountReceipt + $amountInvoice) <= 0){
-                DB_query("INSERT INTO `receiptsallocation``
+                DB_query("INSERT INTO `receiptsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, '" . $receiptDate . "', Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', (Grossamount * -1), '" . $journalReceipt . "'
@@ -153,7 +153,7 @@ function db_autoallocatedebtors($accountno){
 
                 $amountReceipt = $amountReceipt + $amountInvoice;
             } else {
-                DB_query("INSERT INTO `receiptsallocation``
+                DB_query("INSERT INTO `receiptsallocation`
                     (itemcode, date, invoiceno, journalno, doctype, receiptno, amount, receiptjournal)
                     SELECT Accountno, '" . $receiptDate . "', Documentno, JournalNo, Documenttype,
                            '" . $receiptNo . "', " . $amountReceipt . ", '" . $journalReceipt . "'
