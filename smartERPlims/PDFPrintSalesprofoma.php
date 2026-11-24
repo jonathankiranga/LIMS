@@ -25,7 +25,7 @@ $SQL="select
       ,`SalesHeader`.`yourreference`
       ,salesheader.`locationcode` as BankCode
        ,`SalesHeader`.`picture`
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       join debtors on `SalesHeader`.`customercode`=debtors.itemcode
       left join `salesrepsinfo` on `salesrepsinfo`.code=`SalesHeader`.`salespersoncode`
@@ -69,7 +69,7 @@ $SQL="select
       ,salesline.vatrate
       ,salesline.`totalchargedcontainers`
       ,`SalesLine`.`partperunit`
-  FROM `salesheader``` join `salesline` 
+  FROM `salesheader` join `salesline` 
         on salesheader.documentno=salesline.documentno 
         and salesheader.documenttype=salesline.documenttype 
         and salesheader.documenttype=1  
@@ -226,7 +226,7 @@ $SQL="select
       ,`SalesHeader`.`status`
       ,`SalesHeader`.`userid` ,
       sum(salesline.`invoiceamount`) as OrderValue
-      from `salesheader`` join `salesline` on 
+      from `salesheader` join `salesline` on 
       `SalesHeader`.`documentno`=salesline.`documentno` 
       where `SalesHeader`.`documenttype`='1' 
        group by 
